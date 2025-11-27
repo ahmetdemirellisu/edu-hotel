@@ -5,15 +5,18 @@ import { Card, CardContent } from "./ui/card";
 import { Search, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 
 const API_URL = import.meta.env.VITE_API_URL as string;
 
 export function Signup() {
+  const { t, i18n } = useTranslation();
+
   const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
 
   const [fullName, setFullName] = useState("");
-  const [contact, setContact] = useState(""); // email or phone, but backend uses this as email field
+  const [contact, setContact] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -27,12 +30,12 @@ export function Signup() {
     setSuccess(null);
 
     if (!fullName || !contact || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
+      setError(t("signup.errors.fillAll"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("signup.errors.passwordMismatch"));
       return;
     }
 
@@ -45,7 +48,7 @@ export function Signup() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: contact, // backend expects "email" field; we send contact value
+          email: contact,
           password,
           name: fullName,
         }),
@@ -54,22 +57,19 @@ export function Signup() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Registration failed.");
+        setError(data.error || t("signup.errors.failed"));
         setLoading(false);
         return;
       }
 
-      // success
-      setSuccess("Account created successfully. You can now log in.");
+      setSuccess(t("signup.success.accountCreated"));
       setLoading(false);
 
-      // optional: clear form
       setPassword("");
       setConfirmPassword("");
-      // you can also redirect to /login here if you want
     } catch (err) {
       console.error("Signup error:", err);
-      setError("Network error. Please try again.");
+      setError(t("signup.errors.network"));
       setLoading(false);
     }
   };
@@ -80,25 +80,52 @@ export function Signup() {
       <header className="bg-[#003366] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+
+            {/* Sabancı Logo */}
             <div className="flex items-center">
               <div className="border-2 border-white px-3 py-1">
                 <div className="text-sm">Sabancı</div>
                 <div className="text-sm">Üniversitesi</div>
               </div>
             </div>
+
+            {/* Center Title */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
               <h1 className="text-white tracking-widest">E D U   H O T E L</h1>
             </div>
+
+            {/* Header Right Items */}
             <div className="flex items-center gap-6 text-sm">
               <a href="#" className="hover:text-gray-300 transition-colors">
-                My SU
+                {t("header.mySU")}
               </a>
               <button className="hover:text-gray-300 transition-colors">
                 <Search className="h-4 w-4" />
               </button>
-              <a href="#" className="hover:text-gray-300 transition-colors">
-                TR
-              </a>
+
+              {/* 🌐 Language Switcher */}
+              <div className="flex items-center gap-2 ml-2">
+                <button
+                  onClick={() => i18n.changeLanguage("en")}
+                  className={`px-2 py-1 rounded ${
+                    i18n.language === "en"
+                      ? "bg-white text-[#003366]"
+                      : "hover:text-gray-300"
+                  }`}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => i18n.changeLanguage("tr")}
+                  className={`px-2 py-1 rounded ${
+                    i18n.language === "tr"
+                      ? "bg-white text-[#003366]"
+                      : "hover:text-gray-300"
+                  }`}
+                >
+                  TR
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -109,33 +136,32 @@ export function Signup() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Home className="h-4 w-4" />
-            <span>Home</span>
+            <span>{t("breadcrumb.home")}</span>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
           style={{ backgroundImage: `url(${backgroundImage})` }}
         />
 
-        {/* Content with relative positioning to appear above background */}
         <div className="relative z-10">
           <div className="flex justify-center">
-            {/* Signup Form */}
+
             <div className="w-full max-w-md">
               <Card className="border-gray-200">
                 <CardContent className="space-y-6 pt-6">
                   <form className="space-y-6" onSubmit={handleSubmit}>
+
                     <div className="space-y-2">
-                      <Label htmlFor="fullname">Full Name</Label>
+                      <Label htmlFor="fullname">{t("signup.fullNameLabel")}</Label>
                       <Input
                         id="fullname"
                         type="text"
-                        placeholder="Enter your full name"
+                        placeholder={t("signup.fullNamePlaceholder")}
                         className="border-gray-300"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
@@ -144,35 +170,33 @@ export function Signup() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signupMethod">Sign up with</Label>
+                      <Label htmlFor="signupMethod">{t("signup.signupWith")}</Label>
                       <select
                         id="signupMethod"
                         value={signupMethod}
                         onChange={(e) =>
-                          setSignupMethod(
-                            e.target.value as "email" | "phone"
-                          )
+                          setSignupMethod(e.target.value as "email" | "phone")
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366]"
                       >
-                        <option value="email">Email</option>
-                        <option value="phone">Phone Number</option>
+                        <option value="email">{t("signup.email")}</option>
+                        <option value="phone">{t("signup.phone")}</option>
                       </select>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="contact">
                         {signupMethod === "email"
-                          ? "Email Address"
-                          : "Phone Number"}
+                          ? t("signup.emailAddress")
+                          : t("signup.phoneNumber")}
                       </Label>
                       <Input
                         id="contact"
                         type={signupMethod === "email" ? "email" : "tel"}
                         placeholder={
                           signupMethod === "email"
-                            ? "Enter your email"
-                            : "Enter your phone number"
+                            ? t("signup.enterEmail")
+                            : t("signup.enterPhone")
                         }
                         className="border-gray-300"
                         value={contact}
@@ -182,11 +206,11 @@ export function Signup() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">{t("signup.passwordLabel")}</Label>
                       <Input
                         id="password"
                         type="password"
-                        placeholder="Create a password"
+                        placeholder={t("signup.passwordPlaceholder")}
                         className="border-gray-300"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -195,11 +219,13 @@ export function Signup() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Label htmlFor="confirm-password">
+                        {t("signup.confirmPasswordLabel")}
+                      </Label>
                       <Input
                         id="confirm-password"
                         type="password"
-                        placeholder="Re-enter your password"
+                        placeholder={t("signup.confirmPasswordPlaceholder")}
                         className="border-gray-300"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -208,9 +234,7 @@ export function Signup() {
                     </div>
 
                     {error && (
-                      <p className="text-sm text-red-600 text-center">
-                        {error}
-                      </p>
+                      <p className="text-sm text-red-600 text-center">{error}</p>
                     )}
                     {success && (
                       <p className="text-sm text-green-600 text-center">
@@ -223,7 +247,9 @@ export function Signup() {
                       className="w-full bg-[#003366] hover:bg-[#002244] text-white"
                       disabled={loading}
                     >
-                      {loading ? "Creating account..." : "Create account"}
+                      {loading
+                        ? t("signup.creatingAccount")
+                        : t("signup.createAccount")}
                     </Button>
 
                     <div className="space-y-3">
@@ -231,13 +257,15 @@ export function Signup() {
                         to="/"
                         className="text-sm text-[#003366] hover:underline block"
                       >
-                        Already have an account? Login
+                        {t("signup.alreadyHaveAccount")}
                       </Link>
                     </div>
+
                   </form>
                 </CardContent>
               </Card>
             </div>
+
           </div>
         </div>
       </main>
@@ -252,71 +280,75 @@ export function Signup() {
                 <div className="text-sm">Üniversitesi</div>
               </div>
               <p className="text-sm text-gray-300 mt-4">
-                Orta Mahalle, Üniversite Caddesi No: 27
+                {t("footer.address.line1")}
                 <br />
-                Tuzla, İstanbul 34956 Turkey
+                {t("footer.address.line2")}
               </p>
             </div>
+
             <div>
-              <h3 className="mb-4 text-sm">Quick Links</h3>
+              <h3 className="mb-4 text-sm">{t("footer.quickLinks")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    About
+                    {t("footer.about")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    Academic
+                    {t("footer.academic")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    Research
+                    {t("footer.research")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    Campus Life
+                    {t("footer.campusLife")}
                   </a>
                 </li>
               </ul>
             </div>
+
             <div>
-              <h3 className="mb-4 text-sm">Resources</h3>
+              <h3 className="mb-4 text-sm">{t("footer.resources")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    Library
+                    {t("footer.library")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    SuCourse
+                    {t("footer.sucourse")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    Email
+                    {t("footer.email")}
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
-                    Support
+                    {t("footer.support")}
                   </a>
                 </li>
               </ul>
             </div>
+
             <div>
-              <h3 className="mb-4 text-sm">Contact</h3>
+              <h3 className="mb-4 text-sm">{t("footer.contactTitle")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>Phone: +90 (216) 483 9000</li>
-                <li>Email: info@sabanciuniv.edu</li>
+                <li>{t("footer.phone")}</li>
+                <li>{t("footer.emailAddress")}</li>
               </ul>
             </div>
           </div>
+
           <div className="border-t border-blue-800 pt-8 text-center text-sm text-gray-300">
-            <p>&copy; 2025 Sabancı University. All rights reserved.</p>
+            <p>{t("footer.rights")}</p>
           </div>
         </div>
       </footer>

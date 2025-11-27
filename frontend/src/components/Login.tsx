@@ -5,19 +5,19 @@ import { Card, CardContent } from "./ui/card";
 import { Search, Home } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 
-// IMPORTANT: your backend base URL from Vite env
+// Backend URL
 const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
 console.log("API_URL =", API_URL);
 
-
 export function Login() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
 
-  // form state
-  const [identifier, setIdentifier] = useState(""); // email or phone
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +28,11 @@ export function Login() {
     setLoading(true);
 
     try {
-      // for now backend expects "email" field; we send identifier there
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: identifier, // can be email or phone for now
+          email: identifier,
           password,
         }),
       });
@@ -43,26 +40,20 @@ export function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login failed");
+        setError(data.error || t("login.errors.loginFailed"));
         setLoading(false);
         return;
       }
 
-      // success: store token, user, etc.
-      // You can improve this later with context / Redux / router navigation.
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("userEmail", data.user?.email ?? "");
       localStorage.setItem("userName", data.user?.name ?? "");
 
-      console.log("Logged in:", data.user);
-
-      // redirect to main page
       navigate("/main");
-
       setLoading(false);
     } catch (err) {
       console.error("Login error:", err);
-      setError("Network error. Please try again.");
+      setError(t("login.errors.network"));
       setLoading(false);
     }
   };
@@ -73,26 +64,56 @@ export function Login() {
       <header className="bg-[#003366] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            
+            {/* Left logo */}
             <div className="flex items-center">
               <div className="border-2 border-white px-3 py-1">
                 <div className="text-sm">Sabancı</div>
                 <div className="text-sm">Üniversitesi</div>
               </div>
             </div>
+
+            {/* Center title */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
               <h1 className="text-white tracking-widest">E D U   H O T E L</h1>
             </div>
+
+            {/* Right side */}
             <div className="flex items-center gap-6 text-sm">
               <a href="#" className="hover:text-gray-300 transition-colors">
-                My SU
+                {t("header.mySU")}
               </a>
+
               <button className="hover:text-gray-300 transition-colors">
                 <Search className="h-4 w-4" />
               </button>
-              <a href="#" className="hover:text-gray-300 transition-colors">
-                TR
-              </a>
+
+              {/* 🌐 Language Switcher */}
+              <div className="flex items-center gap-2">
+                <button
+                  className={`px-2 py-1 rounded ${
+                    i18n.language === "en"
+                      ? "bg-white text-[#003366]"
+                      : "hover:text-gray-300"
+                  }`}
+                  onClick={() => i18n.changeLanguage("en")}
+                >
+                  EN
+                </button>
+
+                <button
+                  className={`px-2 py-1 rounded ${
+                    i18n.language === "tr"
+                      ? "bg-white text-[#003366]"
+                      : "hover:text-gray-300"
+                  }`}
+                  onClick={() => i18n.changeLanguage("tr")}
+                >
+                  TR
+                </button>
+              </div>
             </div>
+
           </div>
         </div>
       </header>
@@ -102,72 +123,70 @@ export function Login() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Home className="h-4 w-4" />
-            <span>Home</span>
+            <span>{t("breadcrumb.home")}</span>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
           style={{ backgroundImage: `url(${backgroundImage})` }}
         />
 
-        {/* Content with relative positioning to appear above background */}
+        {/* Foreground content */}
         <div className="relative z-10">
           <div className="flex justify-center">
-            {/* Login Form */}
             <div className="w-full max-w-md">
               <Card className="border-gray-200">
                 <CardContent className="space-y-6 pt-6">
+
                   <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-2">
-                      <Label htmlFor="loginMethod">Login with</Label>
+                      <Label>{t("login.loginWith")}</Label>
                       <select
-                        id="loginMethod"
                         value={loginMethod}
                         onChange={(e) =>
                           setLoginMethod(e.target.value as "email" | "phone")
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366]"
                       >
-                        <option value="email">Email</option>
-                        <option value="phone">Phone Number</option>
+                        <option value="email">{t("login.email")}</option>
+                        <option value="phone">{t("login.phone")}</option>
                       </select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="username">
+                      <Label>
                         {loginMethod === "email"
-                          ? "Email Address"
-                          : "Phone Number"}
+                          ? t("login.emailAddress")
+                          : t("login.phoneNumber")}
                       </Label>
                       <Input
-                        id="username"
                         type={loginMethod === "email" ? "email" : "tel"}
                         placeholder={
                           loginMethod === "email"
-                            ? "Enter your email"
-                            : "Enter your phone number"
+                            ? t("login.enterEmail")
+                            : t("login.enterPhone")
                         }
-                        className="border-gray-300"
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
+                        className="border-gray-300"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label>{t("login.password")}</Label>
                       <Input
-                        id="password"
                         type="password"
-                        placeholder="Enter your password"
-                        className="border-gray-300"
+                        placeholder={t("login.enterPassword")}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        className="border-gray-300"
                         required
                       />
                     </div>
@@ -181,24 +200,24 @@ export function Login() {
                       className="w-full bg-[#003366] hover:bg-[#002244] text-white"
                       disabled={loading}
                     >
-                      {loading ? "Logging in..." : "Login to your account"}
+                      {loading ? t("login.loggingIn") : t("login.loginButton")}
                     </Button>
 
                     <div className="space-y-3">
-                      <a
-                        href="#"
-                        className="text-sm text-[#003366] hover:underline block"
-                      >
-                        Forgot your password?
+                      <a className="text-sm text-[#003366] hover:underline block">
+                        {t("login.forgotPassword")}
                       </a>
+
                       <Link
                         to="/signup"
                         className="text-sm text-[#003366] hover:underline block"
                       >
-                        First time user? Create account
+                        {t("login.firstTime")}
                       </Link>
                     </div>
+
                   </form>
+
                 </CardContent>
               </Card>
             </div>
@@ -209,6 +228,7 @@ export function Login() {
       {/* Footer */}
       <footer className="bg-[#003366] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="border-2 border-white px-3 py-1 inline-block mb-4">
@@ -216,72 +236,44 @@ export function Login() {
                 <div className="text-sm">Üniversitesi</div>
               </div>
               <p className="text-sm text-gray-300 mt-4">
-                Orta Mahalle, Üniversite Caddesi No: 27
-                <br />
-                Tuzla, İstanbul 34956 Turkey
+                {t("footer.address.line1")}<br />
+                {t("footer.address.line2")}
               </p>
             </div>
+
             <div>
-              <h3 className="mb-4 text-sm">Quick Links</h3>
+              <h3 className="mb-4 text-sm">{t("footer.quickLinks")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Academic
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Research
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Campus Life
-                  </a>
-                </li>
+                <li>{t("footer.about")}</li>
+                <li>{t("footer.academic")}</li>
+                <li>{t("footer.research")}</li>
+                <li>{t("footer.campusLife")}</li>
               </ul>
             </div>
+
             <div>
-              <h3 className="mb-4 text-sm">Resources</h3>
+              <h3 className="mb-4 text-sm">{t("footer.resources")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Library
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    SuCourse
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Email
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Support
-                  </a>
-                </li>
+                <li>{t("footer.library")}</li>
+                <li>{t("footer.sucourse")}</li>
+                <li>{t("footer.email")}</li>
+                <li>{t("footer.support")}</li>
               </ul>
             </div>
+
             <div>
-              <h3 className="mb-4 text-sm">Contact</h3>
+              <h3 className="mb-4 text-sm">{t("footer.contactTitle")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>Phone: +90 (216) 483 9000</li>
-                <li>Email: info@sabanciuniv.edu</li>
+                <li>{t("footer.phone")}</li>
+                <li>{t("footer.emailAddress")}</li>
               </ul>
             </div>
           </div>
+
           <div className="border-t border-blue-800 pt-8 text-center text-sm text-gray-300">
-            <p>&copy; 2025 Sabancı University. All rights reserved.</p>
+            <p>{t("footer.rights")}</p>
           </div>
+
         </div>
       </footer>
     </div>

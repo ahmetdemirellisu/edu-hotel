@@ -1,0 +1,164 @@
+{
+  "header": {
+    "mySU": "My SU",
+    "language": "TR"
+  },
+
+  "breadcrumb": {
+    "home": "Home"
+  },
+
+  "login": {
+    "loginWith": "Login with",
+    "email": "Email",
+    "phone": "Phone Number",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "enterEmail": "Enter your email",
+    "enterPhone": "Enter your phone number",
+    "password": "Password",
+    "enterPassword": "Enter your password",
+    "loggingIn": "Logging in...",
+    "loginButton": "Login to your account",
+    "forgotPassword": "Forgot your password?",
+    "firstTime": "First time user? Create account",
+    "errors": {
+      "loginFailed": "Login failed",
+      "network": "Network error. Please try again."
+    }
+  },
+
+  "signup": {
+    "fullNameLabel": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "signupWith": "Sign up with",
+    "email": "Email",
+    "phone": "Phone Number",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "enterEmail": "Enter your email",
+    "enterPhone": "Enter your phone number",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Create a password",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "creatingAccount": "Creating account...",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account? Login",
+    "errors": {
+      "fillAll": "Please fill in all fields.",
+      "passwordMismatch": "Passwords do not match.",
+      "failed": "Registration failed.",
+      "network": "Network error. Please try again."
+    },
+    "success": {
+      "accountCreated": "Account created successfully. You can now log in."
+    }
+  },
+
+  "dashboard": {
+    "nav": {
+      "bookRoom": "Book a Room",
+      "myBookings": "My Bookings",
+      "services": "Services",
+      "contact": "Contact"
+    },
+    "search": {
+      "title": "Find Your Perfect Room",
+      "checkIn": "Check In",
+      "checkOut": "Check Out",
+      "guests": "Guests",
+      "guests1": "1 Guest",
+      "guests2": "2 Guests",
+      "guests3": "3 Guests",
+      "guests4": "4+ Guests",
+      "button": "Search Rooms"
+    },
+    "roomsSection": {
+      "title": "Available Rooms",
+      "subtitle": "Choose from our selection of comfortable and well-equipped rooms",
+      "booked": "Booked",
+      "capacity_one": "Up to {{count}} Guest",
+      "capacity_other": "Up to {{count}} Guests",
+      "perNight": "/ night",
+      "bookNow": "Book Now",
+      "unavailable": "Unavailable"
+    },
+    "rooms": {
+      "single": "Single Room",
+      "singleDesc": "Comfortable single room perfect for solo travelers",
+      "double": "Double Room",
+      "doubleDesc": "Spacious double room with modern amenities for two guests"
+    },
+    "amenities": {
+      "wifi": "WiFi",
+      "tv": "TV",
+      "ac": "AC",
+      "coffee": "Coffee"
+    },
+    "info": {
+      "flexibleTitle": "Flexible Booking",
+      "flexibleText": "Free cancellation up to 24 hours before check-in",
+      "amenitiesTitle": "Free Amenities",
+      "amenitiesText": "Complimentary WiFi, breakfast, and parking for all guests",
+      "supportTitle": "24/7 Support",
+      "supportText": "Our team is always available to assist you"
+    }
+  },
+
+  "main": {
+    "welcomeBack": "Welcome back!",
+    "quickActions": "Quick Actions",
+    "quick": {
+      "bookRoom": "Book a Room",
+      "cleaning": "Request Cleaning",
+      "reportIssue": "Report an Issue",
+      "contactSupport": "Contact Support Staff"
+    },
+    "nav": {
+      "home": "Home",
+      "reservations": "Reservations",
+      "profile": "My Profile",
+      "logout": "Logout"
+    },
+    "announcements": {
+      "title": "Announcements",
+      "holidayTitle": "Holiday Season Special Rates",
+      "holidayMsg": "Enjoy special discounted rates for bookings during the holiday season.",
+      "diningTitle": "New Dining Service Available",
+      "diningMsg": "We now offer in-room dining service from 7 AM to 10 PM daily.",
+      "maintenanceTitle": "Maintenance Notice",
+      "maintenanceMsg": "Pool will be under maintenance on Dec 20-21. Thank you for your understanding."
+    }
+  },
+
+  "footer": {
+    "address": {
+      "line1": "Orta Mahalle, Üniversite Caddesi No: 27",
+      "line2": "Tuzla, İstanbul 34956 Turkey"
+    },
+    "quickLinks": "Quick Links",
+    "about": "About",
+    "academic": "Academic",
+    "research": "Research",
+    "campusLife": "Campus Life",
+    "resources": "Resources",
+    "library": "Library",
+    "sucourse": "SuCourse",
+    "email": "Email",
+    "support": "Support",
+    "rooms": "Rooms",
+    "services": "Services",
+    "policies": "Policies",
+    "cancellation": "Cancellation",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "faq": "FAQ",
+    "contactTitle": "Contact",
+    "phone": "Phone: +90 (216) 483 9000",
+    "emailAddress": "Email: hotel@sabanciuniv.edu",
+    "supportEmail": "Support: support@sabanciuniv.edu",
+    "rights": "© 2025 Sabancı University. All rights reserved.",
+    "rightsEduHotel": "© 2025 Edu Hotel Management System - Sabancı University. All rights reserved."
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "header": {
+    "mySU": "My SU",
+    "language": "TR"
+  },
+
+  "breadcrumb": {
+    "home": "Ana Sayfa"
+  },
+
+  "login": {
+    "loginWith": "Giriş yöntemi",
+    "email": "E-posta",
+    "phone": "Telefon Numarası",
+    "emailAddress": "E-posta Adresi",
+    "phoneNumber": "Telefon Numarası",
+    "enterEmail": "E-postanızı girin",
+    "enterPhone": "Telefon numaranızı girin",
+    "password": "Şifre",
+    "enterPassword": "Şifrenizi girin",
+    "loggingIn": "Giriş yapılıyor...",
+    "loginButton": "Hesabınıza giriş yapın",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "firstTime": "İlk defa mı kullanıyorsunuz? Kayıt olun",
+    "errors": {
+      "loginFailed": "Giriş başarısız.",
+      "network": "Ağ hatası. Lütfen tekrar deneyin."
+    }
+  },
+
+  "signup": {
+    "fullNameLabel": "Ad Soyad",
+    "fullNamePlaceholder": "Adınızı ve soyadınızı girin",
+    "signupWith": "Kayıt yöntemi",
+    "email": "E-posta",
+    "phone": "Telefon Numarası",
+    "emailAddress": "E-posta Adresi",
+    "phoneNumber": "Telefon Numarası",
+    "enterEmail": "E-postanızı girin",
+    "enterPhone": "Telefon numaranızı girin",
+    "passwordLabel": "Şifre",
+    "passwordPlaceholder": "Bir şifre oluşturun",
+    "confirmPasswordLabel": "Şifreyi Doğrulayın",
+    "confirmPasswordPlaceholder": "Şifrenizi tekrar girin",
+    "creatingAccount": "Hesap oluşturuluyor...",
+    "createAccount": "Hesap oluştur",
+    "alreadyHaveAccount": "Zaten hesabınız var mı? Giriş yapın",
+    "errors": {
+      "fillAll": "Lütfen tüm alanları doldurun.",
+      "passwordMismatch": "Şifreler eşleşmiyor.",
+      "failed": "Kayıt başarısız.",
+      "network": "Ağ hatası. Lütfen tekrar deneyin."
+    },
+    "success": {
+      "accountCreated": "Hesap başarıyla oluşturuldu. Şimdi giriş yapabilirsiniz."
+    }
+  },
+
+  "dashboard": {
+    "nav": {
+      "bookRoom": "Oda Rezervasyonu",
+      "myBookings": "Rezervasyonlarım",
+      "services": "Hizmetler",
+      "contact": "İletişim"
+    },
+    "search": {
+      "title": "Size Uygun Odayı Bulun",
+      "checkIn": "Giriş Tarihi",
+      "checkOut": "Çıkış Tarihi",
+      "guests": "Kişi Sayısı",
+      "guests1": "1 Kişi",
+      "guests2": "2 Kişi",
+      "guests3": "3 Kişi",
+      "guests4": "4+ Kişi",
+      "button": "Odaları Ara"
+    },
+    "roomsSection": {
+      "title": "Müsait Odalar",
+      "subtitle": "Konforlu ve donanımlı odalarımızdan birini seçin",
+      "booked": "Dolu",
+      "capacity_one": "En fazla {{count}} Kişi",
+      "capacity_other": "En fazla {{count}} Kişi",
+      "perNight": "/ gece",
+      "bookNow": "Hemen Rezervasyon Yap",
+      "unavailable": "Müsait Değil"
+    },
+    "rooms": {
+      "single": "Tek Kişilik Oda",
+      "singleDesc": "Tek başına seyahat eden misafirler için konforlu oda",
+      "double": "Çift Kişilik Oda",
+      "doubleDesc": "İki kişilik, modern ve geniş oda"
+    },
+    "amenities": {
+      "wifi": "WiFi",
+      "tv": "TV",
+      "ac": "Klima",
+      "coffee": "Kahve"
+    },
+    "info": {
+      "flexibleTitle": "Esnek Rezervasyon",
+      "flexibleText": "Girişten 24 saat öncesine kadar ücretsiz iptal",
+      "amenitiesTitle": "Ücretsiz İmkanlar",
+      "amenitiesText": "Tüm misafirlerimiz için ücretsiz WiFi, kahvaltı ve otopark",
+      "supportTitle": "7/24 Destek",
+      "supportText": "Ekibimiz size her zaman yardımcı olmaya hazır"
+    }
+  },
+
+  "main": {
+    "welcomeBack": "Tekrar hoş geldiniz!",
+    "quickActions": "Hızlı İşlemler",
+    "quick": {
+      "bookRoom": "Oda Rezervasyonu",
+      "cleaning": "Temizlik Talebi",
+      "reportIssue": "Sorun Bildir",
+      "contactSupport": "Destek Ekibiyle İletişim"
+    },
+    "nav": {
+      "home": "Ana Sayfa",
+      "reservations": "Rezervasyonlar",
+      "profile": "Profilim",
+      "logout": "Çıkış"
+    },
+    "announcements": {
+      "title": "Duyurular",
+      "holidayTitle": "Yılbaşı Dönemi Özel Fiyatlar",
+      "holidayMsg": "Yılbaşı dönemindeki rezervasyonlar için indirimli fiyatlardan yararlanın.",
+      "diningTitle": "Yeni Yemek Servisi",
+      "diningMsg": "Her gün 07:00–22:00 arası oda servisi hizmetimiz mevcuttur.",
+      "maintenanceTitle": "Bakım Duyurusu",
+      "maintenanceMsg": "Havuz 20–21 Aralık tarihlerinde bakımda olacaktır. Anlayışınız için teşekkür ederiz."
+    }
+  },
+
+  "footer": {
+    "address": {
+      "line1": "Orta Mahalle, Üniversite Caddesi No: 27",
+      "line2": "Tuzla, İstanbul 34956 Türkiye"
+    },
+    "quickLinks": "Hızlı Linkler",
+    "about": "Hakkımızda",
+    "academic": "Akademik",
+    "research": "Araştırma",
+    "campusLife": "Kampüs Hayatı",
+    "resources": "Kaynaklar",
+    "library": "Kütüphane",
+    "sucourse": "SuCourse",
+    "email": "E-posta",
+    "support": "Destek",
+    "rooms": "Odalar",
+    "services": "Hizmetler",
+    "policies": "Politikalar",
+    "cancellation": "İptal Koşulları",
+    "privacy": "Gizlilik",
+    "terms": "Şartlar",
+    "faq": "SSS",
+    "contactTitle": "İletişim",
+    "phone": "Telefon: +90 (216) 483 9000",
+    "emailAddress": "E-posta: hotel@sabanciuniv.edu",
+    "supportEmail": "Destek: support@sabanciuniv.edu",
+    "rights": "© 2025 Sabancı Üniversitesi. Tüm hakları saklıdır.",
+    "rightsEduHotel": "© 2025 Edu Hotel Yönetim Sistemi - Sabancı Üniversitesi. Tüm hakları saklıdır."
+  }
+}

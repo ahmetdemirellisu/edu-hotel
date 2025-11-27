@@ -1,94 +1,90 @@
-import { Home, Calendar, User, LogOut, Bell, CheckCircle, Clock, AlertCircle, Bed, Sparkles, Wrench, MessageSquare, ChevronRight } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  User,
+  LogOut,
+  Bell,
+  CheckCircle,
+  AlertCircle,
+  Bed,
+  Sparkles,
+  Wrench,
+  MessageSquare,
+  ChevronRight,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
+import { useTranslation } from "react-i18next";
 
 export function MainPage() {
+  const { t, i18n } = useTranslation();
+
   const stats = [
     {
-      title: "Upcoming Reservations",
+      title: t("main.stats.upcoming"),
       value: "3",
       icon: Calendar,
       color: "bg-blue-50 text-blue-600",
     },
     {
-      title: "Past Reservations",
+      title: t("main.stats.past"),
       value: "12",
       icon: CheckCircle,
       color: "bg-green-50 text-green-600",
     },
     {
-      title: "Notifications",
+      title: t("main.stats.notifications"),
       value: "5",
       icon: Bell,
       color: "bg-yellow-50 text-yellow-600",
     },
     {
-      title: "Account Status",
-      value: "Active",
+      title: t("main.stats.accountStatus"),
+      value: t("main.stats.active"),
       icon: AlertCircle,
       color: "bg-purple-50 text-purple-600",
     },
   ];
 
-  const upcomingReservations = [
-    {
-      date: "Dec 22, 2025",
-      room: "Single Room 101",
-      duration: "3 nights",
-      status: "Confirmed",
-    },
-    {
-      date: "Jan 5, 2026",
-      room: "Double Room 205",
-      duration: "2 nights",
-      status: "Confirmed",
-    },
-    {
-      date: "Jan 18, 2026",
-      room: "Single Room 103",
-      duration: "1 night",
-      status: "Pending",
-    },
-  ];
-
   const announcements = [
     {
-      title: "Holiday Season Special Rates",
+      title: t("main.announcements.holidayTitle"),
       date: "Dec 15, 2025",
-      message: "Enjoy special discounted rates for bookings during the holiday season.",
+      message: t("main.announcements.holidayMsg"),
     },
     {
-      title: "New Dining Service Available",
+      title: t("main.announcements.diningTitle"),
       date: "Dec 10, 2025",
-      message: "We now offer in-room dining service from 7 AM to 10 PM daily.",
+      message: t("main.announcements.diningMsg"),
     },
     {
-      title: "Maintenance Notice",
+      title: t("main.announcements.maintenanceTitle"),
       date: "Dec 8, 2025",
-      message: "Pool will be under maintenance on Dec 20-21. Thank you for your understanding.",
+      message: t("main.announcements.maintenanceMsg"),
     },
   ];
 
   const quickActions = [
     {
-      title: "Book a Room",
+      title: t("main.quick.bookRoom"),
       icon: Bed,
       color: "bg-[#003366] hover:bg-[#002244] text-white",
-      link: "/dashboard",
+      link: "/book-room",
+
     },
     {
-      title: "Request Cleaning",
+      title: t("main.quick.cleaning"),
       icon: Sparkles,
       color: "bg-white hover:bg-gray-50 text-[#003366] border-2 border-[#003366]",
     },
     {
-      title: "Report an Issue",
+      title: t("main.quick.reportIssue"),
       icon: Wrench,
       color: "bg-white hover:bg-gray-50 text-[#003366] border-2 border-[#003366]",
     },
     {
-      title: "Contact Support Staff",
+      title: t("main.quick.contactSupport"),
       icon: MessageSquare,
       color: "bg-white hover:bg-gray-50 text-[#003366] border-2 border-[#003366]",
     },
@@ -109,24 +105,61 @@ export function MainPage() {
               <span className="tracking-wider">EDU HOTEL</span>
             </div>
 
-            {/* Navigation Links */}
+            {/* Navigation Links + Language Switcher */}
             <nav className="flex items-center gap-6">
-              <Link to="/user-dashboard" className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
+              <Link
+                to="/user-dashboard"
+                className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+              >
                 <Home className="h-4 w-4" />
-                <span>Home</span>
+                <span>{t("main.nav.home")}</span>
               </Link>
-              <Link to="/dashboard" className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
+
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+              >
                 <Calendar className="h-4 w-4" />
-                <span>Reservations</span>
+                <span>{t("main.nav.reservations")}</span>
               </Link>
+
               <button className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
                 <User className="h-4 w-4" />
-                <span>My Profile</span>
+                <span>{t("main.nav.profile")}</span>
               </button>
-              <Link to="/" className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
+
+              <Link
+                to="/"
+                className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+              >
                 <LogOut className="h-4 w-4" />
-                <span>Logout</span>
+                <span>{t("main.nav.logout")}</span>
               </Link>
+
+              {/* 🌐 Language Switcher */}
+              <div className="flex items-center gap-2 ml-4">
+                <button
+                  onClick={() => i18n.changeLanguage("en")}
+                  className={`px-2 py-1 rounded ${
+                    i18n.language === "en"
+                      ? "bg-white text-[#003366]"
+                      : "hover:text-gray-300"
+                  }`}
+                >
+                  EN
+                </button>
+
+                <button
+                  onClick={() => i18n.changeLanguage("tr")}
+                  className={`px-2 py-1 rounded ${
+                    i18n.language === "tr"
+                      ? "bg-white text-[#003366]"
+                      : "hover:text-gray-300"
+                  }`}
+                >
+                  TR
+                </button>
+              </div>
             </nav>
           </div>
         </div>
@@ -136,15 +169,15 @@ export function MainPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-gray-900 mb-2">Welcome back!</h1>
+          <h1 className="text-gray-900 mb-2">{t("main.welcomeBack")}</h1>
         </div>
 
-        {/* Quick Actions and Announcements in two columns */}
+        {/* Quick Actions & Announcements */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Quick Actions Section */}
+          {/* Quick Actions */}
           <Card className="border-gray-200 rounded-2xl shadow-sm">
             <CardContent className="p-8">
-              <h3 className="text-gray-900 mb-6">Quick Actions</h3>
+              <h3 className="text-gray-900 mb-6">{t("main.quickActions")}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
@@ -176,10 +209,12 @@ export function MainPage() {
             </CardContent>
           </Card>
 
-          {/* Announcements Section */}
+          {/* Announcements */}
           <Card className="border-gray-200 rounded-2xl shadow-sm">
             <CardContent className="p-8">
-              <h3 className="text-gray-900 mb-6">Announcements</h3>
+              <h3 className="text-gray-900 mb-6">
+                {t("main.announcements.title")}
+              </h3>
               <div className="space-y-4">
                 {announcements.map((announcement, index) => (
                   <div
@@ -187,10 +222,14 @@ export function MainPage() {
                     className="bg-blue-50 p-4 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-gray-900 text-sm">{announcement.title}</h4>
+                      <h4 className="text-gray-900 text-sm">
+                        {announcement.title}
+                      </h4>
                       <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
                     </div>
-                    <p className="text-gray-600 text-xs mb-2">{announcement.message}</p>
+                    <p className="text-gray-600 text-xs mb-2">
+                      {announcement.message}
+                    </p>
                     <p className="text-gray-500 text-xs">{announcement.date}</p>
                   </div>
                 ))}
@@ -210,30 +249,34 @@ export function MainPage() {
                 <div className="text-xs">Üniversitesi</div>
               </div>
               <p className="text-sm text-gray-300">
-                Orta Mahalle, Üniversite Caddesi No: 27<br />
-                Tuzla, İstanbul 34956 Turkey
+                {t("footer.address.line1")}
+                <br />
+                {t("footer.address.line2")}
               </p>
             </div>
+
             <div>
-              <h4 className="mb-3 text-sm">Quick Links</h4>
+              <h4 className="mb-3 text-sm">{t("footer.quickLinks")}</h4>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Services</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li>{t("footer.about")}</li>
+                <li>{t("footer.services")}</li>
+                <li>{t("footer.privacy")}</li>
+                <li>{t("footer.terms")}</li>
               </ul>
             </div>
+
             <div>
-              <h4 className="mb-3 text-sm">Contact</h4>
+              <h4 className="mb-3 text-sm">{t("footer.contactTitle")}</h4>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>Phone: +90 (216) 483 9000</li>
-                <li>Email: hotel@sabanciuniv.edu</li>
-                <li>Support: support@sabanciuniv.edu</li>
+                <li>{t("footer.phone")}</li>
+                <li>{t("footer.emailAddress")}</li>
+                <li>{t("footer.support")}</li>
               </ul>
             </div>
           </div>
+
           <div className="border-t border-blue-800 pt-6 text-center text-sm text-gray-300">
-            <p>&copy; 2025 Edu Hotel Management System - Sabancı University. All rights reserved.</p>
+            <p>{t("footer.rightsEduHotel")}</p>
           </div>
         </div>
       </footer>
