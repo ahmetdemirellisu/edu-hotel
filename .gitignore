@@ -1,0 +1,22 @@
+# Node modules
+frontend/node_modules/
+backend/node_modules/
+
+# Build output
+frontend/dist/
+backend/dist/
+
+# Prisma
+backend/prisma/dev.db
+
+# Environment variables
+frontend/.env
+backend/.env
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# MacOS junk
+.DS_Store
