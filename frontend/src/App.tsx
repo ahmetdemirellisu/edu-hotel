@@ -4,8 +4,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
 import { MainPage } from "./components/MainPage";
-import { BookRoomPage } from "./components/BookRoomPage"; // renamed
+import { BookRoomPage } from "./components/BookRoomPage";
+import { AdminDashboard } from "./components/AdminDashboard";
 
+// 🔒 Auth wrapper
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("authToken");
   if (!token) return <Navigate to="/" replace />;
@@ -16,11 +18,11 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Public */}
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Main dashboard */}
+        {/* User pages */}
         <Route
           path="/main"
           element={
@@ -30,12 +32,21 @@ export default function App() {
           }
         />
 
-        {/* Book a Room page */}
         <Route
           path="/book-room"
           element={
             <RequireAuth>
               <BookRoomPage />
+            </RequireAuth>
+          }
+        />
+
+        {/* ADMIN PAGE (NEW ✔✔✔) */}
+        <Route
+          path="/admin"
+          element={
+            <RequireAuth>
+              <AdminDashboard />
             </RequireAuth>
           }
         />
