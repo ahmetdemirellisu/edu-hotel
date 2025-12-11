@@ -9,7 +9,8 @@ import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 
 // Backend URL
-const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
+const API_URL =
+  (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
 console.log("API_URL =", API_URL);
 
 export function Login() {
@@ -45,9 +46,13 @@ export function Login() {
         return;
       }
 
+      // ✅ Save auth info
       localStorage.setItem("authToken", data.token);
-      localStorage.setItem("userEmail", data.user?.email ?? "");
-      localStorage.setItem("userName", data.user?.name ?? "");
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("userEmail", data.user.email ?? "");
+        localStorage.setItem("userName", data.user.name ?? "");
+      }
 
       navigate("/main");
       setLoading(false);
@@ -64,7 +69,6 @@ export function Login() {
       <header className="bg-[#003366] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            
             {/* Left logo */}
             <div className="flex items-center">
               <div className="border-2 border-white px-3 py-1">
@@ -75,7 +79,7 @@ export function Login() {
 
             {/* Center title */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
-              <h1 className="text-white tracking-widest">E D U   H O T E L</h1>
+              <h1 className="text-white tracking-widest">E D U H O T E L</h1>
             </div>
 
             {/* Right side */}
@@ -113,7 +117,6 @@ export function Login() {
                 </button>
               </div>
             </div>
-
           </div>
         </div>
       </header>
@@ -130,7 +133,6 @@ export function Login() {
 
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
@@ -143,7 +145,6 @@ export function Login() {
             <div className="w-full max-w-md">
               <Card className="border-gray-200">
                 <CardContent className="space-y-6 pt-6">
-
                   <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-2">
                       <Label>{t("login.loginWith")}</Label>
@@ -192,7 +193,9 @@ export function Login() {
                     </div>
 
                     {error && (
-                      <p className="text-sm text-red-600 text-center">{error}</p>
+                      <p className="text-sm text-red-600 text-center">
+                        {error}
+                      </p>
                     )}
 
                     <Button
@@ -215,9 +218,7 @@ export function Login() {
                         {t("login.firstTime")}
                       </Link>
                     </div>
-
                   </form>
-
                 </CardContent>
               </Card>
             </div>
@@ -228,7 +229,6 @@ export function Login() {
       {/* Footer */}
       <footer className="bg-[#003366] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="border-2 border-white px-3 py-1 inline-block mb-4">
@@ -236,7 +236,8 @@ export function Login() {
                 <div className="text-sm">Üniversitesi</div>
               </div>
               <p className="text-sm text-gray-300 mt-4">
-                {t("footer.address.line1")}<br />
+                {t("footer.address.line1")}
+                <br />
                 {t("footer.address.line2")}
               </p>
             </div>
@@ -273,7 +274,6 @@ export function Login() {
           <div className="border-t border-blue-800 pt-8 text-center text-sm text-gray-300">
             <p>{t("footer.rights")}</p>
           </div>
-
         </div>
       </footer>
     </div>

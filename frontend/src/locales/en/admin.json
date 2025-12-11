@@ -1,0 +1,290 @@
+{
+    "menu": {
+      "dashboard": "Dashboard",
+      "reservations": "Reservations",
+      "calendar": "Calendar",
+      "rooms": "Rooms",
+      "guests": "Guests",
+      "payments": "Payments",
+      "blacklist": "Blacklist",
+      "reports": "Reports",
+      "adminUsers": "Admin Users",
+      "settings": "Settings"
+    },
+  
+    "common": {
+      "adminPanel": "Admin Panel",
+      "searchPlaceholder": "Search...",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+  
+    "pages": {
+      "dashboard": {
+        "title": "Dashboard",
+        "pendingReservations": "Pending reservations",
+        "approvedReservations": "Approved reservations",
+        "guestsStaying": "Guests currently staying",
+        "availableRooms": "Available rooms",
+        "fromYesterday": "from yesterday",
+        "quickActions": "Quick actions",
+        "actions": {
+          "createReservation": "Create reservation",
+          "viewCalendar": "View calendar",
+          "addRoom": "Add room",
+          "reportCenter": "Report center"
+        },
+        "latestReservations": "Latest reservations",
+        "roomOccupancy": "Room occupancy",
+        "occupancyRate": "Occupancy rate",
+        "occupied": "Occupied",
+        "available": "Available",
+        "maintenance": "Under maintenance",
+        "expectedCheckinsToday": "Expected check-ins today",
+        "loadingReservations": "Loading latest reservations...",
+        "noReservations": "No reservations have been created yet."
+      },
+  
+      "reservations": {
+        "title": "Reservation Management"
+      },
+
+      "reports": {
+        "title": "Reports"
+      },  
+  
+      "calendar": {
+        "title": "Calendar View",
+        "roomOccupancyCalendar": "Room occupancy calendar",
+        "room": "Room",
+        "legend": {
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "checkedIn": "Checked-in",
+          "canceled": "Canceled"
+        }
+      },
+  
+      "rooms": {
+        "title": "Room Management"
+      },
+  
+      "guests": {
+        "title": "Guest Management"
+      },
+  
+      "payments": {
+        "title": "Payment Management"
+      },
+  
+      "blacklist": {
+        "title": "Blacklist Management"
+      },
+  
+      "adminUsers": {
+        "title": "Admin User Management"
+      },
+  
+      "settings": {
+        "title": "System Settings"
+      }
+    },
+  
+    "tables": {
+      "guestName": "Guest name",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "status": "Status",
+      "payment": "Payment",
+      "action": "Action",
+      "actions": "Actions",
+      "name": "Name",
+      "email": "Email",
+      "guestType": "Guest type",
+      "reservationId": "Reservation ID",
+      "date": "Date",
+      "room": "Room",
+      "paymentNotTracked": "N/A",
+      "unknownGuest": "Unknown guest"
+
+    },
+  
+    "commonTable": {
+      "viewAll": "View all",
+      "view": "View"
+    },
+  
+    "notifications": {
+      "title": "Notifications",
+      "newReservation": "New reservation created",
+      "paymentReceived": "Payment received",
+      "checkout": "Guest checked out",
+      "time": {
+        "5min": "5 minutes ago",
+        "1h": "1 hour ago",
+        "2h": "2 hours ago"
+      }
+    },
+  
+    "profile": {
+      "name": "Admin",
+      "role": "Hotel manager",
+      "profileSettings": "Profile settings",
+      "changePassword": "Change password",
+      "logout": "Log out"
+    },
+  
+    "adminUsers": {
+      "addNewAdmin": "Add new admin",
+      "role": "Role",
+      "lastLogin": "Last login",
+      "status": "Status",
+      "disable": "Disable",
+      "resetPassword": "Reset password"
+    },
+
+    "guests": {
+        "searchPlaceholder": "Search guests by name, type or reservation ID..."
+    },
+    
+    
+    "blacklist": {
+      "rulesTitle": "Blacklist usage rules",
+      "rulesDescription": "Use the blacklist only for serious violations such as unpaid bills, fraud, or property damage. Always follow legal and data protection requirements.",
+      "title": "Blacklisted guests ({{count}})",
+      "addToBlacklist": "Add to blacklist",
+      "nationalId": "National ID",
+      "reason": "Reason",
+      "addedDate": "Added date",
+      "expiryDate": "Expiry date",
+      "remove": "Remove from blacklist",
+      "searchUser": "Search user by ID, e-mail or name",
+      "searching": "Searching...",
+      "unknownUser": "Unknown user",
+      "blockType": "Block type",
+      "permanent": "Permanent block",
+      "temporary": "Temporary (until date)",
+      "permanentShort": "Permanent",
+      "permanentHint": "For permanent blocks, the expiry date is not required.",
+      
+      "validation": {
+        "required": "User and reason are required.",
+        "expiryRequired": "Please select an expiry date for a temporary block."
+      },
+      "reasonPlaceholder": "Enter reason",
+      "userId": "User ID",
+
+      "confirmRemove": "Remove this user from blacklist?",
+      "loading": "Loading blacklist...",
+      "empty": "There are no blacklisted users."
+    },
+
+    "payments": {
+        "totalRevenue": "Total revenue",
+        "pendingPayments": "Pending payments",
+        "thisMonth": "Revenue this month",
+        "amount": "Amount",
+        "paymentStatus": "Payment status",
+        "viewReceipt": "View receipt",
+        "downloadReceipt": "Download receipt",
+        "approvePayment": "Approve payment"
+    },
+
+    "reports": {
+        "generateReports": "Generate and download reports",
+        "daily": "Daily report",
+        "dailyDesc": "Summary of today's reservations, check-ins, check-outs and payments.",
+        "monthly": "Monthly report",
+        "monthlyDesc": "Overview of reservations, occupancy and revenue for the selected month.",
+        "roomOccupancy": "Room occupancy report",
+        "roomOccupancyDesc": "Detailed occupancy information by room and date.",
+        "revenue": "Revenue report",
+        "revenueDesc": "Income breakdown by payment status, room type and date.",
+        "generateButton": "Generate report",
+        "optionsTitle": "Report options",
+        "dateRange": "Date range",
+        "format": "Format",
+        "downloadReport": "Download report"
+    },
+
+    "reservations": {
+        "search": "Search reservations",
+        "searchPlaceholder": "Search by guest, reservation ID or room...",
+        "status": "Status",
+        "guestType": "Guest type",
+        "dateRange": "Date",
+        "applyFilters": "Apply filters",
+        "allReservations": "All reservations ({{count}})",
+        "createReservation": "Create reservation",
+        "approve": "Approve reservation",
+        "reject": "Reject reservation",
+        "assignRoom": "Assign room",
+        "filters": {
+            "allStatus": "All statuses",
+            "pending": "Pending",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "canceled": "Canceled",
+            "allTypes": "All guest types",
+            "student": "Student",
+            "personnel": "Personnel",
+            "visitor": "Visitor"
+        },
+        "statusLabels": {
+            "pending": "Pending",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "canceled": "Canceled",
+            "refundRequested": "Refund requested",
+            "refunded": "Refunded",
+            "checkedIn": "Checked-in",
+            "completed": "Completed"
+          },
+          "guestTypes": {
+            "personal": "Personal",
+            "corporate": "Corporate",
+            "education": "Education"
+          },
+          "rejectReasonPrompt": "Please enter a reason for rejection (optional):",
+          "guestTypeDisabledHint": "Guest type is derived from accommodation type (personal / corporate / education).",
+          "summary": {
+            "total": "Total reservations: {{count}}",
+            "pending": "Pending: {{count}}"
+          },
+          "loading": "Loading reservations...",
+          "empty": "No reservations found for the selected filters.",
+          "createReservationDisabledHint": "Admin-created reservations will be implemented later."
+    
+    },
+
+    "rooms": {
+        "addNewRoom": "Add new room",
+        "roomLabel": "Room {{number}}",
+        "typeLabel": "Type: {{type}}",
+        "capacity": "Capacity",
+        "guestSingular": "guest",
+        "guestPlural": "guests",
+        "price": "Price",
+        "perNight": "per night",
+        "amenities": "Amenities"
+    },
+
+    "settings": {
+        "generalSettings": "General settings",
+        "hotelName": "Hotel name",
+        "contactEmail": "Contact e-mail",
+        "contactPhone": "Contact phone",
+        "bookingSettings": "Booking settings",
+        "autoApprove": "Auto-approve reservations",
+        "autoApproveDesc": "Automatically approve reservations that match the rules.",
+        "minBookingAdvance": "Minimum booking notice (hours)",
+        "maxBookingDuration": "Maximum stay duration (days)",
+        "saveSettings": "Save settings"
+    }
+
+  
+  }
+  
+  
+  

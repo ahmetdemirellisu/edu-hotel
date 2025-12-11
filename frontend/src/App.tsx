@@ -5,7 +5,7 @@ import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
 import { MainPage } from "./components/MainPage";
 import { BookRoomPage } from "./components/BookRoomPage";
-import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminDashboard } from "./components/admin/AdminDashboard";
 
 // 🔒 Auth wrapper
 function RequireAuth({ children }: { children: ReactNode }) {

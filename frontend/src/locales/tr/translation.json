@@ -8,6 +8,38 @@
     "home": "Ana Sayfa"
   },
 
+  "bookingRequest": {
+    "title": "EDU Otel için Rezervasyon Talebi",
+    "subtitle": "EDU Otel için ön rezervasyon talebi oluşturun. Talebiniz idare tarafından incelenip onaylanacaktır. Nihai oda ataması otel personeli tarafından yapılacaktır.",
+
+    "step1Title": "Adım 1 – Rezervasyon talebinizi gönderin",
+    "step1Description": "Konaklama tarihlerinizi ve temel bilgilerinizi girin. Bu form, anlık bir rezervasyon değil, talep formudur.",
+
+    "step2Title": "Adım 2 – Oda türlerini inceleyin",
+    "step2Description": "Burada EDU Otel’de bulunan örnek oda türlerini görebilirsiniz. Talebiniz onaylandıktan sonra nihai oda ataması otel yönetimi tarafından yapılacaktır.",
+
+    "form": {
+      "checkIn": "Giriş Tarihi",
+      "checkOut": "Çıkış Tarihi",
+      "guests": "Kişi Sayısı",
+      "accommodationType": "Konaklama Türü",
+      "invoiceType": "Fatura Türü",
+      "eventCode": "Etkinlik / Eğitim Kodu",
+      "explanation": "Açıklama / Gerekçe",
+      "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için, kalış amacınızı kısaca açıklayınız.",
+      "submitButton": "Rezervasyon talebini gönder",
+      "submitting": "Gönderiliyor..."
+    },
+
+    "messages": {
+      "success": "Rezervasyon talebiniz gönderildi. İdare tarafından incelendikten sonra size bilgi verilecektir.",
+      "error": "Talep gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.",
+      "datesRequired": "Lütfen giriş ve çıkış tarihlerini seçiniz.",
+      "guestsRequired": "Lütfen kişi sayısını seçiniz."
+    }
+  },
+
+
   "login": {
     "loginWith": "Giriş yöntemi",
     "email": "E-posta",

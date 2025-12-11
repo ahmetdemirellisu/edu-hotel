@@ -1,10 +1,51 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  REFUND_REQUESTED
+  REFUNDED
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum AccommodationType {
+  PERSONAL
+  CORPORATE
+  EDUCATION
+}
+
+enum InvoiceType {
+  INDIVIDUAL
+  CORPORATE
+}
+
+// 🆕 WHO is the guest?
+enum UserType {
+  STUDENT // Sabancı student (lisans / yüksek lisans)
+  STAFF // Administrative / academic staff
+  SPECIAL_GUEST // Özel misafir
+  OTHER
+}
+
+// (Optional but nice for later menu/role checks)
+enum UserRole {
+  USER
+  ADMIN
+  HOTEL_STAFF
 }
 
 model User {
@@ -14,11 +55,15 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
-  reservations Reservation[] // ⬅️ add this line
+  userType UserType @default(OTHER)
+  role     UserRole @default(USER)
+
+  reservations Reservation[]
+  blacklist    Blacklist?
 }
 
 model Room {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   name        String
   type        String // e.g. "Single", "Double"
   price       Int // per night
@@ -26,21 +71,44 @@ model Room {
   description String
   image       String?
   amenities   String // e.g. "Wifi,TV,AC,Coffee"
-  available   Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  status      RoomStatus @default(AVAILABLE)
+  createdAt   DateTime   @default(now())
 
   reservations Reservation[]
 }
 
 model Reservation {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  room      Room     @relation(fields: [roomId], references: [id])
-  roomId    Int
-  checkIn   DateTime
-  checkOut  DateTime
-  guests    Int
-  status    String   @default("PENDING") // or CONFIRMED, CANCELED etc.
+  id Int @id @default(autoincrement())
+
+  // relations
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  room   Room? @relation(fields: [roomId], references: [id])
+  roomId Int?
+
+  checkIn  DateTime
+  checkOut DateTime
+  guests   Int
+
+  status            ReservationStatus @default(PENDING)
+  accommodationType AccommodationType
+  eventCode         String?
+  invoiceType       InvoiceType
+  note              String?           @db.Text
+
+  // 🆕 snapshot of guest type at time of booking
+  guestType UserType @default(OTHER)
+
   createdAt DateTime @default(now())
+}
+
+model Blacklist {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  reason    String
+  addedAt   DateTime  @default(now())
+  expiresAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
 }

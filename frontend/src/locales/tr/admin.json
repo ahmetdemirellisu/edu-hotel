@@ -1,0 +1,292 @@
+{
+    "menu": {
+      "dashboard": "Gösterge Paneli",
+      "reservations": "Rezervasyonlar",
+      "calendar": "Takvim",
+      "rooms": "Odalar",
+      "guests": "Misafirler",
+      "payments": "Ödemeler",
+      "blacklist": "Kara Liste",
+      "reports": "Raporlar",
+      "adminUsers": "Yönetici Kullanıcılar",
+      "settings": "Ayarlar"
+    },
+  
+    "common": {
+      "adminPanel": "Yönetim Paneli",
+      "searchPlaceholder": "Ara...",
+      "edit": "Düzenle",
+      "cancel": "İptal",
+      "save": "Kaydet"
+
+    },
+  
+    "pages": {
+      "dashboard": {
+        "title": "Gösterge Paneli",
+        "pendingReservations": "Bekleyen rezervasyonlar",
+        "approvedReservations": "Onaylanan rezervasyonlar",
+        "guestsStaying": "Konaklayan misafirler",
+        "availableRooms": "Müsait odalar",
+        "fromYesterday": "dünden itibaren",
+        "quickActions": "Hızlı işlemler",
+        "actions": {
+          "createReservation": "Rezervasyon oluştur",
+          "viewCalendar": "Takvimi görüntüle",
+          "addRoom": "Oda ekle",
+          "reportCenter": "Rapor merkezi"
+        },
+        "latestReservations": "Son rezervasyonlar",
+        "roomOccupancy": "Oda doluluk oranı",
+        "occupancyRate": "Doluluk oranı",
+        "occupied": "Dolu",
+        "available": "Müsait",
+        "maintenance": "Bakımda",
+        "expectedCheckinsToday": "Bugün beklenen girişler",
+        "loadingReservations": "Son rezervasyonlar yükleniyor...",
+        "noReservations": "Henüz oluşturulmuş bir rezervasyon bulunmamaktadır."
+    },
+  
+      "reservations": {
+        "title": "Rezervasyon Yönetimi"
+      },
+  
+      "calendar": {
+        "title": "Takvim Görünümü",
+        "roomOccupancyCalendar": "Oda doluluk takvimi",
+        "room": "Oda",
+        "legend": {
+          "pending": "Beklemede",
+          "confirmed": "Onaylandı",
+          "checkedIn": "Giriş yapıldı",
+          "canceled": "İptal edildi"
+        }
+      },
+  
+      "rooms": {
+        "title": "Oda Yönetimi"
+      },
+
+      "reports": {
+        "title": "Raporlar"
+      }, 
+  
+      "guests": {
+        "title": "Misafir Yönetimi"
+      },
+  
+      "payments": {
+        "title": "Ödeme Yönetimi"
+      },
+  
+      "blacklist": {
+        "title": "Kara Liste Yönetimi"
+      },
+  
+      "adminUsers": {
+        "title": "Yönetici Kullanıcı Yönetimi"
+      },
+  
+      "settings": {
+        "title": "Sistem Ayarları"
+      }
+    },
+  
+    "tables": {
+      "guestName": "Misafir adı",
+      "checkIn": "Giriş",
+      "checkOut": "Çıkış",
+      "status": "Durum",
+      "payment": "Ödeme",
+      "action": "İşlem",
+      "actions": "İşlemler",
+      "name": "İsim",
+      "email": "E-posta",
+      "guestType": "Misafir türü",
+      "reservationId": "Rezervasyon ID",
+      "date": "Tarih",
+      "room": "Oda",
+      "paymentNotTracked": "Yok",  
+      "unknownGuest": "Bilinmeyen misafir"
+
+    },
+  
+    "commonTable": {
+      "viewAll": "Tümünü gör",
+      "view": "Görüntüle"
+    },
+  
+    "notifications": {
+      "title": "Bildirimler",
+      "newReservation": "Yeni rezervasyon oluşturuldu",
+      "paymentReceived": "Ödeme alındı",
+      "checkout": "Misafir çıkış yaptı",
+      "time": {
+        "5min": "5 dakika önce",
+        "1h": "1 saat önce",
+        "2h": "2 saat önce"
+      }
+    },
+  
+    "profile": {
+      "name": "Yönetici",
+      "role": "Otel yöneticisi",
+      "profileSettings": "Profil ayarları",
+      "changePassword": "Şifreyi değiştir",
+      "logout": "Çıkış yap"
+    },
+  
+    "adminUsers": {
+      "addNewAdmin": "Yeni yönetici ekle",
+      "role": "Rol",
+      "lastLogin": "Son giriş",
+      "status": "Durum",
+      "disable": "Devre dışı bırak",
+      "resetPassword": "Şifreyi sıfırla"
+    },
+
+    "guests": {
+        "searchPlaceholder": "Misafirleri isim, tür veya rezervasyon numarasına göre ara..."
+    },
+    
+
+    "blacklist": {
+        "rulesTitle": "Kara liste kullanım kuralları",
+        "rulesDescription": "Kara listeyi yalnızca ödenmeyen borçlar, dolandırıcılık veya mülk zararları gibi ciddi ihlaller için kullanın. Her zaman yasal ve KVKK gerekliliklerine uyun.",
+        "title": "Kara listedeki misafirler ({{count}})",
+        "addToBlacklist": "Kara listeye ekle",
+        "nationalId": "T.C. kimlik no",
+        "reason": "Sebep",
+        "addedDate": "Eklenme tarihi",
+        "expiryDate": "Bitiş tarihi",
+        "remove": "Kara listeden çıkar",
+
+        "searchUser": "Kullanıcıyı ID, e-posta veya isim ile ara",
+        "searching": "Aranıyor...",
+        "unknownUser": "Bilinmeyen kullanıcı",
+
+        "blockType": "Blok türü",
+        "permanent": "Kalıcı blok",
+        "temporary": "Geçici (tarihe kadar)",
+        "permanentShort": "Kalıcı",
+        "permanentHint": "Kalıcı bloklarda bitiş tarihi alanı zorunlu değildir.",
+
+        "validation": {
+            "required": "Kullanıcı ve sebep zorunludur.",
+            "expiryRequired": "Geçici blok için lütfen bir bitiş tarihi seçin."
+        },
+
+        "reasonPlaceholder": "Sebebi girin",
+        "userId": "Kullanıcı ID",
+      
+        "confirmRemove": "Bu kullanıcıyı kara listeden çıkarmak istiyor musunuz?",
+        "loading": "Kara liste yükleniyor...",
+        "empty": "Kara listede kayıtlı kullanıcı bulunmamaktadır."
+    },
+
+    "payments": {
+        "totalRevenue": "Toplam gelir",
+        "pendingPayments": "Bekleyen ödemeler",
+        "thisMonth": "Bu ayın geliri",
+        "amount": "Tutar",
+        "paymentStatus": "Ödeme durumu",
+        "viewReceipt": "Makbuzu görüntüle",
+        "downloadReceipt": "Makbuzu indir",
+        "approvePayment": "Ödemeyi onayla"
+    },
+
+    "reports": {
+        "daily": "Günlük rapor",
+        "dailyDesc": "Bugünkü rezervasyonlar, girişler, çıkışlar ve ödemelerin özeti.",
+        "monthly": "Aylık rapor",
+        "monthlyDesc": "Seçilen ay için rezervasyon, doluluk ve gelir görünümü.",
+        "roomOccupancy": "Oda doluluk raporu",
+        "roomOccupancyDesc": "Odalara ve tarih aralığına göre ayrıntılı doluluk verileri.",
+        "revenue": "Gelir raporu",
+        "revenueDesc": "Ödeme durumu, oda türü ve tarihe göre gelir dökümü.",
+        "generateReports": "Rapor oluştur ve indir",
+        "generateButton": "Rapor oluştur",
+        "optionsTitle": "Rapor seçenekleri",
+        "dateRange": "Tarih aralığı",
+        "format": "Format",
+        "downloadReport": "Raporu indir"
+    },
+
+    "reservations": {
+        "search": "Rezervasyon ara",
+        "searchPlaceholder": "Misafir, rezervasyon numarası veya odaya göre ara...",
+        "status": "Durum",
+        "guestType": "Misafir türü",
+        "dateRange": "Tarih",
+        "applyFilters": "Filtreleri uygula",
+        "allReservations": "Tüm rezervasyonlar ({{count}})",
+        "createReservation": "Rezervasyon oluştur",
+        "approve": "Rezervasyonu onayla",
+        "reject": "Rezervasyonu reddet",
+        "assignRoom": "Oda ata",
+        "filters": {
+            "allStatus": "Tüm durumlar",
+            "pending": "Beklemede",
+            "approved": "Onaylandı",
+            "rejected": "Reddedildi",
+            "canceled": "İptal edildi",
+            "allTypes": "Tüm misafir türleri",
+            "student": "Öğrenci",
+            "personnel": "Personel",
+            "visitor": "Ziyaretçi"
+        },
+        "statusLabels": {
+            "pending": "Beklemede",
+            "approved": "Onaylandı",
+            "rejected": "Reddedildi",
+            "canceled": "İptal edildi",
+            "refundRequested": "İade talep edildi",
+            "refunded": "İade edildi",
+            "checkedIn": "Giriş yapıldı",
+            "completed": "Tamamlandı"
+        },
+        "guestTypes": {
+            "personal": "Kişisel",
+            "corporate": "Kurumsal",
+            "education": "Eğitim"
+        },
+        "rejectReasonPrompt": "Lütfen reddetme sebebini yazınız (isteğe bağlı):",
+        "guestTypeDisabledHint": "Misafir türü konaklama türünden türetilir (kişisel / kurumsal / eğitim).",
+        "summary": {
+            "total": "Toplam rezervasyon: {{count}}",
+            "pending": "Beklemede: {{count}}"
+        },
+        "loading": "Rezervasyonlar yükleniyor...",
+        "empty": "Seçili filtrelere göre rezervasyon bulunamadı.",
+        "createReservationDisabledHint": "Yönetici tarafından oluşturulan rezervasyonlar daha sonra eklenecektir."
+    },
+
+    "rooms": {
+        "addNewRoom": "Yeni oda ekle",
+        "roomLabel": "Oda {{number}}",
+        "typeLabel": "Tür: {{type}}",
+        "capacity": "Kapasite",
+        "guestSingular": "misafir",
+        "guestPlural": "misafir",
+        "price": "Fiyat",
+        "perNight": "gecelik",
+        "amenities": "Olanaklar"
+    },
+
+    "settings": {
+        "generalSettings": "Genel ayarlar",
+        "hotelName": "Otel adı",
+        "contactEmail": "İletişim e-postası",
+        "contactPhone": "İletişim telefonu",
+        "bookingSettings": "Rezervasyon ayarları",
+        "autoApprove": "Rezervasyonları otomatik onayla",
+        "autoApproveDesc": "Kurallara uyan rezervasyonlar otomatik olarak onaylanır.",
+        "minBookingAdvance": "Minimum rezervasyon bildirimi (saat)",
+        "maxBookingDuration": "Maksimum konaklama süresi (gün)",
+        "saveSettings": "Ayarları kaydet"
+    }
+
+  
+  }
+  
+  

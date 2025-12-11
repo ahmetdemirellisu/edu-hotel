@@ -160,5 +160,38 @@
     "supportEmail": "Support: support@sabanciuniv.edu",
     "rights": "© 2025 Sabancı University. All rights reserved.",
     "rightsEduHotel": "© 2025 Edu Hotel Management System - Sabancı University. All rights reserved."
+  },
+
+"bookingRequest": {
+  "title": "Reservation Request for EDU Hotel",
+  "subtitle": "Submit a pre-reservation request for EDU Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
+
+  "step1Title": "Step 1 – Submit your reservation request",
+  "step1Description": "Please fill in your stay dates and basic information. This is a request form, not an instant booking.",
+
+  "step2Title": "Step 2 – Explore room types",
+  "step2Description": "These are example room types available at EDU Hotel. Final room assignment will be made by the hotel administration after your request is approved.",
+
+  "form": {
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "guests": "Guests",
+    "accommodationType": "Accommodation Type",
+    "invoiceType": "Invoice Type",
+    "eventCode": "Event / Training Code",
+    "explanation": "Explanation / Reason",
+    "explanationPlaceholder": "Please briefly explain the purpose of your stay (especially for education-related reservations).",
+    "submitButton": "Submit reservation request",
+    "submitting": "Submitting..."
+  },
+
+  "messages": {
+    "success": "Your reservation request has been submitted. You will be notified after it is reviewed by the administration.",
+    "error": "There was an error submitting your request. Please try again later.",
+    "datesRequired": "Please select check-in and check-out dates.",
+    "guestsRequired": "Please select number of guests."
   }
 }
+
+}
+

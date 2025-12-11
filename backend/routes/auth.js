@@ -1,3 +1,4 @@
+
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -6,27 +7,41 @@ const prisma = require("../prismaClient");
 const router = express.Router();
 
 // POST /auth/register
+// POST /auth/register
 router.post("/register", async (req, res) => {
     try {
-        const { email, password, name } = req.body;
+        // 🆕 also read userType from body (optional)
+        const { email, password, name, userType: rawUserType } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ error: "Email and password are required." });
+            return res
+                .status(400)
+                .json({ error: "Email and password are required." });
         }
 
         // check if user already exists
         const existing = await prisma.user.findUnique({ where: { email } });
         if (existing) {
-            return res.status(409).json({ error: "User with this email already exists." });
+            return res
+                .status(409)
+                .json({ error: "User with this email already exists." });
         }
 
         const hashed = await bcrypt.hash(password, 10);
+
+        // 🆕 validate / normalize userType
+        const allowedUserTypes = ["STUDENT", "STAFF", "SPECIAL_GUEST", "OTHER"];
+        const finalUserType = allowedUserTypes.includes(rawUserType)
+            ? rawUserType
+            : "OTHER"; // default for now
 
         const user = await prisma.user.create({
             data: {
                 email,
                 password: hashed,
                 name: name || null,
+                userType: finalUserType, // 🆕 this matches your Prisma enum
+                // role: "USER", // if you already added role
             },
         });
 
@@ -36,6 +51,8 @@ router.post("/register", async (req, res) => {
             email: user.email,
             name: user.name,
             createdAt: user.createdAt,
+            userType: user.userType, // 🆕 include in response
+            // role: user.role,
         });
     } catch (err) {
         console.error("Register error:", err);
@@ -62,6 +79,16 @@ router.post("/login", async (req, res) => {
             return res.status(401).json({ error: "Invalid email or password." });
         }
 
+        const blacklisted = await prisma.blacklist.findUnique({
+            where: { userId: user.id }
+        });
+
+        if (blacklisted) {
+            return res.status(401).json({
+                error: "Your account is blacklisted. You cannot log in. Please contact EDU Hotel."
+            });
+        }
+
         const token = jwt.sign(
             { userId: user.id, email: user.email },
             process.env.JWT_SECRET,
@@ -74,6 +101,8 @@ router.post("/login", async (req, res) => {
                 id: user.id,
                 email: user.email,
                 name: user.name,
+                userType: user.userType,
+                role: user.role
             },
         });
     } catch (err) {

@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+var reservationsRouter = require('./routes/reservations');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -26,5 +27,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/reservations', reservationsRouter);
+app.use("/blacklist", require("./routes/blacklist"));
+app.use("/users", require("./routes/users"));
+
+
 
 module.exports = app;

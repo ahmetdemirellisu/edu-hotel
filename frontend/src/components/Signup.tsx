@@ -3,20 +3,20 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
 import { Search, Home } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 
-const API_URL = import.meta.env.VITE_API_URL as string;
+const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
 
 export function Signup() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
   const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
-
   const [fullName, setFullName] = useState("");
-  const [contact, setContact] = useState(""); 
+  const [contact, setContact] = useState(""); // email or phone, backend uses it as email
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -42,29 +42,65 @@ export function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      // 1) REGISTER
+      const registerRes = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: contact,
+          email: contact,    // backend expects "email"
           password,
           name: fullName,
         }),
       });
 
-      const data = await res.json();
+      const registerData = await registerRes.json();
 
-      if (!res.ok) {
-        setError(data.error || t("signup.errors.failed"));
+      if (!registerRes.ok) {
+        setError(registerData.error || t("signup.errors.failed"));
         setLoading(false);
         return;
       }
 
-      setSuccess(t("signup.success.accountCreated"));
-      setLoading(false);
+      // 2) AUTO-LOGIN immediately after successful registration
+      try {
+        const loginRes = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: contact,
+            password,
+          }),
+        });
 
+        const loginData = await loginRes.json();
+
+        if (loginRes.ok) {
+          // Save token and full user object (id, email, name)
+          localStorage.setItem("authToken", loginData.token);
+
+          if (loginData.user) {
+            localStorage.setItem("user", JSON.stringify(loginData.user));
+            localStorage.setItem("userEmail", loginData.user.email ?? "");
+            localStorage.setItem("userName", loginData.user.name ?? "");
+          }
+
+          setLoading(false);
+          navigate("/main"); // user is now logged in and can book
+          return;
+        } else {
+          // Fallback – account created, but auto-login failed
+          setSuccess(t("signup.success.accountCreated"));
+          setError(loginData.error || null);
+        }
+      } catch (loginErr) {
+        console.error("Auto-login after signup failed:", loginErr);
+        setSuccess(t("signup.success.accountCreated"));
+        setError(t("signup.errors.network"));
+      }
+
+      setLoading(false);
       setPassword("");
       setConfirmPassword("");
     } catch (err) {
@@ -80,7 +116,6 @@ export function Signup() {
       <header className="bg-[#003366] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-
             {/* Sabancı Logo */}
             <div className="flex items-center">
               <div className="border-2 border-white px-3 py-1">
@@ -150,12 +185,10 @@ export function Signup() {
 
         <div className="relative z-10">
           <div className="flex justify-center">
-
             <div className="w-full max-w-md">
               <Card className="border-gray-200">
                 <CardContent className="space-y-6 pt-6">
                   <form className="space-y-6" onSubmit={handleSubmit}>
-
                     <div className="space-y-2">
                       <Label htmlFor="fullname">{t("signup.fullNameLabel")}</Label>
                       <Input
@@ -260,12 +293,10 @@ export function Signup() {
                         {t("signup.alreadyHaveAccount")}
                       </Link>
                     </div>
-
                   </form>
                 </CardContent>
               </Card>
             </div>
-
           </div>
         </div>
       </main>
@@ -274,6 +305,7 @@ export function Signup() {
       <footer className="bg-[#003366] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
+            {/* ... same footer as before ... */}
             <div>
               <div className="border-2 border-white px-3 py-1 inline-block mb-4">
                 <div className="text-sm">Sabancı</div>
@@ -289,52 +321,20 @@ export function Signup() {
             <div>
               <h3 className="mb-4 text-sm">{t("footer.quickLinks")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.about")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.academic")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.research")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.campusLife")}
-                  </a>
-                </li>
+                <li>{t("footer.about")}</li>
+                <li>{t("footer.academic")}</li>
+                <li>{t("footer.research")}</li>
+                <li>{t("footer.campusLife")}</li>
               </ul>
             </div>
 
             <div>
               <h3 className="mb-4 text-sm">{t("footer.resources")}</h3>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.library")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.sucourse")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.email")}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    {t("footer.support")}
-                  </a>
-                </li>
+                <li>{t("footer.library")}</li>
+                <li>{t("footer.sucourse")}</li>
+                <li>{t("footer.email")}</li>
+                <li>{t("footer.support")}</li>
               </ul>
             </div>
 
