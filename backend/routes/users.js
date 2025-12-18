@@ -1,79 +1,173 @@
-// routes/users.js
+// backend/routes/users.js
 const express = require("express");
+const { PrismaClient } = require("@prisma/client");
+
 const router = express.Router();
-const prisma = require("../prismaClient");
-
-// GET /users (unchanged, still useful)
-router.get("/", async function (req, res) {
-  try {
-    const users = await prisma.user.findMany({
-      take: 50,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        userType: true,
-        role: true,
-        createdAt: true,
-      },
-    });
-
-    res.json(users);
-  } catch (err) {
-    console.error("Error fetching users:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+const prisma = new PrismaClient();
 
 /**
- * GET /users/search?query=...
- * Search by:
- *  - ID  (exact)
- *  - e-mail (contains, case-insensitive)
- *  - name (contains, case-insensitive)
+ * --------------------------------------------------------------------------
+ * GET /users/search
+ * Search users by ID, email, or name
+ * Used in BlacklistPage modal autocomplete
+ * Example:
+ *   /users/search?query=john
+ * --------------------------------------------------------------------------
  */
-router.get("/search", async function (req, res) {
+router.get("/search", async (req, res) => {
   try {
-    const raw = req.query.query;
-    const query = typeof raw === "string" ? raw.trim() : "";
+    const query = String(req.query.query || "").trim();
 
-    if (!query) return res.json([]);
+    if (!query || query.length < 2) {
+      return res.json([]);
+    }
 
-    const asNumber = parseInt(query, 10);
-    const isNumeric = !isNaN(asNumber);
+    const orConditions = [];
 
-    const orConditions = [
-      {
-        email: { contains: query, mode: "insensitive" },
-      },
-      {
-        name: { contains: query, mode: "insensitive" },
-      },
-    ];
-
-    if (isNumeric) {
+    const asNumber = Number(query);
+    if (!isNaN(asNumber)) {
       orConditions.push({ id: asNumber });
     }
+
+    orConditions.push(
+        { email: { contains: query, mode: "insensitive" } },
+        { name: { contains: query, mode: "insensitive" } }
+    );
 
     const users = await prisma.user.findMany({
       where: {
         OR: orConditions,
       },
-      take: 10,
       select: {
         id: true,
-        email: true,
         name: true,
+        email: true,
         userType: true,
         role: true,
       },
+      orderBy: { id: "asc" },
     });
 
     res.json(users);
   } catch (err) {
     console.error("User search error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+/**
+ * --------------------------------------------------------------------------
+ * GET /users/admin
+ * Full Guest Management List for Admin Panel
+ * Supports filters:
+ *   /users/admin?type=STUDENT
+ *   /users/admin?search=john
+ *   /users/admin?blacklisted=true
+ *
+ * Returns:
+ *   - user info
+ *   - blacklist (if exists) as merged field
+ *   - reservations[] for history
+ * --------------------------------------------------------------------------
+ */
+router.get("/admin", async (req, res) => {
+  try {
+    const { type, search, blacklisted } = req.query;
+
+    const where = {};
+
+    // Filter: userType (STUDENT / STAFF / SPECIAL_GUEST / OTHER)
+    if (type) {
+      where.userType = type;
+    }
+
+    // Filter: search by name or email
+    if (search) {
+      const q = String(search).trim();
+      where.OR = [
+        { email: { contains: q, mode: "insensitive" } },
+        { name: { contains: q, mode: "insensitive" } },
+      ];
+    }
+
+    // 1) Fetch users with reservations
+    let users = await prisma.user.findMany({
+      where,
+      include: {
+        reservations: {
+          orderBy: { checkIn: "desc" },
+        },
+      },
+      orderBy: { id: "asc" },
+    });
+
+    // 2) Fetch blacklist entries for these users
+    const userIds = users.map((u) => u.id);
+    const blacklistEntries =
+        userIds.length === 0
+            ? []
+            : await prisma.blacklist.findMany({
+              where: { userId: { in: userIds } },
+            });
+
+    const blacklistByUserId = new Map();
+    for (const entry of blacklistEntries) {
+      blacklistByUserId.set(entry.userId, entry);
+    }
+
+    // 3) Merge blacklist info into user objects
+    let mergedUsers = users.map((u) => ({
+      ...u,
+      blacklist: blacklistByUserId.get(u.id) || null,
+    }));
+
+    // 4) Apply blacklisted=true/false filter (in memory)
+    if (blacklisted === "true") {
+      mergedUsers = mergedUsers.filter((u) => u.blacklist !== null);
+    } else if (blacklisted === "false") {
+      mergedUsers = mergedUsers.filter((u) => u.blacklist === null);
+    }
+
+    res.json(mergedUsers);
+  } catch (err) {
+    console.error("Admin guest list error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+/**
+ * --------------------------------------------------------------------------
+ * GET /users/:id
+ * Fetch one user with reservations + blacklist info
+ * --------------------------------------------------------------------------
+ */
+router.get("/:id", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID." });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        reservations: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Fetch blacklist entry (if any)
+    const blacklist = await prisma.blacklist.findUnique({
+      where: { userId },
+    });
+
+    res.json({ ...user, blacklist: blacklist || null });
+  } catch (err) {
+    console.error("Get user error:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 

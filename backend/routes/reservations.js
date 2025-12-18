@@ -1,6 +1,7 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const { sendMail } = require('../services/mail');
+// backend/routes/reservations.js
+const express = require("express");
+const { PrismaClient } = require("@prisma/client");
+const { sendMail } = require("../services/mail");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -20,214 +21,337 @@ function diffInDays(start, end) {
     return Math.round((end - start) / msPerDay);
 }
 
+function isNonEmptyString(v) {
+    return typeof v === "string" && v.trim().length > 0;
+}
+
+/**
+ * Accept guestList either as:
+ *  - Array<{ firstName, lastName }>
+ *  - JSON string
+ *  - null/undefined
+ */
+function normalizeGuestList(guestList) {
+    if (!guestList) return null;
+
+    if (Array.isArray(guestList)) {
+        // Clean + keep only meaningful entries
+        const cleaned = guestList
+            .map((g) => ({
+                firstName: typeof g?.firstName === "string" ? g.firstName.trim() : "",
+                lastName: typeof g?.lastName === "string" ? g.lastName.trim() : "",
+            }))
+            .filter((g) => g.firstName || g.lastName);
+
+        return cleaned.length ? cleaned : null;
+    }
+
+    if (typeof guestList === "string") {
+        try {
+            const parsed = JSON.parse(guestList);
+            return normalizeGuestList(parsed);
+        } catch {
+            return null;
+        }
+    }
+
+    return null;
+}
+
 /**
  * POST /reservations
+ * Create a pre-reservation request (PENDING).
  */
-router.post('/', checkBlacklist, async (req, res) => {
+router.post("/", checkBlacklist, async (req, res) => {
     try {
         const {
             userId: rawUserId,
             checkIn,
             checkOut,
+            checkInTime, // "HH:MM" string
             guests,
-            accommodationType,
-            invoiceType,
+            accommodationType, // PERSONAL | CORPORATE | EDUCATION
+            invoiceType, // INDIVIDUAL | CORPORATE
             eventCode,
             note,
+
+            // NEW fields (stored as real columns)
+            firstName,
+            lastName,
+            phone,
+            contactEmail,
+            nationalId, // T.C. Kimlik No
+            taxNumber,
+            eventType,
+            priceType,
+            freeAccommodation,
+            guestList,
         } = req.body;
 
         const userId = parseInt(rawUserId, 10);
 
-        if (!userId || !checkIn || !checkOut || !guests || !accommodationType || !invoiceType) {
-            return res.status(400).json({ error: 'Missing required fields.' });
+        // Basic required fields
+        if (
+            !userId ||
+            !checkIn ||
+            !checkOut ||
+            !guests ||
+            !accommodationType ||
+            !invoiceType
+        ) {
+            return res.status(400).json({ error: "Missing required fields." });
+        }
+
+        // Contact info required for admin review + compliance
+        if (
+            !isNonEmptyString(firstName) ||
+            !isNonEmptyString(lastName) ||
+            !isNonEmptyString(phone) ||
+            !isNonEmptyString(contactEmail)
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Missing guest contact information." });
+        }
+
+        // Your UI shows this as required — enforce it
+        if (!isNonEmptyString(checkInTime)) {
+            return res.status(400).json({ error: "Check-in time is required." });
+        }
+
+        // For Corporate / Education, code required
+        if (
+            (accommodationType === "CORPORATE" || accommodationType === "EDUCATION") &&
+            !isNonEmptyString(eventCode)
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Event / Education code is required." });
+        }
+
+        // Billing ID fields depending on invoice type
+        if (invoiceType === "INDIVIDUAL" && !isNonEmptyString(nationalId)) {
+            return res
+                .status(400)
+                .json({ error: "National ID is required for individual billing." });
+        }
+        if (invoiceType === "CORPORATE" && !isNonEmptyString(taxNumber)) {
+            return res
+                .status(400)
+                .json({ error: "Tax Number is required for corporate billing." });
+        }
+
+        // EventType is required in your UI
+        if (!isNonEmptyString(eventType)) {
+            return res.status(400).json({ error: "Event type is required." });
         }
 
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
-            return res.status(400).json({ error: `User not found for id ${userId}. Please log in again.` });
+            return res
+                .status(400)
+                .json({ error: `User not found for id ${userId}. Please log in again.` });
         }
 
         const checkInDate = parseDate(checkIn);
         const checkOutDate = parseDate(checkOut);
 
-        if (!checkInDate || !checkOutDate) return res.status(400).json({ error: 'Invalid date format.' });
-        if (checkOutDate <= checkInDate) return res.status(400).json({ error: 'Check-out must be after check-in.' });
-        if (guests <= 0) return res.status(400).json({ error: 'Guests must be at least 1.' });
-
-        const stayLength = diffInDays(checkInDate, checkOutDate);
-        if (stayLength > 5) {
-            return res.status(400).json({ error: 'Maximum stay is 5 nights for a single reservation.' });
+        if (!checkInDate || !checkOutDate) {
+            return res.status(400).json({ error: "Invalid date format." });
+        }
+        if (checkOutDate <= checkInDate) {
+            return res
+                .status(400)
+                .json({ error: "Check-out must be after check-in." });
         }
 
-        // Rule: 30 days in advance
+        const guestsInt = parseInt(guests, 10);
+        if (!guestsInt || guestsInt <= 0) {
+            return res.status(400).json({ error: "Guests must be at least 1." });
+        }
+
+        const stayLength = diffInDays(checkInDate, checkOutDate);
+
+        // Requirement: personal max 5 consecutive days (unless admin override, not implemented here)
+        if (accommodationType === "PERSONAL" && stayLength > 5) {
+            return res.status(400).json({
+                error: "Personal bookings cannot exceed 5 consecutive nights.",
+            });
+        }
+
+        // Rule: 30 days in advance (you currently apply to all users)
         const maxDate = new Date();
         maxDate.setDate(maxDate.getDate() + 30);
         if (checkInDate > maxDate) {
-            return res.status(400).json({ error: 'Reservations can only be made up to 30 days in advance.' });
+            return res.status(400).json({
+                error: "Reservations can only be made up to 30 days in advance.",
+            });
         }
 
+        // Rule: Sunday check-in not allowed
         if (checkInDate.getDay() === 0) {
-            return res.status(400).json({ error: 'Sunday check-in is not allowed.' });
+            return res.status(400).json({ error: "Sunday check-in is not allowed." });
         }
 
+        // Rule: Saturday check-in + Sunday check-out combination not allowed
         if (checkInDate.getDay() === 6 && checkOutDate.getDay() === 0) {
-            return res.status(400).json({ error: 'Saturday check-in & Sunday check-out combination is not allowed.' });
+            return res.status(400).json({
+                error:
+                    "Saturday check-in & Sunday check-out combination is not allowed.",
+            });
         }
+
+        const normalizedGuestList = normalizeGuestList(guestList);
 
         const reservation = await prisma.reservation.create({
             data: {
                 userId,
                 checkIn: checkInDate,
                 checkOut: checkOutDate,
-                guests,
+                checkInTime: checkInTime.trim(),
+                guests: guestsInt,
+
                 accommodationType,
                 invoiceType,
-                eventCode: eventCode || null,
-                note: note || null,
+                eventCode: isNonEmptyString(eventCode) ? eventCode.trim() : null,
 
-                guestType: user.userType || 'OTHER',
+                // NEW: structured form fields
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                phone: phone.trim(),
+                contactEmail: contactEmail.trim(),
+
+                nationalId: isNonEmptyString(nationalId) ? nationalId.trim() : null,
+                taxNumber: isNonEmptyString(taxNumber) ? taxNumber.trim() : null,
+
+                eventType: isNonEmptyString(eventType) ? eventType.trim() : null,
+                priceType: isNonEmptyString(priceType) ? priceType.trim() : null,
+
+                freeAccommodation: !!freeAccommodation,
+
+                guestList: normalizedGuestList ? normalizedGuestList : null,
+
+                note: isNonEmptyString(note) ? note.trim() : null,
+
+                // Snapshot
+                guestType: user.userType || "OTHER",
             },
         });
 
         // ✉️ EMAIL — Reservation Request Received
         try {
             if (user.email) {
-                const subject = 'EDU Hotel – Reservation request received';
+                const subject = "EDU Hotel – Reservation request received";
                 const checkInStr = checkInDate.toISOString().slice(0, 10);
                 const checkOutStr = checkOutDate.toISOString().slice(0, 10);
 
                 const text = `
-Dear ${user.name || 'Guest'},
+Dear ${firstName} ${lastName},
 
 We have received your reservation request for EDU Hotel.
 
-Check-in:  ${checkInStr}
+Check-in:  ${checkInStr} ${checkInTime}
 Check-out: ${checkOutStr}
-Guests:    ${guests}
+Guests:    ${guestsInt}
+Accommodation: ${accommodationType}
+Invoice: ${invoiceType}
+Event type: ${eventType || "-"}
+Event code: ${eventCode || "-"}
 
 Our administration will review your request. You will be notified by email once it is approved or rejected.
 
 Best regards,
 EDU Hotel Team
-
-------------------------------------------
-TÜRKÇE METİN
-------------------------------------------
-
-Sayın ${user.name || 'Misafir'},
-
-EDU Hotel için rezervasyon talebiniz alınmıştır.
-
-Giriş Tarihi: ${checkInStr}
-Çıkış Tarihi: ${checkOutStr}
-Kişi Sayısı:  ${guests}
-
-Talebiniz kısa süre içinde yönetim tarafından değerlendirilecektir. Onay veya red durumunda size e-posta ile bilgilendirme yapılacaktır.
-
-Saygılarımızla,
-EDU Hotel Ekibi
 `;
 
                 const html = `
-<p>Dear <strong>${user.name || 'Guest'}</strong>,</p>
+<p>Dear <strong>${firstName} ${lastName}</strong>,</p>
 <p>Your reservation request has been received.</p>
 <p>
-<strong>Check-in:</strong> ${checkInStr}<br/>
+<strong>Check-in:</strong> ${checkInStr} ${checkInTime}<br/>
 <strong>Check-out:</strong> ${checkOutStr}<br/>
-<strong>Guests:</strong> ${guests}
+<strong>Guests:</strong> ${guestsInt}<br/>
+<strong>Accommodation:</strong> ${accommodationType}<br/>
+<strong>Invoice:</strong> ${invoiceType}<br/>
+<strong>Event type:</strong> ${eventType || "-"}<br/>
+<strong>Event code:</strong> ${eventCode || "-"}
 </p>
 <p>You will be notified once it is reviewed by the administration.</p>
-
-<hr/>
-
-<p><strong>Sayın ${user.name || 'Misafir'},</strong></p>
-<p>Rezervasyon talebiniz alınmıştır.</p>
-<p>
-<strong>Giriş Tarihi:</strong> ${checkInStr}<br/>
-<strong>Çıkış Tarihi:</strong> ${checkOutStr}<br/>
-<strong>Kişi Sayısı:</strong> ${guests}
-</p>
-<p>Talebiniz yönetim tarafından değerlendirildikten sonra bilgilendirileceksiniz.</p>
 `;
 
                 await sendMail({ to: user.email, subject, text, html });
             }
         } catch (mailErr) {
-            console.error('Failed to send request email:', mailErr);
+            console.error("Failed to send request email:", mailErr);
         }
 
         return res.status(201).json(reservation);
-
     } catch (err) {
-        console.error('Error creating reservation:', err);
-        if (err.code === 'P2003') {
+        console.error("Error creating reservation:", err);
+        if (err.code === "P2003") {
             return res.status(400).json({
-                error: 'Reservation cannot be created because the user does not exist.',
+                error: "Reservation cannot be created because the user does not exist.",
             });
         }
-        return res.status(500).json({ error: 'Internal server error.' });
+        return res.status(500).json({ error: "Internal server error." });
     }
 });
 
 /**
  * GET /reservations/user/:userId
  */
-router.get('/user/:userId', async (req, res) => {
+router.get("/user/:userId", async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
-        if (isNaN(userId)) return res.status(400).json({ error: 'Invalid userId.' });
+        if (isNaN(userId)) return res.status(400).json({ error: "Invalid userId." });
 
         const reservations = await prisma.reservation.findMany({
             where: { userId },
-            orderBy: { createdAt: 'desc' },
+            orderBy: { createdAt: "desc" },
             include: { room: true },
         });
 
         return res.json(reservations);
     } catch (err) {
-        console.error('Error fetching user reservations:', err);
-        return res.status(500).json({ error: 'Internal server error.' });
+        console.error("Error fetching user reservations:", err);
+        return res.status(500).json({ error: "Internal server error." });
     }
 });
 
 /**
  * GET /reservations/admin
  */
-router.get('/admin', async (req, res) => {
+router.get("/admin", async (req, res) => {
     try {
         const { status, guestType } = req.query;
 
         const where = {};
 
-        if (status) {
-            where.status = status;
-        }
-        if (guestType) {
-            where.guestType = guestType; // must be one of STUDENT/STAFF/SPECIAL_GUEST/OTHER
-        }
+        if (status) where.status = status;
+        if (guestType) where.guestType = guestType;
 
         const reservations = await prisma.reservation.findMany({
             where,
-            orderBy: { createdAt: 'desc' },
+            orderBy: { createdAt: "desc" },
             include: { user: true, room: true },
         });
 
         return res.json(reservations);
     } catch (err) {
-        console.error('Error fetching admin reservations:', err);
-        return res.status(500).json({ error: 'Internal server error.' });
+        console.error("Error fetching admin reservations:", err);
+        return res.status(500).json({ error: "Internal server error." });
     }
 });
 
 /**
  * PATCH /reservations/admin/:id/approve
  */
-router.patch('/admin/:id/approve', async (req, res) => {
+router.patch("/admin/:id/approve", async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const { roomId } = req.body;
 
-        const data = { status: 'APPROVED' };
+        const data = { status: "APPROVED" };
         if (roomId) data.roomId = roomId;
 
         const reservation = await prisma.reservation.update({
@@ -236,154 +360,106 @@ router.patch('/admin/:id/approve', async (req, res) => {
             include: { user: true, room: true },
         });
 
-        // ✉️ EMAIL — Reservation Approved (English + Turkish)
+        // ✉️ EMAIL — Reservation Approved
         try {
             if (reservation.user.email) {
-                const subject = 'EDU Hotel – Reservation approved';
+                const subject = "EDU Hotel – Reservation approved";
 
                 const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
 
-                const roomInfo =
-                    reservation.room
-                        ? `Room: ${reservation.room.name || reservation.room.id}`
-                        : 'Room will be assigned later.';
+                const roomInfo = reservation.room
+                    ? `Room: ${reservation.room.name || reservation.room.id}`
+                    : "Room will be assigned later.";
 
                 const text = `
-Dear ${reservation.user.name || 'Guest'},
+Dear ${reservation.firstName || reservation.user.name || "Guest"},
 
 Your reservation request has been APPROVED.
 
-Check-in:  ${checkInStr}
+Check-in:  ${checkInStr} ${reservation.checkInTime || ""}
 Check-out: ${checkOutStr}
 Guests:    ${reservation.guests}
 ${roomInfo}
 
 We look forward to welcoming you to EDU Hotel.
-
-------------------------------------------
-TÜRKÇE METİN
-------------------------------------------
-
-Sayın ${reservation.user.name || 'Misafir'},
-
-Rezervasyon talebiniz ONAYLANMIŞTIR.
-
-Giriş Tarihi: ${checkInStr}
-Çıkış Tarihi: ${checkOutStr}
-Kişi Sayısı:  ${reservation.guests}
-${roomInfo}
-
-EDU Hotel olarak sizi ağırlamaktan memnuniyet duyarız.
 `;
 
                 const html = `
-<p>Dear <strong>${reservation.user.name || 'Guest'}</strong>,</p>
+<p>Dear <strong>${reservation.firstName || reservation.user.name || "Guest"}</strong>,</p>
 <p>Your reservation request has been <strong style="color:green">APPROVED</strong>.</p>
 
 <p>
-<strong>Check-in:</strong> ${checkInStr}<br/>
+<strong>Check-in:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
 <strong>Check-out:</strong> ${checkOutStr}<br/>
 <strong>Guests:</strong> ${reservation.guests}<br/>
 ${roomInfo}
 </p>
 
 <p>We look forward to welcoming you.</p>
-
-<hr/>
-
-<p><strong>Sayın ${reservation.user.name || 'Misafir'},</strong></p>
-<p>Rezervasyon talebiniz <strong style="color:green">ONAYLANMIŞTIR</strong>.</p>
-
-<p>
-<strong>Giriş Tarihi:</strong> ${checkInStr}<br/>
-<strong>Çıkış Tarihi:</strong> ${checkOutStr}<br/>
-<strong>Kişi Sayısı:</strong> ${reservation.guests}<br/>
-${roomInfo}
-</p>
-
-<p>EDU Hotel olarak sizi ağırlamaktan memnuniyet duyarız.</p>
 `;
 
                 await sendMail({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
-            console.error('Failed to send approval email:', mailErr);
+            console.error("Failed to send approval email:", mailErr);
         }
 
         return res.json(reservation);
-
     } catch (err) {
-        console.error('Error approving reservation:', err);
-        return res.status(500).json({ error: 'Internal server error.' });
+        console.error("Error approving reservation:", err);
+        return res.status(500).json({ error: "Internal server error." });
     }
 });
 
 /**
  * PATCH /reservations/admin/:id/reject
  */
-router.patch('/admin/:id/reject', async (req, res) => {
+router.patch("/admin/:id/reject", async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const { note } = req.body;
 
         const reservation = await prisma.reservation.update({
             where: { id },
-            data: { status: 'REJECTED', note: note || null },
+            data: { status: "REJECTED", note: note || null },
             include: { user: true, room: true },
         });
 
-        // ✉️ EMAIL — Reservation Rejected (EN + TR)
+        // ✉️ EMAIL — Reservation Rejected
         try {
             if (reservation.user.email) {
-                const subject = 'EDU Hotel – Reservation request rejected';
+                const subject = "EDU Hotel – Reservation request rejected";
 
-                const reasonEN = note ? `Reason: ${note}` : 'Your reservation request could not be approved.';
-                const reasonTR = note ? `Sebep: ${note}` : 'Rezervasyon talebiniz onaylanamamıştır.';
+                const reasonEN = note
+                    ? `Reason: ${note}`
+                    : "Your reservation request could not be approved.";
 
                 const text = `
-Dear ${reservation.user.name || 'Guest'},
+Dear ${reservation.firstName || reservation.user.name || "Guest"},
 
 Unfortunately, your reservation request could not be approved.
 ${reasonEN}
 
 If you have any questions, please contact the hotel administration.
-
-------------------------------------------
-TÜRKÇE METİN
-------------------------------------------
-
-Sayın ${reservation.user.name || 'Misafir'},
-
-Ne yazık ki rezervasyon talebiniz onaylanmamıştır.
-${reasonTR}
-
-Herhangi bir sorunuz varsa lütfen otel yönetimi ile iletişime geçiniz.
 `;
 
                 const html = `
-<p>Dear <strong>${reservation.user.name || 'Guest'}</strong>,</p>
+<p>Dear <strong>${reservation.firstName || reservation.user.name || "Guest"}</strong>,</p>
 <p>Your reservation request has been <strong style="color:red">rejected</strong>.</p>
 <p>${reasonEN}</p>
-
-<hr/>
-
-<p><strong>Sayın ${reservation.user.name || 'Misafir'},</strong></p>
-<p>Rezervasyon talebiniz <strong style="color:red">reddedilmiştir</strong>.</p>
-<p>${reasonTR}</p>
 `;
 
                 await sendMail({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
-            console.error('Failed to send rejection email:', mailErr);
+            console.error("Failed to send rejection email:", mailErr);
         }
 
         return res.json(reservation);
-
     } catch (err) {
-        console.error('Error rejecting reservation:', err);
-        return res.status(500).json({ error: 'Internal server error.' });
+        console.error("Error rejecting reservation:", err);
+        return res.status(500).json({ error: "Internal server error." });
     }
 });
 

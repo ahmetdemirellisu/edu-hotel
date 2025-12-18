@@ -145,7 +145,45 @@
     },
 
     "guests": {
-        "searchPlaceholder": "Search guests by name, type or reservation ID..."
+        "searchPlaceholder": "Search guests by name, type or reservation ID...",
+        "filters": {
+            "type": "Guest type",
+            "blacklist": "Status",
+            "allTypes": "All types",
+            "allStatuses": "All statuses"
+        },
+        "types": {
+            "student": "Student",
+            "staff": "Staff",
+            "specialGuest": "Special guest",
+            "other": "Other"
+        },
+        "status": {
+            "active": "Active",
+            "blacklisted": "Blacklisted"
+        },
+        "columns": {
+            "reservations": "Reservations",
+            "lastStay": "Last stay",
+            "status": "Status"
+        },
+        "summary": {
+            "total": "Total guests: {{count}}",
+            "blacklisted": "Blacklisted: {{count}}"
+        },
+        "loading": "Loading guests...",
+        "empty": "No guests found for the selected filters.",
+        "details": {
+            "title": "Guest details",
+            "reservations": "Reservation history",
+            "noReservations": "This guest has no reservations."
+        },
+        "actions": {
+            "addToBlacklist": "Add to blacklist",
+            "removeFromBlacklist": "Remove from blacklist"
+        },
+        "blacklistReasonPrompt": "Please enter a reason for blacklisting:",
+        "confirmUnblacklist": "Remove this user from the blacklist?"
     },
     
     

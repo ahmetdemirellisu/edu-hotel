@@ -25,7 +25,14 @@ interface AdminReservation {
   };
 }
 
-export function DashboardPage() {
+// navigation targets the dashboard is allowed to request
+type DashboardNavTarget = "reservations" | "calendar" | "rooms" | "reports";
+
+interface DashboardPageProps {
+  onNavigate: (page: DashboardNavTarget) => void;
+}
+
+export function DashboardPage({ onNavigate }: DashboardPageProps) {
   // use the admin namespace
   const { t } = useTranslation("admin");
 
@@ -101,21 +108,25 @@ export function DashboardPage() {
       labelKey: "pages.dashboard.actions.createReservation",
       icon: Plus,
       color: "bg-[#0066cc]",
+      target: "reservations" as DashboardNavTarget,
     },
     {
       labelKey: "pages.dashboard.actions.viewCalendar",
       icon: Calendar,
       color: "bg-green-600",
+      target: "calendar" as DashboardNavTarget,
     },
     {
       labelKey: "pages.dashboard.actions.addRoom",
       icon: Bed,
       color: "bg-purple-600",
+      target: "rooms" as DashboardNavTarget,
     },
     {
       labelKey: "pages.dashboard.actions.reportCenter",
       icon: FileText,
       color: "bg-orange-600",
+      target: "reports" as DashboardNavTarget,
     },
   ];
 
@@ -210,6 +221,7 @@ export function DashboardPage() {
                 <button
                   key={idx}
                   className={`${action.color} text-white p-4 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-3`}
+                  onClick={() => onNavigate(action.target)}
                 >
                   <Icon className="h-5 w-5" />
                   <span className="text-sm">{t(action.labelKey)}</span>
@@ -229,7 +241,10 @@ export function DashboardPage() {
               <h3 className="text-gray-900">
                 {t("pages.dashboard.latestReservations")}
               </h3>
-              <button className="text-sm text-[#0066cc] hover:underline">
+              <button
+                className="text-sm text-[#0066cc] hover:underline"
+                onClick={() => onNavigate("reservations")}
+              >
                 {t("commonTable.viewAll")}
               </button>
             </div>

@@ -55,6 +55,11 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
+  // ✅ Add these
+  firstName String?
+  lastName  String?
+  phone     String?
+
   userType UserType @default(OTHER)
   role     UserRole @default(USER)
 
@@ -87,17 +92,44 @@ model Reservation {
   room   Room? @relation(fields: [roomId], references: [id])
   roomId Int?
 
+  // Dates
   checkIn  DateTime
   checkOut DateTime
-  guests   Int
+
+  // ✅ Add check-in time separately (since your UI collects it)
+  checkInTime String? // "HH:MM" (simple, safe)
+
+  guests Int
 
   status            ReservationStatus @default(PENDING)
   accommodationType AccommodationType
   eventCode         String?
   invoiceType       InvoiceType
-  note              String?           @db.Text
 
-  // 🆕 snapshot of guest type at time of booking
+  // ✅ New fields coming from the form (store them properly)
+  firstName    String?
+  lastName     String?
+  phone        String?
+  contactEmail String?
+
+  // Billing ID fields (one required depending on invoiceType)
+  nationalId String? // T.C. Kimlik No
+  taxNumber  String?
+
+  // Event pricing related fields
+  eventType String? // conference / seminar / etc
+  priceType String? // standard / corporate / discounted
+
+  // Free accommodation request
+  freeAccommodation Boolean @default(false)
+
+  // Additional guests
+  // ✅ Store as JSON array: [{firstName,lastName}, ...]
+  guestList Json?
+
+  note String? @db.Text
+
+  // snapshot of guest type at time of booking
   guestType UserType @default(OTHER)
 
   createdAt DateTime @default(now())

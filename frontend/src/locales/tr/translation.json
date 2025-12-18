@@ -4,9 +4,26 @@
     "language": "TR"
   },
 
+  "nav": {
+  "dashboard": "Ana Sayfa",
+  "notifications": "Bildirimler",
+  "profile": "Profilim",
+  "logout": "Çıkış"
+  },
+
   "breadcrumb": {
     "home": "Ana Sayfa"
   },
+
+  "common": {
+  "select": "Seç",
+  "success": "Başarılı",
+  "error": "Hata",
+  "dismiss": "Kapat",
+  "note": "Not",
+  "backToTop": "Yukarı çık"
+  },
+
 
   "bookingRequest": {
     "title": "EDU Otel için Rezervasyon Talebi",
@@ -18,6 +35,10 @@
     "step2Title": "Adım 2 – Oda türlerini inceleyin",
     "step2Description": "Burada EDU Otel’de bulunan örnek oda türlerini görebilirsiniz. Talebiniz onaylandıktan sonra nihai oda ataması otel yönetimi tarafından yapılacaktır.",
 
+    "pageTitle": "Oda Rezervasyonu",
+    "pageSubtitle": "Ön rezervasyon talebinizi gönderin. EDU ekibi inceleyip onaylayacaktır.",
+    "loggedInAs": "Giriş türü:",
+
     "form": {
       "checkIn": "Giriş Tarihi",
       "checkOut": "Çıkış Tarihi",
@@ -28,7 +49,20 @@
       "explanation": "Açıklama / Gerekçe",
       "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için, kalış amacınızı kısaca açıklayınız.",
       "submitButton": "Rezervasyon talebini gönder",
-      "submitting": "Gönderiliyor..."
+      "submitting": "Gönderiliyor...",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "phone": "Telefon Numarası",
+      "email": "E-posta Adresi",
+      "checkInTime": "Giriş Saati",
+      "eventType": "Etkinlik Türü",
+      "priceType": "Fiyat Türü",
+      "freeAccommodation": "Ücretsiz Konaklama (ödeme yok)",
+      "freeAccommodationHint": "✓ Onaylanırsa ödeme istenmez.",
+      "consent": "Verdiğim bilgilerin doğru olduğunu onaylıyorum ve rezervasyon kurallarını kabul ediyorum.",
+
+      "tcKimlik": "T.C. Kimlik No",
+      "taxNumber": "Vergi Numarası"
     },
 
     "messages": {
@@ -36,9 +70,60 @@
       "error": "Talep gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.",
       "datesRequired": "Lütfen giriş ve çıkış tarihlerini seçiniz.",
       "guestsRequired": "Lütfen kişi sayısını seçiniz."
-    }
+    },
+
+    "sections": {
+      "reservationInfo": "Rezervasyon Bilgileri",
+      "guestInfo": "Misafir Bilgileri",
+      "stayDetails": "Konaklama Detayları",
+      "roomAssignment": "Oda Ataması",
+      "eventBilling": "Etkinlik ve Faturalandırma",
+      "extraInfo": "Ek Bilgiler"
   },
 
+    "rules": {
+      "title": "Rezervasyon Kuralları",
+      "noSunday": "Pazar günü giriş yok",
+      "max5": "Kişisel rezervasyonlarda en fazla 5 gece",
+      "max5short": "En fazla 5 gün (kişisel)",
+      "max30": "Rezervasyon en fazla 30 gün ileri tarihli olabilir",
+      "max30short": "30 gün ileri tarih sınırı",
+      "noSatInSunOut": "Cumartesi giriş + Pazar çıkış yapılamaz",
+      "emailAuto": "E-posta bildirimleri otomatik gönderilir",
+      "manualApproval": "Tüm ön rezervasyonlar EDU ekibi tarafından manuel onay gerektirir.",
+      "confirmationTime": "İncelemeden sonra onay bilgisi alacaksınız."
+    },
+
+    "eventTypes": {
+    "conference": "Konferans",
+    "seminar": "Seminer",
+    "workshop": "Atölye",
+    "training": "Eğitim",
+    "meeting": "Toplantı",
+    "other": "Diğer"
+    },
+
+    "priceTypes": {
+      "standard": "Standart",
+      "corporate": "Kurumsal Tarife",
+      "discounted": "İndirimli"
+    },
+
+    "billing": {
+      "individual": "Bireysel",
+      "corporate": "Kurumsal"
+    },
+
+    "roomAssignmentInfo": "Oda ataması onaydan sonra EDU resepsiyonu tarafından yapılır. Kullanıcılar oda seçemez.",
+
+    "afterSubmitInfo": "Talebiniz gönderildikten sonra EDU ekibi inceleyecektir. İnceleme sonrası e-posta veya bildirim alacaksınız.",
+    "afterSubmitPaymentNote": "Ödeme (varsa) sadece onaydan sonra istenir.",
+
+    "sidebar": {
+      "goToForm": "Forma git"
+    }
+
+  },
 
   "login": {
     "loginWith": "Giriş yöntemi",

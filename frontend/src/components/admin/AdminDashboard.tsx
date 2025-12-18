@@ -331,7 +331,9 @@ export function AdminDashboard() {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {activePage === "dashboard" && <DashboardPage />}
+          {activePage === "dashboard" && (
+            <DashboardPage onNavigate={(page) => setActivePage(page as PageType)} />
+          )}
           {activePage === "reservations" && <ReservationsPage />}
           {activePage === "calendar" && <CalendarPage />}
           {activePage === "rooms" && <RoomsPage />}

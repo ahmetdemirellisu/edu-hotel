@@ -6,8 +6,8 @@ import { Signup } from "./components/Signup";
 import { MainPage } from "./components/MainPage";
 import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
+import { Dashboard } from "./components/Dashboard"; // ✅ add this
 
-// 🔒 Auth wrapper
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("authToken");
   if (!token) return <Navigate to="/" replace />;
@@ -18,16 +18,24 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* User pages */}
         <Route
           path="/main"
           element={
             <RequireAuth>
               <MainPage />
+            </RequireAuth>
+          }
+        />
+
+        {/* ✅ Now shows the actual Dashboard component */}
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <Dashboard />
             </RequireAuth>
           }
         />
@@ -41,7 +49,6 @@ export default function App() {
           }
         />
 
-        {/* ADMIN PAGE (NEW ✔✔✔) */}
         <Route
           path="/admin"
           element={
@@ -51,7 +58,6 @@ export default function App() {
           }
         />
 
-        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

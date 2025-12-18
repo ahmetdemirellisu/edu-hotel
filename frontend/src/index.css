@@ -95,6 +95,7 @@
     --color-green-500: oklch(.723 .219 149.579);
     --color-green-600: oklch(.627 .194 149.214);
     --color-green-700: oklch(.527 .154 150.069);
+    --color-green-800: oklch(.448 .119 151.328);
     --color-green-900: oklch(.393 .095 152.535);
     --color-blue-50: oklch(.97 .014 254.604);
     --color-blue-100: oklch(.932 .032 255.585);
@@ -588,6 +589,10 @@
 
   .mt-12 {
     margin-top: calc(var(--spacing) * 12);
+  }
+
+  .mr-1 {
+    margin-right: calc(var(--spacing) * 1);
   }
 
   .mr-2 {
@@ -1257,6 +1262,10 @@
     background-color: var(--secondary);
   }
 
+  .bg-transparent {
+    background-color: #0000;
+  }
+
   .bg-white {
     background-color: var(--color-white);
   }
@@ -1417,6 +1426,10 @@
 
   .pb-3 {
     padding-bottom: calc(var(--spacing) * 3);
+  }
+
+  .pb-4 {
+    padding-bottom: calc(var(--spacing) * 4);
   }
 
   .pb-6 {
@@ -1584,6 +1597,10 @@
 
   .text-green-700 {
     color: var(--color-green-700);
+  }
+
+  .text-green-800 {
+    color: var(--color-green-800);
   }
 
   .text-green-900 {
@@ -1928,12 +1945,6 @@
   }
 
   @media (hover: hover) {
-    .hover\:bg-red-50:hover {
-      background-color: var(--color-red-50);
-    }
-  }
-
-  @media (hover: hover) {
     .hover\:bg-red-700:hover {
       background-color: var(--color-red-700);
     }
@@ -1947,6 +1958,18 @@
     @supports (color: color-mix(in lab, red, red)) {
       .hover\:bg-secondary\/80:hover {
         background-color: color-mix(in oklab, var(--secondary) 80%, transparent);
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-white\/10:hover {
+      background-color: #ffffff1a;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-white\/10:hover {
+        background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
       }
     }
   }

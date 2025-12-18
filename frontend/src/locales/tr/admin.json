@@ -146,8 +146,47 @@
     },
 
     "guests": {
-        "searchPlaceholder": "Misafirleri isim, tür veya rezervasyon numarasına göre ara..."
+      "searchPlaceholder": "Misafirleri isim, tür veya rezervasyon numarasına göre ara...",
+      "filters": {
+        "type": "Misafir türü",
+        "blacklist": "Durum",
+        "allTypes": "Tüm türler",
+        "allStatuses": "Tüm durumlar"
+      },
+      "types": {
+        "student": "Öğrenci",
+        "staff": "Personel",
+        "specialGuest": "Özel misafir",
+        "other": "Diğer"
+      },
+      "status": {
+        "active": "Aktif",
+        "blacklisted": "Kara listede"
+      },
+      "columns": {
+        "reservations": "Rezervasyon sayısı",
+        "lastStay": "Son konaklama",
+        "status": "Durum"
+      },
+      "summary": {
+        "total": "Toplam misafir: {{count}}",
+        "blacklisted": "Kara listedekiler: {{count}}"
+      },
+      "loading": "Misafirler yükleniyor...",
+      "empty": "Seçili filtrelere göre misafir bulunamadı.",
+      "details": {
+        "title": "Misafir detayları",
+        "reservations": "Rezervasyon geçmişi",
+        "noReservations": "Bu misafirin rezervasyonu bulunmamaktadır."
+      },
+       "actions": {
+        "addToBlacklist": "Kara listeye ekle",
+        "removeFromBlacklist": "Kara listeden çıkar"
+      },
+      "blacklistReasonPrompt": "Lütfen kara listeye alma sebebini yazınız:",
+      "confirmUnblacklist": "Bu kullanıcıyı kara listeden çıkarmak istiyor musunuz?"
     },
+
     
 
     "blacklist": {

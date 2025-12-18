@@ -8,6 +8,22 @@
     "home": "Home"
   },
 
+  "nav": {
+  "dashboard": "Dashboard",
+  "notifications": "Notifications",
+  "profile": "My Profile",
+  "logout": "Logout"
+  },
+
+  "common": {
+  "select": "Select",
+  "success": "Success",
+  "error": "Error",
+  "dismiss": "Dismiss",
+  "note": "Note",
+  "backToTop": "Back to top"
+  },
+
   "login": {
     "loginWith": "Login with",
     "email": "Email",
@@ -162,36 +178,106 @@
     "rightsEduHotel": "© 2025 Edu Hotel Management System - Sabancı University. All rights reserved."
   },
 
-"bookingRequest": {
-  "title": "Reservation Request for EDU Hotel",
-  "subtitle": "Submit a pre-reservation request for EDU Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
+  "bookingRequest": {
+    "title": "Reservation Request for EDU Hotel",
+    "subtitle": "Submit a pre-reservation request for EDU Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
 
-  "step1Title": "Step 1 – Submit your reservation request",
-  "step1Description": "Please fill in your stay dates and basic information. This is a request form, not an instant booking.",
+    "step1Title": "Step 1 – Submit your reservation request",
+    "step1Description": "Please fill in your stay dates and basic information. This is a request form, not an instant booking.",
 
-  "step2Title": "Step 2 – Explore room types",
-  "step2Description": "These are example room types available at EDU Hotel. Final room assignment will be made by the hotel administration after your request is approved.",
+    "step2Title": "Step 2 – Explore room types",
+    "step2Description": "These are example room types available at EDU Hotel. Final room assignment will be made by the hotel administration after your request is approved.",
 
-  "form": {
-    "checkIn": "Check In",
-    "checkOut": "Check Out",
-    "guests": "Guests",
-    "accommodationType": "Accommodation Type",
-    "invoiceType": "Invoice Type",
-    "eventCode": "Event / Training Code",
-    "explanation": "Explanation / Reason",
-    "explanationPlaceholder": "Please briefly explain the purpose of your stay (especially for education-related reservations).",
-    "submitButton": "Submit reservation request",
-    "submitting": "Submitting..."
-  },
+    "pageTitle": "Book a Room",
+    "pageSubtitle": "Submit your pre-reservation request. The EDU team will review and confirm.",
+    "loggedInAs": "You are logged in as:",
 
-  "messages": {
-    "success": "Your reservation request has been submitted. You will be notified after it is reviewed by the administration.",
-    "error": "There was an error submitting your request. Please try again later.",
-    "datesRequired": "Please select check-in and check-out dates.",
-    "guestsRequired": "Please select number of guests."
+    "form": {
+      "checkIn": "Check In",
+      "checkOut": "Check Out",
+      "guests": "Guests",
+      "accommodationType": "Accommodation Type",
+      "invoiceType": "Invoice Type",
+      "eventCode": "Event / Training Code",
+      "explanation": "Explanation / Reason",
+      "explanationPlaceholder": "Please briefly explain the purpose of your stay (especially for education-related reservations).",
+      "submitButton": "Submit reservation request",
+      "submitting": "Submitting...",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "checkInTime": "Check-in Time",
+      "eventType": "Event Type",
+      "priceType": "Price Type",
+      "freeAccommodation": "Free Accommodation (No payment required)",
+      "freeAccommodationHint": "✓ If approved, payment will not be requested for this reservation.",
+      "consent": "I confirm that the information provided is correct and I accept the reservation rules.",
+
+      "tcKimlik": "T.C. Kimlik No",
+      "taxNumber": "Tax Number"
+      
+    },
+
+    "messages": {
+      "success": "Your reservation request has been submitted. You will be notified after it is reviewed by the administration.",
+      "error": "There was an error submitting your request. Please try again later.",
+      "datesRequired": "Please select check-in and check-out dates.",
+      "guestsRequired": "Please select number of guests."
+    },
+
+    "eventTypes": {
+      "conference": "Conference",
+      "seminar": "Seminar",
+      "workshop": "Workshop",
+      "training": "Training",
+      "meeting": "Meeting",
+      "other": "Other"
+    },
+
+    "priceTypes": {
+      "standard": "Standard",
+      "corporate": "Corporate Rate",
+      "discounted": "Discounted"
+    },
+
+    "billing": {
+      "individual": "Individual",
+      "corporate": "Corporate"
+    },
+
+    "roomAssignmentInfo": "Rooms are assigned by the EDU reception after approval. Users cannot select rooms.",
+
+    "afterSubmitInfo": "After submission, your request will be reviewed by the EDU team. You will receive an email or push notification after review.",
+    "afterSubmitPaymentNote": "Payment will be requested only after approval if applicable.",
+
+    "sidebar": {
+      "goToForm": "Go to form"
+    },
+
+    "sections": {
+      "reservationInfo": "Reservation Information",
+      "guestInfo": "Guest Information",
+      "stayDetails": "Stay Details",
+      "roomAssignment": "Room Assignment",
+      "eventBilling": "Event & Billing",
+      "extraInfo": "Extra Information"
+    },
+
+    "rules": {
+      "title": "Reservation Rules",
+      "noSunday": "No Sunday check-in",
+      "max5": "Max 5 nights for personal bookings",
+      "max5short": "Max 5-day consecutive stay (personal)",
+      "max30": "Reservations allowed up to 30 days ahead",
+      "max30short": "30-day advance reservation limit",
+      "noSatInSunOut": "No Saturday check-in + Sunday check-out",
+      "emailAuto": "Email notifications sent automatically",
+      "manualApproval": "All pre-reservations require manual approval by the EDU team.",
+      "confirmationTime": "You will receive confirmation after review."
+    }
+
   }
-}
 
 }
 

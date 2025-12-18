@@ -10,6 +10,8 @@ var cors = require('cors');           // ⬅️ add this
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
+var roomsRouter = require("./routes/rooms");
+var adminRouter = require('./routes/admin');
 
 var app = express();
 
@@ -25,11 +27,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/reservations', reservationsRouter);
 app.use("/blacklist", require("./routes/blacklist"));
 app.use("/users", require("./routes/users"));
+app.use("/rooms", roomsRouter);
+app.use("/admin", adminRouter);
 
 
 

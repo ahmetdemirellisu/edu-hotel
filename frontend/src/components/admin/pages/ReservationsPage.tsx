@@ -1,5 +1,5 @@
 // src/components/admin/pages/ReservationsPage.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "../../ui/card";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
@@ -11,6 +11,7 @@ import {
   XCircle,
   Eye,
   Edit,
+  X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -34,6 +35,27 @@ type AdminReservation = Reservation & {
   } | null;
 };
 
+function formatId(id: number) {
+  return `RES-${id.toString().padStart(3, "0")}`;
+}
+
+function formatDateOnly(iso: string) {
+  // iso may be "2025-07-15" or full date-time string
+  return iso?.slice(0, 10) || "—";
+}
+
+function safe(v?: string | null) {
+  const s = typeof v === "string" ? v.trim() : "";
+  return s.length ? s : "—";
+}
+
+function joinName(first?: string | null, last?: string | null) {
+  const f = (first || "").trim();
+  const l = (last || "").trim();
+  const full = `${f} ${l}`.trim();
+  return full.length ? full : "—";
+}
+
 export function ReservationsPage() {
   const { t } = useTranslation("admin");
 
@@ -45,6 +67,9 @@ export function ReservationsPage() {
   const [loading, setLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // View modal
+  const [selected, setSelected] = useState<AdminReservation | null>(null);
 
   // 🔄 Load all reservations once
   useEffect(() => {
@@ -62,10 +87,6 @@ export function ReservationsPage() {
     };
     load();
   }, []);
-
-  const formatId = (id: number) => `RES-${id.toString().padStart(3, "0")}`;
-
-  const formatDate = (iso: string) => iso.slice(0, 10);
 
   const mapStatusBadge = (status: ReservationStatus) => {
     switch (status) {
@@ -91,10 +112,7 @@ export function ReservationsPage() {
         };
       case "REFUND_REQUESTED":
         return {
-          label: t(
-            "reservations.statusLabels.refundRequested",
-            "Refund requested"
-          ),
+          label: t("reservations.statusLabels.refundRequested", "Refund requested"),
           className: "bg-orange-100 text-orange-700",
         };
       case "REFUNDED":
@@ -110,7 +128,7 @@ export function ReservationsPage() {
     }
   };
 
-  const mapGuestType = (accommodationType: string) => {
+  const mapAccommodationType = (accommodationType: string) => {
     switch (accommodationType) {
       case "PERSONAL":
         return t("reservations.guestTypes.personal", "Personal");
@@ -123,35 +141,47 @@ export function ReservationsPage() {
     }
   };
 
-  const filteredReservations = reservations.filter((res) => {
-    // Status filter (pending/approved/etc.)
-    if (statusFilter === "pending" && res.status !== "PENDING") return false;
-    if (statusFilter === "approved" && res.status !== "APPROVED") return false;
-    if (statusFilter === "rejected" && res.status !== "REJECTED") return false;
-    if (statusFilter === "canceled" && res.status !== "CANCELLED") return false;
+  const filteredReservations = useMemo(() => {
+    return reservations.filter((res) => {
+      // Status filter
+      if (statusFilter === "pending" && res.status !== "PENDING") return false;
+      if (statusFilter === "approved" && res.status !== "APPROVED") return false;
+      if (statusFilter === "rejected" && res.status !== "REJECTED") return false;
+      if (statusFilter === "canceled" && res.status !== "CANCELLED") return false;
 
-    // Simple search on guest name / email / event code
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      const guestName = (res.user?.name || "").toLowerCase();
-      const email = (res.user?.email || "").toLowerCase();
-      const code = (res.eventCode || "").toLowerCase();
-      if (
-        !guestName.includes(term) &&
-        !email.includes(term) &&
-        !code.includes(term)
-      ) {
-        return false;
+      // Search
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+
+        const submittedName = joinName((res as any).firstName, (res as any).lastName).toLowerCase();
+        const submittedEmail = String((res as any).contactEmail || "").toLowerCase();
+        const submittedPhone = String((res as any).phone || "").toLowerCase();
+
+        const accountName = String(res.user?.name || "").toLowerCase();
+        const accountEmail = String(res.user?.email || "").toLowerCase();
+
+        const code = String(res.eventCode || "").toLowerCase();
+        const eventType = String((res as any).eventType || "").toLowerCase();
+
+        if (
+          !submittedName.includes(term) &&
+          !submittedEmail.includes(term) &&
+          !submittedPhone.includes(term) &&
+          !accountName.includes(term) &&
+          !accountEmail.includes(term) &&
+          !code.includes(term) &&
+          !eventType.includes(term)
+        ) {
+          return false;
+        }
       }
-    }
 
-    return true;
-  });
+      return true;
+    });
+  }, [reservations, statusFilter, searchTerm]);
 
   const totalCount = reservations.length;
-  const pendingCount = reservations.filter(
-    (r) => r.status === "PENDING"
-  ).length;
+  const pendingCount = reservations.filter((r) => r.status === "PENDING").length;
 
   const handleApprove = async (id: number) => {
     try {
@@ -159,7 +189,7 @@ export function ReservationsPage() {
       setError(null);
       const updated = await approveReservation(id);
       setReservations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, ...updated } : r))
+        prev.map((r) => (r.id === id ? ({ ...r, ...updated } as AdminReservation) : r))
       );
     } catch (err: any) {
       setError(err.message || "Failed to approve reservation.");
@@ -182,7 +212,7 @@ export function ReservationsPage() {
       setError(null);
       const updated = await rejectReservation(id, reason);
       setReservations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, ...updated } : r))
+        prev.map((r) => (r.id === id ? ({ ...r, ...updated } as AdminReservation) : r))
       );
     } catch (err: any) {
       setError(err.message || "Failed to reject reservation.");
@@ -214,7 +244,7 @@ export function ReservationsPage() {
               </div>
             </div>
 
-            {/* Status filter (now real) */}
+            {/* Status filter */}
             <div>
               <label className="text-sm text-gray-600 mb-2 block">
                 {t("reservations.status")}
@@ -223,35 +253,20 @@ export function ReservationsPage() {
                 value={statusFilter}
                 onChange={(e) =>
                   setStatusFilter(
-                    e.target.value as
-                      | "all"
-                      | "pending"
-                      | "approved"
-                      | "rejected"
-                      | "canceled"
+                    e.target.value as "all" | "pending" | "approved" | "rejected" | "canceled"
                   )
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066cc]"
               >
-                <option value="all">
-                  {t("reservations.filters.allStatus")}
-                </option>
-                <option value="pending">
-                  {t("reservations.filters.pending")}
-                </option>
-                <option value="approved">
-                  {t("reservations.filters.approved")}
-                </option>
-                <option value="rejected">
-                  {t("reservations.filters.rejected")}
-                </option>
-                <option value="canceled">
-                  {t("reservations.filters.canceled")}
-                </option>
+                <option value="all">{t("reservations.filters.allStatus")}</option>
+                <option value="pending">{t("reservations.filters.pending")}</option>
+                <option value="approved">{t("reservations.filters.approved")}</option>
+                <option value="rejected">{t("reservations.filters.rejected")}</option>
+                <option value="canceled">{t("reservations.filters.canceled")}</option>
               </select>
             </div>
 
-            {/* Guest type filter — mapped to accommodationType */}
+            {/* Guest type filter placeholder */}
             <div>
               <label className="text-sm text-gray-600 mb-2 block">
                 {t("reservations.guestType")}
@@ -268,7 +283,7 @@ export function ReservationsPage() {
               </select>
             </div>
 
-            {/* Date filter placeholder (UI only for now) */}
+            {/* Date filter placeholder */}
             <div>
               <label className="text-sm text-gray-600 mb-2 block">
                 {t("reservations.dateRange")}
@@ -287,13 +302,9 @@ export function ReservationsPage() {
             </div>
           </div>
 
-          {/* Small summary row */}
+          {/* Summary */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-            <span>
-              {t("reservations.summary.total", {
-                count: totalCount,
-              })}
-            </span>
+            <span>{t("reservations.summary.total", { count: totalCount })}</span>
             <span className="text-yellow-700">
               {t("reservations.summary.pending", { count: pendingCount })}
             </span>
@@ -307,15 +318,14 @@ export function ReservationsPage() {
         </CardContent>
       </Card>
 
-      {/* Reservations Table */}
+      {/* Table */}
       <Card className="border-gray-200 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-gray-900">
-              {t("reservations.allReservations", {
-                count: filteredReservations.length,
-              })}
+              {t("reservations.allReservations", { count: filteredReservations.length })}
             </h3>
+
             <Button
               className="bg-green-600 hover:bg-green-700 text-white"
               disabled
@@ -335,10 +345,7 @@ export function ReservationsPage() {
             </p>
           ) : filteredReservations.length === 0 ? (
             <p className="text-sm text-gray-600">
-              {t(
-                "reservations.empty",
-                "No reservations found for the selected filters."
-              )}
+              {t("reservations.empty", "No reservations found for the selected filters.")}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -352,6 +359,12 @@ export function ReservationsPage() {
                       {t("tables.guestName")}
                     </th>
                     <th className="text-left py-3 px-2 text-sm text-gray-600">
+                      {t("tables.email", "Email")}
+                    </th>
+                    <th className="text-left py-3 px-2 text-sm text-gray-600">
+                      {t("tables.phone", "Phone")}
+                    </th>
+                    <th className="text-left py-3 px-2 text-sm text-gray-600">
                       {t("tables.guestType")}
                     </th>
                     <th className="text-left py-3 px-2 text-sm text-gray-600">
@@ -361,13 +374,7 @@ export function ReservationsPage() {
                       {t("tables.checkOut")}
                     </th>
                     <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.room")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
                       {t("tables.status")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.payment")}
                     </th>
                     <th className="text-left py-3 px-2 text-sm text-gray-600">
                       {t("tables.actions")}
@@ -377,47 +384,43 @@ export function ReservationsPage() {
                 <tbody>
                   {filteredReservations.map((res) => {
                     const badge = mapStatusBadge(res.status);
-                    const guestName =
-                      res.user?.name || res.user?.email || "—";
-                    const guestType = mapGuestType(res.accommodationType);
-                    const roomName = res.room?.name || "Unassigned";
+
+                    const submittedName = joinName((res as any).firstName, (res as any).lastName);
+                    const submittedEmail = safe((res as any).contactEmail || res.user?.email);
+                    const submittedPhone = safe((res as any).phone);
+
+                    const guestType = mapAccommodationType(res.accommodationType);
+
+                    const checkInDisplay = `${formatDateOnly(res.checkIn)}${(res as any).checkInTime ? ` • ${(res as any).checkInTime}` : ""}`;
 
                     return (
-                      <tr
-                        key={res.id}
-                        className="border-b border-gray-100 hover:bg-gray-50"
-                      >
+                      <tr key={res.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-2 text-sm text-gray-900">{formatId(res.id)}</td>
+
                         <td className="py-3 px-2 text-sm text-gray-900">
-                          {formatId(res.id)}
+                          <div className="flex flex-col">
+                            <span className="font-medium">{submittedName}</span>
+                            <span className="text-xs text-gray-500">
+                              {t("tables.guestsCount", "Guests")}: {res.guests}
+                              {(res as any).freeAccommodation ? " • Free" : ""}
+                            </span>
+                          </div>
                         </td>
-                        <td className="py-3 px-2 text-sm text-gray-900">
-                          {guestName}
-                        </td>
-                        <td className="py-3 px-2 text-sm text-gray-600">
-                          {guestType}
-                        </td>
-                        <td className="py-3 px-2 text-sm text-gray-600">
-                          {formatDate(res.checkIn)}
-                        </td>
-                        <td className="py-3 px-2 text-sm text-gray-600">
-                          {formatDate(res.checkOut)}
-                        </td>
-                        <td className="py-3 px-2 text-sm text-gray-900">
-                          {roomName}
-                        </td>
+
+                        <td className="py-3 px-2 text-sm text-gray-700">{submittedEmail}</td>
+                        <td className="py-3 px-2 text-sm text-gray-700">{submittedPhone}</td>
+
+                        <td className="py-3 px-2 text-sm text-gray-600">{guestType}</td>
+
+                        <td className="py-3 px-2 text-sm text-gray-600">{checkInDisplay}</td>
+                        <td className="py-3 px-2 text-sm text-gray-600">{formatDateOnly(res.checkOut)}</td>
+
                         <td className="py-3 px-2">
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${badge.className}`}
-                          >
+                          <span className={`text-xs px-2 py-1 rounded-full ${badge.className}`}>
                             {badge.label}
                           </span>
                         </td>
-                        <td className="py-3 px-2">
-                          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                            {/* Payment tracking not implemented yet */}
-                            {t("tables.paymentNotTracked", "N/A")}
-                          </span>
-                        </td>
+
                         <td className="py-3 px-2">
                           <div className="flex items-center gap-2">
                             {res.status === "PENDING" && (
@@ -426,44 +429,37 @@ export function ReservationsPage() {
                                   className="text-green-600 hover:text-green-700 disabled:opacity-50"
                                   title={t("reservations.approve")}
                                   onClick={() => handleApprove(res.id)}
-                                  disabled={
-                                    actionLoadingId === res.id || loading
-                                  }
+                                  disabled={actionLoadingId === res.id || loading}
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                 </button>
+
                                 <button
                                   className="text-red-600 hover:text-red-700 disabled:opacity-50"
                                   title={t("reservations.reject")}
                                   onClick={() => handleReject(res.id)}
-                                  disabled={
-                                    actionLoadingId === res.id || loading
-                                  }
+                                  disabled={actionLoadingId === res.id || loading}
                                 >
                                   <XCircle className="h-4 w-4" />
                                 </button>
                               </>
                             )}
+
                             <button
                               className="text-[#0066cc] hover:text-[#0052a3]"
-                              title={t("commonTable.view")}
+                              title={t("commonTable.view", "View")}
+                              onClick={() => setSelected(res)}
                             >
                               <Eye className="h-4 w-4" />
                             </button>
+
                             <button
                               className="text-gray-600 hover:text-gray-700"
-                              title={t("common.edit")}
+                              title={t("common.edit", "Edit")}
+                              disabled
                             >
                               <Edit className="h-4 w-4" />
                             </button>
-                            {!res.roomId && res.status === "APPROVED" && (
-                              <Button
-                                className="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white"
-                                disabled
-                              >
-                                {t("reservations.assignRoom")}
-                              </Button>
-                            )}
                           </div>
                         </td>
                       </tr>
@@ -475,6 +471,171 @@ export function ReservationsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* View modal */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="w-full max-w-3xl bg-white rounded-xl shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-500">
+                  {t("tables.reservationId")} • {formatId(selected.id)}
+                </span>
+                <span className="text-lg font-semibold text-gray-900">
+                  {joinName((selected as any).firstName, (selected as any).lastName)}
+                </span>
+              </div>
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100"
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("tables.email", "Email")}</div>
+                <div className="text-sm text-gray-900">{safe((selected as any).contactEmail)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("tables.phone", "Phone")}</div>
+                <div className="text-sm text-gray-900">{safe((selected as any).phone)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("tables.checkIn")}</div>
+                <div className="text-sm text-gray-900">
+                  {formatDateOnly(selected.checkIn)}{" "}
+                  <span className="text-gray-500">•</span>{" "}
+                  {safe((selected as any).checkInTime)}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("tables.checkOut")}</div>
+                <div className="text-sm text-gray-900">{formatDateOnly(selected.checkOut)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("tables.guestType")}</div>
+                <div className="text-sm text-gray-900">{mapAccommodationType(selected.accommodationType)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("tables.guestsCount", "Guests")}</div>
+                <div className="text-sm text-gray-900">{selected.guests}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.eventType", "Event Type")}</div>
+                <div className="text-sm text-gray-900">{safe((selected as any).eventType)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.eventCode", "Event / Education Code")}</div>
+                <div className="text-sm text-gray-900">{safe(selected.eventCode)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.invoiceType", "Invoice Type")}</div>
+                <div className="text-sm text-gray-900">{safe(selected.invoiceType)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.priceType", "Price Type")}</div>
+                <div className="text-sm text-gray-900">{safe((selected as any).priceType)}</div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.freeAccommodation", "Free Accommodation")}</div>
+                <div className="text-sm text-gray-900">
+                  {(selected as any).freeAccommodation ? "YES" : "NO"}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">
+                  {selected.invoiceType === "INDIVIDUAL" ? "National ID" : "Tax Number"}
+                </div>
+                <div className="text-sm text-gray-900">
+                  {selected.invoiceType === "INDIVIDUAL"
+                    ? safe((selected as any).nationalId)
+                    : safe((selected as any).taxNumber)}
+                </div>
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.additionalGuests", "Additional Guests")}</div>
+                <div className="text-sm text-gray-900">
+                  {Array.isArray((selected as any).guestList) && (selected as any).guestList.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-1">
+                      {(selected as any).guestList.map((g: any, idx: number) => (
+                        <li key={idx}>
+                          {safe(g?.firstName)} {safe(g?.lastName)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-gray-500">—</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <div className="text-xs text-gray-500">{t("reservations.form.note", "Note")}</div>
+                <div className="text-sm text-gray-900 whitespace-pre-wrap">
+                  {safe((selected as any).note)}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t flex items-center justify-end gap-2">
+              {selected.status === "PENDING" && (
+                <>
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => {
+                      const id = selected.id;
+                      setSelected(null);
+                      handleApprove(id);
+                    }}
+                    disabled={actionLoadingId === selected.id || loading}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    {t("reservations.approve", "Approve")}
+                  </Button>
+
+                  <Button
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => {
+                      const id = selected.id;
+                      setSelected(null);
+                      handleReject(id);
+                    }}
+                    disabled={actionLoadingId === selected.id || loading}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {t("reservations.reject", "Reject")}
+                  </Button>
+                </>
+              )}
+
+              <Button variant="outline" onClick={() => setSelected(null)}>
+                {t("common.close", "Close")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
