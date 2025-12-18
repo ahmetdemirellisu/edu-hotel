@@ -121,16 +121,6 @@ export function Login() {
         </div>
       </header>
 
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Home className="h-4 w-4" />
-            <span>{t("breadcrumb.home")}</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Background Image */}

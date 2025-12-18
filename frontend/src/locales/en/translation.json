@@ -9,7 +9,7 @@
   },
 
   "nav": {
-  "dashboard": "Dashboard",
+  "dashboard": "Main Page",
   "notifications": "Notifications",
   "profile": "My Profile",
   "logout": "Logout"
@@ -277,6 +277,54 @@
       "confirmationTime": "You will receive confirmation after review."
     }
 
+  },
+
+  "account": {
+    "title": "My Account",
+    "subtitle": "Manage your account settings and personal information",
+    "profile": {
+      "title": "Profile Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "tcNo": "T.C. Kimlik No",
+      "tcNote": "This field cannot be modified for security reasons.",
+      "saveBtn": "Save Changes"
+    },
+    "password": {
+      "title": "Change Password",
+      "current": "Current Password",
+      "new": "New Password",
+      "mustContain": "Password must contain:",
+      "req1": "At least 8 characters",
+      "req2": "One uppercase & one lowercase letter",
+      "req3": "At least one number & one special character",
+      "updateBtn": "Update Password"
+    },
+    "status": {
+      "title": "Account Status",
+      "type": "Account Type",
+      "student": "Student",
+      "label": "Status",
+      "active": "Active",
+      "reservations": "Reservations",
+      "total": "Total"
+    },
+    "prefs": {
+      "title": "Preferences",
+      "lang": "Language",
+      "emailNotifs": "Email Notifications",
+      "notifAll": "All Notifications",
+      "notifImportant": "Important Only",
+      "notifNone": "None",
+      "saveBtn": "Save Preferences"
+    },
+    "session": {
+      "title": "Session Management",
+      "subtitle": "Sign out to protect your account data.",
+      "logoutBtn": "Logout"
+    }
   }
 
 }

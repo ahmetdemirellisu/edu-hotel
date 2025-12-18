@@ -173,56 +173,75 @@
     }
   },
 
-  "dashboard": {
-    "nav": {
-      "bookRoom": "Oda Rezervasyonu",
-      "myBookings": "Rezervasyonlarım",
-      "services": "Hizmetler",
-      "contact": "İletişim"
+"dashboard": {
+    "subtitle": "Rezervasyon taleplerinizi, onaylarınızı, ödemelerinizi ve bildirimlerinizi tek bir yerden takip edin.",
+    "stats": {
+      "totalReservations": "Toplam Rezervasyon",
+      "totalReservationsSub": "Tüm zamanlar",
+      "upcoming": "Yaklaşan Konaklamalar",
+      "upcomingSub": "Sıradaki giriş yakında",
+      "pending": "Bekleyen Onaylar",
+      "pendingSub": "İnceleme aşamasında",
+      "completed": "Tamamlanan Konaklamalar",
+      "completedSub": "Bu yıl"
     },
-    "search": {
-      "title": "Size Uygun Odayı Bulun",
-      "checkIn": "Giriş Tarihi",
-      "checkOut": "Çıkış Tarihi",
-      "guests": "Kişi Sayısı",
-      "guests1": "1 Kişi",
-      "guests2": "2 Kişi",
-      "guests3": "3 Kişi",
-      "guests4": "4+ Kişi",
-      "button": "Odaları Ara"
+    "activeReservation": {
+      "title": "Güncel Rezervasyon Durumu",
+      "reservationId": "Rezervasyon No",
+      "dates": "Tarihler",
+      "amount": "Tutar",
+      "viewRequests": "Taleplerimi Görüntüle",
+      "createNew": "Yeni Rezervasyon Oluştur",
+      "paymentDisabledTip": "Ödeme sayfası, akış bağlandığında aktif hale gelecektir.",
+      "proceedPayment": "Ödemeye Geç"
     },
-    "roomsSection": {
-      "title": "Müsait Odalar",
-      "subtitle": "Konforlu ve donanımlı odalarımızdan birini seçin",
-      "booked": "Dolu",
-      "capacity_one": "En fazla {{count}} Kişi",
-      "capacity_other": "En fazla {{count}} Kişi",
-      "perNight": "/ gece",
-      "bookNow": "Hemen Rezervasyon Yap",
-      "unavailable": "Müsait Değil"
+    "status": {
+      "approved": "Onaylandı",
+      "paymentPending": "Ödeme Bekleniyor",
+      "paymentReceived": "Ödeme Alındı",
+      "refundRequested": "İade Talep Edildi",
+      "refunded": "İade Edildi",
+      "cancelled": "İptal Edildi",
+      "pending": "Ön Kayıt / Beklemede"
     },
-    "rooms": {
-      "single": "Tek Kişilik Oda",
-      "singleDesc": "Tek başına seyahat eden misafirler için konforlu oda",
-      "double": "Çift Kişilik Oda",
-      "doubleDesc": "İki kişilik, modern ve geniş oda"
+    "quick": {
+      "viewReservations": "Rezervasyon Taleplerim",
+      "notifications": "Bildirimler",
+      "contactSupport": "Destekle İletişime Geç",
+      "soon": "Yakında"
     },
-    "amenities": {
-      "wifi": "WiFi",
-      "tv": "TV",
-      "ac": "Klima",
-      "coffee": "Kahve"
+    "rules": {
+      "title": "Rezervasyon Kuralları (Önemli)",
+      "r1": "Pazar günleri giriş yapılamaz.",
+      "r2": "En fazla 30 gün sonrası için rezervasyon talebi oluşturabilirsiniz.",
+      "r3": "Bireysel konaklamalar (yetki verilmedikçe) 5 ardışık günü geçemez.",
+      "r4": "Cumartesi giriş - Pazar çıkış kombinasyonları sistem tarafından kısıtlanabilir.",
+      "r5": "Oda seçimi kullanıcılara açık değildir; odalar otel/yönetim tarafından atanır."
     },
-    "info": {
-      "flexibleTitle": "Esnek Rezervasyon",
-      "flexibleText": "Girişten 24 saat öncesine kadar ücretsiz iptal",
-      "amenitiesTitle": "Ücretsiz İmkanlar",
-      "amenitiesText": "Tüm misafirlerimiz için ücretsiz WiFi, kahvaltı ve otopark",
-      "supportTitle": "7/24 Destek",
-      "supportText": "Ekibimiz size her zaman yardımcı olmaya hazır"
+    "notifications": {
+      "title": "Bildirimler",
+      "approvedTitle": "Rezervasyon Onaylandı",
+      "approvedMsg": "Rezervasyonunuz onaylandı. Gerekliyse lütfen ödeme adımına geçiniz.",
+      "pendingTitle": "İnceleme Bekleniyor",
+      "pendingMsg": "Rezervasyon talebiniz yönetici onayı bekliyor.",
+      "reminderTitle": "Giriş Hatırlatması",
+      "reminderMsg": "Giriş işlemleri, giriş tarihinizde saat 14:00 için planlanmıştır.",
+      "time1": "2 saat önce",
+      "time2": "1 gün önce",
+      "time3": "3 gün önce"
+    },
+    "announcements": {
+      "a1Title": "Tatil Sezonu Özel Fiyatları",
+      "a1Msg": "Tatil sezonundaki rezervasyonlarınız için özel indirimlerin tadını çıkarın.",
+      "a2Title": "Yeni Yemek Servisi Başladı",
+      "a2Msg": "Odaya yemek servisi her gün 07:00 - 22:00 saatleri arasında mevcuttur."
+    },
+    "help": {
+      "title": "Yardıma mı ihtiyacınız var?",
+      "msg": "Onaylar, ödeme makbuzları veya iptallerle ilgili sorun yaşıyorsanız destek ekibiyle iletişime geçin.",
+      "cta": "Destekle İletişime Geç"
     }
   },
-
   "main": {
     "welcomeBack": "Tekrar hoş geldiniz!",
     "quickActions": "Hızlı İşlemler",
@@ -277,5 +296,53 @@
     "supportEmail": "Destek: support@sabanciuniv.edu",
     "rights": "© 2025 Sabancı Üniversitesi. Tüm hakları saklıdır.",
     "rightsEduHotel": "© 2025 Edu Hotel Yönetim Sistemi - Sabancı Üniversitesi. Tüm hakları saklıdır."
+  },
+  
+  "account": {
+    "title": "Hesabım",
+    "subtitle": "Hesap ayarlarınızı ve kişisel bilgilerinizi yönetin",
+    "profile": {
+      "title": "Profil Bilgileri",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-posta Adresi",
+      "phone": "Telefon Numarası",
+      "tcNo": "T.C. Kimlik No",
+      "tcNote": "Bu alan güvenlik nedeniyle değiştirilemez.",
+      "saveBtn": "Değişiklikleri Kaydet"
+    },
+    "password": {
+      "title": "Şifre Değiştir",
+      "current": "Mevcut Şifre",
+      "new": "Yeni Şifre",
+      "mustContain": "Şifre şunları içermelidir:",
+      "req1": "En az 8 karakter",
+      "req2": "Bir büyük ve bir küçük harf",
+      "req3": "En az bir rakam ve bir özel karakter",
+      "updateBtn": "Şifreyi Güncelle"
+    },
+    "status": {
+      "title": "Hesap Durumu",
+      "type": "Hesap Türü",
+      "student": "Öğrenci",
+      "label": "Durum",
+      "active": "Aktif",
+      "reservations": "Rezervasyon",
+      "total": "Toplam"
+    },
+    "prefs": {
+      "title": "Tercihler",
+      "lang": "Dil",
+      "emailNotifs": "E-posta Bildirimleri",
+      "notifAll": "Tüm Bildirimler",
+      "notifImportant": "Sadece Önemli",
+      "notifNone": "Hiçbiri",
+      "saveBtn": "Tercihleri Kaydet"
+    },
+    "session": {
+      "title": "Oturum Yönetimi",
+      "subtitle": "Hesap verilerinizi korumak için oturumu kapatın.",
+      "logoutBtn": "Çıkış Yap"
+    }
   }
 }

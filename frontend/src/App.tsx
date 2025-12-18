@@ -5,7 +5,9 @@ import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
 import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
-import { Dashboard } from "./components/Dashboard"; // ✅ add this
+import { Dashboard } from "./components/Dashboard"; 
+// 1. Import the new page
+import { MyAccount } from "./components/MyAccount"; 
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("authToken");
@@ -29,7 +31,6 @@ export default function App() {
           }
         />
 
-        {/* ✅ Now shows the actual Dashboard component */}
         <Route
           path="/dashboard"
           element={
@@ -44,6 +45,16 @@ export default function App() {
           element={
             <RequireAuth>
               <BookRoomPage />
+            </RequireAuth>
+          }
+        />
+
+        {/* 2. Add the Profile Route */}
+        <Route
+          path="/profile"
+          element={
+            <RequireAuth>
+              <MyAccount />
             </RequireAuth>
           }
         />
