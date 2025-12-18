@@ -58,3 +58,4 @@ docker-compose.override.yml
 .temp/
 *.sqlite
 *.db
+backend/prisma.config.bak.ts
