@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
-import { MainPage } from "./components/MainPage";
 import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { Dashboard } from "./components/Dashboard"; // ✅ add this
@@ -25,7 +24,7 @@ export default function App() {
           path="/main"
           element={
             <RequireAuth>
-              <MainPage />
+              <Dashboard />
             </RequireAuth>
           }
         />
