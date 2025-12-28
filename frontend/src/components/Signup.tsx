@@ -7,13 +7,21 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
-
+import { Footer } from "./layout/Footer";
+import {
+  Select as UISelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"; // Adjust path if necessary
 const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
 
 export function Signup() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-
+  const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
+  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
   const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
   const [fullName, setFullName] = useState("");
   const [contact, setContact] = useState(""); // email or phone, backend uses it as email
@@ -120,54 +128,44 @@ export function Signup() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Header */}
-      <header className="bg-[#003366] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Sabancı Logo */}
+      <header className="bg-[#003366] text-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 relative">
+          <div className="flex justify-between items-center">
+            {/* Left logo */}
             <div className="flex items-center">
               <div className="border-2 border-white px-3 py-1">
-                <div className="text-sm">Sabancı</div>
-                <div className="text-sm">Üniversitesi</div>
+                <div className="text-xs font-medium">Sabancı</div>
+                <div className="text-xs font-medium">Üniversitesi</div>
               </div>
             </div>
 
-            {/* Center Title */}
+            {/* Center title */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
-              <h1 className="text-white tracking-widest">E D U   H O T E L</h1>
+              <h1 className="text-2xl tracking-wider whitespace-nowrap font-bold">
+                E D U &nbsp;&nbsp; H O T E L
+              </h1>
             </div>
 
-            {/* Header Right Items */}
-            <div className="flex items-center gap-6 text-sm">
-              <a href="#" className="hover:text-gray-300 transition-colors">
+            {/* Right side */}
+            <div className="flex items-center gap-6">
+              <a href="#" className="text-sm hover:text-gray-300 transition-colors hidden md:inline">
                 {t("header.mySU")}
               </a>
+
               <button className="hover:text-gray-300 transition-colors">
-                <Search className="h-4 w-4" />
+                <Search className="h-5 w-5" />
               </button>
 
-              {/* 🌐 Language Switcher */}
-              <div className="flex items-center gap-2 ml-2">
-                <button
-                  onClick={() => i18n.changeLanguage("en")}
-                  className={`px-2 py-1 rounded ${
-                    i18n.language === "en"
-                      ? "bg-white text-[#003366]"
-                      : "hover:text-gray-300"
-                  }`}
-                >
-                  EN
-                </button>
-                <button
-                  onClick={() => i18n.changeLanguage("tr")}
-                  className={`px-2 py-1 rounded ${
-                    i18n.language === "tr"
-                      ? "bg-white text-[#003366]"
-                      : "hover:text-gray-300"
-                  }`}
-                >
-                  TR
-                </button>
-              </div>
+              {/* 🌐 Stylish Language Switcher */}
+              <UISelect value={currentLang} onValueChange={switchLanguage}>
+                <SelectTrigger className="w-16 h-8 bg-transparent border-white text-white hover:bg-white/10 font-medium focus:ring-0">
+                  <SelectValue placeholder={currentLang} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EN">EN</SelectItem>
+                  <SelectItem value="TR">TR</SelectItem>
+                </SelectContent>
+              </UISelect>
             </div>
           </div>
         </div>
@@ -299,56 +297,7 @@ export function Signup() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#003366] text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            {/* ... same footer as before ... */}
-            <div>
-              <div className="border-2 border-white px-3 py-1 inline-block mb-4">
-                <div className="text-sm">Sabancı</div>
-                <div className="text-sm">Üniversitesi</div>
-              </div>
-              <p className="text-sm text-gray-300 mt-4">
-                {t("footer.address.line1")}
-                <br />
-                {t("footer.address.line2")}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="mb-4 text-sm">{t("footer.quickLinks")}</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>{t("footer.about")}</li>
-                <li>{t("footer.academic")}</li>
-                <li>{t("footer.research")}</li>
-                <li>{t("footer.campusLife")}</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-4 text-sm">{t("footer.resources")}</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>{t("footer.library")}</li>
-                <li>{t("footer.sucourse")}</li>
-                <li>{t("footer.email")}</li>
-                <li>{t("footer.support")}</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-4 text-sm">{t("footer.contactTitle")}</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>{t("footer.phone")}</li>
-                <li>{t("footer.emailAddress")}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-blue-800 pt-8 text-center text-sm text-gray-300">
-            <p>{t("footer.rights")}</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
