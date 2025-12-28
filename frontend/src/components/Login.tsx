@@ -50,6 +50,7 @@ export function Login() {
       localStorage.setItem("authToken", data.token);
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("userId", String(data.user.id));
         localStorage.setItem("userEmail", data.user.email ?? "");
         localStorage.setItem("userName", data.user.name ?? "");
       }

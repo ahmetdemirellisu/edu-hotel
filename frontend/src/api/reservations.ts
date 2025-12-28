@@ -195,3 +195,19 @@ export async function rejectReservation(
 
   return res.json();
 }
+// Fetch latest reservation for dashboard
+export async function getMyLatestReservation(userId: number) {
+  const res = await fetch(
+    `http://localhost:3000/reservations/my/latest?userId=${userId}`
+  );
+
+  if (res.status === 404) {
+    return null;
+  }
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch latest reservation");
+  }
+
+  return res.json();
+}

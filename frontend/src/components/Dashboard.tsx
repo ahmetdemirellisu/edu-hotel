@@ -1,6 +1,11 @@
 import { Navbar } from "./layout/Navbar";
 import { Footer } from "./layout/Footer";
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { getMyLatestReservation, type Reservation } from "../api/reservations";
+import { useNavigate } from "react-router-dom";
+
+
 
 // (Optional) If you already use lucide-react in your project, keep these.
 // If not, you can remove icons and the UI still works.
@@ -17,21 +22,46 @@ import {
 
 export function Dashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  // NOTE:
-  // These are placeholder values until you connect real APIs.
-  // Structure is designed to match the scope/requirements:
-  // - statuses (pre/confirmed/payment/refund)
-  // - notifications list
-  // - announcements list
-  const activeReservation = {
-    id: "RES-2025-001",
-    status: "PENDING", // PENDING | APPROVED | PAYMENT_PENDING | PAYMENT_RECEIVED | CANCELLED | REFUND_REQUESTED | REFUNDED
-    checkIn: "2025-12-20",
-    checkOut: "2025-12-23",
-    amount: "₺ 2,400",
+  const userId = Number(localStorage.getItem("userId"));
+  const [activeReservation, setActiveReservation] =
+    useState<Reservation | null>(null);
+  const [loadingReservation, setLoadingReservation] = useState(true);
+
+  useEffect(() => {
+    async function loadReservation() {
+      if (!userId || isNaN(userId)) {
+        setActiveReservation(null);
+        setLoadingReservation(false);
+        return;
+      }
+
+
+      try {
+        const res = await getMyLatestReservation(userId);
+        setActiveReservation(res);
+      } catch (err) {
+        console.error("Failed to load latest reservation", err);
+      } finally {
+        setLoadingReservation(false);
+      }
+    }
+
+    loadReservation();
+  }, [userId]);
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-GB");
+
+  const calculateAmount = (checkIn: string, checkOut: string) => {
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+
+    const diffMs = end.getTime() - start.getTime();
+    const nights = diffMs / (1000 * 60 * 60 * 24);
+
+    return nights * 1200;
   };
-
   const quickStats = [
     {
       title: t("dashboard.stats.totalReservations", { defaultValue: "Total Reservations" }),
@@ -228,7 +258,7 @@ export function Dashboard() {
                 <h2 className="text-xl text-[#003366]">
                   {t("dashboard.activeReservation.title", { defaultValue: "Current Reservation Status" })}
                 </h2>
-                {statusBadge(activeReservation.status)}
+                {activeReservation && statusBadge(activeReservation.status)}
               </div>
 
               <div className="p-6">
@@ -237,21 +267,29 @@ export function Dashboard() {
                     <p className="text-xs text-gray-500 mb-1">
                       {t("dashboard.activeReservation.reservationId", { defaultValue: "Reservation ID" })}
                     </p>
-                    <p className="text-sm text-gray-900 font-medium">{activeReservation.id}</p>
+                    <p className="text-sm text-gray-900 font-medium">{activeReservation?.id}</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 mb-1">
                       {t("dashboard.activeReservation.dates", { defaultValue: "Dates" })}
                     </p>
                     <p className="text-sm text-gray-900 font-medium">
-                      {activeReservation.checkIn} → {activeReservation.checkOut}
+                      {activeReservation &&
+                        `${formatDate(activeReservation.checkIn)} → ${formatDate(activeReservation.checkOut)}`}
                     </p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 mb-1">
                       {t("dashboard.activeReservation.amount", { defaultValue: "Amount" })}
                     </p>
-                    <p className="text-sm text-gray-900 font-medium">{activeReservation.amount}</p>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {activeReservation
+                        ? `₺ ${calculateAmount(
+                            activeReservation.checkIn,
+                            activeReservation.checkOut
+                          ).toLocaleString()}`
+                        : "—"}
+                    </p>
                   </div>
                 </div>
 
@@ -275,14 +313,27 @@ export function Dashboard() {
                   {/* If you have a /payment route later, wire it here.
                       Keeping it disabled to avoid breaking navigation. */}
                   <button
-                    className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 bg-gray-100 text-gray-400 cursor-not-allowed"
-                    disabled
-                    title={t("dashboard.activeReservation.paymentDisabledTip", {
-                      defaultValue: "Payment page will be enabled when your flow is connected.",
-                    })}
+                    disabled={activeReservation?.status !== "APPROVED"}
+                    onClick={() => navigate("/payment")}
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-medium transition
+                      ${
+                        activeReservation?.status === "APPROVED"
+                          ? "bg-[#003366] text-white hover:opacity-95 cursor-pointer"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    title={
+                      activeReservation?.status !== "APPROVED"
+                        ? t("dashboard.activeReservation.paymentDisabledTip", {
+                            defaultValue: "Payment is available only after approval.",
+                          })
+                        : undefined
+                    }
                   >
-                    {t("dashboard.activeReservation.proceedPayment", { defaultValue: "Proceed to Payment" })}
+                    {t("dashboard.activeReservation.proceedPayment", {
+                      defaultValue: "Proceed to Payment",
+                    })}
                   </button>
+
                 </div>
               </div>
             </div>

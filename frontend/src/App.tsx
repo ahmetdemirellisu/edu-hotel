@@ -6,6 +6,8 @@ import { Signup } from "./components/Signup";
 import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { Dashboard } from "./components/Dashboard"; 
+import { Payment } from "./components/Payment";
+
 // 1. Import the new page
 import { MyAccount } from "./components/MyAccount"; 
 
@@ -30,6 +32,7 @@ export default function App() {
             </RequireAuth>
           }
         />
+        <Route path="/payment" element={<Payment />} />
 
         <Route
           path="/dashboard"

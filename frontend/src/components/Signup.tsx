@@ -43,6 +43,12 @@ export function Signup() {
 
     try {
       // 1) REGISTER
+      localStorage.removeItem("userId");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userName");
+
       const registerRes = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -82,6 +88,7 @@ export function Signup() {
 
           if (loginData.user) {
             localStorage.setItem("user", JSON.stringify(loginData.user));
+            localStorage.setItem("userId", loginData.user.id.toString());
             localStorage.setItem("userEmail", loginData.user.email ?? "");
             localStorage.setItem("userName", loginData.user.name ?? "");
           }

@@ -300,6 +300,36 @@ EDU Hotel Team
 /**
  * GET /reservations/user/:userId
  */
+router.get("/my/latest", async (req, res) => {
+    try {
+        const userId = parseInt(req.query.userId, 10);
+
+        if (!userId || isNaN(userId)) {
+            return res.status(400).json({
+                error: "userId query parameter is required.",
+            });
+        }
+
+        const reservation = await prisma.reservation.findFirst({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            include: { room: true },
+        });
+
+        if (!reservation) {
+            return res.status(404).json({
+                error: "No reservations found.",
+            });
+        }
+
+        return res.json(reservation);
+    } catch (err) {
+        console.error("Error fetching latest reservation:", err);
+        return res.status(500).json({
+            error: "Internal server error.",
+        });
+    }
+});
 router.get("/user/:userId", async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
