@@ -151,11 +151,6 @@ export function Signup() {
               <a href="#" className="text-sm hover:text-gray-300 transition-colors hidden md:inline">
                 {t("header.mySU")}
               </a>
-
-              <button className="hover:text-gray-300 transition-colors">
-                <Search className="h-5 w-5" />
-              </button>
-
               {/* 🌐 Stylish Language Switcher */}
               <UISelect value={currentLang} onValueChange={switchLanguage}>
                 <SelectTrigger className="w-16 h-8 bg-transparent border-white text-white hover:bg-white/10 font-medium focus:ring-0">

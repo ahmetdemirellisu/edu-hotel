@@ -189,7 +189,7 @@ export function Dashboard() {
         return (
           <span className={`${base} bg-blue-100 text-blue-800`}>
             <Clock className="h-4 w-4" />
-            {t("dashboard.status.pending", { defaultValue: "Pre-Registration / Pending" })}
+            {t("dashboard.status.pending", { defaultValue: "Pending" })}
           </span>
         );
     }
