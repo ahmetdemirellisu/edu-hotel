@@ -325,7 +325,46 @@
       "subtitle": "Sign out to protect your account data.",
       "logoutBtn": "Logout"
     }
-  }
-
+  },
+  "payment": {
+    "title": "Payment & Confirmation",
+    "subtitle": "Complete your payment via bank transfer and upload your receipt for verification.",
+    "summary": "Reservation Summary",
+    "awaiting": "Awaiting Payment",
+    "resId": "Reservation ID",
+    "checkIn": "Check-in Date",
+    "checkOut": "Check-out Date",
+    "nights": "Number of Nights",
+    "night_one": "night",
+    "night_other": "nights",
+    "pricePerNight": "Price per night",
+    "total": "Total Amount",
+    "currency": "Currency: Turkish Lira (TRY)",
+    "importantInfo": "Important Information",
+    "importantNote": "Your reservation has been approved. Please complete the payment via bank transfer and upload your receipt to finalize your booking.",
+    "bankInfo": "Bank Transfer Information",
+    "bankName": "Bank Name",
+    "accountHolder": "Account Holder",
+    "iban": "IBAN",
+    "amountToTransfer": "Amount to Transfer",
+    "paymentRef": "Important: Please use your Reservation ID #{{id}} as the payment reference/description.",
+    "uploadTitle": "Upload Payment Receipt",
+    "uploadLabel": "Upload Payment Receipt (Dekont)",
+    "dragDrop": "Drag and drop your receipt here, or",
+    "browse": "Browse Files",
+    "acceptedFormats": "Accepted formats: PDF, JPG, PNG (Max 5MB)",
+    "adminReview": "After uploading your receipt, the administration will review and confirm your payment. You will receive an email notification once verified.",
+    "submitBtn": "Submit Receipt for Review",
+    "submitting": "Submitting Receipt...",
+    
+  "errors": {
+    "noFile": "Please upload a payment receipt.",
+    "invalidFormat": "Invalid file format. Please upload PDF, JPG, or PNG.",
+    "tooLarge": "File size exceeds 5MB.",
+    "uploadFailed": "Failed to upload receipt. Please try again.",
+    "noReservation": "No active reservation found."
+  },
+  "success": "Payment receipt submitted successfully!"
+}
 }
 

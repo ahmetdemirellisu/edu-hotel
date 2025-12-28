@@ -344,5 +344,44 @@
       "subtitle": "Hesap verilerinizi korumak için oturumu kapatın.",
       "logoutBtn": "Çıkış Yap"
     }
+  },
+  "payment": {
+    "title": "Ödeme ve Onay",
+    "subtitle": "Ödemenizi banka havalesi ile tamamlayın ve doğrulama için makbuzunuzu yükleyin.",
+    "summary": "Rezervasyon Özeti",
+    "awaiting": "Ödeme Bekleniyor",
+    "resId": "Rezervasyon No",
+    "checkIn": "Giriş Tarihi",
+    "checkOut": "Çıkış Tarihi",
+    "nights": "Gece Sayısı",
+    "night_one": "gece",
+    "night_other": "gece",
+    "pricePerNight": "Gecelik fiyat",
+    "total": "Toplam Tutar",
+    "currency": "Para Birimi: Türk Lirası (TRY)",
+    "importantInfo": "Önemli Bilgi",
+    "importantNote": "Rezervasyonunuz onaylandı. Lütfen ödemeyi banka havalesi ile tamamlayın ve işleminizi kesinleştirmek için dekontu yükleyin.",
+    "bankInfo": "Banka Hesap Bilgileri",
+    "bankName": "Banka Adı",
+    "accountHolder": "Hesap Sahibi",
+    "iban": "IBAN",
+    "amountToTransfer": "Transfer Edilecek Tutar",
+    "paymentRef": "Önemli: Lütfen transfer yaparken açıklama kısmına #{{id}} nolu Rezervasyon numaranızı yazınız.",
+    "uploadTitle": "Ödeme Dekontu Yükle",
+    "uploadLabel": "Ödeme Dekontu Yükle (Dekont)",
+    "dragDrop": "Dekontu buraya sürükleyin veya",
+    "browse": "Dosyalara Göz At",
+    "acceptedFormats": "Geçerli formatlar: PDF, JPG, PNG (Maks 5MB)",
+    "adminReview": "Dekontunuzu yükledikten sonra idare ödemenizi inceleyip onaylayacaktır. Onaylandığında e-posta bildirimi alacaksınız.",
+    "submitBtn": "Dekontu İncelemeye Gönder",
+    "submitting": "Dekont Gönderiliyor...",
+  "errors": {
+      "noFile": "Lütfen ödeme dekontunu yükleyin.",
+      "invalidFormat": "Geçersiz dosya formatı. Lütfen PDF, JPG veya PNG yükleyin.",
+      "tooLarge": "Dosya boyutu 5MB'ı aşıyor.",
+      "uploadFailed": "Dekont yüklenemedi. Lütfen tekrar deneyin.",
+      "noReservation": "Aktif rezervasyon bulunamadı."
+    },
+  "success": "Ödeme dekontu başarıyla gönderildi!"
   }
 }
