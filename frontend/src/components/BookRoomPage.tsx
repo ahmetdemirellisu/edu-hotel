@@ -919,17 +919,6 @@ export function BookRoomPage() {
                         : t("bookingRequest.form.submitButton", "Submit Pre-Reservation")}
                     </Button>
                   </div>
-
-                  {/* Small helper button */}
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="text-xs text-[#003366] underline"
-                      onClick={scrollToTopOfForm}
-                    >
-                      {t("common.backToTop", "Back to top")}
-                    </button>
-                  </div>
                 </form>
               </CardContent>
             </Card>
@@ -945,8 +934,8 @@ export function BookRoomPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
                     <div className="bg-red-100 rounded-full p-2 flex-shrink-0">
                       <XCircle className="h-4 w-4 text-red-600" />
                     </div>
@@ -955,7 +944,7 @@ export function BookRoomPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="bg-orange-100 rounded-full p-2 flex-shrink-0">
                       <Clock className="h-4 w-4 text-orange-600" />
                     </div>
@@ -964,7 +953,7 @@ export function BookRoomPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="bg-blue-100 rounded-full p-2 flex-shrink-0">
                       <CalendarIcon className="h-4 w-4 text-blue-600" />
                     </div>
@@ -973,7 +962,7 @@ export function BookRoomPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="bg-green-100 rounded-full p-2 flex-shrink-0">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                     </div>
