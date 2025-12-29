@@ -544,11 +544,9 @@ export function BookRoomPage() {
                           id="first-name"
                           placeholder={t("bookingRequest.form.firstNamePlaceholder", "Enter first name")}
                           className="border-gray-300"
-                          value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
                         />
                       </div>
-
                       <div className="space-y-2">
                         <Label htmlFor="last-name" className="text-gray-700">
                           {t("bookingRequest.form.lastName", "Last Name")}{" "}

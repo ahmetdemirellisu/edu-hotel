@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { useTranslation } from "react-i18next";
-import { Clock, Eye, Download, CheckCircle, XCircle, User } from "lucide-react";
+import { Clock, Eye, Download, CheckCircle, XCircle, User, Space } from "lucide-react";
 
 export function PaymentsPage() {
   const { t } = useTranslation("admin");
@@ -94,8 +94,8 @@ export function PaymentsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left">
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">Res. ID</th>
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">User ID</th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold"> Reservation ID </th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold"> User ID </th> 
                   <th className="py-3 px-2 text-sm text-gray-600 font-semibold">{t("tables.name")}</th>
                   <th className="py-3 px-2 text-sm text-gray-600 font-semibold">{t("tables.email")}</th>
                   <th className="py-3 px-2 text-sm text-gray-600 font-semibold">{t("tables.file", "File")}</th>
@@ -113,8 +113,8 @@ export function PaymentsPage() {
                       <td className="py-4 px-2 text-sm font-mono text-gray-600">
                         #{payment.id}
                       </td>
-                      <td className="py-4 px-2 text-sm text-gray-500">
-                        UID-{payment.user?.id || "—"}
+                      <td className="py-4 px-3 text-sm text-gray-500">
+                        {payment.user?.id || "—"}
                       </td>
                       <td className="py-4 px-2">
                         <div className="flex flex-col">
