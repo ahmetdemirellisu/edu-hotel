@@ -7,6 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Existing Booking Statuses
 enum ReservationStatus {
   PENDING
   APPROVED
@@ -14,6 +15,14 @@ enum ReservationStatus {
   CANCELLED
   REFUND_REQUESTED
   REFUNDED
+}
+
+// 🆕 NEW: Specific statuses for the Receipt Verification process
+enum PaymentStatus {
+  NONE                 // No file uploaded yet
+  PENDING_VERIFICATION // File uploaded, waiting for Admin to check
+  APPROVED             // Admin verified the PDF
+  REJECTED             // Admin found an issue with the PDF
 }
 
 enum RoomStatus {
@@ -33,15 +42,13 @@ enum InvoiceType {
   CORPORATE
 }
 
-// 🆕 WHO is the guest?
 enum UserType {
-  STUDENT // Sabancı student (lisans / yüksek lisans)
-  STAFF // Administrative / academic staff
-  SPECIAL_GUEST // Özel misafir
+  STUDENT
+  STAFF
+  SPECIAL_GUEST
   OTHER
 }
 
-// (Optional but nice for later menu/role checks)
 enum UserRole {
   USER
   ADMIN
@@ -55,7 +62,6 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
-  // ✅ Add these
   firstName String?
   lastName  String?
   phone     String?
@@ -68,16 +74,16 @@ model User {
 }
 
 model Room {
-  id          Int        @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   name        String
-  type        String // e.g. "Single", "Double"
-  price       Int // per night
+  type        String
+  price       Int
   capacity    Int
   description String
   image       String?
-  amenities   String // e.g. "Wifi,TV,AC,Coffee"
-  status      RoomStatus @default(AVAILABLE)
-  createdAt   DateTime   @default(now())
+  amenities   String
+  status      RoomStatus     @default(AVAILABLE)
+  createdAt   DateTime       @default(now())
 
   reservations Reservation[]
 }
@@ -85,52 +91,43 @@ model Room {
 model Reservation {
   id Int @id @default(autoincrement())
 
-  // relations
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
   room   Room? @relation(fields: [roomId], references: [id])
   roomId Int?
 
-  // Dates
-  checkIn  DateTime
-  checkOut DateTime
-
-  // ✅ Add check-in time separately (since your UI collects it)
-  checkInTime String? // "HH:MM" (simple, safe)
+  checkIn     DateTime
+  checkOut    DateTime
+  checkInTime String? 
 
   guests Int
 
+  // Overall booking status
   status            ReservationStatus @default(PENDING)
+  
+  // 🆕 The new field to track the PDF receipt specifically
+  paymentStatus     PaymentStatus     @default(NONE)
+
   accommodationType AccommodationType
   eventCode         String?
   invoiceType       InvoiceType
 
-  // ✅ New fields coming from the form (store them properly)
   firstName    String?
   lastName     String?
   phone        String?
   contactEmail String?
 
-  // Billing ID fields (one required depending on invoiceType)
-  nationalId String? // T.C. Kimlik No
+  nationalId String?
   taxNumber  String?
 
-  // Event pricing related fields
-  eventType String? // conference / seminar / etc
-  priceType String? // standard / corporate / discounted
+  eventType String?
+  priceType String?
 
-  // Free accommodation request
   freeAccommodation Boolean @default(false)
-
-  // Additional guests
-  // ✅ Store as JSON array: [{firstName,lastName}, ...]
-  guestList Json?
-
-  note String? @db.Text
-
-  // snapshot of guest type at time of booking
-  guestType UserType @default(OTHER)
+  guestList         Json?
+  note              String? @db.Text
+  guestType         UserType @default(OTHER)
 
   createdAt DateTime @default(now())
 }

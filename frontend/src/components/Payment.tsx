@@ -90,18 +90,20 @@ export function Payment() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploadedFile || !reservation) {
-      setUploadError(t("payment.errors.noFile"));
-      return;
-    }
+    if (!uploadedFile || !reservation) return;
 
     setIsSubmitting(true);
     const formData = new FormData();
-    formData.append("receipt", uploadedFile);
-    formData.append("reservationId", reservation.id.toString());
+    
+    // Use "dekont" to match the 'payment.js' upload.single('dekont')
+    formData.append("dekont", uploadedFile);
 
     try {
-      const response = await fetch("http://localhost:5000/api/payments/upload", {
+      /**
+       * FIX: Use Port 3000 (from your error log) 
+       * and "/payment" (from your app.use in app.js)
+       */
+      const response = await fetch(`http://localhost:3000/payment/upload-dekont/${reservation.id}`, {
         method: "POST",
         body: formData,
       });
@@ -110,10 +112,11 @@ export function Payment() {
         alert(t("payment.success"));
         navigate("/dashboard");
       } else {
-        throw new Error("Upload failed");
+        const errData = await response.json();
+        setUploadError(errData.error || "Upload failed");
       }
     } catch (err) {
-      setUploadError(t("payment.errors.uploadFailed"));
+      setUploadError("Could not connect to server. Check if backend is running on port 3000.");
     } finally {
       setIsSubmitting(false);
     }
