@@ -94,39 +94,59 @@ router.get("/pending-payments", async (req, res) => {
     }
 });
 
-// --- Approve Payment & Move File ---
+// --- Approve Payment & Move File (PDF / PNG / JPG / JPEG) ---
 router.post('/approve-payment/:id', async (req, res) => {
-    const { id } = req.params;
-    
-    const pendingDir = path.resolve(__dirname, '../../paymentRecieptsPending');
-    const approvedDir = path.resolve(__dirname, '../../paymentRecieptsAprooved');
-    const fileName = `${id}_payment.pdf`;
+  const { id } = req.params;
 
-    const oldPath = path.join(pendingDir, fileName);
-    const newPath = path.join(approvedDir, fileName);
+  const pendingDir = path.resolve(__dirname, '../../paymentRecieptsPending');
+  const approvedDir = path.resolve(__dirname, '../../paymentRecieptsAprooved');
 
-    try {
-        if (!fs.existsSync(approvedDir)) {
-            fs.mkdirSync(approvedDir, { recursive: true });
-        }
+  const candidates = [
+    `${id}_payment.pdf`,
+    `${id}_payment.png`,
+    `${id}_payment.jpg`,
+    `${id}_payment.jpeg`,
+  ];
 
-        if (fs.existsSync(oldPath)) {
-            fs.renameSync(oldPath, newPath);
-        }
-
-        await prisma.reservation.update({
-            where: { id: Number(id) },
-            data: { 
-                paymentStatus: 'APPROVED',
-                status: 'APPROVED' 
-            }
-        });
-
-        res.json({ message: "Payment verified successfully!" });
-    } catch (err) {
-        console.error("Approval error:", err);
-        res.status(500).json({ error: "Server error during approval." });
+  try {
+    if (!fs.existsSync(approvedDir)) {
+      fs.mkdirSync(approvedDir, { recursive: true });
     }
+
+    let movedFilename = null;
+
+    for (const fileName of candidates) {
+      const oldPath = path.join(pendingDir, fileName);
+      if (fs.existsSync(oldPath)) {
+        const newPath = path.join(approvedDir, fileName);
+        fs.renameSync(oldPath, newPath);
+        movedFilename = fileName;
+        break;
+      }
+    }
+
+    if (!movedFilename) {
+      return res.status(404).json({
+        error: "Receipt file not found in pending folder.",
+      });
+    }
+
+    await prisma.reservation.update({
+      where: { id: Number(id) },
+      data: {
+        paymentStatus: 'APPROVED',
+        status: 'APPROVED',
+      },
+    });
+
+    res.json({
+      message: "Payment verified successfully!",
+      filename: movedFilename,
+    });
+  } catch (err) {
+    console.error("Approval error:", err);
+    res.status(500).json({ error: "Server error during approval." });
+  }
 });
 
 // --- Reject Payment ---

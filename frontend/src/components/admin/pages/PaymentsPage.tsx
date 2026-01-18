@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { useTranslation } from "react-i18next";
-import { Clock, Eye, Download, CheckCircle, XCircle, User, Space } from "lucide-react";
+import {
+  Clock,
+  Eye,
+  Download,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 export function PaymentsPage() {
   const { t } = useTranslation("admin");
@@ -30,37 +36,75 @@ export function PaymentsPage() {
   const handleApprove = async (id: number) => {
     if (!window.confirm(t("payments.confirmApprove", "Confirm approval?"))) return;
     try {
-      const res = await fetch(`http://localhost:3000/admin/approve-payment/${id}`, { method: "POST" });
-      if (res.ok) setPayments(prev => prev.filter((p) => p.id !== id));
-    } catch (error) { console.error("Approval error:", error); }
+      const res = await fetch(`http://localhost:3000/admin/approve-payment/${id}`, {
+        method: "POST",
+      });
+      if (res.ok) setPayments((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      console.error("Approval error:", error);
+    }
   };
 
   const handleReject = async (id: number) => {
     if (!window.confirm(t("payments.confirmReject", "Reject this payment?"))) return;
     try {
-      const res = await fetch(`http://localhost:3000/admin/reject-payment/${id}`, { 
+      const res = await fetch(`http://localhost:3000/admin/reject-payment/${id}`, {
         method: "POST",
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
-        setPayments(prev => prev.filter((p) => p.id !== id));
+        setPayments((prev) => prev.filter((p) => p.id !== id));
       } else {
         alert("Failed to update status in database.");
       }
-    } catch (error) { 
-      console.error("Rejection error:", error); 
+    } catch (error) {
+      console.error("Rejection error:", error);
     }
   };
 
-  const handleDownload = (id: number) => {
-    const url = `http://localhost:3000/view-pending/${id}_payment.pdf`;
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `Receipt_${id}.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  // ---- NEW: Try pdf/png/jpg/jpeg and open/download the first one that exists ----
+  const receiptCandidates = (id: number) => [
+    `${id}_payment.pdf`,
+    `${id}_payment.png`,
+    `${id}_payment.jpg`,
+    `${id}_payment.jpeg`,
+  ];
+
+  const openFirstExistingReceipt = async (id: number) => {
+    const base = "http://localhost:3000/view-pending";
+    for (const name of receiptCandidates(id)) {
+      const url = `${base}/${name}`;
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        if (res.ok) {
+          window.open(url, "_blank", "noopener,noreferrer");
+          return;
+        }
+      } catch (_) {}
+    }
+    alert("Receipt file not found (pdf/png/jpg).");
   };
+
+  const downloadFirstExistingReceipt = async (id: number) => {
+    const base = "http://localhost:3000/view-pending";
+    for (const name of receiptCandidates(id)) {
+      const url = `${base}/${name}`;
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        if (res.ok) {
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          return;
+        }
+      } catch (_) {}
+    }
+    alert("Receipt file not found (pdf/png/jpg).");
+  };
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="space-y-6">
@@ -94,71 +138,107 @@ export function PaymentsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 text-left">
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold"> Reservation ID </th>
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold"> User ID </th> 
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">{t("tables.name")}</th>
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">{t("tables.email")}</th>
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">{t("tables.file", "File")}</th>
-                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold text-right">{t("tables.actions")}</th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">
+                    Reservation ID
+                  </th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">
+                    User ID
+                  </th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">
+                    {t("tables.name")}
+                  </th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">
+                    {t("tables.email")}
+                  </th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold">
+                    {t("tables.file", "File")}
+                  </th>
+                  <th className="py-3 px-2 text-sm text-gray-600 font-semibold text-right">
+                    {t("tables.actions")}
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={6} className="text-center py-10 text-sm text-gray-500">{t("common.loading", "Loading...")}</td></tr>
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-sm text-gray-500">
+                      {t("common.loading", "Loading...")}
+                    </td>
+                  </tr>
                 ) : payments.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-10 text-sm text-gray-500">{t("payments.empty", "No pending receipts.")}</td></tr>
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-sm text-gray-500">
+                      {t("payments.empty", "No pending receipts.")}
+                    </td>
+                  </tr>
                 ) : (
                   payments.map((payment) => (
-                    <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={payment.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
                       <td className="py-4 px-2 text-sm font-mono text-gray-600">
                         #{payment.id}
                       </td>
+
                       <td className="py-4 px-3 text-sm text-gray-500">
                         {payment.user?.id || "—"}
                       </td>
+
                       <td className="py-4 px-2">
                         <div className="flex flex-col">
                           <span className="text-sm font-semibold text-gray-900">
-                            {/* FIXED: Changed username to name to match GuestsPage logic */}
-                            {payment.user?.name || `${payment.user?.firstName} ${payment.user?.lastName}` || t("tables.unknownGuest")}
+                            {payment.user?.name ||
+                              `${payment.user?.firstName ?? ""} ${payment.user?.lastName ?? ""}`.trim() ||
+                              t("tables.unknownGuest")}
                           </span>
                         </div>
                       </td>
+
                       <td className="py-4 px-2 text-sm text-gray-600">
                         {payment.user?.email || "—"}
                       </td>
+
                       <td className="py-4 px-2">
                         <div className="flex flex-col gap-1">
-                          <a 
-                            href={`http://localhost:3000/view-pending/${payment.id}_payment.pdf`} 
-                            target="_blank" 
-                            rel="noreferrer"
+                          <button
+                            onClick={() => openFirstExistingReceipt(payment.id)}
                             className="text-[#0066cc] hover:underline flex items-center gap-1 text-xs font-medium"
+                            type="button"
                           >
-                            <Eye className="h-3 w-3" /> {t("commonTable.preview", "Preview")}
-                          </a>
-                          <button 
-                            onClick={() => handleDownload(payment.id)} 
+                            <Eye className="h-3 w-3" />{" "}
+                            {t("commonTable.preview", "Preview")}
+                          </button>
+
+                          <button
+                            onClick={() => downloadFirstExistingReceipt(payment.id)}
                             className="text-gray-500 hover:text-gray-700 flex items-center gap-1 text-xs"
+                            type="button"
                           >
-                            <Download className="h-3 w-3" /> {t("common.download", "Download")}
+                            <Download className="h-3 w-3" />{" "}
+                            {t("common.download", "Download")}
                           </button>
                         </div>
                       </td>
+
                       <td className="py-4 px-2 text-right">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            onClick={() => handleApprove(payment.id)} 
+                          <Button
+                            onClick={() => handleApprove(payment.id)}
                             className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs flex items-center gap-1"
                           >
-                            <CheckCircle className="h-3 w-3" /> {t("payments.actions.approve", "Approve")}
+                            <CheckCircle className="h-3 w-3" />{" "}
+                            {t("payments.actions.approve", "Approve")}
                           </Button>
-                          <Button 
-                            onClick={() => handleReject(payment.id)} 
-                            variant="destructive" 
+
+                          <Button
+                            onClick={() => handleReject(payment.id)}
+                            variant="destructive"
                             className="h-8 px-3 text-xs flex items-center gap-1"
                           >
-                            <XCircle className="h-3 w-3" /> {t("payments.actions.reject", "Reject")}
+                            <XCircle className="h-3 w-3" />{" "}
+                            {t("payments.actions.reject", "Reject")}
                           </Button>
                         </div>
                       </td>
