@@ -1,0 +1,73 @@
+name: Deploy Project
+on:
+  push:
+    branches: ["main"]
+
+env:
+  REGISTRY: ghcr.io
+  TARGET_RUNNER: spu-runner 
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Images
+        run: |
+          # Repo ismini küçük harfe çevir (GHCR zorunluluğu)
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
+          docker build -t ghcr.io/$REPO_LOWER/backend:latest ./Backend
+          docker build -t ghcr.io/$REPO_LOWER/frontend:latest ./Frontend
+          
+          docker push ghcr.io/$REPO_LOWER/backend:latest
+          docker push ghcr.io/$REPO_LOWER/frontend:latest
+
+  deploy:
+    needs: build-and-push
+    # Sunucudaki ilgili kullanıcıda çalışan runner'ı hedefliyoruz
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy with Podman
+        run: |
+          DEPLOY_DIR="$HOME/app"
+          mkdir -p "$DEPLOY_DIR/postgres_data"
+          
+          # Docker compose dosyasını hedef dizine taşı
+          cp docker-compose.yml "$DEPLOY_DIR/"
+
+          # .env dosyasını oluştur (Secrets'tan gelen verilerle)
+          cat <<EOF > "$DEPLOY_DIR/.env"
+          PROJECT_NAME=${{ github.event.repository.name }}
+          GITHUB_REPOSITORY=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
+          BACKEND_PORT=${{ secrets.BACKEND_PORT }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          EOF
+
+          cd "$DEPLOY_DIR"
+          
+          # Podman ile login ol (Token süresi dolmuş olabilir)
+          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          # Güncel imajları çek ve servisleri yeniden başlat
+          podman-compose pull
+          podman-compose up -d --remove-orphans
