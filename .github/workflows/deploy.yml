@@ -5,7 +5,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  TARGET_RUNNER: spu-runner 
+  TARGET_RUNNER: edu-hotel-runner 
 
 jobs:
   build-and-push:
@@ -30,8 +30,8 @@ jobs:
           # Repo ismini küçük harfe çevir (GHCR zorunluluğu)
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           
-          docker build -t ghcr.io/$REPO_LOWER/backend:latest ./Backend
-          docker build -t ghcr.io/$REPO_LOWER/frontend:latest ./Frontend
+          docker build -t ghcr.io/$REPO_LOWER/backend:latest ./backend
+          docker build -t ghcr.io/$REPO_LOWER/frontend:latest ./frontend
           
           docker push ghcr.io/$REPO_LOWER/backend:latest
           docker push ghcr.io/$REPO_LOWER/frontend:latest
