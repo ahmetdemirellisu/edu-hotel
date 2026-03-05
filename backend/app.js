@@ -19,7 +19,7 @@ var app = express();
 
 // --- 1. MIDDLEWARE ---
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: ['http://localhost:5173', 'http://localhost', 'http://localhost:80'],
     credentials: true
 }));
 
