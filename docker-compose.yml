@@ -28,5 +28,14 @@ services:
       - /app/node_modules
     command: npm start
 
+  frontend:
+    build: ./frontend
+    container_name: edu-hotel-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
 volumes:
   postgres_data:
