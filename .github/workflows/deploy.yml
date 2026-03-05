@@ -1,11 +1,12 @@
 name: Deploy Project
+
 on:
   push:
     branches: ["main"]
 
 env:
   REGISTRY: ghcr.io
-  TARGET_RUNNER: edu-hotel-runner 
+  TARGET_RUNNER: eduhotel-runner 
 
 jobs:
   build-and-push:
@@ -23,7 +24,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.DEPLOY_TOKEN }}
 
       - name: Build and Push Images
         run: |
@@ -38,8 +39,8 @@ jobs:
 
   deploy:
     needs: build-and-push
-    # Sunucudaki ilgili kullanıcıda çalışan runner'ı hedefliyoruz
-    runs-on: self-hosted
+    # Belirlediğimiz runner etiketini kullanıyoruz
+    runs-on: [self-hosted, production]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -49,24 +50,28 @@ jobs:
           DEPLOY_DIR="$HOME/app"
           mkdir -p "$DEPLOY_DIR/postgres_data"
           
-          # Docker compose dosyasını hedef dizine taşı
+          # Imaj isimleri için repo adını tekrar küçük harfe çeviriyoruz
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
+          # Docker compose dosyasını taşı
           cp docker-compose.yml "$DEPLOY_DIR/"
 
-          # .env dosyasını oluştur (Secrets'tan gelen verilerle)
+          # .env dosyasını oluştur (GITHUB_REPOSITORY artık küçük harf)
           cat <<EOF > "$DEPLOY_DIR/.env"
           PROJECT_NAME=${{ github.event.repository.name }}
-          GITHUB_REPOSITORY=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          GITHUB_REPOSITORY=$REPO_LOWER
           FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
           BACKEND_PORT=${{ secrets.BACKEND_PORT }}
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
           EOF
 
           cd "$DEPLOY_DIR"
           
-          # Podman ile login ol (Token süresi dolmuş olabilir)
-          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          # Podman login
+          echo "${{ secrets.DEPLOY_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
           
           # Güncel imajları çek ve servisleri yeniden başlat
           podman-compose pull
