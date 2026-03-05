@@ -7,9 +7,10 @@ import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { Dashboard } from "./components/Dashboard"; 
 import { Payment } from "./components/Payment";
+import { MyReservations } from "./components/Myreservations";
 
-// 1. Import the new page
-import { MyAccount } from "./components/MyAccount"; 
+import { MyAccount } from "./components/MyAccount";
+import { NotificationsPage } from "./components/NotificationsPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("authToken");
@@ -52,6 +53,15 @@ export default function App() {
           }
         />
 
+        <Route
+          path="/reservations"
+          element={
+            <RequireAuth>
+              <MyReservations />
+            </RequireAuth>
+          }
+        />
+
         {/* 2. Add the Profile Route */}
         <Route
           path="/profile"
@@ -67,6 +77,15 @@ export default function App() {
           element={
             <RequireAuth>
               <AdminDashboard />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <RequireAuth>
+              <NotificationsPage />
             </RequireAuth>
           }
         />

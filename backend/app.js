@@ -37,6 +37,7 @@ app.use('/reservations', reservationsRouter);
 app.use("/blacklist", require("./routes/blacklist"));
 app.use("/users", usersRouter);
 app.use("/rooms", roomsRouter);
+app.use("/notifications", require("./routes/notifications"));
 
 // --- 3. STATIC FILE SERVING ---
 // FIX: Defining rootDir to point to the project root (one level up from /backend)

@@ -1,17 +1,26 @@
 // src/components/admin/pages/ReservationsPage.tsx
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent } from "../../ui/card";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import {
   Search,
-  Filter,
-  Plus,
   CheckCircle,
   XCircle,
   Eye,
-  Edit,
   X,
+  ChevronDown,
+  CreditCard,
+  Clock,
+  AlertCircle,
+  Users,
+  Calendar,
+  MapPin,
+  FileText,
+  Hash,
+  Mail,
+  Phone,
+  User,
+  Bed,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -21,617 +30,467 @@ import {
   type Reservation,
   type ReservationStatus,
 } from "../../../api/reservations";
+import { getRooms, type Room } from "../../../api/rooms";
 
 type AdminReservation = Reservation & {
-  user?: {
-    id: number;
-    email: string;
-    name?: string | null;
-  };
-  room?: {
-    id: number;
-    name: string;
-    type: string;
-  } | null;
+  user?: { id: number; email: string; name?: string | null };
+  room?: { id: number; name: string; type: string } | null;
 };
 
-function formatId(id: number) {
-  return `RES-${id.toString().padStart(3, "0")}`;
-}
-
-function formatDateOnly(iso: string) {
-  // iso may be "2025-07-15" or full date-time string
-  return iso?.slice(0, 10) || "—";
-}
-
-function safe(v?: string | null) {
-  const s = typeof v === "string" ? v.trim() : "";
-  return s.length ? s : "—";
-}
-
+function formatId(id: number) { return `#${id}`; }
+function formatDateOnly(iso: string) { return iso?.slice(0, 10) || "—"; }
+function safe(v?: string | null) { return (typeof v === "string" && v.trim()) || "—"; }
 function joinName(first?: string | null, last?: string | null) {
-  const f = (first || "").trim();
-  const l = (last || "").trim();
-  const full = `${f} ${l}`.trim();
-  return full.length ? full : "—";
+  return `${(first || "").trim()} ${(last || "").trim()}`.trim() || "—";
 }
+
+const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+  PENDING:           { label: "Pending",          bg: "bg-amber-50",   text: "text-amber-700",   dot: "#f59e0b" },
+  APPROVED:          { label: "Approved",         bg: "bg-emerald-50", text: "text-emerald-700", dot: "#22c55e" },
+  REJECTED:          { label: "Rejected",         bg: "bg-red-50",     text: "text-red-700",     dot: "#ef4444" },
+  CANCELLED:         { label: "Cancelled",        bg: "bg-gray-100",   text: "text-gray-600",    dot: "#9ca3af" },
+  REFUND_REQUESTED:  { label: "Refund Req.",      bg: "bg-orange-50",  text: "text-orange-700",  dot: "#f97316" },
+  REFUNDED:          { label: "Refunded",         bg: "bg-indigo-50",  text: "text-indigo-700",  dot: "#6366f1" },
+};
+
+const PAYMENT_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
+  NONE:                  { label: "—",              bg: "",              text: "text-gray-400" },
+  PENDING_VERIFICATION:  { label: "Pending",        bg: "bg-blue-50",    text: "text-blue-700" },
+  APPROVED:              { label: "Paid",            bg: "bg-emerald-50", text: "text-emerald-700" },
+  REJECTED:              { label: "Rejected",        bg: "bg-red-50",     text: "text-red-700" },
+};
+
+const ACCOM_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
+  PERSONAL:  { label: "Personal",  bg: "bg-sky-50",    text: "text-sky-700" },
+  CORPORATE: { label: "Corporate", bg: "bg-violet-50", text: "text-violet-700" },
+  EDUCATION: { label: "Education", bg: "bg-teal-50",   text: "text-teal-700" },
+};
 
 export function ReservationsPage() {
   const { t } = useTranslation("admin");
 
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "pending" | "approved" | "rejected" | "canceled"
-  >("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [reservations, setReservations] = useState<AdminReservation[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // View modal
   const [selected, setSelected] = useState<AdminReservation | null>(null);
 
-  // 🔄 Load all reservations once
+  // Room assignment modal
+  const [approveModalId, setApproveModalId] = useState<number | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<number | undefined>(undefined);
+
   useEffect(() => {
-    const load = async () => {
+    (async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getAdminReservations();
-        setReservations(data as AdminReservation[]);
+        const [resData, roomData] = await Promise.all([
+          getAdminReservations(),
+          getRooms(),
+        ]);
+        setReservations(resData as AdminReservation[]);
+        setRooms(roomData);
       } catch (err: any) {
-        setError(err.message || "Failed to load reservations.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+        setError(err.message || "Failed to load data.");
+      } finally { setLoading(false); }
+    })();
   }, []);
-
-  const mapStatusBadge = (status: ReservationStatus) => {
-    switch (status) {
-      case "PENDING":
-        return {
-          label: t("reservations.statusLabels.pending", "Pending"),
-          className: "bg-yellow-100 text-yellow-700",
-        };
-      case "APPROVED":
-        return {
-          label: t("reservations.statusLabels.approved", "Approved"),
-          className: "bg-green-100 text-green-700",
-        };
-      case "REJECTED":
-        return {
-          label: t("reservations.statusLabels.rejected", "Rejected"),
-          className: "bg-red-100 text-red-700",
-        };
-      case "CANCELLED":
-        return {
-          label: t("reservations.statusLabels.canceled", "Canceled"),
-          className: "bg-gray-100 text-gray-700",
-        };
-      case "REFUND_REQUESTED":
-        return {
-          label: t("reservations.statusLabels.refundRequested", "Refund requested"),
-          className: "bg-orange-100 text-orange-700",
-        };
-      case "REFUNDED":
-        return {
-          label: t("reservations.statusLabels.refunded", "Refunded"),
-          className: "bg-blue-100 text-blue-700",
-        };
-      default:
-        return {
-          label: status,
-          className: "bg-gray-100 text-gray-700",
-        };
-    }
-  };
-
-  const mapAccommodationType = (accommodationType: string) => {
-    switch (accommodationType) {
-      case "PERSONAL":
-        return t("reservations.guestTypes.personal", "Personal");
-      case "CORPORATE":
-        return t("reservations.guestTypes.corporate", "Corporate");
-      case "EDUCATION":
-        return t("reservations.guestTypes.education", "Education");
-      default:
-        return accommodationType;
-    }
-  };
 
   const filteredReservations = useMemo(() => {
     return reservations.filter((res) => {
-      // Status filter
-      if (statusFilter === "pending" && res.status !== "PENDING") return false;
-      if (statusFilter === "approved" && res.status !== "APPROVED") return false;
-      if (statusFilter === "rejected" && res.status !== "REJECTED") return false;
-      if (statusFilter === "canceled" && res.status !== "CANCELLED") return false;
-
-      // Search
+      if (statusFilter !== "all" && res.status !== statusFilter.toUpperCase()) return false;
       if (searchTerm.trim()) {
         const term = searchTerm.toLowerCase();
-
-        const submittedName = joinName((res as any).firstName, (res as any).lastName).toLowerCase();
-        const submittedEmail = String((res as any).contactEmail || "").toLowerCase();
-        const submittedPhone = String((res as any).phone || "").toLowerCase();
-
-        const accountName = String(res.user?.name || "").toLowerCase();
-        const accountEmail = String(res.user?.email || "").toLowerCase();
-
-        const code = String(res.eventCode || "").toLowerCase();
-        const eventType = String((res as any).eventType || "").toLowerCase();
-
-        if (
-          !submittedName.includes(term) &&
-          !submittedEmail.includes(term) &&
-          !submittedPhone.includes(term) &&
-          !accountName.includes(term) &&
-          !accountEmail.includes(term) &&
-          !code.includes(term) &&
-          !eventType.includes(term)
-        ) {
-          return false;
-        }
+        const name = joinName((res as any).firstName, (res as any).lastName).toLowerCase();
+        const email = ((res as any).contactEmail || res.user?.email || "").toLowerCase();
+        const phone = ((res as any).phone || "").toLowerCase();
+        const id = String(res.id);
+        if (!name.includes(term) && !email.includes(term) && !phone.includes(term) && !id.includes(term)) return false;
       }
-
       return true;
     });
   }, [reservations, statusFilter, searchTerm]);
 
-  const totalCount = reservations.length;
-  const pendingCount = reservations.filter((r) => r.status === "PENDING").length;
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: reservations.length };
+    reservations.forEach(r => { c[r.status] = (c[r.status] || 0) + 1; });
+    return c;
+  }, [reservations]);
 
-  const handleApprove = async (id: number) => {
+  const handleApproveClick = (id: number) => {
+    setApproveModalId(id);
+    setSelectedRoomId(undefined);
+  };
+
+  const handleApproveConfirm = async () => {
+    if (!approveModalId) return;
     try {
-      setActionLoadingId(id);
+      setActionLoadingId(approveModalId);
       setError(null);
-      const updated = await approveReservation(id);
-      setReservations((prev) =>
-        prev.map((r) => (r.id === id ? ({ ...r, ...updated } as AdminReservation) : r))
-      );
+      const updated = await approveReservation(approveModalId, selectedRoomId);
+      setReservations(prev => prev.map(r => r.id === approveModalId ? { ...r, ...updated } as AdminReservation : r));
+      setApproveModalId(null);
     } catch (err: any) {
-      setError(err.message || "Failed to approve reservation.");
-    } finally {
-      setActionLoadingId(null);
-    }
+      setError(err.message || "Failed to approve.");
+    } finally { setActionLoadingId(null); }
   };
 
   const handleReject = async (id: number) => {
-    const reason =
-      window.prompt(
-        t(
-          "reservations.rejectReasonPrompt",
-          "Please enter a reason for rejection (optional):"
-        )
-      ) || undefined;
-
+    const reason = window.prompt(t("reservations.rejectReasonPrompt", "Enter rejection reason (optional):")) || undefined;
     try {
       setActionLoadingId(id);
       setError(null);
       const updated = await rejectReservation(id, reason);
-      setReservations((prev) =>
-        prev.map((r) => (r.id === id ? ({ ...r, ...updated } as AdminReservation) : r))
-      );
+      setReservations(prev => prev.map(r => r.id === id ? { ...r, ...updated } as AdminReservation : r));
     } catch (err: any) {
-      setError(err.message || "Failed to reject reservation.");
-    } finally {
-      setActionLoadingId(null);
-    }
+      setError(err.message || "Failed to reject.");
+    } finally { setActionLoadingId(null); }
   };
 
+  const StatusBadge = ({ status }: { status: string }) => {
+    const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.PENDING;
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${cfg.bg} ${cfg.text}`}>
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: cfg.dot }} />
+        {cfg.label}
+      </span>
+    );
+  };
+
+  const PaymentBadge = ({ status }: { status: string }) => {
+    const cfg = PAYMENT_CONFIG[status] || PAYMENT_CONFIG.NONE;
+    if (status === "NONE") return <span className="text-[10px] text-gray-400">—</span>;
+    return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>;
+  };
+
+  const filterTabs = [
+    { key: "all", label: "All" },
+    { key: "PENDING", label: "Pending" },
+    { key: "APPROVED", label: "Approved" },
+    { key: "REJECTED", label: "Rejected" },
+    { key: "CANCELLED", label: "Cancelled" },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {/* Search */}
-            <div>
-              <label className="text-sm text-gray-600 mb-2 block">
-                {t("reservations.search")}
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder={t("reservations.searchPlaceholder")}
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 tracking-tight">{t("pages.reservations.title", "Reservations")}</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{reservations.length} total reservations</p>
+        </div>
+      </div>
 
-            {/* Status filter */}
-            <div>
-              <label className="text-sm text-gray-600 mb-2 block">
-                {t("reservations.status")}
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) =>
-                  setStatusFilter(
-                    e.target.value as "all" | "pending" | "approved" | "rejected" | "canceled"
-                  )
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066cc]"
+      {/* Filter tabs + Search */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          {/* Tabs */}
+          <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 flex-shrink-0">
+            {filterTabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  statusFilter === tab.key
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
-                <option value="all">{t("reservations.filters.allStatus")}</option>
-                <option value="pending">{t("reservations.filters.pending")}</option>
-                <option value="approved">{t("reservations.filters.approved")}</option>
-                <option value="rejected">{t("reservations.filters.rejected")}</option>
-                <option value="canceled">{t("reservations.filters.canceled")}</option>
-              </select>
-            </div>
-
-            {/* Guest type filter placeholder */}
-            <div>
-              <label className="text-sm text-gray-600 mb-2 block">
-                {t("reservations.guestType")}
-              </label>
-              <select
-                disabled
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-400"
-                title={t(
-                  "reservations.guestTypeDisabledHint",
-                  "Guest type is derived from accommodation type (personal / corporate / education)."
+                {tab.label}
+                {counts[tab.key === "all" ? "all" : tab.key] > 0 && (
+                  <span className={`ml-1.5 text-[10px] ${statusFilter === tab.key ? "text-blue-600" : "text-gray-400"}`}>
+                    {counts[tab.key === "all" ? "all" : tab.key]}
+                  </span>
                 )}
-              >
-                <option>{t("reservations.filters.allTypes")}</option>
-              </select>
-            </div>
-
-            {/* Date filter placeholder */}
-            <div>
-              <label className="text-sm text-gray-600 mb-2 block">
-                {t("reservations.dateRange")}
-              </label>
-              <Input type="date" disabled className="bg-gray-50" />
-            </div>
-
-            <div className="flex items-end">
-              <Button
-                className="w-full bg-[#0066cc] hover:bg-[#0052a3] text-white"
-                disabled
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                {t("reservations.applyFilters")}
-              </Button>
-            </div>
+              </button>
+            ))}
           </div>
 
-          {/* Summary */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-            <span>{t("reservations.summary.total", { count: totalCount })}</span>
-            <span className="text-yellow-700">
-              {t("reservations.summary.pending", { count: pendingCount })}
-            </span>
-          </div>
-
-          {error && (
-            <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-              {error}
+          {/* Search */}
+          <div className="flex-1">
+            <div className="flex items-center h-9 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-300 transition-all">
+              <div className="flex items-center justify-center w-9 h-9 flex-shrink-0">
+                <Search className="h-3.5 w-3.5 text-gray-400" />
+              </div>
+              <input type="text" placeholder="Search by name, email, phone, or ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 h-full bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none pr-3" />
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            {error}
+            <button onClick={() => setError(null)} className="ml-auto text-red-500 hover:text-red-700"><X className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      </div>
 
       {/* Table */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-900">
-              {t("reservations.allReservations", { count: filteredReservations.length })}
-            </h3>
-
-            <Button
-              className="bg-green-600 hover:bg-green-700 text-white"
-              disabled
-              title={t(
-                "reservations.createReservationDisabledHint",
-                "Admin-created reservations will be implemented later."
-              )}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {t("reservations.createReservation")}
-            </Button>
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center h-48">
+            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : filteredReservations.length === 0 ? (
+          <div className="p-12 text-center">
+            <FileText className="h-8 w-8 text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500">{t("reservations.empty", "No reservations found.")}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  {["ID", "Guest", "Type", "Check-in", "Check-out", "Status", "Payment", "Room", "Actions"].map(h => (
+                    <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wider first:pl-6 last:pr-6">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredReservations.map((res) => {
+                  const name = joinName((res as any).firstName, (res as any).lastName);
+                  const email = safe((res as any).contactEmail || res.user?.email);
+                  const accom = ACCOM_CONFIG[res.accommodationType] || ACCOM_CONFIG.PERSONAL;
+                  const checkInDisplay = formatDateOnly(res.checkIn);
+                  const checkInTime = (res as any).checkInTime;
+                  const ps = (res as any).paymentStatus || "NONE";
 
-          {loading ? (
-            <p className="text-sm text-gray-600">
-              {t("reservations.loading", "Loading reservations...")}
-            </p>
-          ) : filteredReservations.length === 0 ? (
-            <p className="text-sm text-gray-600">
-              {t("reservations.empty", "No reservations found for the selected filters.")}
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.reservationId")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.guestName")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.email", "Email")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.phone", "Phone")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.guestType")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.checkIn")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.checkOut")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.status")}
-                    </th>
-                    <th className="text-left py-3 px-2 text-sm text-gray-600">
-                      {t("tables.actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredReservations.map((res) => {
-                    const badge = mapStatusBadge(res.status);
+                  return (
+                    <tr key={res.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors group">
+                      <td className="py-3.5 pl-6 pr-4 text-xs font-mono text-gray-500">{formatId(res.id)}</td>
+                      <td className="py-3.5 px-4">
+                        <p className="text-[13px] font-medium text-gray-800 leading-tight">{name}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">{email}</p>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${accom.bg} ${accom.text}`}>{accom.label}</span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <p className="text-xs text-gray-700">{checkInDisplay}</p>
+                        {checkInTime && <p className="text-[10px] text-gray-400">{checkInTime}</p>}
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-gray-700">{formatDateOnly(res.checkOut)}</td>
+                      <td className="py-3.5 px-4"><StatusBadge status={res.status} /></td>
+                      <td className="py-3.5 px-4"><PaymentBadge status={ps} /></td>
+                      <td className="py-3.5 px-4">
+                        {res.room ? (
+                          <span className="text-xs font-medium text-gray-700 bg-gray-50 px-2 py-0.5 rounded">{res.room.name}</span>
+                        ) : (
+                          <span className="text-[10px] text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 pr-6 px-4">
+                        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                          {res.status === "PENDING" && (
+                            <>
+                              <button
+                                className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors disabled:opacity-40"
+                                title="Approve"
+                                onClick={() => handleApproveClick(res.id)}
+                                disabled={actionLoadingId === res.id}
+                              >
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 transition-colors disabled:opacity-40"
+                                title="Reject"
+                                onClick={() => handleReject(res.id)}
+                                disabled={actionLoadingId === res.id}
+                              >
+                                <XCircle className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                          <button
+                            className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
+                            title="View Details"
+                            onClick={() => setSelected(res)}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {/* Footer count */}
+        {!loading && filteredReservations.length > 0 && (
+          <div className="px-6 py-3 border-t border-gray-50 text-[11px] text-gray-400">
+            Showing {filteredReservations.length} of {reservations.length} reservations
+          </div>
+        )}
+      </div>
 
-                    const submittedName = joinName((res as any).firstName, (res as any).lastName);
-                    const submittedEmail = safe((res as any).contactEmail || res.user?.email);
-                    const submittedPhone = safe((res as any).phone);
-
-                    const guestType = mapAccommodationType(res.accommodationType);
-
-                    const checkInDisplay = `${formatDateOnly(res.checkIn)}${(res as any).checkInTime ? ` • ${(res as any).checkInTime}` : ""}`;
-
-                    return (
-                      <tr key={res.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-2 text-sm text-gray-900">{formatId(res.id)}</td>
-
-                        <td className="py-3 px-2 text-sm text-gray-900">
-                          <div className="flex flex-col">
-                            <span className="font-medium">{submittedName}</span>
-                            <span className="text-xs text-gray-500">
-                              {t("tables.guestsCount", "Guests")}: {res.guests}
-                              {(res as any).freeAccommodation ? " • Free" : ""}
-                            </span>
-                          </div>
-                        </td>
-
-                        <td className="py-3 px-2 text-sm text-gray-700">{submittedEmail}</td>
-                        <td className="py-3 px-2 text-sm text-gray-700">{submittedPhone}</td>
-
-                        <td className="py-3 px-2 text-sm text-gray-600">{guestType}</td>
-
-                        <td className="py-3 px-2 text-sm text-gray-600">{checkInDisplay}</td>
-                        <td className="py-3 px-2 text-sm text-gray-600">{formatDateOnly(res.checkOut)}</td>
-
-                        <td className="py-3 px-2">
-                          <span className={`text-xs px-2 py-1 rounded-full ${badge.className}`}>
-                            {badge.label}
-                          </span>
-                        </td>
-
-                        <td className="py-3 px-2">
-                          <div className="flex items-center gap-2">
-                            {res.status === "PENDING" && (
-                              <>
-                                <button
-                                  className="text-green-600 hover:text-green-700 disabled:opacity-50"
-                                  title={t("reservations.approve")}
-                                  onClick={() => handleApprove(res.id)}
-                                  disabled={actionLoadingId === res.id || loading}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </button>
-
-                                <button
-                                  className="text-red-600 hover:text-red-700 disabled:opacity-50"
-                                  title={t("reservations.reject")}
-                                  onClick={() => handleReject(res.id)}
-                                  disabled={actionLoadingId === res.id || loading}
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </button>
-                              </>
-                            )}
-
-                            <button
-                              className="text-[#0066cc] hover:text-[#0052a3]"
-                              title={t("commonTable.view", "View")}
-                              onClick={() => setSelected(res)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </button>
-
-                            <button
-                              className="text-gray-600 hover:text-gray-700"
-                              title={t("common.edit", "Edit")}
-                              disabled
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+      {/* ═══ APPROVE MODAL (with room assignment) ═══ */}
+      {approveModalId && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setApproveModalId(null)}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()} style={{ animation: "adminFadeIn 0.2s ease-out" }}>
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h3 className="text-base font-semibold text-gray-900">Approve Reservation {formatId(approveModalId)}</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Optionally assign a room before approving.</p>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* View modal */}
-      {selected && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="w-full max-w-3xl bg-white rounded-xl shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <div className="flex flex-col">
-                <span className="text-sm text-gray-500">
-                  {t("tables.reservationId")} • {formatId(selected.id)}
-                </span>
-                <span className="text-lg font-semibold text-gray-900">
-                  {joinName((selected as any).firstName, (selected as any).lastName)}
-                </span>
-              </div>
-              <button
-                className="p-2 rounded-lg hover:bg-gray-100"
-                onClick={() => setSelected(null)}
-                aria-label="Close"
+            <div className="px-6 py-5">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Assign Room (Optional)</label>
+              <select
+                value={selectedRoomId ?? ""}
+                onChange={e => setSelectedRoomId(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 bg-gray-50"
               >
-                <X className="h-5 w-5 text-gray-600" />
+                <option value="">No room assignment (assign later)</option>
+                {rooms
+                  .filter(r => r.status === "AVAILABLE")
+                  .map(r => (
+                    <option key={r.id} value={r.id}>
+                      Room {r.name} — {r.type} ({r.capacity} guest{r.capacity > 1 ? "s" : ""})
+                    </option>
+                  ))}
+              </select>
+              <p className="text-[10px] text-gray-400 mt-2">
+                Only available rooms are shown. The system will check for double-booking conflicts.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
+              <button
+                onClick={() => setApproveModalId(null)}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApproveConfirm}
+                disabled={actionLoadingId === approveModalId}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <CheckCircle className="h-4 w-4" />
+                {actionLoadingId === approveModalId ? "Approving..." : "Approve Reservation"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ DETAIL MODAL ═══ */}
+      {selected && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()} style={{ animation: "adminFadeIn 0.2s ease-out" }}>
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xs font-mono text-gray-400">{formatId(selected.id)}</span>
+                  <StatusBadge status={selected.status} />
+                  <PaymentBadge status={(selected as any).paymentStatus || "NONE"} />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {joinName((selected as any).firstName, (selected as any).lastName)}
+                </h3>
+              </div>
+              <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors" onClick={() => setSelected(null)}>
+                <X className="h-4 w-4 text-gray-500" />
               </button>
             </div>
 
-            <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("tables.email", "Email")}</div>
-                <div className="text-sm text-gray-900">{safe((selected as any).contactEmail)}</div>
-              </div>
+            {/* Modal body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {/* Guest Info */}
+                <div>
+                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Guest Information</h4>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><User className="h-3.5 w-3.5 text-gray-400" />{joinName((selected as any).firstName, (selected as any).lastName)}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Mail className="h-3.5 w-3.5 text-gray-400" />{safe((selected as any).contactEmail)}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Phone className="h-3.5 w-3.5 text-gray-400" />{safe((selected as any).phone)}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Users className="h-3.5 w-3.5 text-gray-400" />{selected.guests} guest{selected.guests > 1 ? "s" : ""}</div>
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("tables.phone", "Phone")}</div>
-                <div className="text-sm text-gray-900">{safe((selected as any).phone)}</div>
-              </div>
+                {/* Stay Details */}
+                <div>
+                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Stay Details</h4>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
+                    {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400" />Check-in: {(selected as any).checkInTime}</div>}
+                    {selected.room && <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400" />Room {selected.room.name} ({selected.room.type})</div>}
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />{selected.accommodationType} / {selected.invoiceType}</div>
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("tables.checkIn")}</div>
-                <div className="text-sm text-gray-900">
-                  {formatDateOnly(selected.checkIn)}{" "}
-                  <span className="text-gray-500">•</span>{" "}
-                  {safe((selected as any).checkInTime)}
+                {/* Billing & Event */}
+                <div>
+                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Billing & Event</h4>
+                  <div className="space-y-2.5">
+                    {(selected as any).eventType && <div className="flex items-center gap-2 text-sm text-gray-700"><FileText className="h-3.5 w-3.5 text-gray-400" />Event: {(selected as any).eventType}</div>}
+                    {selected.eventCode && <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />Code: {selected.eventCode}</div>}
+                    {(selected as any).freeAccommodation && <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium"><CheckCircle className="h-3.5 w-3.5" />Free Accommodation</div>}
+                    {selected.invoiceType === "INDIVIDUAL" && (selected as any).nationalId && (
+                      <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />TC: {(selected as any).nationalId}</div>
+                    )}
+                    {selected.invoiceType === "CORPORATE" && (selected as any).taxNumber && (
+                      <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />Tax: {(selected as any).taxNumber}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("tables.checkOut")}</div>
-                <div className="text-sm text-gray-900">{formatDateOnly(selected.checkOut)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("tables.guestType")}</div>
-                <div className="text-sm text-gray-900">{mapAccommodationType(selected.accommodationType)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("tables.guestsCount", "Guests")}</div>
-                <div className="text-sm text-gray-900">{selected.guests}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.eventType", "Event Type")}</div>
-                <div className="text-sm text-gray-900">{safe((selected as any).eventType)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.eventCode", "Event / Education Code")}</div>
-                <div className="text-sm text-gray-900">{safe(selected.eventCode)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.invoiceType", "Invoice Type")}</div>
-                <div className="text-sm text-gray-900">{safe(selected.invoiceType)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.priceType", "Price Type")}</div>
-                <div className="text-sm text-gray-900">{safe((selected as any).priceType)}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.freeAccommodation", "Free Accommodation")}</div>
-                <div className="text-sm text-gray-900">
-                  {(selected as any).freeAccommodation ? "YES" : "NO"}
+              {/* Additional guests */}
+              {Array.isArray((selected as any).guestList) && (selected as any).guestList.length > 0 && (
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Additional Guests</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(selected as any).guestList.map((g: any, idx: number) => (
+                      <span key={idx} className="text-xs bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg text-gray-700">
+                        {safe(g?.firstName)} {safe(g?.lastName)}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-xs text-gray-500">
-                  {selected.invoiceType === "INDIVIDUAL" ? "National ID" : "Tax Number"}
-                </div>
-                <div className="text-sm text-gray-900">
-                  {selected.invoiceType === "INDIVIDUAL"
-                    ? safe((selected as any).nationalId)
-                    : safe((selected as any).taxNumber)}
-                </div>
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.additionalGuests", "Additional Guests")}</div>
-                <div className="text-sm text-gray-900">
-                  {Array.isArray((selected as any).guestList) && (selected as any).guestList.length > 0 ? (
-                    <ul className="list-disc pl-5 space-y-1">
-                      {(selected as any).guestList.map((g: any, idx: number) => (
-                        <li key={idx}>
-                          {safe(g?.firstName)} {safe(g?.lastName)}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span className="text-gray-500">—</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <div className="text-xs text-gray-500">{t("reservations.form.note", "Note")}</div>
-                <div className="text-sm text-gray-900 whitespace-pre-wrap">
-                  {safe((selected as any).note)}
-                </div>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t flex items-center justify-end gap-2">
-              {selected.status === "PENDING" && (
-                <>
-                  <Button
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => {
-                      const id = selected.id;
-                      setSelected(null);
-                      handleApprove(id);
-                    }}
-                    disabled={actionLoadingId === selected.id || loading}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {t("reservations.approve", "Approve")}
-                  </Button>
-
-                  <Button
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                    onClick={() => {
-                      const id = selected.id;
-                      setSelected(null);
-                      handleReject(id);
-                    }}
-                    disabled={actionLoadingId === selected.id || loading}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    {t("reservations.reject", "Reject")}
-                  </Button>
-                </>
               )}
 
-              <Button variant="outline" onClick={() => setSelected(null)}>
-                {t("common.close", "Close")}
-              </Button>
+              {/* Note */}
+              {(selected as any).note && (
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Note</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 whitespace-pre-wrap">{(selected as any).note}</p>
+                </div>
+              )}
+
+              {/* Created at */}
+              <p className="text-[10px] text-gray-400 mt-4">Created: {selected.createdAt?.slice(0, 10)}</p>
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 flex-shrink-0">
+              {selected.status === "PENDING" && (
+                <>
+                  <button
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+                    onClick={() => { setSelected(null); handleApproveClick(selected.id); }}
+                  >
+                    <CheckCircle className="h-4 w-4" /> Approve
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+                    onClick={() => { const id = selected.id; setSelected(null); handleReject(id); }}
+                  >
+                    <XCircle className="h-4 w-4" /> Reject
+                  </button>
+                </>
+              )}
+              <button
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                onClick={() => setSelected(null)}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

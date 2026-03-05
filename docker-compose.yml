@@ -1,43 +1,32 @@
 services:
   db:
-    image: postgres:15-alpine
-    container_name: db-${PROJECT_NAME}
+    image: postgres:17
+    container_name: edu-hotel-db
+    restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespw
+      POSTGRES_DB: edu_hotel
+    ports:
+      - "5440:5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data:Z
-    expose:
-      - "5432"
-    networks:
-      - internal
+      - postgres_data:/var/lib/postgresql/data
 
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
-    container_name: backend-${PROJECT_NAME}
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      # Backend'in hangi yoldan geldiğini bilmesi gerekebilir
-      SERVER_SERVLET_CONTEXT_PATH: ${BASE_PATH}-api 
-    ports:
-      - "${BACKEND_PORT}:8080"
+    build: ./backend
+    container_name: edu-hotel-backend
+    restart: always
     depends_on:
       - db
-    networks:
-      - internal
-
-  frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
-    container_name: frontend-${PROJECT_NAME}
-    environment:
-      # Önemli: React/Vue/NextJS'e alt yolu bildirin
-      PUBLIC_URL: ${BASE_PATH} 
     ports:
-      - "${FRONTEND_PORT}:3000"
-    networks:
-      - internal
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespw@db:5432/edu_hotel?schema=public
+      JWT_SECRET: your_secret_here
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm start
 
-networks:
-  internal:
-    driver: bridge
+volumes:
+  postgres_data:

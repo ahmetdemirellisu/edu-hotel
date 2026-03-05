@@ -1,449 +1,175 @@
 // src/components/admin/pages/BlacklistPage.tsx
-import { Card, CardContent } from "../../ui/card";
-import { Button } from "../../ui/button";
-import { UserX, Plus } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
+import { Button } from "../../ui/button";
+import { UserX, Plus, ShieldAlert, Search, X, CheckCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-type BlacklistEntry = {
-  id: number;
-  userId: number;
-  reason: string;
-  addedAt: string;
-  expiresAt: string | null;
-  user: {
-    id: number;
-    name: string | null;
-    email: string;
-  };
-};
-
-type SearchUser = {
-  id: number;
-  name: string | null;
-  email: string;
-  userType: string;
-  role: string;
-};
+type BlacklistEntry = { id: number; userId: number; reason: string; addedAt: string; expiresAt: string | null; user: { id: number; name: string | null; email: string } };
+type SearchUser = { id: number; name: string | null; email: string; userType: string; role: string };
 
 export function BlacklistPage() {
   const { t } = useTranslation("admin");
-
   const [blacklistedGuests, setBlacklistedGuests] = useState<BlacklistEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Modal & form state
   const [showModal, setShowModal] = useState(false);
   const [modalUserId, setModalUserId] = useState("");
   const [modalReason, setModalReason] = useState("");
   const [modalExpiresAt, setModalExpiresAt] = useState("");
-  const [isPermanent, setIsPermanent] = useState(true); // 🔥 permanent vs temporary
-
-  // Autocomplete state
+  const [isPermanent, setIsPermanent] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<SearchUser | null>(null);
 
-  // ----------------------------------------------------------------------
-  // LOAD BLACKLIST
-  // ----------------------------------------------------------------------
   useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const res = await fetch("http://localhost:3000/blacklist");
-        if (!res.ok) throw new Error("Failed to load blacklist");
-        const data = await res.json();
-        setBlacklistedGuests(data);
-      } catch (err: any) {
-        console.error("Failed to load blacklist:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
+    (async () => {
+      try { setLoading(true); setError(null); const res = await fetch("http://localhost:3000/blacklist"); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(await res.json()); }
+      catch (err: any) { setError(err.message); } finally { setLoading(false); }
+    })();
   }, []);
 
-  // ----------------------------------------------------------------------
-  // USER SEARCH (ID / EMAIL / NAME)
-  // ----------------------------------------------------------------------
   useEffect(() => {
-    if (!showModal) return;
-    if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
+    if (!showModal || searchQuery.trim().length < 2) { setSearchResults([]); return; }
     const timeout = setTimeout(async () => {
-      try {
-        setSearchLoading(true);
-        const res = await fetch(
-          `http://localhost:3000/users/search?query=${encodeURIComponent(
-            searchQuery.trim()
-          )}`
-        );
-        if (!res.ok) throw new Error("Failed to search users");
-
-        const data: SearchUser[] = await res.json();
-        const filtered = data.filter((u) => u.role !== "ADMIN");
-        setSearchResults(filtered);
-      } catch (err) {
-        console.error("User search failed:", err);
-      } finally {
-        setSearchLoading(false);
-      }
+      try { setSearchLoading(true); const res = await fetch(`http://localhost:3000/users/search?query=${encodeURIComponent(searchQuery.trim())}`); if (!res.ok) throw new Error("Failed"); setSearchResults((await res.json()).filter((u: SearchUser) => u.role !== "ADMIN")); }
+      catch {} finally { setSearchLoading(false); }
     }, 300);
-
     return () => clearTimeout(timeout);
   }, [searchQuery, showModal]);
 
-  function handleSelectUser(user: SearchUser) {
-    setSelectedUser(user);
-    setModalUserId(String(user.id));
-    setSearchResults([]);
-  }
+  const handleSelectUser = (user: SearchUser) => { setSelectedUser(user); setModalUserId(String(user.id)); setSearchResults([]); };
 
-  // ----------------------------------------------------------------------
-  // REMOVE
-  // ----------------------------------------------------------------------
-  async function handleRemove(userId: number) {
-    const confirm = window.confirm(
-      t("blacklist.confirmRemove", "Remove this user from blacklist?")
-    );
-    if (!confirm) return;
+  const handleRemove = async (userId: number) => {
+    if (!window.confirm("Remove from blacklist?")) return;
+    try { const res = await fetch(`http://localhost:3000/blacklist/remove/${userId}`, { method: "DELETE" }); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(prev => prev.filter(e => e.userId !== userId)); }
+    catch (err: any) { alert(err.message); }
+  };
 
+  const handleAddSubmit = async () => {
+    if (!modalUserId || !modalReason) { alert("User and reason required."); return; }
+    if (!isPermanent && !modalExpiresAt) { alert("Select expiry date."); return; }
     try {
-      const res = await fetch(`http://localhost:3000/blacklist/remove/${userId}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to remove user");
-      }
+      const res = await fetch("http://localhost:3000/blacklist/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: Number(modalUserId), reason: modalReason, expiresAt: isPermanent ? null : modalExpiresAt }) });
+      const data = await res.json(); if (!res.ok) throw new Error(data.error || "Failed");
+      setBlacklistedGuests(prev => [data, ...prev]); setShowModal(false); resetModal();
+    } catch (err: any) { alert(err.message); }
+  };
 
-      setBlacklistedGuests((prev) => prev.filter((e) => e.userId !== userId));
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || "Failed to remove user.");
-    }
-  }
-
-  // ----------------------------------------------------------------------
-  // ADD
-  // ----------------------------------------------------------------------
-  async function handleAddSubmit() {
-    if (!modalUserId || !modalReason) {
-      alert(t("blacklist.validation.required", "User and reason are required."));
-      return;
-    }
-
-    if (!isPermanent && !modalExpiresAt) {
-      alert(
-        t(
-          "blacklist.validation.expiryRequired",
-          "Please select an expiry date for a temporary block."
-        )
-      );
-      return;
-    }
-
-    try {
-      const res = await fetch("http://localhost:3000/blacklist/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: Number(modalUserId),
-          reason: modalReason,
-          expiresAt: isPermanent ? null : modalExpiresAt,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add user");
-
-      setBlacklistedGuests((prev) => [data, ...prev]);
-
-      // reset
-      setShowModal(false);
-      setModalUserId("");
-      setModalReason("");
-      setModalExpiresAt("");
-      setIsPermanent(true);
-      setSearchQuery("");
-      setSelectedUser(null);
-      setSearchResults([]);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  }
-
-  function openModal() {
-    setShowModal(true);
-    setSearchQuery("");
-    setSelectedUser(null);
-    setModalUserId("");
-    setModalReason("");
-    setModalExpiresAt("");
-    setIsPermanent(true);
-    setSearchResults([]);
-  }
+  const resetModal = () => { setModalUserId(""); setModalReason(""); setModalExpiresAt(""); setIsPermanent(true); setSearchQuery(""); setSelectedUser(null); setSearchResults([]); };
+  const openModal = () => { setShowModal(true); resetModal(); };
 
   return (
-    <div className="space-y-6">
-      {/* Warning Banner */}
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <div className="bg-red-500 p-2 rounded-lg">
-            <UserX className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h4 className="text-red-900 mb-1">{t("blacklist.rulesTitle")}</h4>
-            <p className="text-sm text-red-700">
-              {t("blacklist.rulesDescription")}
-            </p>
-          </div>
-        </div>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div><h2 className="text-xl font-semibold text-gray-900 tracking-tight">{t("blacklist.rulesTitle", "Blacklist Management")}</h2><p className="text-sm text-gray-500 mt-0.5">{blacklistedGuests.length} blocked users</p></div>
+        <button onClick={openModal} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-all"><Plus className="h-4 w-4" />Add to Blacklist</button>
       </div>
 
-      {/* Blacklist table card */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardContent className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-gray-900 text-lg font-semibold">
-              {t("blacklist.title", { count: blacklistedGuests.length })}
-            </h3>
-            <Button
-              className="bg-red-600 hover:bg-red-700 text-white"
-              onClick={openModal}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {t("blacklist.addToBlacklist")}
-            </Button>
-          </div>
+      {/* Warning */}
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+        <ShieldAlert className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+        <div><p className="text-sm font-semibold text-red-800">Blacklist Rules</p><p className="text-xs text-red-600 mt-0.5">{t("blacklist.rulesDescription", "Blacklisted users cannot log in or make reservations. They will see a warning message.")}</p></div>
+      </div>
 
-          {error && (
-            <div className="text-red-600 bg-red-50 border border-red-200 p-2 rounded">
-              {error}
-            </div>
-          )}
+      {error && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">{error}</div>}
 
-          {loading && (
-            <p className="text-sm text-gray-600">
-              {t("blacklist.loading", "Loading blacklist...")}
-            </p>
-          )}
-
-          {!loading && blacklistedGuests.length === 0 && (
-            <p className="text-sm text-gray-600">
-              {t("blacklist.empty", "There are no blacklisted users.")}
-            </p>
-          )}
-
-          {!loading && blacklistedGuests.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="py-3 px-2 text-left">
-                      {t("tables.guestName")}
-                    </th>
-                    <th className="py-3 px-2 text-left">E-mail</th>
-                    <th className="py-3 px-2 text-left">
-                      {t("blacklist.reason")}
-                    </th>
-                    <th className="py-3 px-2 text-left">
-                      {t("blacklist.addedDate")}
-                    </th>
-                    <th className="py-3 px-2 text-left">
-                      {t("blacklist.expiryDate")}
-                    </th>
-                    <th className="py-3 px-2 text-left">
-                      {t("tables.actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {blacklistedGuests.map((entry) => (
-                    <tr
-                      key={entry.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-2">
-                        {entry.user?.name || "Unknown"}
-                      </td>
-                      <td className="py-3 px-2">{entry.user?.email}</td>
-                      <td className="py-3 px-2">{entry.reason}</td>
-                      <td className="py-3 px-2">
-                        {entry.addedAt.slice(0, 10)}
-                      </td>
-                      <td className="py-3 px-2">
-                        {entry.expiresAt
-                          ? entry.expiresAt.slice(0, 10)
-                          : t("blacklist.permanentShort", "Permanent")}
-                      </td>
-                      <td className="py-3 px-2">
-                        <Button
-                          className="text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => handleRemove(entry.userId)}
-                        >
-                          {t("blacklist.remove")}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[420px]">
-            <h2 className="text-lg font-semibold mb-4">
-              {t("blacklist.addToBlacklist")}
-            </h2>
-
-            {/* Search */}
-            <div className="mb-4">
-              <label className="text-sm text-gray-700">
-                {t("blacklist.searchUser", "Search user by ID, e-mail or name")}
-              </label>
-              <input
-                type="text"
-                className="w-full border px-3 py-2 rounded-md mt-1"
-                placeholder="e.g. 12, john@example.com, John"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchLoading && (
-                <p className="text-xs text-gray-500 mt-1">
-                  {t("blacklist.searching", "Searching...")}
-                </p>
-              )}
-            </div>
-
-            {/* Results */}
-            {searchResults.length > 0 && (
-              <div className="border rounded-md mb-4 max-h-40 overflow-y-auto">
-                {searchResults.map((u) => (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => handleSelectUser(u)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100 flex justify-between items-center"
-                  >
-                    <div>
-                      <p className="font-medium text-sm">
-                        {u.name || "Unnamed user"}
-                      </p>
-                      <p className="text-xs text-gray-500">{u.email}</p>
-                    </div>
-                    <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                      {u.userType}
-                    </span>
-                  </button>
+      {/* Table */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center h-48"><div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" /></div>
+        ) : blacklistedGuests.length === 0 ? (
+          <div className="p-12 text-center"><UserX className="h-8 w-8 text-gray-300 mx-auto mb-3" /><p className="text-sm text-gray-500">No blacklisted users.</p></div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead><tr className="border-b border-gray-100 bg-gray-50/50">
+                {["User", "Email", "Reason", "Added", "Expires", "Actions"].map(h => (
+                  <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wider first:pl-6 last:pr-6">{h}</th>
                 ))}
-              </div>
-            )}
+              </tr></thead>
+              <tbody>
+                {blacklistedGuests.map(entry => (
+                  <tr key={entry.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors group">
+                    <td className="py-3.5 pl-6 pr-4 text-[13px] font-medium text-gray-800">{entry.user?.name || "Unknown"}</td>
+                    <td className="py-3.5 px-4 text-xs text-gray-600">{entry.user?.email}</td>
+                    <td className="py-3.5 px-4 text-xs text-gray-600 max-w-[200px] truncate">{entry.reason}</td>
+                    <td className="py-3.5 px-4 text-xs text-gray-500">{entry.addedAt.slice(0, 10)}</td>
+                    <td className="py-3.5 px-4">
+                      {entry.expiresAt ? <span className="text-xs text-gray-600">{entry.expiresAt.slice(0, 10)}</span> : <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Permanent</span>}
+                    </td>
+                    <td className="py-3.5 pr-6 px-4">
+                      <button onClick={() => handleRemove(entry.userId)} className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors opacity-60 group-hover:opacity-100" title="Remove">
+                        <CheckCircle className="h-3.5 w-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
-            {/* Selected user info */}
-            {selectedUser && (
-              <div className="mb-4 p-3 bg-gray-50 border rounded-md">
-                <p className="font-medium text-sm">
-                  {selectedUser.name || "Unnamed user"}
-                </p>
-                <p className="text-xs text-gray-600">{selectedUser.email}</p>
-                <p className="text-xs text-gray-500">
-                  ID: {selectedUser.id} • {selectedUser.userType}
-                </p>
-              </div>
-            )}
-
-            {/* Block type: permanent vs temporary */}
-            <div className="mb-3">
-              <label className="text-sm text-gray-700">
-                {t("blacklist.blockType", "Block type")}
-              </label>
-              <div className="flex gap-4 mt-1 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={isPermanent}
-                    onChange={() => setIsPermanent(true)}
-                  />
-                  {t("blacklist.permanent", "Permanent block")}
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!isPermanent}
-                    onChange={() => setIsPermanent(false)}
-                  />
-                  {t("blacklist.temporary", "Temporary (until date)")}
-                </label>
-              </div>
+      {/* Add Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()} style={{ animation: "adminFadeIn 0.2s ease-out" }}>
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-gray-900">Add to Blacklist</h3>
+              <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center"><X className="h-4 w-4 text-gray-500" /></button>
             </div>
-
-            {/* Reason */}
-            <div className="mb-3">
-              <label className="text-sm text-gray-700">
-                {t("blacklist.reason")}
-              </label>
-              <input
-                type="text"
-                className="w-full border px-3 py-2 rounded-md mt-1"
-                value={modalReason}
-                onChange={(e) => setModalReason(e.target.value)}
-                placeholder={t(
-                  "blacklist.reasonPlaceholder",
-                  "Enter reason"
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Search User</label>
+                <div className="flex items-center h-9 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-red-500/20 focus-within:border-red-300">
+                  <div className="flex items-center justify-center w-9 h-9 flex-shrink-0">
+                    <Search className="h-3.5 w-3.5 text-gray-400" />
+                  </div>
+                  <input type="text" placeholder="ID, email, or name..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    className="flex-1 h-full bg-transparent text-sm outline-none pr-3" />
+                </div>
+                {searchLoading && <p className="text-[10px] text-gray-400 mt-1">Searching...</p>}
+                {searchResults.length > 0 && (
+                  <div className="border border-gray-200 rounded-xl mt-2 max-h-32 overflow-y-auto">
+                    {searchResults.map(u => (
+                      <button key={u.id} onClick={() => handleSelectUser(u)} className="w-full text-left px-3 py-2 hover:bg-gray-50 flex justify-between items-center text-sm transition-colors">
+                        <div><p className="font-medium text-gray-800">{u.name || "Unnamed"}</p><p className="text-[10px] text-gray-400">{u.email}</p></div>
+                        <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-500">{u.userType}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
-              />
-            </div>
-
-            {/* Expiry date */}
-            <div className="mb-3">
-              <label className="text-sm text-gray-700">
-                {t("blacklist.expiryDate")}
-              </label>
-              <input
-                type="date"
-                className="w-full border px-3 py-2 rounded-md mt-1"
-                value={modalExpiresAt}
-                onChange={(e) => setModalExpiresAt(e.target.value)}
-                disabled={isPermanent}
-              />
-              {isPermanent && (
-                <p className="text-xs text-gray-500 mt-1">
-                  {t(
-                    "blacklist.permanentHint",
-                    "For permanent blocks, the expiry date is not required."
-                  )}
-                </p>
+              </div>
+              {selectedUser && (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                  <p className="text-sm font-medium text-gray-800">{selectedUser.name || "Unnamed"}</p>
+                  <p className="text-[10px] text-gray-500">{selectedUser.email} · ID: {selectedUser.id}</p>
+                </div>
+              )}
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Block Type</label>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" checked={isPermanent} onChange={() => setIsPermanent(true)} className="accent-red-600" />Permanent</label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" checked={!isPermanent} onChange={() => setIsPermanent(false)} className="accent-red-600" />Temporary</label>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Reason</label>
+                <input type="text" value={modalReason} onChange={e => setModalReason(e.target.value)} placeholder="Enter reason..."
+                  className="w-full px-3 h-9 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300" />
+              </div>
+              {!isPermanent && (
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Expiry Date</label>
+                  <input type="date" value={modalExpiresAt} onChange={e => setModalExpiresAt(e.target.value)}
+                    className="w-full px-3 h-9 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-300" />
+                </div>
               )}
             </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 mt-4">
-              <Button variant="outline" onClick={() => setShowModal(false)}>
-                {t("common.cancel")}
-              </Button>
-              <Button
-                className="bg-red-600 hover:bg-red-700 text-white"
-                onClick={handleAddSubmit}
-                disabled={!modalUserId}
-              >
-                {t("common.save")}
-              </Button>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50">Cancel</button>
+              <button onClick={handleAddSubmit} disabled={!modalUserId} className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50 flex items-center gap-2"><UserX className="h-4 w-4" />Block User</button>
             </div>
           </div>
         </div>

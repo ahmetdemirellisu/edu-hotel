@@ -1,128 +1,29 @@
 {
   "header": {
     "mySU": "My SU",
-    "language": "TR"
-  },
-
-  "nav": {
-  "dashboard": "Ana Sayfa",
-  "notifications": "Bildirimler",
-  "profile": "Profilim",
-  "logout": "Çıkış"
+    "language": "TR",
+    "mainPage": "Ana Sayfa"
   },
 
   "breadcrumb": {
     "home": "Ana Sayfa"
   },
 
+  "nav": {
+    "dashboard": "Ana Sayfa",
+    "notifications": "Bildirimler",
+    "profile": "Profilim",
+    "logout": "Çıkış"
+  },
+
   "common": {
-  "select": "Seç",
-  "success": "Başarılı",
-  "error": "Hata",
-  "dismiss": "Kapat",
-  "note": "Not",
-  "backToTop": "Yukarı çık"
-  },
-
-
-  "bookingRequest": {
-    "title": "EDU Otel için Rezervasyon Talebi",
-    "subtitle": "EDU Otel için ön rezervasyon talebi oluşturun. Talebiniz idare tarafından incelenip onaylanacaktır. Nihai oda ataması otel personeli tarafından yapılacaktır.",
-
-    "step1Title": "Adım 1 – Rezervasyon talebinizi gönderin",
-    "step1Description": "Konaklama tarihlerinizi ve temel bilgilerinizi girin. Bu form, anlık bir rezervasyon değil, talep formudur.",
-
-    "step2Title": "Adım 2 – Oda türlerini inceleyin",
-    "step2Description": "Burada EDU Otel’de bulunan örnek oda türlerini görebilirsiniz. Talebiniz onaylandıktan sonra nihai oda ataması otel yönetimi tarafından yapılacaktır.",
-
-    "pageTitle": "Oda Rezervasyonu",
-    "pageSubtitle": "Ön rezervasyon talebinizi gönderin. EDU ekibi inceleyip onaylayacaktır.",
-    "loggedInAs": "Giriş türü:",
-
-    "form": {
-      "checkIn": "Giriş Tarihi",
-      "checkOut": "Çıkış Tarihi",
-      "guests": "Kişi Sayısı",
-      "accommodationType": "Konaklama Türü",
-      "invoiceType": "Fatura Türü",
-      "eventCode": "Etkinlik / Eğitim Kodu",
-      "explanation": "Açıklama / Gerekçe",
-      "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için, kalış amacınızı kısaca açıklayınız.",
-      "submitButton": "Rezervasyon talebini gönder",
-      "submitting": "Gönderiliyor...",
-      "firstName": "Ad",
-      "lastName": "Soyad",
-      "phone": "Telefon Numarası",
-      "email": "E-posta Adresi",
-      "checkInTime": "Giriş Saati",
-      "eventType": "Etkinlik Türü",
-      "priceType": "Fiyat Türü",
-      "freeAccommodation": "Ücretsiz Konaklama (ödeme yok)",
-      "freeAccommodationHint": "✓ Onaylanırsa ödeme istenmez.",
-      "consent": "Verdiğim bilgilerin doğru olduğunu onaylıyorum ve rezervasyon kurallarını kabul ediyorum.",
-
-      "tcKimlik": "T.C. Kimlik No",
-      "taxNumber": "Vergi Numarası"
-    },
-
-    "messages": {
-      "success": "Rezervasyon talebiniz gönderildi. İdare tarafından incelendikten sonra size bilgi verilecektir.",
-      "error": "Talep gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.",
-      "datesRequired": "Lütfen giriş ve çıkış tarihlerini seçiniz.",
-      "guestsRequired": "Lütfen kişi sayısını seçiniz."
-    },
-
-    "sections": {
-      "reservationInfo": "Rezervasyon Bilgileri",
-      "guestInfo": "Misafir Bilgileri",
-      "stayDetails": "Konaklama Detayları",
-      "roomAssignment": "Oda Ataması",
-      "eventBilling": "Etkinlik ve Faturalandırma",
-      "extraInfo": "Ek Bilgiler"
-  },
-
-    "rules": {
-      "title": "Rezervasyon Kuralları",
-      "noSunday": "Pazar günü giriş yok",
-      "max5": "Kişisel rezervasyonlarda en fazla 5 gece",
-      "max5short": "En fazla 5 gün (kişisel)",
-      "max30": "Rezervasyon en fazla 30 gün ileri tarihli olabilir",
-      "max30short": "30 gün ileri tarih sınırı",
-      "noSatInSunOut": "Cumartesi giriş + Pazar çıkış yapılamaz",
-      "emailAuto": "E-posta bildirimleri otomatik gönderilir",
-      "manualApproval": "Tüm ön rezervasyonlar EDU ekibi tarafından manuel onay gerektirir.",
-      "confirmationTime": "İncelemeden sonra onay bilgisi alacaksınız."
-    },
-
-    "eventTypes": {
-    "conference": "Konferans",
-    "seminar": "Seminer",
-    "workshop": "Atölye",
-    "training": "Eğitim",
-    "meeting": "Toplantı",
-    "other": "Diğer"
-    },
-
-    "priceTypes": {
-      "standard": "Standart",
-      "corporate": "Kurumsal Tarife",
-      "discounted": "İndirimli"
-    },
-
-    "billing": {
-      "individual": "Bireysel",
-      "corporate": "Kurumsal"
-    },
-
-    "roomAssignmentInfo": "Oda ataması onaydan sonra EDU resepsiyonu tarafından yapılır. Kullanıcılar oda seçemez.",
-
-    "afterSubmitInfo": "Talebiniz gönderildikten sonra EDU ekibi inceleyecektir. İnceleme sonrası e-posta veya bildirim alacaksınız.",
-    "afterSubmitPaymentNote": "Ödeme (varsa) sadece onaydan sonra istenir.",
-
-    "sidebar": {
-      "goToForm": "Forma git"
-    }
-
+    "select": "Seç",
+    "success": "Başarılı",
+    "error": "Hata",
+    "dismiss": "Kapat",
+    "note": "Not",
+    "backToTop": "Yukarı çık",
+    "loading": "Yükleniyor..."
   },
 
   "login": {
@@ -173,7 +74,54 @@
     }
   },
 
-"dashboard": {
+  "dashboard": {
+    "nav": {
+      "bookRoom": "Oda Rezervasyonu",
+      "myBookings": "Rezervasyonlarım",
+      "services": "Hizmetler",
+      "contact": "İletişim"
+    },
+    "search": {
+      "title": "Mükemmel Odanızı Bulun",
+      "checkIn": "Giriş Tarihi",
+      "checkOut": "Çıkış Tarihi",
+      "guests": "Kişi Sayısı",
+      "guests1": "1 Kişi",
+      "guests2": "2 Kişi",
+      "guests3": "3 Kişi",
+      "guests4": "4+ Kişi",
+      "button": "Oda Ara"
+    },
+    "roomsSection": {
+      "title": "Müsait Odalar",
+      "subtitle": "Konforlu ve tam donanımlı odalarımızdan seçiminizi yapın",
+      "booked": "Dolu",
+      "capacity_one": "{{count}} Kişiye Kadar",
+      "capacity_other": "{{count}} Kişiye Kadar",
+      "perNight": "/ gece",
+      "bookNow": "Şimdi Rezervasyon Yap",
+      "unavailable": "Müsait Değil"
+    },
+    "rooms": {
+      "single": "Tek Kişilik Oda",
+      "singleDesc": "Tek seyahat edenler için ideal, konforlu oda",
+      "double": "Çift Kişilik Oda",
+      "doubleDesc": "İki misafir için modern olanaklarla geniş oda"
+    },
+    "amenities": {
+      "wifi": "WiFi",
+      "tv": "TV",
+      "ac": "Klima",
+      "coffee": "Kahve"
+    },
+    "info": {
+      "flexibleTitle": "Esnek Rezervasyon",
+      "flexibleText": "Giriş tarihinden 24 saat öncesine kadar ücretsiz iptal",
+      "amenitiesTitle": "Ücretsiz Olanaklar",
+      "amenitiesText": "Tüm misafirler için ücretsiz WiFi, kahvaltı ve park",
+      "supportTitle": "7/24 Destek",
+      "supportText": "Ekibimiz her zaman yardımınıza hazır"
+    },
     "subtitle": "Rezervasyon taleplerinizi, onaylarınızı, ödemelerinizi ve bildirimlerinizi tek bir yerden takip edin.",
     "stats": {
       "totalReservations": "Toplam Rezervasyon",
@@ -192,8 +140,8 @@
       "amount": "Tutar",
       "viewRequests": "Taleplerimi Görüntüle",
       "createNew": "Yeni Rezervasyon Oluştur",
-      "paymentDisabledTip": "Ödeme sayfası, akış bağlandığında aktif hale gelecektir.",
-      "proceedPayment": "Ödemeye Geç"
+      "proceedPayment": "Ödemeye Geç",
+      "paymentDisabledTip": "Ödeme sayfası, akış bağlandığında aktif hale gelecektir."
     },
     "status": {
       "approved": "Onaylandı",
@@ -202,7 +150,9 @@
       "refundRequested": "İade Talep Edildi",
       "refunded": "İade Edildi",
       "cancelled": "İptal Edildi",
-      "pending": "Ön Kayıt / Beklemede"
+      "pending": "Ön Kayıt / Beklemede",
+      "confirmed": "Onaylandı",
+      "paymentRejected": "Ödeme Reddedildi"
     },
     "quick": {
       "viewReservations": "Rezervasyon Taleplerim",
@@ -242,6 +192,7 @@
       "cta": "Destekle İletişime Geç"
     }
   },
+
   "main": {
     "welcomeBack": "Tekrar hoş geldiniz!",
     "quickActions": "Hızlı İşlemler",
@@ -297,7 +248,106 @@
     "rights": "© 2025 Sabancı Üniversitesi. Tüm hakları saklıdır.",
     "rightsEduHotel": "© 2025 Edu Hotel Yönetim Sistemi - Sabancı Üniversitesi. Tüm hakları saklıdır."
   },
-  
+
+  "bookingRequest": {
+    "title": "EDU Otel için Rezervasyon Talebi",
+    "subtitle": "EDU Otel için ön rezervasyon talebi oluşturun. Talebiniz idare tarafından incelenip onaylanacaktır. Nihai oda ataması otel personeli tarafından yapılacaktır.",
+    "step1Title": "Adım 1 – Rezervasyon talebinizi gönderin",
+    "step1Description": "Konaklama tarihlerinizi ve temel bilgilerinizi girin. Bu form, anlık bir rezervasyon değil, talep formudur.",
+    "step2Title": "Adım 2 – Oda türlerini inceleyin",
+    "step2Description": "Burada EDU Otel'de bulunan örnek oda türlerini görebilirsiniz. Talebiniz onaylandıktan sonra nihai oda ataması otel yönetimi tarafından yapılacaktır.",
+    "pageTitle": "Oda Rezervasyonu",
+    "pageSubtitle": "Ön rezervasyon talebinizi gönderin. EDU ekibi inceleyip onaylayacaktır.",
+    "loggedInAs": "Giriş türü:",
+    "form": {
+      "checkIn": "Giriş Tarihi",
+      "checkOut": "Çıkış Tarihi",
+      "guests": "Kişi Sayısı",
+      "accommodationType": "Konaklama Türü",
+      "invoiceType": "Fatura Türü",
+      "eventCode": "Etkinlik / Eğitim Kodu",
+      "eventCodePlaceholder": "SAT-KAF veya Eğitim Kodu girin",
+      "explanation": "Açıklama / Gerekçe",
+      "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için, kalış amacınızı kısaca açıklayınız.",
+      "submitButton": "Rezervasyon talebini gönder",
+      "submitting": "Gönderiliyor...",
+      "firstName": "Ad",
+      "firstNamePlaceholder": "Adınızı girin",
+      "lastName": "Soyad",
+      "lastNamePlaceholder": "Soyadınızı girin",
+      "phone": "Telefon Numarası",
+      "phonePlaceholder": "+90 (5xx) xxx xx xx",
+      "email": "E-posta Adresi",
+      "emailPlaceholder": "ornek@email.com",
+      "additionalGuests": "Ek Misafirler",
+      "guest": "Misafir",
+      "checkInTime": "Giriş Saati",
+      "eventType": "Etkinlik Türü",
+      "priceType": "Fiyat Türü",
+      "freeAccommodation": "Ücretsiz Konaklama (ödeme yok)",
+      "freeAccommodationHint": "✓ Onaylanırsa ödeme istenmez.",
+      "consent": "Verdiğim bilgilerin doğru olduğunu onaylıyorum ve rezervasyon kurallarını kabul ediyorum.",
+      "tcKimlik": "T.C. Kimlik No",
+      "tcKimlikPlaceholder": "T.C. Kimlik No girin",
+      "taxNumber": "Vergi Numarası",
+      "taxNumberPlaceholder": "Vergi Numarası girin"
+    },
+    "messages": {
+      "success": "Rezervasyon talebiniz gönderildi. İdare tarafından incelendikten sonra size bilgi verilecektir.",
+      "error": "Talep gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.",
+      "datesRequired": "Lütfen giriş ve çıkış tarihlerini seçiniz.",
+      "guestsRequired": "Lütfen kişi sayısını seçiniz."
+    },
+    "eventTypes": {
+      "conference": "Konferans",
+      "seminar": "Seminer",
+      "workshop": "Atölye",
+      "training": "Eğitim",
+      "meeting": "Toplantı",
+      "other": "Diğer"
+    },
+    "priceTypes": {
+      "standard": "Standart",
+      "corporate": "Kurumsal Tarife",
+      "discounted": "İndirimli"
+    },
+    "billing": {
+      "individual": "Bireysel",
+      "corporate": "Kurumsal"
+    },
+    "accommodation": {
+      "personal": "Kişisel",
+      "corporate": "Kurumsal (SÜ)",
+      "education": "Eğitim"
+    },
+    "roomAssignmentInfo": "Oda ataması onaydan sonra EDU resepsiyonu tarafından yapılır. Kullanıcılar oda seçemez.",
+    "afterSubmitInfo": "Talebiniz gönderildikten sonra EDU ekibi inceleyecektir. İnceleme sonrası e-posta veya bildirim alacaksınız.",
+    "afterSubmitPaymentNote": "Ödeme (varsa) sadece onaydan sonra istenir.",
+    "sidebar": {
+      "goToForm": "Forma git"
+    },
+    "sections": {
+      "reservationInfo": "Rezervasyon Bilgileri",
+      "guestInfo": "Misafir Bilgileri",
+      "stayDetails": "Konaklama Detayları",
+      "roomAssignment": "Oda Ataması",
+      "eventBilling": "Etkinlik ve Faturalandırma",
+      "extraInfo": "Ek Bilgiler"
+    },
+    "rules": {
+      "title": "Rezervasyon Kuralları",
+      "noSunday": "Pazar günü giriş yok",
+      "max5": "Kişisel rezervasyonlarda en fazla 5 gece",
+      "max5short": "En fazla 5 gün (kişisel)",
+      "max30": "Rezervasyon en fazla 30 gün ileri tarihli olabilir",
+      "max30short": "30 gün ileri tarih sınırı",
+      "noSatInSunOut": "Cumartesi giriş + Pazar çıkış yapılamaz",
+      "emailAuto": "E-posta bildirimleri otomatik gönderilir",
+      "manualApproval": "Tüm ön rezervasyonlar EDU ekibi tarafından manuel onay gerektirir.",
+      "confirmationTime": "İncelemeden sonra onay bilgisi alacaksınız."
+    }
+  },
+
   "account": {
     "title": "Hesabım",
     "subtitle": "Hesap ayarlarınızı ve kişisel bilgilerinizi yönetin",
@@ -333,6 +383,7 @@
     "prefs": {
       "title": "Tercihler",
       "lang": "Dil",
+      "langNote": "Dil, başlık menüsünden değiştirilebilir.",
       "emailNotifs": "E-posta Bildirimleri",
       "notifAll": "Tüm Bildirimler",
       "notifImportant": "Sadece Önemli",
@@ -343,8 +394,14 @@
       "title": "Oturum Yönetimi",
       "subtitle": "Hesap verilerinizi korumak için oturumu kapatın.",
       "logoutBtn": "Çıkış Yap"
+    },
+    "nav": {
+      "backToDashboard": "Ana Sayfaya Dön",
+      "myReservations": "Rezervasyonlarım",
+      "bookRoom": "Oda Rezervasyonu"
     }
   },
+
   "payment": {
     "title": "Ödeme ve Onay",
     "subtitle": "Ödemenizi banka havalesi ile tamamlayın ve doğrulama için makbuzunuzu yükleyin.",
@@ -375,13 +432,69 @@
     "adminReview": "Dekontunuzu yükledikten sonra idare ödemenizi inceleyip onaylayacaktır. Onaylandığında e-posta bildirimi alacaksınız.",
     "submitBtn": "Dekontu İncelemeye Gönder",
     "submitting": "Dekont Gönderiliyor...",
-  "errors": {
+    "errors": {
       "noFile": "Lütfen ödeme dekontunu yükleyin.",
       "invalidFormat": "Geçersiz dosya formatı. Lütfen PDF, JPG veya PNG yükleyin.",
       "tooLarge": "Dosya boyutu 5MB'ı aşıyor.",
       "uploadFailed": "Dekont yüklenemedi. Lütfen tekrar deneyin.",
       "noReservation": "Aktif rezervasyon bulunamadı."
     },
-  "success": "Ödeme dekontu başarıyla gönderildi!"
+    "success": "Ödeme dekontu başarıyla gönderildi!"
+  },
+
+  "reservations": {
+    "title": "Rezervasyonlarım",
+    "subtitle": "Tüm rezervasyon taleplerinizi görüntüleyin ve yönetin.",
+    "newReservation": "Yeni Rezervasyon",
+    "stats": {
+      "total": "Toplam",
+      "pending": "Beklemede",
+      "approved": "Onaylandı",
+      "confirmed": "Onaylandı"
+    },
+    "search": "Numara, isim veya tarih ile ara...",
+    "filter": {
+      "all": "Tüm Durumlar",
+      "pending": "Beklemede",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi",
+      "cancelled": "İptal Edildi",
+      "refundRequested": "İade Talep Edildi",
+      "refunded": "İade Edildi"
+    },
+    "empty": {
+      "title": "Henüz rezervasyon yok",
+      "subtitle": "Başlamak için bir oda rezervasyonu yapın.",
+      "noMatch": "Eşleşen rezervasyon bulunamadı",
+      "noMatchSub": "Filtrelerinizi veya arama sorgunuzu ayarlamayı deneyin."
+    },
+    "detail": {
+      "guestInfo": "Misafir Bilgileri",
+      "stayDetails": "Konaklama Detayları",
+      "billing": "Faturalandırma ve Notlar",
+      "created": "Oluşturulma Tarihi",
+      "rejectionReason": "Red Gerekçesi",
+      "cancellationNote": "İptal Notu",
+      "checkInLabel": "Giriş",
+      "roomLabel": "Oda",
+      "eventLabel": "Etkinlik",
+      "codeLabel": "Kod",
+      "freeAccommodation": "Ücretsiz Konaklama",
+      "cancelledByYou": "Sizin tarafınızdan iptal edildi.",
+      "night_one": "gece",
+      "night_other": "gece",
+      "guest_one": "misafir",
+      "guest_other": "misafir"
+    },
+    "action": {
+      "pay": "Ödemeye Geç",
+      "paymentWaiting": "Ödeme Doğrulaması Bekleniyor",
+      "paymentConfirmed": "Ödeme Onaylandı",
+      "cancel": "Rezervasyonu İptal Et",
+      "cancelReason": "Lütfen iptal gerekçesi girin (isteğe bağlı):"
+    },
+    "showing": "Gösterilen",
+    "of": "/",
+    "reservations": "rezervasyon"
   }
 }

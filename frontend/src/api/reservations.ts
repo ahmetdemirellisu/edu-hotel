@@ -12,6 +12,12 @@ export type ReservationStatus =
   | "REFUND_REQUESTED"
   | "REFUNDED";
 
+export type PaymentStatus =
+  | "NONE"
+  | "PENDING_VERIFICATION"
+  | "APPROVED"
+  | "REJECTED";
+
 export type GuestType = "STUDENT" | "STAFF" | "SPECIAL_GUEST" | "OTHER";
 
 export type GuestListItem = {
@@ -71,6 +77,7 @@ export interface Reservation extends ReservationPayload {
   id: number;
   roomId: number | null;
   status: ReservationStatus;
+  paymentStatus: PaymentStatus;
   createdAt: string;
 
   // snapshot fields from backend
@@ -195,10 +202,14 @@ export async function rejectReservation(
 
   return res.json();
 }
-// Fetch latest reservation for dashboard
+
+/**
+ * GET /reservations/my/latest
+ * Fetch latest reservation for dashboard
+ */
 export async function getMyLatestReservation(userId: number) {
   const res = await fetch(
-    `http://localhost:3000/reservations/my/latest?userId=${userId}`
+    `${API_BASE_URL}/reservations/my/latest?userId=${userId}`
   );
 
   if (res.status === 404) {
@@ -207,6 +218,30 @@ export async function getMyLatestReservation(userId: number) {
 
   if (!res.ok) {
     throw new Error("Failed to fetch latest reservation");
+  }
+
+  return res.json();
+}
+
+/**
+ * PATCH /reservations/:id/cancel
+ * Cancel a reservation (user-side).
+ */
+export async function cancelReservation(
+  id: number,
+  userId: number,
+  reason?: string
+): Promise<Reservation> {
+  const res = await fetch(`${API_BASE_URL}/reservations/${id}/cancel`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId, reason }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await parseError(res, "Failed to cancel reservation"));
   }
 
   return res.json();

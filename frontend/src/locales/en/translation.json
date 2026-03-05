@@ -1,7 +1,8 @@
 {
   "header": {
     "mySU": "My SU",
-    "language": "TR"
+    "language": "TR",
+    "mainPage": "Main Page"
   },
 
   "breadcrumb": {
@@ -9,19 +10,20 @@
   },
 
   "nav": {
-  "dashboard": "Main Page",
-  "notifications": "Notifications",
-  "profile": "My Profile",
-  "logout": "Logout"
+    "dashboard": "Main Page",
+    "notifications": "Notifications",
+    "profile": "My Profile",
+    "logout": "Logout"
   },
 
   "common": {
-  "select": "Select",
-  "success": "Success",
-  "error": "Error",
-  "dismiss": "Dismiss",
-  "note": "Note",
-  "backToTop": "Back to top"
+    "select": "Select",
+    "success": "Success",
+    "error": "Error",
+    "dismiss": "Dismiss",
+    "note": "Note",
+    "backToTop": "Back to top",
+    "loading": "Loading..."
   },
 
   "login": {
@@ -119,6 +121,75 @@
       "amenitiesText": "Complimentary WiFi, breakfast, and parking for all guests",
       "supportTitle": "24/7 Support",
       "supportText": "Our team is always available to assist you"
+    },
+    "subtitle": "Track your reservation requests, approvals, payments, and notifications in one place.",
+    "stats": {
+      "totalReservations": "Total Reservations",
+      "totalReservationsSub": "All time",
+      "upcoming": "Upcoming Stays",
+      "upcomingSub": "Next check-in soon",
+      "pending": "Pending Approvals",
+      "pendingSub": "Awaiting review",
+      "completed": "Completed Stays",
+      "completedSub": "This year"
+    },
+    "activeReservation": {
+      "title": "Current Reservation Status",
+      "reservationId": "Reservation ID",
+      "dates": "Dates",
+      "amount": "Amount",
+      "viewRequests": "View My Requests",
+      "createNew": "Create New Reservation",
+      "proceedPayment": "Proceed to Payment",
+      "paymentDisabledTip": "Payment is available only after approval."
+    },
+    "status": {
+      "approved": "Approved",
+      "paymentPending": "Payment Pending",
+      "paymentReceived": "Payment Received",
+      "refundRequested": "Refund Requested",
+      "refunded": "Refunded",
+      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "paymentRejected": "Payment Rejected"
+    },
+    "quick": {
+      "viewReservations": "My Reservation Requests",
+      "notifications": "Notifications",
+      "soon": "Soon",
+      "contactSupport": "Contact Support"
+    },
+    "rules": {
+      "title": "Reservation Rules (Important)",
+      "r1": "Sunday check-in is not allowed.",
+      "r2": "You can request reservations up to 30 days ahead.",
+      "r3": "Individual stays cannot exceed 5 consecutive days (unless authorized).",
+      "r4": "Saturday check-in & Sunday check-out combinations may be restricted by the system.",
+      "r5": "Room selection is not available to users; rooms are assigned by the hotel/admin workflow."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "approvedTitle": "Reservation Approved",
+      "approvedMsg": "Your reservation has been approved. Please proceed to payment if required.",
+      "pendingTitle": "Pending Review",
+      "pendingMsg": "Your reservation request is awaiting admin approval.",
+      "reminderTitle": "Check-in Reminder",
+      "reminderMsg": "Check-in is scheduled for 14:00 on your check-in date.",
+      "time1": "2 hours ago",
+      "time2": "1 day ago",
+      "time3": "3 days ago"
+    },
+    "announcements": {
+      "a1Title": "Holiday Season Special Rates",
+      "a1Msg": "Enjoy special rates for bookings during the holiday season.",
+      "a2Title": "New Dining Service Available",
+      "a2Msg": "In-room dining is available from 7 AM to 10 PM daily."
+    },
+    "help": {
+      "title": "Need Help?",
+      "msg": "If you have issues with approvals, payment receipts, or cancellations, contact the support team.",
+      "cta": "Contact Support"
     }
   },
 
@@ -181,17 +252,13 @@
   "bookingRequest": {
     "title": "Reservation Request for EDU Hotel",
     "subtitle": "Submit a pre-reservation request for EDU Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
-
     "step1Title": "Step 1 – Submit your reservation request",
     "step1Description": "Please fill in your stay dates and basic information. This is a request form, not an instant booking.",
-
     "step2Title": "Step 2 – Explore room types",
     "step2Description": "These are example room types available at EDU Hotel. Final room assignment will be made by the hotel administration after your request is approved.",
-
     "pageTitle": "Book a Room",
     "pageSubtitle": "Submit your pre-reservation request. The EDU team will review and confirm.",
     "loggedInAs": "You are logged in as:",
-
     "form": {
       "checkIn": "Check In",
       "checkOut": "Check Out",
@@ -199,33 +266,38 @@
       "accommodationType": "Accommodation Type",
       "invoiceType": "Invoice Type",
       "eventCode": "Event / Training Code",
+      "eventCodePlaceholder": "Enter SAT-KAF or Education Code",
       "explanation": "Explanation / Reason",
       "explanationPlaceholder": "Please briefly explain the purpose of your stay (especially for education-related reservations).",
       "submitButton": "Submit reservation request",
       "submitting": "Submitting...",
       "firstName": "First Name",
+      "firstNamePlaceholder": "Enter first name",
       "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter last name",
       "phone": "Phone Number",
+      "phonePlaceholder": "+90 (5xx) xxx xx xx",
       "email": "Email Address",
+      "emailPlaceholder": "example@email.com",
+      "additionalGuests": "Additional Guests",
+      "guest": "Guest",
       "checkInTime": "Check-in Time",
       "eventType": "Event Type",
       "priceType": "Price Type",
       "freeAccommodation": "Free Accommodation (No payment required)",
       "freeAccommodationHint": "✓ If approved, payment will not be requested for this reservation.",
       "consent": "I confirm that the information provided is correct and I accept the reservation rules.",
-
       "tcKimlik": "T.C. Kimlik No",
-      "taxNumber": "Tax Number"
-      
+      "tcKimlikPlaceholder": "Enter T.C. Kimlik No",
+      "taxNumber": "Tax Number",
+      "taxNumberPlaceholder": "Enter Tax Number"
     },
-
     "messages": {
       "success": "Your reservation request has been submitted. You will be notified after it is reviewed by the administration.",
       "error": "There was an error submitting your request. Please try again later.",
       "datesRequired": "Please select check-in and check-out dates.",
       "guestsRequired": "Please select number of guests."
     },
-
     "eventTypes": {
       "conference": "Conference",
       "seminar": "Seminar",
@@ -234,27 +306,26 @@
       "meeting": "Meeting",
       "other": "Other"
     },
-
     "priceTypes": {
       "standard": "Standard",
       "corporate": "Corporate Rate",
       "discounted": "Discounted"
     },
-
     "billing": {
       "individual": "Individual",
       "corporate": "Corporate"
     },
-
+    "accommodation": {
+      "personal": "Personal",
+      "corporate": "Corporate (SU)",
+      "education": "Education"
+    },
     "roomAssignmentInfo": "Rooms are assigned by the EDU reception after approval. Users cannot select rooms.",
-
     "afterSubmitInfo": "After submission, your request will be reviewed by the EDU team. You will receive an email or push notification after review.",
     "afterSubmitPaymentNote": "Payment will be requested only after approval if applicable.",
-
     "sidebar": {
       "goToForm": "Go to form"
     },
-
     "sections": {
       "reservationInfo": "Reservation Information",
       "guestInfo": "Guest Information",
@@ -263,7 +334,6 @@
       "eventBilling": "Event & Billing",
       "extraInfo": "Extra Information"
     },
-
     "rules": {
       "title": "Reservation Rules",
       "noSunday": "No Sunday check-in",
@@ -276,7 +346,6 @@
       "manualApproval": "All pre-reservations require manual approval by the EDU team.",
       "confirmationTime": "You will receive confirmation after review."
     }
-
   },
 
   "account": {
@@ -314,6 +383,7 @@
     "prefs": {
       "title": "Preferences",
       "lang": "Language",
+      "langNote": "Language can be changed from the header.",
       "emailNotifs": "Email Notifications",
       "notifAll": "All Notifications",
       "notifImportant": "Important Only",
@@ -324,8 +394,14 @@
       "title": "Session Management",
       "subtitle": "Sign out to protect your account data.",
       "logoutBtn": "Logout"
+    },
+    "nav": {
+      "backToDashboard": "Back to Dashboard",
+      "myReservations": "My Reservations",
+      "bookRoom": "Book a Room"
     }
   },
+
   "payment": {
     "title": "Payment & Confirmation",
     "subtitle": "Complete your payment via bank transfer and upload your receipt for verification.",
@@ -356,15 +432,69 @@
     "adminReview": "After uploading your receipt, the administration will review and confirm your payment. You will receive an email notification once verified.",
     "submitBtn": "Submit Receipt for Review",
     "submitting": "Submitting Receipt...",
-    
-  "errors": {
-    "noFile": "Please upload a payment receipt.",
-    "invalidFormat": "Invalid file format. Please upload PDF, JPG, or PNG.",
-    "tooLarge": "File size exceeds 5MB.",
-    "uploadFailed": "Failed to upload receipt. Please try again.",
-    "noReservation": "No active reservation found."
+    "errors": {
+      "noFile": "Please upload a payment receipt.",
+      "invalidFormat": "Invalid file format. Please upload PDF, JPG, or PNG.",
+      "tooLarge": "File size exceeds 5MB.",
+      "uploadFailed": "Failed to upload receipt. Please try again.",
+      "noReservation": "No active reservation found."
+    },
+    "success": "Payment receipt submitted successfully!"
   },
-  "success": "Payment receipt submitted successfully!"
-}
-}
 
+  "reservations": {
+    "title": "My Reservations",
+    "subtitle": "View and manage all your reservation requests.",
+    "newReservation": "New Reservation",
+    "stats": {
+      "total": "Total",
+      "pending": "Pending",
+      "approved": "Approved",
+      "confirmed": "Confirmed"
+    },
+    "search": "Search by ID, name, or date...",
+    "filter": {
+      "all": "All Statuses",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "refundRequested": "Refund Requested",
+      "refunded": "Refunded"
+    },
+    "empty": {
+      "title": "No reservations yet",
+      "subtitle": "Book a room to get started.",
+      "noMatch": "No matching reservations",
+      "noMatchSub": "Try adjusting your filters or search query."
+    },
+    "detail": {
+      "guestInfo": "Guest Information",
+      "stayDetails": "Stay Details",
+      "billing": "Billing & Notes",
+      "created": "Created",
+      "rejectionReason": "Rejection Reason",
+      "cancellationNote": "Cancellation Note",
+      "checkInLabel": "Check-in",
+      "roomLabel": "Room",
+      "eventLabel": "Event",
+      "codeLabel": "Code",
+      "freeAccommodation": "Free Accommodation",
+      "cancelledByYou": "Cancelled by you.",
+      "night_one": "night",
+      "night_other": "nights",
+      "guest_one": "guest",
+      "guest_other": "guests"
+    },
+    "action": {
+      "pay": "Proceed to Payment",
+      "paymentWaiting": "Awaiting Payment Verification",
+      "paymentConfirmed": "Payment Confirmed",
+      "cancel": "Cancel Reservation",
+      "cancelReason": "Please provide a reason for cancellation (optional):"
+    },
+    "showing": "Showing",
+    "of": "of",
+    "reservations": "reservations"
+  }
+}
