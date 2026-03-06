@@ -96,6 +96,7 @@ enum RoomStatus {
   AVAILABLE
   OCCUPIED
   MAINTENANCE
+  RESERVED
 }
 
 enum AccommodationType {
