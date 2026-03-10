@@ -79,6 +79,6 @@ jobs:
           podman-compose pull
           Environment="XDG_RUNTIME_DIR=/run/user/$(id -u)"
           echo "Restarting eduhotel-runner service"
-          systemctl –user stop eduhotel-runner 
+          systemctl --user stop eduhotel-runner
           systemctl --user start eduhotel-runner 
           podman-compose up -d --remove-orphans
