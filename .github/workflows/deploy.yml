@@ -66,8 +66,8 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
           JWT_SECRET=${{ secrets.JWT_SECRET }}
-          EMAIL_USER=user
-          EMAIL_PASS=pass
+          EMAIL_USER=user1
+          EMAIL_PASS=pass1
           EOF
 
           cd "$DEPLOY_DIR"
