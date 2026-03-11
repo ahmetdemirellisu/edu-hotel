@@ -1,5 +1,5 @@
 // src/api/reservations.ts
-const API_BASE_URL = "http://localhost:9004";
+const API_BASE_URL = "api";
 
 export type AccommodationType = "PERSONAL" | "CORPORATE" | "EDUCATION";
 export type InvoiceType = "INDIVIDUAL" | "CORPORATE";
