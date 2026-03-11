@@ -53,7 +53,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("http://localhost:3000/admin/dashboard-stats");
+        const res = await fetch("http://localhost:9004/admin/dashboard-stats");
         if (res.ok) setStats(await res.json());
       } catch (err) { console.error("Failed to load dashboard stats:", err); }
       finally { setLoadingStats(false); }

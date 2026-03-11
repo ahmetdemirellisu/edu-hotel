@@ -24,7 +24,7 @@ export function BlacklistPage() {
 
   useEffect(() => {
     (async () => {
-      try { setLoading(true); setError(null); const res = await fetch("http://localhost:3000/blacklist"); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(await res.json()); }
+      try { setLoading(true); setError(null); const res = await fetch("http://localhost:9004/blacklist"); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(await res.json()); }
       catch (err: any) { setError(err.message); } finally { setLoading(false); }
     })();
   }, []);
@@ -32,7 +32,7 @@ export function BlacklistPage() {
   useEffect(() => {
     if (!showModal || searchQuery.trim().length < 2) { setSearchResults([]); return; }
     const timeout = setTimeout(async () => {
-      try { setSearchLoading(true); const res = await fetch(`http://localhost:3000/users/search?query=${encodeURIComponent(searchQuery.trim())}`); if (!res.ok) throw new Error("Failed"); setSearchResults((await res.json()).filter((u: SearchUser) => u.role !== "ADMIN")); }
+      try { setSearchLoading(true); const res = await fetch(`http://localhost:9004/users/search?query=${encodeURIComponent(searchQuery.trim())}`); if (!res.ok) throw new Error("Failed"); setSearchResults((await res.json()).filter((u: SearchUser) => u.role !== "ADMIN")); }
       catch {} finally { setSearchLoading(false); }
     }, 300);
     return () => clearTimeout(timeout);
@@ -42,7 +42,7 @@ export function BlacklistPage() {
 
   const handleRemove = async (userId: number) => {
     if (!window.confirm("Remove from blacklist?")) return;
-    try { const res = await fetch(`http://localhost:3000/blacklist/remove/${userId}`, { method: "DELETE" }); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(prev => prev.filter(e => e.userId !== userId)); }
+    try { const res = await fetch(`http://localhost:9004/blacklist/remove/${userId}`, { method: "DELETE" }); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(prev => prev.filter(e => e.userId !== userId)); }
     catch (err: any) { alert(err.message); }
   };
 
@@ -50,7 +50,7 @@ export function BlacklistPage() {
     if (!modalUserId || !modalReason) { alert("User and reason required."); return; }
     if (!isPermanent && !modalExpiresAt) { alert("Select expiry date."); return; }
     try {
-      const res = await fetch("http://localhost:3000/blacklist/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: Number(modalUserId), reason: modalReason, expiresAt: isPermanent ? null : modalExpiresAt }) });
+      const res = await fetch("http://localhost:9004/blacklist/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: Number(modalUserId), reason: modalReason, expiresAt: isPermanent ? null : modalExpiresAt }) });
       const data = await res.json(); if (!res.ok) throw new Error(data.error || "Failed");
       setBlacklistedGuests(prev => [data, ...prev]); setShowModal(false); resetModal();
     } catch (err: any) { alert(err.message); }

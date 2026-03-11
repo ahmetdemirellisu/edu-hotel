@@ -23,7 +23,7 @@ export function AdminUsersPage() {
     (async () => {
       try {
         // Try to load admin/staff users from the API
-        const res = await fetch("http://localhost:3000/users/search?query=&role=ADMIN,HOTEL_STAFF");
+        const res = await fetch("http://localhost:9004/users/search?query=&role=ADMIN,HOTEL_STAFF");
         if (res.ok) {
           const data = await res.json();
           setUsers(data);

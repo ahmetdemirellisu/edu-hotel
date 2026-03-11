@@ -82,7 +82,7 @@ export function NotificationsPage() {
     (async () => {
       if (!userId || isNaN(userId)) { setLoading(false); return; }
       try {
-        const res = await fetch(`http://localhost:3000/notifications/user/${userId}`);
+        const res = await fetch(`http://localhost:9004/notifications/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setNotifications(data.notifications || []);

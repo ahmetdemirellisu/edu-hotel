@@ -103,7 +103,7 @@ export function Payment() {
        * FIX: Use Port 3000 (from your error log) 
        * and "/payment" (from your app.use in app.js)
        */
-      const response = await fetch(`http://localhost:3000/payment/upload-dekont/${reservation.id}`, {
+      const response = await fetch(`http://localhost:9004/payment/upload-dekont/${reservation.id}`, {
         method: "POST",
         body: formData,
       });

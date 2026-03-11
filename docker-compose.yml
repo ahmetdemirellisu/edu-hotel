@@ -7,8 +7,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      # Named volume yerine dizin bazlı (Bind Mount) kullanım: 
-      # Bu sayede veriler direkt kullanıcının home dizininde kalır.
       - ./postgres_data:/var/lib/postgresql/data:Z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -19,36 +17,35 @@ services:
       - app-network
 
   backend:
-    image: ghcr.io/ahmetdemirellisu/edu-hotel/backend:latest
+    build: ./backend
     container_name: eduhotel-backend
     environment:
       NODE_ENV: production
       PORT: 3000
-      # İç ağda 'db' servis ismini kullanarak bağlanır
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
-      JWT_EXPIRES_IN: 1d
-      JWT_REFRESH_EXPIRES_IN: 7d
-      # Frontend'in dışarıdan erişildiği URL
-      CLIENT_URL: https://student-projects.sabanciuniv.edu/ehp
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: ${EMAIL_USER:-}
+      SMTP_PASS: ${EMAIL_PASS:-}
+      SMTP_FROM: "EDU HOTEL <${EMAIL_USER:-}>"
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "9004:3000" # Dışarıdan 9002, içeride 3000
+      - "9004:3000"
     networks:
       - app-network
 
   frontend:
-    image: ghcr.io/ahmetdemirellisu/edu-hotel/frontend:latest
+    build: ./frontend
     container_name: eduhotel-frontend
-    environment:
-      # Frontend'in API'ye gitmesi gereken adres
-      REACT_APP_API_URL: https://student-projects.sabanciuniv.edu/ehp-api
     depends_on:
       - backend
     ports:
-      - "8004:80" # Dışarıdan 8002, içeride 80 (Nginx/Server portu)
+      - "8004:80"
     networks:
       - app-network
 

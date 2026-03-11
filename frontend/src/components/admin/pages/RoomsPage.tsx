@@ -143,14 +143,14 @@ export function RoomsPage() {
   const load = useCallback(async (d: string) => {
     try {
       setLoading(true); setError(null);
-      const res = await fetch(`http://localhost:3000/rooms/availability?date=${d}`);
+      const res = await fetch(`http://localhost:9004/rooms/availability?date=${d}`);
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setRooms(data.rooms); setCounts(data.counts);
     } catch {
       // Fallback
       try {
-        const res = await fetch("http://localhost:3000/rooms");
+        const res = await fetch("http://localhost:9004/rooms");
         if (res.ok) {
           const arr = await res.json();
           setRooms(arr.map((r: any) => ({ ...r, baseStatus: r.status, reservation: null })));
@@ -395,7 +395,7 @@ function Drawer({ room, date, onClose }: { room: RoomData; date: string; onClose
   const save = async () => {
     try {
       setSaving(true);
-      const r = await fetch(`http://localhost:3000/rooms/${room.id}/status`, {
+      const r = await fetch(`http://localhost:9004/rooms/${room.id}/status`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });

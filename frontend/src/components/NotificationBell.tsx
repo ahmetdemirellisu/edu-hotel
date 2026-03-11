@@ -54,7 +54,7 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
     if (!userId || isNaN(userId)) return;
     (async () => {
       try {
-        const res = await fetch(`http://localhost:3000/notifications/user/${userId}`);
+        const res = await fetch(`http://localhost:9004/notifications/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setNotifications((data.notifications || []).slice(0, 8));
