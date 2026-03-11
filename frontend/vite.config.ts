@@ -4,7 +4,7 @@
   import * as path from "path";
 
   export default defineConfig({
-    base: './ehp/',
+    base: './',
     plugins: [react()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
