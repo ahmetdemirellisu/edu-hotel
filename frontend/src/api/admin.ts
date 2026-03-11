@@ -12,7 +12,7 @@ export interface AdminDashboardStats {
   }
   
   export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-    const res = await fetch("http://localhost:9004/admin/dashboard-stats");
+    const res = await fetch("api/admin/dashboard-stats");
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.error || "Failed to load dashboard stats.");
