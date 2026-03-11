@@ -50,7 +50,7 @@ export async function getAdminGuests(params?: {
 
   const qs = query.toString();
   const res = await fetch(
-    `http://localhost:9004/users/admin${qs ? `?${qs}` : ""}`
+    `api/users/admin${qs ? `?${qs}` : ""}`
   );
 
   if (!res.ok) {
@@ -65,7 +65,7 @@ export async function getAdminGuests(params?: {
  * Add user to blacklist (simple permanent block – reason only).
  */
 export async function blacklistUser(userId: number, reason: string) {
-  const res = await fetch("http://localhost:9004/blacklist/add", {
+  const res = await fetch("api/blacklist/add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId, reason, expiresAt: null }),
@@ -83,7 +83,7 @@ export async function blacklistUser(userId: number, reason: string) {
  */
 export async function unblacklistUser(userId: number) {
   const res = await fetch(
-    `http://localhost:9004/blacklist/remove/${userId}`,
+    `api/blacklist/remove/${userId}`,
     { method: "DELETE" }
   );
 
