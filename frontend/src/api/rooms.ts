@@ -14,7 +14,7 @@ export interface Room {
   createdAt: string;
 }
 
-const API_BASE = "http://localhost:9004"; // same host/port as your backend
+const API_BASE = "api"; // same host/port as your backend
 
 export async function getRooms(): Promise<Room[]> {
   const res = await fetch(`${API_BASE}/rooms`);
