@@ -78,6 +78,5 @@ jobs:
           # Güncel imajları çek ve servisleri yeniden başlat
 
           podman-compose down
-          cp --interactive=never docker-compose.yml "$DEPLOY_DIR/"
           podman-compose pull
           podman-compose up -d --remove-orphans --force-recreate
