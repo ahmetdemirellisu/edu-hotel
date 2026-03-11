@@ -14,10 +14,10 @@ services:
       timeout: 3s
       retries: 20
     networks:
-      - app-network
+      - ehp-network
 
   backend:
-    build: ./backend
+    image: ghcr.io/ahmetdemirellisu/edu-hotel/backend:latest
     container_name: eduhotel-backend
     environment:
       NODE_ENV: production
@@ -37,18 +37,18 @@ services:
     ports:
       - "9004:3000"
     networks:
-      - app-network
+      - ehp-network
 
   frontend:
-    build: ./frontend
+    image: ghcr.io/ahmetdemirellisu/edu-hotel/frontend:latest
     container_name: eduhotel-frontend
     depends_on:
       - backend
     ports:
       - "8004:80"
     networks:
-      - app-network
+      - ehp-network
 
 networks:
-  app-network:
+  ehp-network:
     driver: bridge
