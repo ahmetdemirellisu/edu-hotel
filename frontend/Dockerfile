@@ -11,7 +11,9 @@ RUN npm run build
 # 2. Aşama: Yayına Alma (Production)
 FROM nginx:stable-alpine
 
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
