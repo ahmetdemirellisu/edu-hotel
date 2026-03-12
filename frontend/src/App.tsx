@@ -14,7 +14,7 @@ import { NotificationsPage } from "./components/NotificationsPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("authToken");
-  if (!token) return <Navigate to="/" replace />;
+  if (!token) return <Navigate to="/ehp" replace />;
   return children;
 }
 
