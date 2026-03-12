@@ -14,13 +14,13 @@ import { NotificationsPage } from "./components/NotificationsPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("authToken");
-  if (!token) return <Navigate to="/ehp" replace />;
+  if (!token) return <Navigate to="/" replace />;
   return children;
 }
 
 export default function App() {
   return (
-    <Router>
+    <Router basename="/ehp">
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
