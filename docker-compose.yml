@@ -45,8 +45,8 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: http://localhost:9004
-        VITE_BASE_PATH: /
+        VITE_API_URL: /ehp
+        VITE_BASE_PATH: /ehp
     container_name: eduhotel-frontend
     depends_on:
       - backend
