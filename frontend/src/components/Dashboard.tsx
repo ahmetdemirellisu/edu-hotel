@@ -563,7 +563,7 @@ export function Dashboard() {
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
                   </a>
                   <a
-                    href="/book-room"
+                    href="book-room"
                     className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 bg-[#003366] text-white font-medium text-sm
                                hover:bg-[#002244] hover:shadow-lg transition-all duration-300"
                   >
