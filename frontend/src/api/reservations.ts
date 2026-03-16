@@ -1,5 +1,5 @@
 // src/api/reservations.ts
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:9004";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "/ehp";
 
 export type AccommodationType = "PERSONAL" | "CORPORATE" | "EDUCATION";
 export type InvoiceType = "INDIVIDUAL" | "CORPORATE";
