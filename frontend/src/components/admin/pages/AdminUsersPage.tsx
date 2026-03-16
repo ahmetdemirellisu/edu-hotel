@@ -21,7 +21,7 @@ export function AdminUsersPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/users/search?query=&role=ADMIN,HOTEL_STAFF");
+        const res = await fetch("/ehp/api/users/search?query=&role=ADMIN,HOTEL_STAFF");
         if (res.ok) {
           const data = await res.json();
           setUsers(data);

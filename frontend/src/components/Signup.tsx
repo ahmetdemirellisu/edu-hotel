@@ -19,7 +19,7 @@ import {
 } from "./ui/select";
 
 const API_URL =
-  (import.meta.env.VITE_API_URL as string) || "api";
+  (import.meta.env.VITE_API_URL as string) || "/ehp/api";
 
 /* ═══════════════════════════════════════════════════════════
    Inline keyframes (inject once)

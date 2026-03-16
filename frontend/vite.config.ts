@@ -10,9 +10,9 @@
     plugins: [react()],
     server: {
       proxy: {
-        '/api': {
-          target: env.VITE_API_URL || 'http://localhost:9004',
-          rewrite: (path) => path.replace(/^\/api/, ''),
+        '/ehp/api': {
+          target: 'http://localhost:9004',
+          rewrite: (path) => path.replace(/^\/ehp\/api/, ''),
           changeOrigin: true,
         },
       },

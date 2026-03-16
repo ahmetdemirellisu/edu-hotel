@@ -21,7 +21,7 @@ export function PaymentsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/pending-payments");
+      const response = await fetch("/ehp/api/admin/pending-payments");
       if (!response.ok) {
         const d = await response.json().catch(() => ({}));
         throw new Error(d.error || `Server error ${response.status}`);
@@ -39,7 +39,7 @@ export function PaymentsPage() {
   const handleApprove = async (id: number) => {
     if (!window.confirm(t("payments.confirmApproval", "Confirm payment approval?"))) return;
     try {
-      const res = await fetch(`/api/admin/approve-payment/${id}`, { method: "POST" });
+      const res = await fetch(`/ehp/api/admin/approve-payment/${id}`, { method: "POST" });
       if (res.ok) setPayments(prev => prev.filter(p => p.id !== id));
       else { const d = await res.json().catch(() => ({})); alert(d.error || "Failed to approve."); }
     } catch (err) { console.error("Approval error:", err); }
@@ -48,7 +48,7 @@ export function PaymentsPage() {
   const handleReject = async (id: number) => {
     const reason = window.prompt(t("payments.rejectReasonPrompt", "Enter rejection reason (optional):")) || undefined;
     try {
-      const res = await fetch(`/api/admin/reject-payment/${id}`, {
+      const res = await fetch(`/ehp/api/admin/reject-payment/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
@@ -62,7 +62,7 @@ export function PaymentsPage() {
 
   const openReceipt = async (id: number) => {
     for (const name of receiptCandidates(id)) {
-      const url = `/api/view-pending/${name}`;
+      const url = `/ehp/api/view-pending/${name}`;
       try { const res = await fetch(url, { method: "HEAD" }); if (res.ok) { window.open(url, "_blank"); return; } } catch {}
     }
     alert(t("payments.receiptNotFound", "Receipt file not found."));
@@ -70,7 +70,7 @@ export function PaymentsPage() {
 
   const downloadReceipt = async (id: number) => {
     for (const name of receiptCandidates(id)) {
-      const url = `/api/view-pending/${name}`;
+      const url = `/ehp/api/view-pending/${name}`;
       try {
         const res = await fetch(url, { method: "HEAD" });
         if (res.ok) { const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); return; }

@@ -54,7 +54,7 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
     if (!userId || isNaN(userId)) return;
     (async () => {
       try {
-        const res = await fetch(`/ehp/notifications/user/${userId}`);
+        const res = await fetch(`/ehp/api/notifications/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setNotifications((data.notifications || []).slice(0, 8));

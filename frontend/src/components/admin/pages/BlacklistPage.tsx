@@ -24,7 +24,7 @@ export function BlacklistPage() {
 
   useEffect(() => {
     (async () => {
-      try { setLoading(true); setError(null); const res = await fetch("/api/blacklist"); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(await res.json()); }
+      try { setLoading(true); setError(null); const res = await fetch("/ehp/api/blacklist"); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(await res.json()); }
       catch (err: any) { setError(err.message); } finally { setLoading(false); }
     })();
   }, []);
@@ -32,7 +32,7 @@ export function BlacklistPage() {
   useEffect(() => {
     if (!showModal || searchQuery.trim().length < 2) { setSearchResults([]); return; }
     const timeout = setTimeout(async () => {
-      try { setSearchLoading(true); const res = await fetch(`/api/users/search?query=${encodeURIComponent(searchQuery.trim())}`); if (!res.ok) throw new Error("Failed"); setSearchResults((await res.json()).filter((u: SearchUser) => u.role !== "ADMIN")); }
+      try { setSearchLoading(true); const res = await fetch(`/ehp/api/users/search?query=${encodeURIComponent(searchQuery.trim())}`); if (!res.ok) throw new Error("Failed"); setSearchResults((await res.json()).filter((u: SearchUser) => u.role !== "ADMIN")); }
       catch {} finally { setSearchLoading(false); }
     }, 300);
     return () => clearTimeout(timeout);
@@ -42,7 +42,7 @@ export function BlacklistPage() {
 
   const handleRemove = async (userId: number) => {
     if (!window.confirm(t("blacklist.confirmRemove", "Remove this user from blacklist?"))) return;
-    try { const res = await fetch(`/api/blacklist/remove/${userId}`, { method: "DELETE" }); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(prev => prev.filter(e => e.userId !== userId)); }
+    try { const res = await fetch(`/ehp/api/blacklist/remove/${userId}`, { method: "DELETE" }); if (!res.ok) throw new Error("Failed"); setBlacklistedGuests(prev => prev.filter(e => e.userId !== userId)); }
     catch (err: any) { alert(err.message); }
   };
 
@@ -50,7 +50,7 @@ export function BlacklistPage() {
     if (!modalUserId || !modalReason) { alert(t("blacklist.validation.required", "User and reason are required.")); return; }
     if (!isPermanent && !modalExpiresAt) { alert(t("blacklist.validation.expiryRequired", "Please select an expiry date for a temporary block.")); return; }
     try {
-      const res = await fetch("/api/blacklist/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: Number(modalUserId), reason: modalReason, expiresAt: isPermanent ? null : modalExpiresAt }) });
+      const res = await fetch("/ehp/api/blacklist/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: Number(modalUserId), reason: modalReason, expiresAt: isPermanent ? null : modalExpiresAt }) });
       const data = await res.json(); if (!res.ok) throw new Error(data.error || "Failed");
       setBlacklistedGuests(prev => [data, ...prev]); setShowModal(false); resetModal();
     } catch (err: any) { alert(err.message); }
