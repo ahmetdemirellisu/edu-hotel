@@ -10,5 +10,7 @@ RUN npx prisma generate
 
 COPY . .
 
-EXPOSE 3000
+ENV PORT=9004
+
+EXPOSE 9004
 CMD ["npm", "start"]
