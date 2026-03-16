@@ -1,54 +1,46 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: eduhotel-db
+    container_name: ehp-db
+    network_mode: host # Ağ izolasyonunu kaldırır
+    command: postgres -p ${POSTGRES_PORT}
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - ./postgres_data:/var/lib/postgresql/data:Z
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 20
-    networks:
-      - ehp-network
 
   backend:
-    image: ghcr.io/ahmetdemirellisu/edu-hotel/backend:latest
-    container_name: eduhotel-backend
+    image: ghcr.io/ahmetdemirellisu/edu-hotl/backend:latest
+    container_name: ehp-backend
+    network_mode: host # Ağ izolasyonunu kaldırır
+    command: sh -c "npx prisma migrate deploy && PORT=9002 npm run start"
     environment:
       NODE_ENV: production
-      PORT: 3000
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      PORT: 9002
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
-      EMAIL_USER: ${EMAIL_USER:-}
-      EMAIL_PASS: ${EMAIL_PASS:-}
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 587
-      SMTP_USER: ${EMAIL_USER:-}
-      SMTP_PASS: ${EMAIL_PASS:-}
-      SMTP_FROM: "EDU HOTEL <${EMAIL_USER:-}>"
+      JWT_EXPIRES_IN: 1d
+      JWT_REFRESH_EXPIRES_IN: 7d
+      # Frontend'in dışarıdan erişildiği URL
+      CLIENT_URL: https://student-projects.sabanciuniv.edu/ehp
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "9004:3000"
-    networks:
-      - ehp-network
 
   frontend:
-    image: ghcr.io/ahmetdemirellisu/edu-hotel/frontend:latest
-    container_name: eduhotel-frontend
+    image: ghcr.io/ahmetdemirellisu/suimc_app/frontend:latest
+    container_name: ehp-frontend
+    network_mode: host # Ağ izolasyonunu kaldırır
+    environment:
+      # Frontend'in API'ye gitmesi gereken adres
+      REACT_APP_API_URL: https://student-projects.sabanciuniv.edu/ehp/api
     depends_on:
       - backend
-    ports:
-      - "8004:80"
-    networks:
-      - ehp-network
-
-networks:
-  ehp-network:
-    driver: bridge
