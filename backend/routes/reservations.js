@@ -54,7 +54,7 @@ router.post("/", checkBlacklist, async (req, res) => {
             guests, accommodationType, invoiceType, eventCode, note,
             firstName, lastName, phone, contactEmail,
             nationalId, taxNumber, eventType, priceType,
-            freeAccommodation, guestList,
+            freeAccommodation, guestList, billingTitle, billingAddress,
         } = req.body;
 
         const userId = parseInt(rawUserId, 10);
@@ -76,6 +76,12 @@ router.post("/", checkBlacklist, async (req, res) => {
         }
         if (invoiceType === "CORPORATE" && !isNonEmptyString(taxNumber)) {
             return res.status(400).json({ error: "Tax Number is required for corporate billing." });
+        }
+        if (invoiceType === "CORPORATE" && !isNonEmptyString(billingTitle)) {
+            return res.status(400).json({ error: "Billing title (fatura unvanı) is required for corporate billing." });
+        }
+        if (invoiceType === "CORPORATE" && !isNonEmptyString(billingAddress)) {
+            return res.status(400).json({ error: "Billing address (fatura adresi) is required for corporate billing." });
         }
         if (!isNonEmptyString(eventType)) {
             return res.status(400).json({ error: "Event type is required." });
@@ -124,6 +130,8 @@ router.post("/", checkBlacklist, async (req, res) => {
                 phone: phone.trim(), contactEmail: contactEmail.trim(),
                 nationalId: isNonEmptyString(nationalId) ? nationalId.trim() : null,
                 taxNumber: isNonEmptyString(taxNumber) ? taxNumber.trim() : null,
+                billingTitle: isNonEmptyString(billingTitle) ? billingTitle.trim() : null,
+                billingAddress: isNonEmptyString(billingAddress) ? billingAddress.trim() : null,
                 eventType: isNonEmptyString(eventType) ? eventType.trim() : null,
                 priceType: isNonEmptyString(priceType) ? priceType.trim() : null,
                 freeAccommodation: !!freeAccommodation,
@@ -296,35 +304,12 @@ router.get("/admin", async (req, res) => {
 router.patch("/admin/:id/approve", async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const { roomId } = req.body;
+        const { price } = req.body;
 
-        // ── Double-booking prevention ──────────────────────
-        if (roomId) {
-            const reservation = await prisma.reservation.findUnique({ where: { id } });
-            if (!reservation) return res.status(404).json({ error: "Reservation not found." });
-
-            const overlapping = await prisma.reservation.findFirst({
-                where: {
-                    roomId: roomId,
-                    id: { not: id },
-                    status: { in: ["APPROVED"] },
-                    // Overlap: existing checkIn < this checkOut AND existing checkOut > this checkIn
-                    checkIn: { lt: reservation.checkOut },
-                    checkOut: { gt: reservation.checkIn },
-                },
-            });
-
-            if (overlapping) {
-                const room = await prisma.room.findUnique({ where: { id: roomId } });
-                return res.status(409).json({
-                    error: `Room ${room?.name || roomId} is already booked from ${overlapping.checkIn.toISOString().slice(0, 10)} to ${overlapping.checkOut.toISOString().slice(0, 10)} (Reservation #${overlapping.id}). Please choose a different room.`,
-                });
-            }
-        }
-        // ── End double-booking check ──────────────────────
+        const parsedPrice = price !== undefined && price !== null && price !== "" ? parseFloat(price) : null;
 
         const data = { status: "APPROVED" };
-        if (roomId) data.roomId = roomId;
+        if (parsedPrice !== null && !isNaN(parsedPrice)) data.price = parsedPrice;
 
         const reservation = await prisma.reservation.update({
             where: { id },
@@ -338,8 +323,8 @@ router.patch("/admin/:id/approve", async (req, res) => {
                 const guestName = reservation.firstName || reservation.user.name || "Guest";
                 const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
-                const roomInfo = reservation.room ? `Room: ${reservation.room.name}` : "Room will be assigned at check-in.";
-                const roomInfoTR = reservation.room ? `Oda: ${reservation.room.name}` : "Oda bilgisi giriş sırasında iletilecektir.";
+                const priceInfo = reservation.price != null ? `Price: ${reservation.price} TL` : "";
+                const priceInfoTR = reservation.price != null ? `Ücret: ${reservation.price} TL` : "";
 
                 const subject = "EDU Hotel – Reservation approved / Rezervasyon onaylandı";
 
@@ -351,9 +336,8 @@ Your reservation request #${reservation.id} has been APPROVED.
 Check-in:  ${checkInStr} ${reservation.checkInTime || ""}
 Check-out: ${checkOutStr}
 Guests:    ${reservation.guests}
-${roomInfo}
-
-Please proceed with payment if applicable. We look forward to welcoming you.
+${priceInfo ? priceInfo + "\n" : ""}
+Please proceed with payment. We look forward to welcoming you.
 
 ---
 
@@ -364,9 +348,8 @@ Sayın ${guestName},
 Giriş:     ${checkInStr} ${reservation.checkInTime || ""}
 Çıkış:     ${checkOutStr}
 Misafir:   ${reservation.guests}
-${roomInfoTR}
-
-Gerekli ise lütfen ödeme işlemini gerçekleştirin. Sizi ağırlamayı dört gözle bekliyoruz.
+${priceInfoTR ? priceInfoTR + "\n" : ""}
+Lütfen ödeme işlemini gerçekleştirin. Sizi ağırlamayı dört gözle bekliyoruz.
 
 EDU Hotel
 `;
@@ -378,9 +361,9 @@ EDU Hotel
 <strong>Check-in:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
 <strong>Check-out:</strong> ${checkOutStr}<br/>
 <strong>Guests:</strong> ${reservation.guests}<br/>
-${roomInfo}
+${reservation.price != null ? `<strong>Price:</strong> ${reservation.price} TL<br/>` : ""}
 </p>
-<p>Please proceed with payment if applicable.</p>
+<p>Please proceed with payment.</p>
 
 <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
 
@@ -390,9 +373,9 @@ ${roomInfo}
 <strong>Giriş:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
 <strong>Çıkış:</strong> ${checkOutStr}<br/>
 <strong>Misafir:</strong> ${reservation.guests}<br/>
-${roomInfoTR}
+${reservation.price != null ? `<strong>Ücret:</strong> ${reservation.price} TL<br/>` : ""}
 </p>
-<p>Gerekli ise lütfen ödeme işlemini gerçekleştirin.</p>
+<p>Lütfen ödeme işlemini gerçekleştirin.</p>
 
 <p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
 `;

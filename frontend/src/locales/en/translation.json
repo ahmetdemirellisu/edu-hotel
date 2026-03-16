@@ -63,11 +63,13 @@
     "creatingAccount": "Creating account...",
     "createAccount": "Create account",
     "alreadyHaveAccount": "Already have an account? Login",
+    "kvkk": "I consent to the processing of my personal data by EDU Hotel solely for accommodation and reservation services, in accordance with the Personal Data Protection Law No. 6698 (KVKK). My data will not be shared with third parties and will not be used in violation of applicable legislation.",
     "errors": {
       "fillAll": "Please fill in all fields.",
       "passwordMismatch": "Passwords do not match.",
       "failed": "Registration failed.",
-      "network": "Network error. Please try again."
+      "network": "Network error. Please try again.",
+      "kvkkRequired": "You must accept the KVKK data protection consent."
     },
     "success": {
       "accountCreated": "Account created successfully. You can now log in."
@@ -141,7 +143,18 @@
       "viewRequests": "View My Requests",
       "createNew": "Create New Reservation",
       "proceedPayment": "Proceed to Payment",
+      "paymentConfirmed": "Payment Confirmed",
+      "paymentSent": "Payment Sent",
+      "priceNotSet": "To be determined",
       "paymentDisabledTip": "Payment is available only after approval."
+    },
+    "reservation": {
+      "success": "Your reservation request has been submitted for approval."
+    },
+    "validation": {
+      "notLoggedIn": "Please log in to make a reservation.",
+      "datesRequired": "Please select check-in and check-out dates.",
+      "guestsRequired": "Please select number of guests."
     },
     "status": {
       "approved": "Approved",
@@ -260,16 +273,23 @@
     "pageSubtitle": "Submit your pre-reservation request. The EDU team will review and confirm.",
     "loggedInAs": "You are logged in as:",
     "form": {
-      "checkIn": "Check In",
-      "checkOut": "Check Out",
-      "guests": "Guests",
+      "checkIn": "Check-in Date",
+      "checkOut": "Check-out Date",
+      "datePlaceholder": "DD/MM/YYYY",
+      "guests": "Number of Guests",
+      "guestsHint": "Main guest information below + additional guests",
       "accommodationType": "Accommodation Type",
-      "invoiceType": "Invoice Type",
-      "eventCode": "Event / Training Code",
+      "accommodation": {
+        "personal": "Personal",
+        "corporate": "Corporate (SU)",
+        "education": "Education"
+      },
+      "invoiceType": "Billing Type",
+      "eventCode": "Event / Education Code",
       "eventCodePlaceholder": "Enter SAT-KAF or Education Code",
       "explanation": "Explanation / Reason",
-      "explanationPlaceholder": "Please briefly explain the purpose of your stay (especially for education-related reservations).",
-      "submitButton": "Submit reservation request",
+      "explanationPlaceholder": "Please briefly explain the purpose of your stay (required for education-related reservations).",
+      "submitButton": "Submit Pre-Reservation",
       "submitting": "Submitting...",
       "firstName": "First Name",
       "firstNamePlaceholder": "Enter first name",
@@ -284,13 +304,38 @@
       "checkInTime": "Check-in Time",
       "eventType": "Event Type",
       "priceType": "Price Type",
-      "freeAccommodation": "Free Accommodation (No payment required)",
-      "freeAccommodationHint": "✓ If approved, payment will not be requested for this reservation.",
-      "consent": "I confirm that the information provided is correct and I accept the reservation rules.",
-      "tcKimlik": "T.C. Kimlik No",
-      "tcKimlikPlaceholder": "Enter T.C. Kimlik No",
+      "idType": "ID Type",
+      "tcKimlik": "T.C. Identity No",
+      "tcKimlikPlaceholder": "Enter your T.C. Identity Number",
+      "passport": "Passport No",
+      "passportPlaceholder": "Enter your Passport Number",
       "taxNumber": "Tax Number",
-      "taxNumberPlaceholder": "Enter Tax Number"
+      "taxNumberPlaceholder": "Enter Tax Number",
+      "billingTitle": "Billing Title (Company Name)",
+      "billingTitlePlaceholder": "Enter company / institution name",
+      "billingAddress": "Billing Address",
+      "billingAddressPlaceholder": "Enter billing address",
+      "freeAccommodation": "Free Accommodation (No payment required)",
+      "freeAccommodationHint": "If approved, payment will not be requested for this reservation.",
+      "consent": "I confirm that the information provided is correct and I accept the reservation rules."
+    },
+    "validation": {
+      "accommodationTypeRequired": "Please select an accommodation type.",
+      "billingTypeRequired": "Please select a billing type.",
+      "dateOrder": "Check-out date must be after check-in date.",
+      "noSundayCheckin": "Sunday check-in is not allowed.",
+      "noSatInSunOut": "Saturday check-in and Sunday check-out combinations are not allowed.",
+      "max30Days": "Reservations are only allowed up to 30 days in advance.",
+      "max5Nights": "Personal bookings cannot exceed 5 consecutive nights.",
+      "codeRequired": "Event / Education code is required for Corporate or Education stays.",
+      "explanationRequired": "Please provide an explanation for education-related reservations.",
+      "tcRequired": "T.C. Identity Number is required for individual billing.",
+      "taxRequired": "Tax Number is required for corporate billing.",
+      "billingTitleRequired": "Billing title is required for corporate billing.",
+      "billingAddressRequired": "Billing address is required for corporate billing.",
+      "consentRequired": "Please confirm the information and accept the reservation rules.",
+      "identityRequired": "Please ensure your name, phone, and email are filled.",
+      "additionalGuestsRequired": "Please fill first and last names for all additional guests."
     },
     "messages": {
       "success": "Your reservation request has been submitted. You will be notified after it is reviewed by the administration.",
@@ -414,6 +459,7 @@
     "night_one": "night",
     "night_other": "nights",
     "pricePerNight": "Price per night",
+    "priceNotSet": "To be determined",
     "total": "Total Amount",
     "currency": "Currency: Turkish Lira (TRY)",
     "importantInfo": "Important Information",

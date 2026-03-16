@@ -63,6 +63,9 @@ model Reservation {
   priceType         String?
   taxNumber         String?
   paymentStatus     PaymentStatus     @default(NONE)
+  price             Float?
+  billingTitle      String?
+  billingAddress    String?
   room              Room?             @relation(fields: [roomId], references: [id])
   user              User              @relation(fields: [userId], references: [id])
 }

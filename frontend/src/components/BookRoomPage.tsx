@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -113,8 +113,10 @@ export function BookRoomPage() {
   const [billingTypeUI, setBillingTypeUI] = useState<"individual" | "corporate" | "">("");
   const [requestFreeAccommodation, setRequestFreeAccommodation] = useState(false);
   const [checkInDate, setCheckInDate] = useState("");
+  const [checkInDisplay, setCheckInDisplay] = useState("");
   const [checkInTime, setCheckInTime] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
+  const [checkOutDisplay, setCheckOutDisplay] = useState("");
   const [numberOfGuests, setNumberOfGuests] = useState("1");
   const [guestList, setGuestList] = useState<Array<{ firstName: string; lastName: string }>>([]);
   const [eventCode, setEventCode] = useState("");
@@ -124,8 +126,11 @@ export function BookRoomPage() {
   const [lastName, setLastName] = useState(storedUser?.lastName || storedUser?.surname || "");
   const [phone, setPhone] = useState(storedUser?.phone || "");
   const [email, setEmail] = useState(storedUser?.email || "");
+  const [nationalIdType, setNationalIdType] = useState<"tc" | "passport">("tc");
   const [tcKimlikNo, setTcKimlikNo] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
+  const [billingTitle, setBillingTitle] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [consentChecked, setConsentChecked] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -173,6 +178,8 @@ export function BookRoomPage() {
     if (accommodationTypeUI === "education" && !notes.trim()) return t("bookingRequest.validation.explanationRequired", "Please provide an explanation for education-related reservations.");
     if (billingTypeUI === "individual" && !tcKimlikNo.trim()) return t("bookingRequest.validation.tcRequired", "T.C. Kimlik No is required for individual billing.");
     if (billingTypeUI === "corporate" && !taxNumber.trim()) return t("bookingRequest.validation.taxRequired", "Tax Number is required for corporate billing.");
+    if (billingTypeUI === "corporate" && !billingTitle.trim()) return t("bookingRequest.validation.billingTitleRequired", "Fatura unvanı is required for corporate billing.");
+    if (billingTypeUI === "corporate" && !billingAddress.trim()) return t("bookingRequest.validation.billingAddressRequired", "Fatura adresi is required for corporate billing.");
     const g = parseInt(numberOfGuests, 10);
     if (!g || Number.isNaN(g) || g < 1) return t("dashboard.validation.guestsRequired", "Please select number of guests.");
     if (!consentChecked) return t("bookingRequest.validation.consentRequired", "Please confirm the information and accept the reservation rules.");
@@ -198,18 +205,38 @@ export function BookRoomPage() {
         eventType: eventType.trim(), priceType: priceType?.trim() || undefined,
         freeAccommodation: requestFreeAccommodation, guestList,
         nationalId: tcKimlikNo?.trim() || undefined, taxNumber: taxNumber?.trim() || undefined,
+        billingTitle: billingTitle?.trim() || undefined, billingAddress: billingAddress?.trim() || undefined,
         note: notes?.trim() || undefined,
       });
       setSuccessMessage(t("dashboard.reservation.success", "Your reservation request has been submitted for approval."));
       setAccommodationTypeUI(""); setBillingTypeUI(""); setRequestFreeAccommodation(false);
-      setCheckInDate(""); setCheckInTime(""); setCheckOutDate(""); setNumberOfGuests("1"); setGuestList([]);
-      setEventCode(""); setEventType(""); setPriceType(""); setTcKimlikNo(""); setTaxNumber(""); setNotes(""); setConsentChecked(false);
+      setCheckInDate(""); setCheckInDisplay(""); setCheckInTime(""); setCheckOutDate(""); setCheckOutDisplay(""); setNumberOfGuests("1"); setGuestList([]); setNationalIdType("tc");
+      setEventCode(""); setEventType(""); setPriceType(""); setTcKimlikNo(""); setTaxNumber(""); setBillingTitle(""); setBillingAddress(""); setNotes(""); setConsentChecked(false);
       scrollToTopOfForm();
     } catch (err: any) { setErrorMessage(err?.message || "Failed to create reservation."); scrollToTopOfForm(); }
     finally { setLoading(false); }
   };
 
   const stagger = (i: number): React.CSSProperties => ({ animation: `bookFadeUp 0.5s ease-out ${0.1 + i * 0.06}s both` });
+
+  // ── DD/MM/YYYY date helpers ─────────────────
+  const handleDateTyping = (
+    raw: string,
+    setDisplay: (v: string) => void,
+    setISO: (v: string) => void
+  ) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    let display = digits;
+    if (digits.length > 4) display = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
+    else if (digits.length > 2) display = digits.slice(0, 2) + "/" + digits.slice(2);
+    setDisplay(display);
+    if (digits.length === 8) {
+      const d = digits.slice(0, 2), m = digits.slice(2, 4), y = digits.slice(4, 8);
+      setISO(`${y}-${m}-${d}`);
+    } else {
+      setISO("");
+    }
+  };
 
   /* ── Section header helper ──────────────── */
   const SectionHeader = ({ title, accent = "#003366" }: { title: string; accent?: string }) => (
@@ -325,9 +352,9 @@ export function BookRoomPage() {
                         <Select value={accommodationTypeUI} onValueChange={(v) => setAccommodationTypeUI(v as any)}>
                           <SelectTrigger className={selectTriggerClass}><SelectValue placeholder={t("common.select", "Select")} /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="personal">{t("bookingRequest.form.accommodation.personal", "Personal")}</SelectItem>
-                            <SelectItem value="corporate">{t("bookingRequest.form.accommodation.corporate", "Corporate (SU)")}</SelectItem>
-                            <SelectItem value="education">{t("bookingRequest.form.accommodation.education", "Education")}</SelectItem>
+                            <SelectItem value="personal">{t("bookingRequest.accommodation.personal", "Personal")}</SelectItem>
+                            <SelectItem value="corporate">{t("bookingRequest.accommodation.corporate", "Corporate (SU)")}</SelectItem>
+                            <SelectItem value="education">{t("bookingRequest.accommodation.education", "Education")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -394,7 +421,14 @@ export function BookRoomPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                           <Label className={labelClass}>{t("bookingRequest.form.checkIn", "Check-in Date")}<Req /></Label>
-                          <Input type="date" value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} className={inputClass} />
+                          <Input
+                            type="text"
+                            placeholder={t("bookingRequest.form.datePlaceholder", "DD/MM/YYYY")}
+                            value={checkInDisplay}
+                            onChange={(e) => handleDateTyping(e.target.value, setCheckInDisplay, setCheckInDate)}
+                            className={inputClass}
+                            maxLength={10}
+                          />
                         </div>
                         <div className="space-y-1.5">
                           <Label className={labelClass}>{t("bookingRequest.form.checkInTime", "Check-in Time")}<Req /></Label>
@@ -403,7 +437,14 @@ export function BookRoomPage() {
                       </div>
                       <div className="space-y-1.5">
                         <Label className={labelClass}>{t("bookingRequest.form.checkOut", "Check-out Date")}<Req /></Label>
-                        <Input type="date" value={checkOutDate} onChange={(e) => setCheckOutDate(e.target.value)} className={inputClass} />
+                        <Input
+                          type="text"
+                          placeholder={t("bookingRequest.form.datePlaceholder", "DD/MM/YYYY")}
+                          value={checkOutDisplay}
+                          onChange={(e) => handleDateTyping(e.target.value, setCheckOutDisplay, setCheckOutDate)}
+                          className={inputClass}
+                          maxLength={10}
+                        />
                       </div>
 
                       {/* Rules inline */}
@@ -474,15 +515,49 @@ export function BookRoomPage() {
                         </Select>
                       </div>
                       {billingTypeUI === "individual" && (
-                        <div className="space-y-1.5">
-                          <Label className={labelClass}>{t("bookingRequest.form.tcKimlik", "T.C. Kimlik No")}<Req /></Label>
-                          <Input placeholder={t("bookingRequest.form.tcKimlikPlaceholder", "Enter T.C. Kimlik No")} className={inputClass} value={tcKimlikNo} onChange={(e) => setTcKimlikNo(e.target.value)} />
+                        <div className="space-y-2.5">
+                          <Label className={labelClass}>{t("bookingRequest.form.idType", "ID Type")}<Req /></Label>
+                          <div className="flex gap-5">
+                            {(["tc", "passport"] as const).map((type) => (
+                              <label key={type} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="nationalIdType"
+                                  value={type}
+                                  checked={nationalIdType === type}
+                                  onChange={() => { setNationalIdType(type); setTcKimlikNo(""); }}
+                                  className="accent-[#003366]"
+                                />
+                                <span className="text-sm text-gray-700">
+                                  {type === "tc" ? t("bookingRequest.form.tcKimlik", "T.C. Identity No") : t("bookingRequest.form.passport", "Passport No")}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                          <Input
+                            placeholder={nationalIdType === "tc"
+                              ? t("bookingRequest.form.tcKimlikPlaceholder", "Enter your T.C. Identity Number")
+                              : t("bookingRequest.form.passportPlaceholder", "Enter your Passport Number")}
+                            className={inputClass}
+                            value={tcKimlikNo}
+                            onChange={(e) => setTcKimlikNo(e.target.value)}
+                          />
                         </div>
                       )}
                       {billingTypeUI === "corporate" && (
-                        <div className="space-y-1.5">
-                          <Label className={labelClass}>{t("bookingRequest.form.taxNumber", "Tax Number")}<Req /></Label>
-                          <Input placeholder={t("bookingRequest.form.taxNumberPlaceholder", "Enter Tax Number")} className={inputClass} value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <Label className={labelClass}>{t("bookingRequest.form.taxNumber", "Tax Number")}<Req /></Label>
+                            <Input placeholder={t("bookingRequest.form.taxNumberPlaceholder", "Enter Tax Number")} className={inputClass} value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className={labelClass}>{t("bookingRequest.form.billingTitle", "Billing Title")}<Req /></Label>
+                            <Input placeholder={t("bookingRequest.form.billingTitlePlaceholder", "Enter company / institution name")} className={inputClass} value={billingTitle} onChange={(e) => setBillingTitle(e.target.value)} />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className={labelClass}>{t("bookingRequest.form.billingAddress", "Billing Address")}<Req /></Label>
+                            <Input placeholder={t("bookingRequest.form.billingAddressPlaceholder", "Enter billing address")} className={inputClass} value={billingAddress} onChange={(e) => setBillingAddress(e.target.value)} />
+                          </div>
                         </div>
                       )}
                       <div className="flex items-center space-x-3 pt-1">

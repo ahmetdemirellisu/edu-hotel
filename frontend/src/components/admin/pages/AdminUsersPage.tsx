@@ -1,7 +1,6 @@
 // src/components/admin/pages/AdminUsersPage.tsx
-import { useEffect, useState } from "react";
-import { Button } from "../../ui/button";
-import { Plus, Edit, Shield, Users, X, AlertCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Plus, Edit, Shield, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 type AdminUser = {
@@ -17,18 +16,16 @@ export function AdminUsersPage() {
   const { t } = useTranslation("admin");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        // Try to load admin/staff users from the API
-        const res = await fetch("http://localhost:9004/users/search?query=&role=ADMIN,HOTEL_STAFF");
+        const res = await fetch("/api/users/search?query=&role=ADMIN,HOTEL_STAFF");
         if (res.ok) {
           const data = await res.json();
           setUsers(data);
         } else {
-          // Fallback to showing current logged-in admin info
           setUsers([]);
         }
       } catch {
@@ -39,9 +36,9 @@ export function AdminUsersPage() {
 
   const roleBadge = (role: string) => {
     const map: Record<string, { label: string; bg: string; text: string }> = {
-      ADMIN: { label: "Super Admin", bg: "bg-violet-50", text: "text-violet-700" },
-      HOTEL_STAFF: { label: "Hotel Staff", bg: "bg-blue-50", text: "text-blue-700" },
-      USER: { label: "User", bg: "bg-gray-50", text: "text-gray-600" },
+      ADMIN: { label: t("adminUsers.roleSuperAdmin", "Super Admin"), bg: "bg-violet-50", text: "text-violet-700" },
+      HOTEL_STAFF: { label: t("adminUsers.roleHotelStaff", "Hotel Staff"), bg: "bg-blue-50", text: "text-blue-700" },
+      USER: { label: t("adminUsers.roleUser", "User"), bg: "bg-gray-50", text: "text-gray-600" },
     };
     const cfg = map[role] || map.USER;
     return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>;
@@ -50,9 +47,12 @@ export function AdminUsersPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <div><h2 className="text-xl font-semibold text-gray-900 tracking-tight">{t("pages.adminUsers.title", "Admin Users")}</h2><p className="text-sm text-gray-500 mt-0.5">System administrators and staff accounts</p></div>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 tracking-tight">{t("pages.adminUsers.title", "Admin Users")}</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{t("adminUsers.subtitle", "System administrators and staff accounts")}</p>
+        </div>
         <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-sm font-semibold transition-all hover:shadow-lg" disabled>
-          <Plus className="h-4 w-4" />{t("adminUsers.addNewAdmin", "Add Admin")}
+          <Plus className="h-4 w-4" />{t("adminUsers.addNewAdmin", "Add new admin")}
         </button>
       </div>
 
@@ -64,14 +64,22 @@ export function AdminUsersPage() {
         ) : users.length === 0 ? (
           <div className="p-12 text-center">
             <Shield className="h-8 w-8 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">No admin users found.</p>
-            <p className="text-xs text-gray-400 mt-1">Admin user management will be available when the user search API supports role filtering.</p>
+            <p className="text-sm text-gray-500">{t("adminUsers.noUsers", "No admin users found.")}</p>
+            <p className="text-xs text-gray-400 mt-1">{t("adminUsers.noUsersDesc", "Admin user management will be available when the user search API supports role filtering.")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead><tr className="border-b border-gray-100 bg-gray-50/50">
-                {["ID", "Name", "Email", "Role", "Type", "Joined", "Actions"].map(h => (
+                {[
+                  t("tables.id", "ID"),
+                  t("tables.name", "Name"),
+                  t("tables.email", "Email"),
+                  t("adminUsers.role", "Role"),
+                  t("adminUsers.colType", "Type"),
+                  t("adminUsers.colJoined", "Joined"),
+                  t("tables.actions", "Actions"),
+                ].map(h => (
                   <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wider first:pl-6 last:pr-6">{h}</th>
                 ))}
               </tr></thead>
@@ -85,7 +93,7 @@ export function AdminUsersPage() {
                     <td className="py-3.5 px-4 text-xs text-gray-500">{user.userType}</td>
                     <td className="py-3.5 px-4 text-xs text-gray-500">{user.createdAt?.slice(0, 10) || "—"}</td>
                     <td className="py-3.5 pr-6 px-4">
-                      <button className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors opacity-60 group-hover:opacity-100" title="Edit" disabled>
+                      <button className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors opacity-60 group-hover:opacity-100" title={t("common.edit", "Edit")} disabled>
                         <Edit className="h-3.5 w-3.5" />
                       </button>
                     </td>

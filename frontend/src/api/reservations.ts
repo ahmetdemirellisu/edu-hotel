@@ -1,5 +1,5 @@
 // src/api/reservations.ts
-const API_BASE_URL = "api";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:9004";
 
 export type AccommodationType = "PERSONAL" | "CORPORATE" | "EDUCATION";
 export type InvoiceType = "INDIVIDUAL" | "CORPORATE";
@@ -52,8 +52,10 @@ export interface ReservationPayload {
 
   // Billing identifiers
   // Required depending on invoiceType (validated in backend)
-  nationalId?: string; // T.C. Kimlik No
+  nationalId?: string; // T.C. Kimlik No / Pasaport No
   taxNumber?: string;
+  billingTitle?: string; // Fatura Unvanı (corporate)
+  billingAddress?: string; // Fatura Adresi (corporate)
 
   // Pricing/event metadata
   eventType: string; // required (validated in backend)
@@ -78,6 +80,7 @@ export interface Reservation extends ReservationPayload {
   roomId: number | null;
   status: ReservationStatus;
   paymentStatus: PaymentStatus;
+  price?: number | null;
   createdAt: string;
 
   // snapshot fields from backend
@@ -167,14 +170,14 @@ export async function getAdminReservations(params?: {
 
 export async function approveReservation(
   id: number,
-  roomId?: number
+  price?: number
 ): Promise<Reservation> {
   const res = await fetch(`${API_BASE_URL}/reservations/admin/${id}/approve`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(roomId ? { roomId } : {}),
+    body: JSON.stringify(price !== undefined ? { price } : {}),
   });
 
   if (!res.ok) {

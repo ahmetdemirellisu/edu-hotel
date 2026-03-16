@@ -1,9 +1,10 @@
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
+import { Checkbox } from "./ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 import { Footer } from "./layout/Footer";
@@ -72,6 +73,7 @@ export function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const [kvkkChecked, setKvkkChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -83,6 +85,11 @@ export function Signup() {
 
     if (!fullName || !contact || !password || !confirmPassword) {
       setError(t("signup.errors.fillAll"));
+      return;
+    }
+
+    if (!kvkkChecked) {
+      setError(t("signup.errors.kvkkRequired", "KVKK aydınlatma metnini onaylamanız gerekmektedir."));
       return;
     }
 
@@ -434,11 +441,27 @@ export function Signup() {
                       </div>
                     )}
 
+                    {/* KVKK Consent */}
+                    <div className="space-y-2 pt-1" style={stagger(6)}>
+                      <div className="flex items-start gap-3 p-3.5 rounded-xl bg-blue-50/60 border border-blue-100">
+                        <Checkbox
+                          id="kvkk"
+                          checked={kvkkChecked}
+                          onCheckedChange={(v) => setKvkkChecked(v as boolean)}
+                          className="mt-0.5"
+                        />
+                        <Label htmlFor="kvkk" className="text-[12px] text-gray-600 leading-relaxed cursor-pointer">
+                          {t("signup.kvkk", "6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında kişisel verilerimin yalnızca konaklama ve rezervasyon hizmetleri amacıyla EDU Hotel tarafından işlenmesine onay veriyorum. Verilerim üçüncü şahıslarla paylaşılmayacak ve mevzuata aykırı kullanılmayacaktır.")}
+                          <span className="text-red-400 ml-0.5">*</span>
+                        </Label>
+                      </div>
+                    </div>
+
                     {/* Submit */}
-                    <div style={stagger(6)}>
+                    <div style={stagger(7)}>
                       <Button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !kvkkChecked}
                         className="w-full h-11 rounded-xl text-white text-sm font-semibold relative overflow-hidden group
                                    transition-all duration-300 hover:shadow-lg active:scale-[0.99] disabled:opacity-60"
                         style={{
@@ -455,7 +478,7 @@ export function Signup() {
                     </div>
 
                     {/* Link to login */}
-                    <div className="text-center pt-1" style={stagger(7)}>
+                    <div className="text-center pt-1" style={stagger(8)}>
                       <Link
                         to="/"
                         className="text-[13px] text-[#003366] hover:text-[#0066cc] transition-colors font-medium"

@@ -118,7 +118,7 @@ export function AdminDashboard() {
     guests: t("pages.guests.title", "Guests"),
     payments: t("pages.payments.title", "Payments"),
     blacklist: t("pages.blacklist.title", "Blacklist"),
-    reports: "Reports",
+    reports: t("pages.reports.title", "Reports"),
     "admin-users": t("pages.adminUsers.title", "Admin Users"),
     settings: t("pages.settings.title", "Settings"),
   };
@@ -147,7 +147,7 @@ export function AdminDashboard() {
             </div>
             <div>
               <h2 className="text-white text-sm font-semibold tracking-wide">EDU HOTEL</h2>
-              <p className="text-[10px] text-white/40 font-medium tracking-wider uppercase">Admin Panel</p>
+              <p className="text-[10px] text-white/40 font-medium tracking-wider uppercase">{t("common.adminPanel", "Admin Panel")}</p>
             </div>
           </div>
         ) : (
@@ -207,7 +207,7 @@ export function AdminDashboard() {
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all text-xs"
         >
-          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <><ChevronLeft className="h-4 w-4" /><span className="font-medium">Collapse</span></>}
+          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <><ChevronLeft className="h-4 w-4" /><span className="font-medium">{t("common.collapse", "Collapse")}</span></>}
         </button>
       </div>
     </>
@@ -249,7 +249,7 @@ export function AdminDashboard() {
             {/* Page title + breadcrumb */}
             <div>
               <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
-                <span>Admin</span>
+                <span>{t("common.admin", "Admin")}</span>
                 <span>/</span>
                 <span className="text-gray-600">{pageTitles[activePage]}</span>
               </div>
@@ -301,13 +301,13 @@ export function AdminDashboard() {
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden" style={{ animation: "adminFadeIn 0.15s ease-out" }}>
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-gray-900">{t("notifications.title", "Notifications")}</h3>
-                    <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">3 new</span>
+                    <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{t("notifications.newBadge", { count: 3 })}</span>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
                     {[
-                      { text: "New reservation request from Elmar A.", time: "5 min ago", dot: "#f59e0b" },
-                      { text: "Payment receipt uploaded for #3", time: "1 hour ago", dot: "#3b82f6" },
-                      { text: "Check-out completed for Room 230", time: "2 hours ago", dot: "#22c55e" },
+                      { text: t("notifications.newReservation", "New reservation created"), time: t("notifications.time.5min", "5 minutes ago"), dot: "#f59e0b" },
+                      { text: t("notifications.paymentReceived", "Payment received"), time: t("notifications.time.1h", "1 hour ago"), dot: "#3b82f6" },
+                      { text: t("notifications.checkout", "Guest checked out"), time: t("notifications.time.2h", "2 hours ago"), dot: "#22c55e" },
                     ].map((n, idx) => (
                       <div key={idx} className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 transition-colors">
                         <div className="flex items-start gap-2.5">

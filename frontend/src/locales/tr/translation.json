@@ -63,11 +63,13 @@
     "creatingAccount": "Hesap oluşturuluyor...",
     "createAccount": "Hesap oluştur",
     "alreadyHaveAccount": "Zaten hesabınız var mı? Giriş yapın",
+    "kvkk": "6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında kişisel verilerimin yalnızca konaklama ve rezervasyon hizmetleri amacıyla EDU Hotel tarafından işlenmesine onay veriyorum. Verilerim üçüncü şahıslarla paylaşılmayacak ve mevzuata aykırı kullanılmayacaktır.",
     "errors": {
       "fillAll": "Lütfen tüm alanları doldurun.",
       "passwordMismatch": "Şifreler eşleşmiyor.",
       "failed": "Kayıt başarısız.",
-      "network": "Ağ hatası. Lütfen tekrar deneyin."
+      "network": "Ağ hatası. Lütfen tekrar deneyin.",
+      "kvkkRequired": "KVKK aydınlatma metnini onaylamanız gerekmektedir."
     },
     "success": {
       "accountCreated": "Hesap başarıyla oluşturuldu. Şimdi giriş yapabilirsiniz."
@@ -141,7 +143,18 @@
       "viewRequests": "Taleplerimi Görüntüle",
       "createNew": "Yeni Rezervasyon Oluştur",
       "proceedPayment": "Ödemeye Geç",
+      "paymentConfirmed": "Ödeme Onaylandı",
+      "paymentSent": "Ödeme Gönderildi",
+      "priceNotSet": "Belirlenecek",
       "paymentDisabledTip": "Ödeme sayfası, akış bağlandığında aktif hale gelecektir."
+    },
+    "reservation": {
+      "success": "Rezervasyon talebiniz onay için gönderildi."
+    },
+    "validation": {
+      "notLoggedIn": "Rezervasyon yapmak için lütfen giriş yapınız.",
+      "datesRequired": "Lütfen giriş ve çıkış tarihlerini seçiniz.",
+      "guestsRequired": "Lütfen kişi sayısını seçiniz."
     },
     "status": {
       "approved": "Onaylandı",
@@ -262,14 +275,21 @@
     "form": {
       "checkIn": "Giriş Tarihi",
       "checkOut": "Çıkış Tarihi",
+      "datePlaceholder": "GG/AA/YYYY",
       "guests": "Kişi Sayısı",
+      "guestsHint": "Ana misafir bilgisi aşağıda + ek misafirler",
       "accommodationType": "Konaklama Türü",
+      "accommodation": {
+        "personal": "Kişisel",
+        "corporate": "Kurumsal (SÜ)",
+        "education": "Eğitim"
+      },
       "invoiceType": "Fatura Türü",
       "eventCode": "Etkinlik / Eğitim Kodu",
       "eventCodePlaceholder": "SAT-KAF veya Eğitim Kodu girin",
       "explanation": "Açıklama / Gerekçe",
-      "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için, kalış amacınızı kısaca açıklayınız.",
-      "submitButton": "Rezervasyon talebini gönder",
+      "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için kalış amacınızı kısaca açıklayınız.",
+      "submitButton": "Ön Rezervasyon Talebi Gönder",
       "submitting": "Gönderiliyor...",
       "firstName": "Ad",
       "firstNamePlaceholder": "Adınızı girin",
@@ -284,13 +304,38 @@
       "checkInTime": "Giriş Saati",
       "eventType": "Etkinlik Türü",
       "priceType": "Fiyat Türü",
-      "freeAccommodation": "Ücretsiz Konaklama (ödeme yok)",
-      "freeAccommodationHint": "✓ Onaylanırsa ödeme istenmez.",
-      "consent": "Verdiğim bilgilerin doğru olduğunu onaylıyorum ve rezervasyon kurallarını kabul ediyorum.",
+      "idType": "Kimlik Türü",
       "tcKimlik": "T.C. Kimlik No",
-      "tcKimlikPlaceholder": "T.C. Kimlik No girin",
+      "tcKimlikPlaceholder": "T.C. Kimlik numaranızı girin",
+      "passport": "Pasaport No",
+      "passportPlaceholder": "Pasaport numaranızı girin",
       "taxNumber": "Vergi Numarası",
-      "taxNumberPlaceholder": "Vergi Numarası girin"
+      "taxNumberPlaceholder": "Vergi numaranızı girin",
+      "billingTitle": "Fatura Unvanı",
+      "billingTitlePlaceholder": "Şirket / Kurum adını girin",
+      "billingAddress": "Fatura Adresi",
+      "billingAddressPlaceholder": "Fatura adresini girin",
+      "freeAccommodation": "Ücretsiz Konaklama (ödeme yok)",
+      "freeAccommodationHint": "Onaylanırsa bu rezervasyon için ödeme istenmeyecektir.",
+      "consent": "Verdiğim bilgilerin doğru olduğunu onaylıyorum ve rezervasyon kurallarını kabul ediyorum."
+    },
+    "validation": {
+      "accommodationTypeRequired": "Lütfen konaklama türünü seçiniz.",
+      "billingTypeRequired": "Lütfen fatura türünü seçiniz.",
+      "dateOrder": "Çıkış tarihi, giriş tarihinden sonra olmalıdır.",
+      "noSundayCheckin": "Pazar günleri giriş yapılamaz.",
+      "noSatInSunOut": "Cumartesi giriş - Pazar çıkış kombinasyonları kabul edilmez.",
+      "max30Days": "Rezervasyon en fazla 30 gün ileri tarihli olabilir.",
+      "max5Nights": "Kişisel rezervasyonlar 5 ardışık geceyi geçemez.",
+      "codeRequired": "Kurumsal ve Eğitim konaklamaları için etkinlik / eğitim kodu zorunludur.",
+      "explanationRequired": "Eğitim amaçlı konaklamalar için lütfen bir açıklama giriniz.",
+      "tcRequired": "Bireysel faturalama için T.C. Kimlik No zorunludur.",
+      "taxRequired": "Kurumsal faturalama için vergi numarası zorunludur.",
+      "billingTitleRequired": "Kurumsal faturalama için fatura unvanı zorunludur.",
+      "billingAddressRequired": "Kurumsal faturalama için fatura adresi zorunludur.",
+      "consentRequired": "Lütfen bilgilerin doğruluğunu onaylayın ve rezervasyon kurallarını kabul edin.",
+      "identityRequired": "Lütfen ad, telefon ve e-posta alanlarının dolu olduğundan emin olunuz.",
+      "additionalGuestsRequired": "Lütfen tüm ek misafirlerin ad ve soyadını doldurunuz."
     },
     "messages": {
       "success": "Rezervasyon talebiniz gönderildi. İdare tarafından incelendikten sonra size bilgi verilecektir.",
@@ -414,6 +459,7 @@
     "night_one": "gece",
     "night_other": "gece",
     "pricePerNight": "Gecelik fiyat",
+    "priceNotSet": "Belirlenecek",
     "total": "Toplam Tutar",
     "currency": "Para Birimi: Türk Lirası (TRY)",
     "importantInfo": "Önemli Bilgi",

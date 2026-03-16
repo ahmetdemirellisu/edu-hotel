@@ -9,91 +9,118 @@
       "blacklist": "Kara Liste",
       "reports": "Raporlar",
       "adminUsers": "Yönetici Kullanıcılar",
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "sectionMain": "Ana",
+      "sectionManage": "Yönetim",
+      "sectionSystem": "Sistem"
     },
-  
+
     "common": {
       "adminPanel": "Yönetim Paneli",
       "searchPlaceholder": "Ara...",
       "edit": "Düzenle",
       "cancel": "İptal",
-      "save": "Kaydet"
-
+      "save": "Kaydet",
+      "collapse": "Daralt",
+      "admin": "Yönetici",
+      "close": "Kapat",
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "today": "Bugün"
     },
-  
+
     "pages": {
       "dashboard": {
         "title": "Gösterge Paneli",
-        "pendingReservations": "Bekleyen rezervasyonlar",
-        "approvedReservations": "Onaylanan rezervasyonlar",
-        "guestsStaying": "Konaklayan misafirler",
-        "availableRooms": "Müsait odalar",
+        "pendingReservations": "Bekleyen Talepler",
+        "approvedReservations": "Onaylandı",
+        "guestsStaying": "Konaklayan Misafirler",
+        "availableRooms": "Müsait Odalar",
         "fromYesterday": "dünden itibaren",
-        "quickActions": "Hızlı işlemler",
+        "quickActions": "Hızlı İşlemler",
         "actions": {
-          "createReservation": "Rezervasyon oluştur",
-          "viewCalendar": "Takvimi görüntüle",
+          "createReservation": "Yeni Rezervasyon",
+          "viewCalendar": "Takvimi Görüntüle",
           "addRoom": "Oda ekle",
+          "manageRooms": "Oda Yönetimi",
+          "pendingPayments": "Bekleyen Ödemeler",
+          "generateReport": "Rapor Oluştur",
           "reportCenter": "Rapor merkezi"
         },
-        "latestReservations": "Son rezervasyonlar",
-        "roomOccupancy": "Oda doluluk oranı",
-        "occupancyRate": "Doluluk oranı",
+        "latestReservations": "Son Rezervasyonlar",
+        "latestBookingActivity": "Son rezervasyon hareketleri",
+        "viewAll": "Tümünü gör",
+        "noReservationsYet": "Henüz rezervasyon yok.",
+        "roomOccupancy": "Oda Doluluk Oranı",
+        "occupancyRate": "Doluluk Oranı",
         "occupied": "Dolu",
         "available": "Müsait",
         "maintenance": "Bakımda",
-        "expectedCheckinsToday": "Bugün beklenen girişler",
+        "expectedCheckinsToday": "Bugün Beklenen Girişler",
         "loadingReservations": "Son rezervasyonlar yükleniyor...",
-        "noReservations": "Henüz oluşturulmuş bir rezervasyon bulunmamaktadır."
+        "noReservations": "Henüz oluşturulmuş bir rezervasyon bulunmamaktadır.",
+        "pendingAlert": {
+          "title_one": "{{count}} bekleyen talep",
+          "title_other": "{{count}} bekleyen talep",
+          "message": "İnceleme ve onayınızı bekliyor.",
+          "reviewNow": "Şimdi incele"
+        }
     },
-  
+
       "reservations": {
         "title": "Rezervasyon Yönetimi"
       },
-  
+
+      "reports": {
+        "title": "Raporlar"
+      },
+
       "calendar": {
         "title": "Takvim Görünümü",
         "roomOccupancyCalendar": "Oda doluluk takvimi",
         "room": "Oda",
+        "prev": "← Önceki",
+        "today": "Bugün",
+        "next": "Sonraki →",
+        "bookings": "{{count}} rezervasyon",
+        "roomsOccupied": "{{occupied}}/{{total}} oda dolu",
         "legend": {
           "pending": "Beklemede",
+          "approved": "Onaylandı",
           "confirmed": "Onaylandı",
           "checkedIn": "Giriş yapıldı",
           "canceled": "İptal edildi"
         }
       },
-  
+
       "rooms": {
         "title": "Oda Yönetimi"
       },
 
-      "reports": {
-        "title": "Raporlar"
-      }, 
-  
       "guests": {
         "title": "Misafir Yönetimi"
       },
-  
+
       "payments": {
         "title": "Ödeme Yönetimi"
       },
-  
+
       "blacklist": {
         "title": "Kara Liste Yönetimi"
       },
-  
+
       "adminUsers": {
         "title": "Yönetici Kullanıcı Yönetimi"
       },
-  
+
       "settings": {
         "title": "Sistem Ayarları"
       }
     },
-  
+
     "tables": {
-      "guestName": "Misafir adı",
+      "id": "ID",
+      "guestName": "Misafir",
       "checkIn": "Giriş",
       "checkOut": "Çıkış",
       "status": "Durum",
@@ -106,28 +133,34 @@
       "reservationId": "Rezervasyon ID",
       "date": "Tarih",
       "room": "Oda",
-      "paymentNotTracked": "Yok",  
-      "unknownGuest": "Bilinmeyen misafir"
-
+      "paymentNotTracked": "Yok",
+      "unknownGuest": "Bilinmeyen misafir",
+      "guest_one": "misafir",
+      "guest_other": "misafir",
+      "paymentPaid": "Ödendi",
+      "paymentPending": "Beklemede",
+      "paymentRejected": "Reddedildi",
+      "paymentNA": "Yok"
     },
-  
+
     "commonTable": {
       "viewAll": "Tümünü gör",
       "view": "Görüntüle"
     },
-  
+
     "notifications": {
       "title": "Bildirimler",
       "newReservation": "Yeni rezervasyon oluşturuldu",
       "paymentReceived": "Ödeme alındı",
       "checkout": "Misafir çıkış yaptı",
+      "newBadge": "{{count}} yeni",
       "time": {
         "5min": "5 dakika önce",
         "1h": "1 saat önce",
         "2h": "2 saat önce"
       }
     },
-  
+
     "profile": {
       "name": "Yönetici",
       "role": "Otel yöneticisi",
@@ -135,18 +168,27 @@
       "changePassword": "Şifreyi değiştir",
       "logout": "Çıkış yap"
     },
-  
+
     "adminUsers": {
       "addNewAdmin": "Yeni yönetici ekle",
       "role": "Rol",
       "lastLogin": "Son giriş",
       "status": "Durum",
       "disable": "Devre dışı bırak",
-      "resetPassword": "Şifreyi sıfırla"
+      "resetPassword": "Şifreyi sıfırla",
+      "subtitle": "Sistem yöneticileri ve personel hesapları",
+      "noUsers": "Yönetici kullanıcı bulunamadı.",
+      "noUsersDesc": "Kullanıcı arama API'si rol filtrelemesini desteklediğinde yönetici kullanıcı yönetimi kullanılabilir olacaktır.",
+      "roleSuperAdmin": "Süper Yönetici",
+      "roleHotelStaff": "Otel Personeli",
+      "roleUser": "Kullanıcı",
+      "colType": "Tür",
+      "colJoined": "Katılım"
     },
 
     "guests": {
       "searchPlaceholder": "Misafirleri isim, tür veya rezervasyon numarasına göre ara...",
+      "searchPlaceholderSimple": "Misafir ara...",
       "filters": {
         "type": "Misafir türü",
         "blacklist": "Durum",
@@ -172,22 +214,35 @@
         "total": "Toplam misafir: {{count}}",
         "blacklisted": "Kara listedekiler: {{count}}"
       },
+      "subtitle": "{{count}} misafir · {{blacklisted}} kara listede",
       "loading": "Misafirler yükleniyor...",
       "empty": "Seçili filtrelere göre misafir bulunamadı.",
+      "noGuests": "Misafir bulunamadı.",
       "details": {
         "title": "Misafir detayları",
         "reservations": "Rezervasyon geçmişi",
         "noReservations": "Bu misafirin rezervasyonu bulunmamaktadır."
       },
-       "actions": {
+      "actions": {
         "addToBlacklist": "Kara listeye ekle",
         "removeFromBlacklist": "Kara listeden çıkar"
       },
       "blacklistReasonPrompt": "Lütfen kara listeye alma sebebini yazınız:",
-      "confirmUnblacklist": "Bu kullanıcıyı kara listeden çıkarmak istiyor musunuz?"
+      "confirmUnblacklist": "Bu kullanıcıyı kara listeden çıkarmak istiyor musunuz?",
+      "blacklistReasonSection": "Kara Liste Sebebi",
+      "reservationHistoryTitle": "Rezervasyon Geçmişi ({{count}})",
+      "noReservationsSimple": "Rezervasyon bulunamadı.",
+      "close": "Kapat",
+      "filterAllTypes": "Tüm Türler",
+      "filterStudent": "Öğrenci",
+      "filterStaff": "Personel",
+      "filterSpecialGuest": "Özel Misafir",
+      "filterOther": "Diğer",
+      "filterAllStatuses": "Tüm Durumlar",
+      "filterActive": "Aktif",
+      "filterBlacklisted": "Kara listede"
     },
 
-    
 
     "blacklist": {
         "rulesTitle": "Kara liste kullanım kuralları",
@@ -210,6 +265,20 @@
         "permanentShort": "Kalıcı",
         "permanentHint": "Kalıcı bloklarda bitiş tarihi alanı zorunlu değildir.",
 
+        "blockedUsers": "{{count}} engelli kullanıcı",
+        "unknown": "Bilinmiyor",
+        "unnamed": "İsimsiz",
+        "reasonLabel": "Sebep",
+        "searchPlaceholder": "ID, e-posta veya isim...",
+        "expiryDateLabel": "Bitiş Tarihi",
+        "blockUser": "Kullanıcıyı Engelle",
+        "colUser": "Kullanıcı",
+        "colEmail": "E-posta",
+        "colReason": "Sebep",
+        "colAdded": "Eklenme",
+        "colExpires": "Bitiş",
+        "colActions": "İşlemler",
+
         "validation": {
             "required": "Kullanıcı ve sebep zorunludur.",
             "expiryRequired": "Geçici blok için lütfen bir bitiş tarihi seçin."
@@ -217,7 +286,7 @@
 
         "reasonPlaceholder": "Sebebi girin",
         "userId": "Kullanıcı ID",
-      
+
         "confirmRemove": "Bu kullanıcıyı kara listeden çıkarmak istiyor musunuz?",
         "loading": "Kara liste yükleniyor...",
         "empty": "Kara listede kayıtlı kullanıcı bulunmamaktadır."
@@ -231,7 +300,24 @@
         "paymentStatus": "Ödeme durumu",
         "viewReceipt": "Makbuzu görüntüle",
         "downloadReceipt": "Makbuzu indir",
-        "approvePayment": "Ödemeyi onayla"
+        "approvePayment": "Ödemeyi onayla",
+        "subtitle": "Yüklenen ödeme makbuzlarını inceleyin ve doğrulayın",
+        "pendingVerification": "Doğrulama Bekliyor",
+        "approvedToday": "Bugün Onaylanan",
+        "rejectedToday": "Bugün Reddedilen",
+        "noReceipts": "Bekleyen makbuz yok",
+        "noReceiptsDesc": "Tüm ödeme makbuzları işlendi.",
+        "colReservation": "Rezervasyon",
+        "colUser": "Kullanıcı",
+        "colGuestName": "Misafir Adı",
+        "colEmail": "E-posta",
+        "colReceipt": "Makbuz",
+        "preview": "Önizle",
+        "download": "İndir",
+        "confirmApproval": "Ödeme onaylanacak. Emin misiniz?",
+        "rejectReasonPrompt": "Reddetme sebebini girin (isteğe bağlı):",
+        "receiptNotFound": "Makbuz dosyası bulunamadı.",
+        "rejectFailed": "Ödeme reddedilemedi."
     },
 
     "reports": {
@@ -254,6 +340,7 @@
     "reservations": {
         "search": "Rezervasyon ara",
         "searchPlaceholder": "Misafir, rezervasyon numarası veya odaya göre ara...",
+        "searchByAll": "İsim, e-posta, telefon veya ID ile ara...",
         "status": "Durum",
         "guestType": "Misafir türü",
         "dateRange": "Tarih",
@@ -263,6 +350,11 @@
         "approve": "Rezervasyonu onayla",
         "reject": "Rezervasyonu reddet",
         "assignRoom": "Oda ata",
+        "totalCount": "{{count}} rezervasyon",
+        "filterAll": "Tümü",
+        "tableColResType": "Konaklama Türü",
+        "tableColEventType": "Etkinlik Türü",
+        "showingCount": "{{shown}} / {{total}} rezervasyon gösteriliyor",
         "filters": {
             "allStatus": "Tüm durumlar",
             "pending": "Beklemede",
@@ -297,7 +389,32 @@
         },
         "loading": "Rezervasyonlar yükleniyor...",
         "empty": "Seçili filtrelere göre rezervasyon bulunamadı.",
-        "createReservationDisabledHint": "Yönetici tarafından oluşturulan rezervasyonlar daha sonra eklenecektir."
+        "createReservationDisabledHint": "Yönetici tarafından oluşturulan rezervasyonlar daha sonra eklenecektir.",
+        "approveModal": {
+          "title": "Rezervasyonu Onayla {{id}}",
+          "desc": "Bu rezervasyon için fiyat belirleyin. Kullanıcıya e-posta ile bildirim yapılacaktır.",
+          "priceLabel": "Fiyat (TL)",
+          "pricePlaceholder": "Tutarı TL olarak girin",
+          "priceHint": "Fiyat, misafire gönderilecek onay e-postasına dahil edilecektir.",
+          "approving": "Onaylanıyor...",
+          "approveBtn": "Rezervasyonu Onayla"
+        },
+        "detail": {
+          "guestInfo": "Misafir Bilgileri",
+          "stayDetails": "Konaklama Detayları",
+          "billingEvent": "Faturalama ve Etkinlik",
+          "checkInLabel": "Giriş",
+          "freeAccommodation": "Ücretsiz Konaklama",
+          "eventLabel": "Etkinlik",
+          "codeLabel": "Kod",
+          "tcLabel": "TC",
+          "taxLabel": "Vergi",
+          "additionalGuests": "Ek Misafirler",
+          "note": "Not",
+          "created": "Oluşturulma",
+          "guest_one": "{{count}} misafir",
+          "guest_other": "{{count}} misafir"
+        }
     },
 
     "rooms": {
@@ -309,7 +426,43 @@
         "guestPlural": "misafir",
         "price": "Fiyat",
         "perNight": "gecelik",
-        "amenities": "Olanaklar"
+        "amenities": "Olanaklar",
+        "statusAvailable": "Müsait",
+        "statusOccupied": "Dolu",
+        "statusMaintenance": "Bakımda",
+        "statusReserved": "Rezerve",
+        "today": "Bugün",
+        "viewFloor": "Kat Planı",
+        "viewGrid": "Kartlar",
+        "noRooms": "Oda bulunamadı.",
+        "roomsCount": "{{count}} oda",
+        "drawer": {
+          "floor": "Kat 2",
+          "type": "Tür",
+          "doubleRoom": "Çift Kişilik Oda",
+          "singleRoom": "Tek Kişilik Oda",
+          "perNight": "/gece",
+          "occupiedTitle": "Dolu",
+          "maintenanceTitle": "Bakımda",
+          "maintenanceDesc": "Oda rezervasyon için müsait değil.",
+          "reservedTitle": "Özel Misafirler İçin Rezerve",
+          "reservedDesc": "Bu oda kalıcı olarak rezerve edilmiştir ve sistem üzerinden rezervasyon yapılamaz.",
+          "changeStatus": "Temel Durumu Değiştir",
+          "optAvailable": "Müsait",
+          "optMaintenance": "Bakımda",
+          "optReserved": "Rezerve (Özel Misafirler)",
+          "saving": "Kaydediliyor...",
+          "updateStatus": "Durumu Güncelle",
+          "guest_one": "misafir",
+          "guest_other": "misafir"
+        },
+        "grid": {
+          "double": "Çift",
+          "single": "Tek",
+          "perNight": "/gece",
+          "guest_one": "misafir",
+          "guest_other": "misafir"
+        }
     },
 
     "settings": {
@@ -322,10 +475,14 @@
         "autoApproveDesc": "Kurallara uyan rezervasyonlar otomatik olarak onaylanır.",
         "minBookingAdvance": "Minimum rezervasyon bildirimi (saat)",
         "maxBookingDuration": "Maksimum konaklama süresi (gün)",
-        "saveSettings": "Ayarları kaydet"
+        "saveSettings": "Ayarları kaydet",
+        "subtitle": "Otel yapılandırması ve sistem tercihleri",
+        "emailNotifications": "E-posta Bildirimleri",
+        "emailNotificationsDesc": "Rezervasyon durum değişikliklerinde e-posta bildirimi gönder.",
+        "saved": "Ayarlar kaydedildi!"
     }
 
-  
+
   }
-  
-  
+
+

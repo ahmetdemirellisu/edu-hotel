@@ -20,7 +20,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <Router basename="/ehp">
+    <Router basename={import.meta.env.VITE_BASE_PATH || "/"}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

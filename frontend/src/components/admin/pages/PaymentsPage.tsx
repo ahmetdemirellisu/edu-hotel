@@ -1,6 +1,5 @@
 // src/components/admin/pages/PaymentsPage.tsx
-import { useEffect, useState } from "react";
-import { Button } from "../../ui/button";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Clock,
@@ -10,8 +9,6 @@ import {
   XCircle,
   CreditCard,
   AlertCircle,
-  FileText,
-  X,
 } from "lucide-react";
 
 export function PaymentsPage() {
@@ -24,7 +21,11 @@ export function PaymentsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:9004/admin/pending-payments");
+      const response = await fetch("/api/admin/pending-payments");
+      if (!response.ok) {
+        const d = await response.json().catch(() => ({}));
+        throw new Error(d.error || `Server error ${response.status}`);
+      }
       const data = await response.json();
       setPayments(Array.isArray(data) ? data : []);
     } catch (err: any) {
@@ -36,24 +37,24 @@ export function PaymentsPage() {
   useEffect(() => { fetchPayments(); }, []);
 
   const handleApprove = async (id: number) => {
-    if (!window.confirm("Confirm payment approval?")) return;
+    if (!window.confirm(t("payments.confirmApproval", "Confirm payment approval?"))) return;
     try {
-      const res = await fetch(`http://localhost:9004/admin/approve-payment/${id}`, { method: "POST" });
+      const res = await fetch(`/api/admin/approve-payment/${id}`, { method: "POST" });
       if (res.ok) setPayments(prev => prev.filter(p => p.id !== id));
       else { const d = await res.json().catch(() => ({})); alert(d.error || "Failed to approve."); }
     } catch (err) { console.error("Approval error:", err); }
   };
 
   const handleReject = async (id: number) => {
-    const reason = window.prompt("Enter rejection reason (optional):") || undefined;
+    const reason = window.prompt(t("payments.rejectReasonPrompt", "Enter rejection reason (optional):")) || undefined;
     try {
-      const res = await fetch(`http://localhost:9004/admin/reject-payment/${id}`, {
+      const res = await fetch(`/api/admin/reject-payment/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
       });
       if (res.ok) setPayments(prev => prev.filter(p => p.id !== id));
-      else alert("Failed to reject payment.");
+      else alert(t("payments.rejectFailed", "Failed to reject payment."));
     } catch (err) { console.error("Rejection error:", err); }
   };
 
@@ -61,21 +62,21 @@ export function PaymentsPage() {
 
   const openReceipt = async (id: number) => {
     for (const name of receiptCandidates(id)) {
-      const url = `http://localhost:9004/view-pending/${name}`;
+      const url = `/api/view-pending/${name}`;
       try { const res = await fetch(url, { method: "HEAD" }); if (res.ok) { window.open(url, "_blank"); return; } } catch {}
     }
-    alert("Receipt file not found.");
+    alert(t("payments.receiptNotFound", "Receipt file not found."));
   };
 
   const downloadReceipt = async (id: number) => {
     for (const name of receiptCandidates(id)) {
-      const url = `http://localhost:9004/view-pending/${name}`;
+      const url = `/api/view-pending/${name}`;
       try {
         const res = await fetch(url, { method: "HEAD" });
         if (res.ok) { const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); return; }
       } catch {}
     }
-    alert("Receipt file not found.");
+    alert(t("payments.receiptNotFound", "Receipt file not found."));
   };
 
   return (
@@ -83,7 +84,7 @@ export function PaymentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-gray-900 tracking-tight">{t("pages.payments.title", "Payment Verification")}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Review and verify uploaded payment receipts</p>
+          <p className="text-sm text-gray-500 mt-0.5">{t("payments.subtitle", "Review and verify uploaded payment receipts")}</p>
         </div>
       </div>
 
@@ -91,15 +92,15 @@ export function PaymentsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4" style={{ borderLeft: "3px solid #f59e0b" }}>
           <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><Clock className="h-5 w-5 text-amber-600" /></div>
-          <div><p className="text-[13px] text-gray-500">Pending Verification</p><p className="text-2xl font-bold text-gray-900">{payments.length}</p></div>
+          <div><p className="text-[13px] text-gray-500">{t("payments.pendingVerification", "Pending Verification")}</p><p className="text-2xl font-bold text-gray-900">{payments.length}</p></div>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4" style={{ borderLeft: "3px solid #22c55e" }}>
           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><CheckCircle className="h-5 w-5 text-emerald-600" /></div>
-          <div><p className="text-[13px] text-gray-500">Approved Today</p><p className="text-2xl font-bold text-gray-900">—</p></div>
+          <div><p className="text-[13px] text-gray-500">{t("payments.approvedToday", "Approved Today")}</p><p className="text-2xl font-bold text-gray-900">—</p></div>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4" style={{ borderLeft: "3px solid #ef4444" }}>
           <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center"><XCircle className="h-5 w-5 text-red-600" /></div>
-          <div><p className="text-[13px] text-gray-500">Rejected Today</p><p className="text-2xl font-bold text-gray-900">—</p></div>
+          <div><p className="text-[13px] text-gray-500">{t("payments.rejectedToday", "Rejected Today")}</p><p className="text-2xl font-bold text-gray-900">—</p></div>
         </div>
       </div>
 
@@ -116,15 +117,22 @@ export function PaymentsPage() {
         ) : payments.length === 0 ? (
           <div className="p-12 text-center">
             <CreditCard className="h-8 w-8 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm font-medium text-gray-600">No pending receipts</p>
-            <p className="text-xs text-gray-400 mt-1">All payment receipts have been processed.</p>
+            <p className="text-sm font-medium text-gray-600">{t("payments.noReceipts", "No pending receipts")}</p>
+            <p className="text-xs text-gray-400 mt-1">{t("payments.noReceiptsDesc", "All payment receipts have been processed.")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  {["Reservation", "User", "Guest Name", "Email", "Receipt", "Actions"].map(h => (
+                  {[
+                    t("payments.colReservation", "Reservation"),
+                    t("payments.colUser", "User"),
+                    t("payments.colGuestName", "Guest Name"),
+                    t("payments.colEmail", "Email"),
+                    t("payments.colReceipt", "Receipt"),
+                    t("tables.actions", "Actions"),
+                  ].map(h => (
                     <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wider first:pl-6 last:pr-6">{h}</th>
                   ))}
                 </tr>
@@ -136,26 +144,26 @@ export function PaymentsPage() {
                     <td className="py-3.5 px-4 text-xs text-gray-500">{payment.user?.id || "—"}</td>
                     <td className="py-3.5 px-4">
                       <p className="text-[13px] font-medium text-gray-800">
-                        {payment.user?.name || `${payment.user?.firstName ?? ""} ${payment.user?.lastName ?? ""}`.trim() || "Unknown"}
+                        {payment.user?.name || `${payment.user?.firstName ?? ""} ${payment.user?.lastName ?? ""}`.trim() || t("tables.unknownGuest", "Unknown guest")}
                       </p>
                     </td>
                     <td className="py-3.5 px-4 text-xs text-gray-600">{payment.user?.email || "—"}</td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2">
                         <button onClick={() => openReceipt(payment.id)} className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
-                          <Eye className="h-3 w-3" /> Preview
+                          <Eye className="h-3 w-3" /> {t("payments.preview", "Preview")}
                         </button>
                         <button onClick={() => downloadReceipt(payment.id)} className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">
-                          <Download className="h-3 w-3" /> Download
+                          <Download className="h-3 w-3" /> {t("payments.download", "Download")}
                         </button>
                       </div>
                     </td>
                     <td className="py-3.5 pr-6 px-4">
                       <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleApprove(payment.id)} className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors" title="Approve">
+                        <button onClick={() => handleApprove(payment.id)} className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors" title={t("common.approve", "Approve")}>
                           <CheckCircle className="h-3.5 w-3.5" />
                         </button>
-                        <button onClick={() => handleReject(payment.id)} className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 transition-colors" title="Reject">
+                        <button onClick={() => handleReject(payment.id)} className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 transition-colors" title={t("common.reject", "Reject")}>
                           <XCircle className="h-3.5 w-3.5" />
                         </button>
                       </div>

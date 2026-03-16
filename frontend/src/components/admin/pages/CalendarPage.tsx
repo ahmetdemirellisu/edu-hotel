@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "../../ui/card";
 import { useTranslation } from "react-i18next";
 import { getRooms, type Room } from "../../../api/rooms";
@@ -29,7 +29,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
 };
 
 export function CalendarPage() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
 
   const [rooms, setRooms] = useState<Room[]>([]);
   const [reservations, setReservations] = useState<AdminReservation[]>([]);
@@ -61,6 +61,8 @@ export function CalendarPage() {
     load();
   }, []);
 
+  const locale = i18n.language === "tr" ? "tr-TR" : "en-US";
+
   const { daysInMonth, dayLabels, monthLabel } = useMemo(() => {
     const year = month.getFullYear();
     const m = month.getMonth();
@@ -69,7 +71,7 @@ export function CalendarPage() {
     const labels = Array.from({ length: days }, (_, i) => {
       const d = new Date(year, m, i + 1);
       const day = d.getDate();
-      const weekday = d.toLocaleDateString("en-US", { weekday: "narrow" });
+      const weekday = d.toLocaleDateString(locale, { weekday: "narrow" });
       const isWeekend = d.getDay() === 0 || d.getDay() === 6;
       return { text: `${day}`, weekday, isWeekend, isToday: false };
     });
@@ -81,13 +83,13 @@ export function CalendarPage() {
       if (labels[idx]) labels[idx].isToday = true;
     }
 
-    const monthText = month.toLocaleDateString("en-US", {
+    const monthText = month.toLocaleDateString(locale, {
       month: "long",
       year: "numeric",
     });
 
     return { daysInMonth: days, dayLabels: labels, monthLabel: monthText };
-  }, [month]);
+  }, [month, locale]);
 
   const bookingsByRoom = useMemo(() => {
     const monthStart = month;
@@ -158,7 +160,7 @@ export function CalendarPage() {
                 {t("pages.calendar.roomOccupancyCalendar", "Room Occupancy Calendar")}
               </h3>
               <p className="text-sm text-gray-500 mt-0.5">
-                {monthLabel} · {totalBookings} bookings · {occupiedRoomCount}/{rooms.length} rooms occupied
+                {monthLabel} · {t("pages.calendar.bookings", { count: totalBookings, defaultValue: `${totalBookings} bookings` })} · {t("pages.calendar.roomsOccupied", { occupied: occupiedRoomCount, total: rooms.length, defaultValue: `${occupiedRoomCount}/${rooms.length} rooms occupied` })}
               </p>
             </div>
 
@@ -166,8 +168,8 @@ export function CalendarPage() {
               {/* Legend */}
               <div className="hidden md:flex items-center gap-3 mr-4">
                 {[
-                  { label: "Approved", color: STATUS_COLORS.APPROVED },
-                  { label: "Pending", color: STATUS_COLORS.PENDING },
+                  { label: t("pages.calendar.legend.approved", "Approved"), color: STATUS_COLORS.APPROVED },
+                  { label: t("pages.calendar.legend.pending", "Pending"), color: STATUS_COLORS.PENDING },
                 ].map(({ label, color }) => (
                   <div key={label} className="flex items-center gap-1.5 text-xs">
                     <div className="w-3 h-3 rounded" style={{ background: color.bg, border: `1px solid ${color.border}` }} />
@@ -179,13 +181,13 @@ export function CalendarPage() {
               {/* Navigation */}
               <div className="flex items-center gap-1.5">
                 <button onClick={goPrevMonth} className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  ← Prev
+                  {t("pages.calendar.prev", "← Prev")}
                 </button>
                 <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  Today
+                  {t("pages.calendar.today", "Today")}
                 </button>
                 <button onClick={goNextMonth} className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  Next →
+                  {t("pages.calendar.next", "Next →")}
                 </button>
               </div>
             </div>
@@ -211,7 +213,7 @@ export function CalendarPage() {
                 {/* Date header */}
                 <div className="flex bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <div className="w-[130px] flex-shrink-0 px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                    Room
+                    {t("pages.calendar.room", "Room")}
                   </div>
                   {dayLabels.map((day, idx) => (
                     <div

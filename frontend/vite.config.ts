@@ -1,11 +1,22 @@
 
-  import { defineConfig } from 'vite';
+  import { defineConfig, loadEnv } from 'vite';
   import react from '@vitejs/plugin-react-swc';
   import * as path from "path";
 
-  export default defineConfig({
-    base: '/ehp/',
+  export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    base: env.VITE_BASE_PATH || '/ehp/',
     plugins: [react()],
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL || 'http://localhost:9004',
+          rewrite: (path) => path.replace(/^\/api/, ''),
+          changeOrigin: true,
+        },
+      },
+    },
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -51,4 +62,5 @@
         '@': path.resolve(__dirname, './src'),
       },
     },
+  };
   });

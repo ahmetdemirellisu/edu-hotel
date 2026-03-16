@@ -12,7 +12,8 @@ export interface AdminDashboardStats {
   }
   
   export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-    const res = await fetch("api/admin/dashboard-stats");
+    const API_BASE = (import.meta as any).env?.VITE_API_URL || "http://localhost:9004";
+    const res = await fetch(`${API_BASE}/admin/dashboard-stats`);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.error || "Failed to load dashboard stats.");

@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next"; // Added i18n
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
 
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:9004";
+
 import {
   CalendarDays,
   Moon,
@@ -53,8 +55,7 @@ export function Payment() {
   };
 
   const nights = calculateNights();
-  const pricePerNight = 1200;
-  const totalAmount = nights * pricePerNight;
+  const totalAmount = (reservation as any)?.price ?? null;
 
   const formatDate = (dateStr: string) => {
     const currentLang = i18n.language === "tr" ? "tr-TR" : "en-GB";
@@ -103,7 +104,7 @@ export function Payment() {
        * FIX: Use Port 3000 (from your error log) 
        * and "/payment" (from your app.use in app.js)
        */
-      const response = await fetch(`http://localhost:9004/payment/upload-dekont/${reservation.id}`, {
+      const response = await fetch(`${API_BASE_URL}/payment/upload-dekont/${reservation.id}`, {
         method: "POST",
         body: formData,
       });
@@ -189,19 +190,18 @@ export function Payment() {
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">{t("payment.pricePerNight")}</span>
-                    <span className="text-gray-900">₺{pricePerNight.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
                     <span className="text-gray-600">{t("payment.nights")}</span>
-                    <span className="text-gray-900">× {nights}</span>
+                    <span className="text-gray-900">{nights} {t("payment.night", { count: nights })}</span>
                   </div>
                 </div>
 
                 <div className="bg-[#003366] text-white rounded-xl p-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">{t("payment.total")}</span>
-                    <span className="text-2xl font-semibold">₺{totalAmount.toLocaleString()}</span>
+                    {totalAmount !== null
+                      ? <span className="text-2xl font-semibold">₺{totalAmount.toLocaleString()}</span>
+                      : <span className="text-sm text-blue-200">{t("payment.priceNotSet", { defaultValue: "To be determined" })}</span>
+                    }
                   </div>
                   <p className="text-xs text-blue-200 mt-2">{t("payment.currency")}</p>
                 </div>

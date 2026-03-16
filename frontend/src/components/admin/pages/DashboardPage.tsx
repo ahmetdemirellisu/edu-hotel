@@ -1,5 +1,5 @@
 // src/components/admin/pages/DashboardPage.tsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Clock,
   CheckCircle,
@@ -53,7 +53,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("http://localhost:9004/admin/dashboard-stats");
+        const res = await fetch("/api/admin/dashboard-stats");
         if (res.ok) setStats(await res.json());
       } catch (err) { console.error("Failed to load dashboard stats:", err); }
       finally { setLoadingStats(false); }
@@ -75,21 +75,21 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const formatDate = (iso: string) => iso?.slice(0, 10) || "—";
 
   const statusBadge = (status: string) => {
-    const map: Record<string, { label: string; bg: string; text: string }> = {
-      PENDING: { label: "Pending", bg: "bg-amber-50", text: "text-amber-700" },
-      APPROVED: { label: "Approved", bg: "bg-emerald-50", text: "text-emerald-700" },
-      REJECTED: { label: "Rejected", bg: "bg-red-50", text: "text-red-700" },
-      CANCELLED: { label: "Cancelled", bg: "bg-gray-100", text: "text-gray-600" },
+    const map: Record<string, { key: string; bg: string; text: string }> = {
+      PENDING: { key: "reservations.statusLabels.pending", bg: "bg-amber-50", text: "text-amber-700" },
+      APPROVED: { key: "reservations.statusLabels.approved", bg: "bg-emerald-50", text: "text-emerald-700" },
+      REJECTED: { key: "reservations.statusLabels.rejected", bg: "bg-red-50", text: "text-red-700" },
+      CANCELLED: { key: "reservations.statusLabels.canceled", bg: "bg-gray-100", text: "text-gray-600" },
     };
     const cfg = map[status] || map.PENDING;
-    return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>;
+    return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>{t(cfg.key)}</span>;
   };
 
   const paymentBadge = (ps: string) => {
-    if (ps === "APPROVED") return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Paid</span>;
-    if (ps === "PENDING_VERIFICATION") return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">Pending</span>;
-    if (ps === "REJECTED") return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-700">Rejected</span>;
-    return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-50 text-gray-500">N/A</span>;
+    if (ps === "APPROVED") return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{t("tables.paymentPaid")}</span>;
+    if (ps === "PENDING_VERIFICATION") return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">{t("tables.paymentPending")}</span>;
+    if (ps === "REJECTED") return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-700">{t("tables.paymentRejected")}</span>;
+    return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-50 text-gray-500">{t("tables.paymentNA")}</span>;
   };
 
   /* ── Skeleton loader ─────────────────── */
@@ -201,15 +201,15 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
               <h3 className="text-[15px] font-semibold text-gray-900">
-                {t("pages.dashboard.latestReservations", "Recent Reservations")}
+                {t("pages.dashboard.latestReservations")}
               </h3>
-              <p className="text-[11px] text-gray-400 mt-0.5">Latest booking activity</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">{t("pages.dashboard.latestBookingActivity")}</p>
             </div>
             <button
               onClick={() => onNavigate("reservations")}
               className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 transition-colors"
             >
-              View all <ArrowRight className="h-3 w-3" />
+              {t("pages.dashboard.viewAll")} <ArrowRight className="h-3 w-3" />
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -218,12 +218,19 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 {[1,2,3].map(i => <Skeleton key={i} h="h-12" />)}
               </div>
             ) : latestReservations.length === 0 ? (
-              <div className="p-8 text-center text-sm text-gray-400">No reservations yet.</div>
+              <div className="p-8 text-center text-sm text-gray-400">{t("pages.dashboard.noReservationsYet")}</div>
             ) : (
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-50">
-                    {["ID", "Guest", "Check-in", "Check-out", "Status", "Payment"].map(h => (
+                    {[
+                      t("tables.id"),
+                      t("tables.guestName"),
+                      t("tables.checkIn"),
+                      t("tables.checkOut"),
+                      t("tables.status"),
+                      t("tables.payment"),
+                    ].map(h => (
                       <th key={h} className="text-left py-2.5 px-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wider first:pl-6">{h}</th>
                     ))}
                   </tr>
@@ -238,7 +245,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                         <td className="py-3 pl-6 pr-4 text-xs font-mono text-gray-500">#{res.id}</td>
                         <td className="py-3 px-4">
                           <p className="text-[13px] font-medium text-gray-800">{guestName}</p>
-                          <p className="text-[10px] text-gray-400">{res.guests} guest{res.guests > 1 ? "s" : ""}</p>
+                          <p className="text-[10px] text-gray-400">{res.guests} {t(res.guests > 1 ? "tables.guest_other" : "tables.guest_one")}</p>
                         </td>
                         <td className="py-3 px-4 text-xs text-gray-600">{formatDate(res.checkIn)}</td>
                         <td className="py-3 px-4 text-xs text-gray-600">{formatDate(res.checkOut)}</td>
@@ -317,13 +324,13 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h3 className="text-[15px] font-semibold text-gray-900 mb-3">Quick Actions</h3>
+            <h3 className="text-[15px] font-semibold text-gray-900 mb-3">{t("pages.dashboard.quickActions")}</h3>
             <div className="space-y-2">
               {[
-                { label: "View Calendar", icon: Calendar, color: "text-emerald-600", bg: "bg-emerald-50", target: "calendar" as DashboardNavTarget },
-                { label: "Manage Rooms", icon: BedDouble, color: "text-violet-600", bg: "bg-violet-50", target: "rooms" as DashboardNavTarget },
-                { label: "Pending Payments", icon: CreditCard, color: "text-amber-600", bg: "bg-amber-50", target: "payments" as DashboardNavTarget },
-                { label: "Generate Report", icon: FileText, color: "text-blue-600", bg: "bg-blue-50", target: "reports" as DashboardNavTarget },
+                { label: t("pages.dashboard.actions.viewCalendar"), icon: Calendar, color: "text-emerald-600", bg: "bg-emerald-50", target: "calendar" as DashboardNavTarget },
+                { label: t("pages.dashboard.actions.manageRooms"), icon: BedDouble, color: "text-violet-600", bg: "bg-violet-50", target: "rooms" as DashboardNavTarget },
+                { label: t("pages.dashboard.actions.pendingPayments"), icon: CreditCard, color: "text-amber-600", bg: "bg-amber-50", target: "payments" as DashboardNavTarget },
+                { label: t("pages.dashboard.actions.generateReport"), icon: FileText, color: "text-blue-600", bg: "bg-blue-50", target: "reports" as DashboardNavTarget },
               ].map((action, idx) => {
                 const Icon = action.icon;
                 return (
@@ -351,14 +358,14 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-amber-800">
-                  {stats?.pendingReservations} pending request{(stats?.pendingReservations ?? 0) > 1 ? "s" : ""}
+                  {t((stats?.pendingReservations ?? 0) > 1 ? "pages.dashboard.pendingAlert.title_other" : "pages.dashboard.pendingAlert.title_one", { count: stats?.pendingReservations ?? 0 })}
                 </p>
-                <p className="text-xs text-amber-600 mt-0.5">Requires your review and approval.</p>
+                <p className="text-xs text-amber-600 mt-0.5">{t("pages.dashboard.pendingAlert.message")}</p>
                 <button
                   onClick={() => onNavigate("reservations")}
                   className="text-xs font-semibold text-amber-700 hover:text-amber-900 mt-2 flex items-center gap-1 transition-colors"
                 >
-                  Review now <ArrowRight className="h-3 w-3" />
+                  {t("pages.dashboard.pendingAlert.reviewNow")} <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
             </div>
