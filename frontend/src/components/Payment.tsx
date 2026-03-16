@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next"; // Added i18n
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:9004";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "/ehp";
 
 import {
   CalendarDays,
