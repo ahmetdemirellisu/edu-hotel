@@ -18,7 +18,7 @@ services:
       retries: 20
 
   backend:
-    image: ghcr.io/ahmetdemirellisu/edu-hotl/backend:latest
+    image: ghcr.io/ahmetdemirellisu/edu-hotel/backend:latest
     container_name: ehp-backend
     network_mode: host # Ağ izolasyonunu kaldırır
     command: sh -c "npx prisma migrate deploy && PORT=9002 npm run start"
@@ -36,7 +36,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: ghcr.io/ahmetdemirellisu/suimc_app/frontend:latest
+    image: ghcr.io/ahmetdemirellisu/edu-hotel/frontend:latest
     container_name: ehp-frontend
     network_mode: host # Ağ izolasyonunu kaldırır
     environment:
