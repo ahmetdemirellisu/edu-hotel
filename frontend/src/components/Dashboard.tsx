@@ -377,7 +377,7 @@ export function Dashboard() {
               className="flex-shrink-0"
             >
               <motion.a
-                href="/book-room"
+                href="book-room"
                 whileHover={{ scale: 1.04, y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-semibold text-[#003366] transition-shadow duration-300"
@@ -584,7 +584,7 @@ export function Dashboard() {
                 {/* Action buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <motion.a
-                    href="/reservations"
+                    href="reservations"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     className="group/btn inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 border-2 border-[#003366]/20 text-[#003366] font-semibold text-sm hover:border-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-300"
@@ -594,7 +594,7 @@ export function Dashboard() {
                   </motion.a>
 
                   <motion.a
-                    href="/book-room"
+                    href="book-room"
                     whileHover={{ scale: 1.02, boxShadow: "0 8px 24px rgba(0,51,102,0.28)" }}
                     whileTap={{ scale: 0.97 }}
                     className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 bg-[#003366] text-white font-semibold text-sm transition-all duration-300"
@@ -655,7 +655,7 @@ export function Dashboard() {
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Book a Room */}
                 <motion.a
-                  href="/book-room"
+                  href="book-room"
                   whileHover={{ y: -3, boxShadow: "0 16px 40px rgba(0,51,102,0.28)" }}
                   whileTap={{ scale: 0.97 }}
                   className="group/qa relative rounded-2xl p-5 text-white flex items-center justify-between overflow-hidden cursor-pointer"
@@ -678,7 +678,7 @@ export function Dashboard() {
 
                 {/* My Requests */}
                 <motion.a
-                  href="/reservations"
+                  href="reservations"
                   whileHover={{ y: -3, boxShadow: "0 16px 40px rgba(0,51,102,0.12)" }}
                   whileTap={{ scale: 0.97 }}
                   className="group/qa rounded-2xl p-5 flex items-center justify-between cursor-pointer"
