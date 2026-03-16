@@ -21,7 +21,7 @@ services:
     container_name: eduhotel-backend
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 9004
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
       EMAIL_USER: ${EMAIL_USER:-}
