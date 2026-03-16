@@ -14,7 +14,7 @@ export interface Room {
   createdAt: string;
 }
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp";
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
 
 export async function getRooms(): Promise<Room[]> {
   const res = await fetch(`${API_BASE}/rooms`);

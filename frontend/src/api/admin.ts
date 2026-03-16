@@ -12,7 +12,7 @@ export interface AdminDashboardStats {
   }
   
   export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-    const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp";
+    const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
     const res = await fetch(`${API_BASE}/admin/dashboard-stats`);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
