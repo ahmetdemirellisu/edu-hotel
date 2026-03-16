@@ -35,7 +35,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "9004:3000"
+      - "9004:9004"
     networks:
       - ehp-network
 
@@ -45,7 +45,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "8004:80"
+      - "8004:8004"
     networks:
       - ehp-network
 
