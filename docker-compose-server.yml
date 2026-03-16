@@ -21,10 +21,10 @@ services:
     image: ghcr.io/ahmetdemirellisu/edu-hotel/backend:latest
     container_name: ehp-backend
     network_mode: host # Ağ izolasyonunu kaldırır
-    command: sh -c "npx prisma migrate deploy && PORT=9002 npm run start"
+    command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
     environment:
       NODE_ENV: production
-      PORT: 9002
+      PORT: 9004
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
       JWT_EXPIRES_IN: 1d
