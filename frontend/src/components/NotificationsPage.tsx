@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "./layout/Footer";
 import {
   Bell,
@@ -22,14 +23,38 @@ import {
 } from "./ui/select";
 import { NotificationBell } from "./NotificationBell";
 
-/* ─── Animation ─────────────────────────────────────────── */
-const _style = document.getElementById("notif-anim") ?? (() => {
+/* ─── Inject animation styles ───────────────────────── */
+if (!document.getElementById("notif-anim")) {
   const s = document.createElement("style");
   s.id = "notif-anim";
-  s.textContent = `@keyframes notifFadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }`;
+  s.textContent = `
+    @keyframes notifFadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes underlineGrow {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+    @keyframes bellSwing {
+      0%, 100% { transform: rotate(0deg); }
+      20%       { transform: rotate(15deg); }
+      40%       { transform: rotate(-12deg); }
+      60%       { transform: rotate(8deg); }
+      80%       { transform: rotate(-5deg); }
+    }
+    @keyframes dotPop {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+  `;
   document.head.appendChild(s);
-  return s;
-})();
+}
 
 type Notification = {
   id: string;
@@ -43,12 +68,12 @@ type Notification = {
   read: boolean;
 };
 
-const TYPE_CONFIG: Record<string, { icon: typeof Bell; color: string; bg: string; dot: string }> = {
-  info:     { icon: Info,         color: "text-blue-600",    bg: "bg-blue-50",    dot: "#3b82f6" },
-  success:  { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", dot: "#22c55e" },
-  error:    { icon: XCircle,      color: "text-red-600",     bg: "bg-red-50",     dot: "#ef4444" },
-  warning:  { icon: AlertCircle,  color: "text-amber-600",   bg: "bg-amber-50",   dot: "#f59e0b" },
-  reminder: { icon: Calendar,     color: "text-violet-600",  bg: "bg-violet-50",  dot: "#8b5cf6" },
+const TYPE_CONFIG: Record<string, { icon: typeof Bell; color: string; bg: string; dot: string; ring: string }> = {
+  info:     { icon: Info,         color: "#3b82f6",  bg: "#eff6ff",  dot: "#3b82f6",  ring: "rgba(59,130,246,0.15)" },
+  success:  { icon: CheckCircle2, color: "#22c55e",  bg: "#f0fdf4",  dot: "#22c55e",  ring: "rgba(34,197,94,0.15)"  },
+  error:    { icon: XCircle,      color: "#ef4444",  bg: "#fef2f2",  dot: "#ef4444",  ring: "rgba(239,68,68,0.15)"  },
+  warning:  { icon: AlertCircle,  color: "#f59e0b",  bg: "#fffbeb",  dot: "#f59e0b",  ring: "rgba(245,158,11,0.15)" },
+  reminder: { icon: Calendar,     color: "#8b5cf6",  bg: "#f5f3ff",  dot: "#8b5cf6",  ring: "rgba(139,92,246,0.15)" },
 };
 
 function timeAgo(timestamp: string): string {
@@ -77,6 +102,7 @@ export function NotificationsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
+  const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
 
   useEffect(() => {
     (async () => {
@@ -96,10 +122,15 @@ export function NotificationsPage() {
     })();
   }, [userId]);
 
-  const filtered = notifications.filter(n => filterType === "all" || n.type === filterType);
-
-  const stagger = (i: number): React.CSSProperties => ({
-    animation: `notifFadeUp 0.4s ease-out ${0.05 + i * 0.04}s both`,
+  const filtered = notifications.filter(n => {
+    const typeMatch = filterType === "all" || n.type === filterType;
+    const readMatch =
+      readFilter === "all"
+        ? true
+        : readFilter === "unread"
+        ? !n.read
+        : n.read;
+    return typeMatch && readMatch;
   });
 
   const filterTabs = [
@@ -111,12 +142,19 @@ export function NotificationsPage() {
     { key: "reminder", label: isTR ? "Hatırlatma" : "Reminders" },
   ];
 
+  const readFilterTabs: Array<{ key: "all" | "unread" | "read"; label: string }> = [
+    { key: "all",    label: isTR ? "Tümü"        : "All" },
+    { key: "unread", label: isTR ? "Okunmamış"   : "Unread" },
+    { key: "read",   label: isTR ? "Okunmuş"     : "Read" },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f8fafb]">
+    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #f0f4f8 0%, #e8eef5 50%, #f0f4f8 100%)" }}>
+
       {/* ═══ HEADER ═══════════════════════════════════════ */}
       <header
         className="sticky top-0 z-50 border-b border-white/10"
-        style={{ background: "rgba(0,51,102,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+        style={{ background: "rgba(0,51,102,0.94)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}
       >
         <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="flex justify-between items-center">
@@ -167,124 +205,334 @@ export function NotificationsPage() {
         </div>
       </header>
 
-      {/* ═══ MAIN ═════════════════════════════════════════ */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+      {/* ═══ HERO BANNER ══════════════════════════════════ */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #001a3a 0%, #003366 45%, #004d80 100%)",
+          minHeight: "180px",
+        }}
+      >
+        {/* Decorative grid */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "36px 36px",
+          }}
+        />
 
-        {/* Title */}
-        <div className="mb-8" style={stagger(0)}>
-          <h1 className="text-[28px] font-semibold text-[#003366] tracking-tight mb-1">
-            {isTR ? "Bildirimler" : "Notifications"}
-          </h1>
-          <p className="text-[15px] text-gray-500">
-            {isTR
-              ? `${unreadCount} okunmamış bildirim`
-              : `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}`}
-          </p>
+        {/* Floating dots */}
+        {[
+          { size: 5, x: "5%",  y: "25%", delay: "0s" },
+          { size: 3, x: "12%", y: "72%", delay: "0.9s" },
+          { size: 7, x: "78%", y: "18%", delay: "0.4s" },
+          { size: 4, x: "90%", y: "60%", delay: "1.3s" },
+          { size: 6, x: "55%", y: "75%", delay: "0.7s" },
+        ].map((dot, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: dot.size, height: dot.size,
+              left: dot.x, top: dot.y,
+              animation: `floatDot ${3 + i * 0.4}s ease-in-out ${dot.delay} infinite`,
+              opacity: 0.3,
+            }}
+          />
+        ))}
+
+        {/* Gold bottom border */}
+        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "linear-gradient(90deg, transparent, #c9a84c 30%, #e8c96d 50%, #c9a84c 70%, transparent)" }} />
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-10 flex items-center justify-between" style={{ minHeight: "180px" }}>
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#c9a84c]" />
+              <span className="text-[#c9a84c] text-[10px] font-bold uppercase tracking-widest">EDU Hotel</span>
+            </div>
+            <div className="flex items-center gap-4 mb-2">
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+              >
+                <Bell
+                  className="h-6 w-6 text-white"
+                  style={{ animation: "bellSwing 3s ease-in-out 1s infinite" }}
+                />
+              </div>
+              <h1
+                className="text-white"
+                style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontSize: "clamp(24px, 4vw, 38px)",
+                  fontWeight: 700,
+                  lineHeight: 1.1,
+                }}
+              >
+                {isTR ? "Bildirimler" : "Notifications"}
+              </h1>
+            </div>
+            <p className="text-white/40 text-sm ml-16">
+              {isTR
+                ? `${unreadCount} okunmamış bildirim`
+                : `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}`}
+            </p>
+          </div>
+
+          {/* Unread badge */}
+          {unreadCount > 0 && (
+            <div
+              className="hidden sm:flex flex-col items-center justify-center w-20 h-20 rounded-2xl flex-shrink-0"
+              style={{
+                background: "rgba(201,168,76,0.12)",
+                border: "1px solid rgba(201,168,76,0.25)",
+              }}
+            >
+              <span
+                className="text-[32px] font-black text-[#c9a84c] leading-none tabular-nums"
+                style={{ animation: "countUp 0.6s ease-out both" }}
+              >
+                {unreadCount}
+              </span>
+              <span className="text-[#c9a84c]/60 text-[9px] font-bold uppercase tracking-widest mt-0.5">
+                {isTR ? "Yeni" : "New"}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ MAIN ═════════════════════════════════════════ */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+
+        {/* Read/Unread filter tabs */}
+        <div className="mb-4">
+          <div
+            className="inline-flex items-center gap-1 bg-white rounded-2xl border border-slate-100 p-1.5 shadow-sm"
+            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+          >
+            {readFilterTabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setReadFilter(tab.key)}
+                className="relative px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200"
+                style={{
+                  color: readFilter === tab.key ? "white" : "#94a3b8",
+                  background: readFilter === tab.key ? "linear-gradient(135deg, #001a3a 0%, #003366 100%)" : "transparent",
+                }}
+              >
+                {tab.label}
+                {tab.key === "unread" && unreadCount > 0 && (
+                  <span
+                    className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-black"
+                    style={{
+                      background: readFilter === "unread" ? "rgba(255,255,255,0.2)" : "#ef4444",
+                      color: "white",
+                      animation: "dotPop 0.3s ease-out both",
+                    }}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Filter tabs */}
+        {/* Type filter tabs */}
         <div
-          className="flex flex-wrap items-center gap-1.5 bg-white rounded-xl border border-gray-100 p-1.5 mb-6"
-          style={stagger(1)}
+          className="flex flex-wrap items-center gap-1.5 bg-white rounded-2xl border border-slate-100 p-1.5 mb-7"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
         >
-          {filterTabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setFilterType(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                filterType === tab.key
-                  ? "bg-[#003366] text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {tab.label}
-              {tab.key !== "all" && (
-                <span className={`ml-1 ${filterType === tab.key ? "text-white/60" : "text-gray-400"}`}>
-                  {notifications.filter(n => n.type === tab.key).length}
-                </span>
-              )}
-            </button>
-          ))}
+          {filterTabs.map(tab => {
+            const cfg = TYPE_CONFIG[tab.key];
+            const count = tab.key === "all" ? notifications.length : notifications.filter(n => n.type === tab.key).length;
+            const isActive = filterType === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setFilterType(tab.key)}
+                className="relative px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5"
+                style={{
+                  background: isActive
+                    ? (cfg ? cfg.bg : "#eff6ff")
+                    : "transparent",
+                  color: isActive
+                    ? (cfg ? cfg.color : "#003366")
+                    : "#94a3b8",
+                  border: isActive
+                    ? `1.5px solid ${cfg ? cfg.dot + "40" : "rgba(0,51,102,0.2)"}`
+                    : "1.5px solid transparent",
+                }}
+              >
+                {tab.label}
+                {count > 0 && (
+                  <span
+                    className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-black"
+                    style={{
+                      background: isActive ? (cfg ? cfg.dot : "#003366") : "#e2e8f0",
+                      color: isActive ? "white" : "#94a3b8",
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Notification list */}
         <div className="space-y-3">
           {loading ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center" style={stagger(2)}>
-              <div className="w-8 h-8 border-2 border-[#003366] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-sm text-gray-500">{isTR ? "Yükleniyor..." : "Loading..."}</p>
+            <div
+              className="bg-white rounded-3xl border border-slate-100 p-16 text-center"
+              style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.04)" }}
+            >
+              <div className="w-10 h-10 border-2 border-[#003366]/20 border-t-[#003366] rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm text-slate-400 font-medium">{isTR ? "Yükleniyor..." : "Loading..."}</p>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center" style={stagger(2)}>
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
-                <Bell className="h-7 w-7 text-gray-300" />
-              </div>
-              <p className="text-base font-semibold text-gray-700 mb-1">
-                {isTR ? "Bildirim yok" : "No notifications"}
-              </p>
-              <p className="text-sm text-gray-500">
-                {isTR ? "Yeni bildirimler burada görünecek." : "New notifications will appear here."}
-              </p>
-            </div>
-          ) : (
-            filtered.map((n, idx) => {
-              const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.info;
-              const Icon = cfg.icon;
-              const title = isTR ? n.titleTR : n.title;
-              const message = isTR ? n.messageTR : n.message;
-
-              return (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl border border-slate-100 p-16 text-center"
+              style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.04)" }}
+            >
+              {/* Empty state illustration */}
+              <div className="relative w-24 h-24 mx-auto mb-6">
                 <div
-                  key={n.id}
-                  className={`bg-white rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-md ${
-                    n.read ? "border-gray-100" : "border-gray-200"
-                  }`}
-                  style={{ ...stagger(idx + 2), borderLeft: `3px solid ${cfg.dot}` }}
+                  className="w-24 h-24 rounded-3xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%)" }}
                 >
-                  <div className="px-5 py-4 flex items-start gap-4">
-                    {/* Icon */}
-                    <div className={`w-10 h-10 rounded-xl ${cfg.bg} ${cfg.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className={`text-[14px] font-semibold ${n.read ? "text-gray-700" : "text-gray-900"}`}>
-                          {title}
-                          {!n.read && (
-                            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 ml-2 -translate-y-0.5" />
-                          )}
-                        </h3>
-                        <span className="text-[11px] text-gray-400 font-medium flex-shrink-0">
-                          {timeAgo(n.timestamp)}
-                        </span>
-                      </div>
-                      <p className={`text-[13px] leading-relaxed ${n.read ? "text-gray-500" : "text-gray-600"}`}>
-                        {message}
-                      </p>
-                      <Link
-                        to="/reservations"
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#003366] hover:text-[#004d99] mt-2 transition-colors"
-                      >
-                        {isTR ? "Rezervasyonu Görüntüle" : "View Reservation"}
-                        <ChevronRight className="h-3 w-3" />
-                      </Link>
-                    </div>
-                  </div>
+                  <Bell className="h-10 w-10 text-slate-300" />
                 </div>
-              );
-            })
+                {/* Decorative rings */}
+                <div className="absolute -inset-3 rounded-[28px] border-2 border-dashed border-slate-100" />
+                <div className="absolute -inset-6 rounded-[36px] border border-slate-100/60" />
+              </div>
+              <p className="text-lg font-bold text-slate-600 mb-2">
+                {isTR ? "Bildirim yok" : "No notifications yet"}
+              </p>
+              <p className="text-sm text-slate-400 max-w-xs mx-auto leading-relaxed">
+                {isTR
+                  ? "Rezervasyon güncellemeleri ve bilgiler burada görünecek."
+                  : "Reservation updates and alerts will appear here when available."}
+              </p>
+              <Link
+                to="/main"
+                className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:shadow-lg"
+                style={{ background: "linear-gradient(135deg, #003366 0%, #0052a3 100%)" }}
+              >
+                {isTR ? "Ana Sayfaya Dön" : "Back to Home"}
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </motion.div>
+          ) : (
+            <AnimatePresence>
+              {filtered.map((n, idx) => {
+                const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.info;
+                const Icon = cfg.icon;
+                const title = isTR ? n.titleTR : n.title;
+                const message = isTR ? n.messageTR : n.message;
+
+                return (
+                  <motion.div
+                    key={n.id}
+                    initial={{ opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -24 }}
+                    transition={{ duration: 0.3, delay: idx * 0.04, ease: "easeOut" }}
+                    className="group relative bg-white rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg hover:translate-x-0.5"
+                    style={{
+                      boxShadow: n.read
+                        ? "0 1px 3px rgba(0,0,0,0.04)"
+                        : "0 4px 16px rgba(0,0,0,0.06)",
+                      border: `1px solid ${n.read ? "rgba(226,232,240,0.8)" : "rgba(203,213,225,0.8)"}`,
+                    }}
+                  >
+                    {/* Left accent bar */}
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl transition-all duration-200 group-hover:w-1.5"
+                      style={{ background: cfg.dot }}
+                    />
+
+                    <div className="pl-5 pr-5 py-4 flex items-start gap-4">
+                      {/* Unread indicator dot */}
+                      {!n.read && (
+                        <div
+                          className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{
+                            background: cfg.dot,
+                            boxShadow: `0 0 0 3px ${cfg.ring}`,
+                            animation: "dotPop 0.4s ease-out both",
+                          }}
+                        />
+                      )}
+
+                      {/* Icon */}
+                      <div
+                        className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5 transition-transform duration-200 group-hover:scale-105"
+                        style={{
+                          background: cfg.bg,
+                          boxShadow: `0 2px 8px ${cfg.ring}`,
+                        }}
+                      >
+                        <Icon className="h-5 w-5" style={{ color: cfg.color }} />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 pr-4">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h3
+                            className="text-[14px] leading-snug tracking-tight"
+                            style={{
+                              fontWeight: n.read ? 500 : 700,
+                              color: n.read ? "#64748b" : "#0f172a",
+                            }}
+                          >
+                            {title}
+                          </h3>
+                          <span className="text-[11px] text-slate-400 font-medium flex-shrink-0 tabular-nums mt-0.5">
+                            {timeAgo(n.timestamp)}
+                          </span>
+                        </div>
+                        <p
+                          className="text-[13px] leading-relaxed mb-2.5"
+                          style={{ color: n.read ? "#94a3b8" : "#475569" }}
+                        >
+                          {message}
+                        </p>
+                        <Link
+                          to="/reservations"
+                          className="inline-flex items-center gap-1 text-[12px] font-bold transition-all duration-200 hover:gap-1.5"
+                          style={{ color: cfg.color }}
+                        >
+                          {isTR ? "Rezervasyonu Görüntüle" : "View Reservation"}
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           )}
         </div>
 
-        {/* Count */}
+        {/* Count footer */}
         {!loading && filtered.length > 0 && (
-          <p className="text-center text-[12px] text-gray-400 mt-6" style={stagger(filtered.length + 3)}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center text-[12px] text-slate-400 mt-8 font-medium"
+          >
             {isTR
               ? `${filtered.length} bildirim gösteriliyor`
               : `Showing ${filtered.length} notification${filtered.length !== 1 ? "s" : ""}`}
-          </p>
+          </motion.p>
         )}
       </main>
 

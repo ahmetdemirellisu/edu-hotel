@@ -30,24 +30,99 @@ import {
   SelectValue,
 } from "./ui/select";
 
+/* ── Inject keyframes once ─────────────────────────────── */
+void (document.getElementById("dashboard-anim") ?? (() => {
+  const s = document.createElement("style");
+  s.id = "dashboard-anim";
+  s.textContent = `
+    @keyframes dashAurora1 {
+      0%   { transform: translate(0,0) scale(1); }
+      33%  { transform: translate(30px,-20px) scale(1.08); }
+      66%  { transform: translate(-20px,15px) scale(0.95); }
+      100% { transform: translate(0,0) scale(1); }
+    }
+    @keyframes dashAurora2 {
+      0%   { transform: translate(0,0) scale(1); }
+      33%  { transform: translate(-40px,20px) scale(1.05); }
+      66%  { transform: translate(25px,-10px) scale(0.98); }
+      100% { transform: translate(0,0) scale(1); }
+    }
+    @keyframes dashAurora3 {
+      0%   { transform: translate(0,0) rotate(0deg); }
+      50%  { transform: translate(10px,-15px) rotate(10deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
+    }
+    @keyframes dashGoldShimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes dashPulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50%       { opacity: 1;   transform: scale(1.3); }
+    }
+    @keyframes dashFloatA {
+      0%, 100% { transform: translateY(0px) rotate(12deg); }
+      50%       { transform: translateY(-8px) rotate(16deg); }
+    }
+    @keyframes dashFloatB {
+      0%, 100% { transform: translateY(0px) rotate(-8deg); }
+      50%       { transform: translateY(10px) rotate(-12deg); }
+    }
+    @keyframes dashFloatC {
+      0%, 100% { transform: translate(0,0) rotate(30deg); }
+      50%       { transform: translate(6px,-6px) rotate(36deg); }
+    }
+    @keyframes dashProgressBar {
+      from { width: 0%; }
+    }
+    @keyframes dashCardTilt {
+      0%   { transform: perspective(800px) rotateX(0deg) rotateY(0deg); }
+    }
+    .dash-stat-pill {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dash-tilt-card {
+      transition: transform 0.15s ease, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+    }
+    .dash-quick-action {
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+    }
+    .dash-quick-action:hover {
+      transform: translateY(-5px);
+    }
+  `;
+  document.head.appendChild(s);
+  return s;
+})());
+
 /* ── Motion variants ─────────────────────────────────────────── */
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 24 },
   visible: (i = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, delay: i * 0.07, ease: "easeOut" as const },
+    transition: { duration: 0.65, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
   }),
 };
 
 const slideLeft = {
-  hidden: { opacity: 0, x: -16 },
+  hidden: { opacity: 0, x: -20 },
   visible: (i = 0) => ({
     opacity: 1,
     x: 0,
-    transition: { duration: 0.45, delay: i * 0.08, ease: "easeOut" as const },
+    transition: { duration: 0.5, delay: i * 0.1, ease: "easeOut" as const },
   }),
 };
+
+/* ── Time-based greeting ─────────────────────────────────────── */
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export function Dashboard() {
   const { t, i18n } = useTranslation();
@@ -61,6 +136,20 @@ export function Dashboard() {
   const [activeReservation, setActiveReservation] = useState<Reservation | null>(null);
   const [allReservations, setAllReservations] = useState<Reservation[]>([]);
   const [loadingReservation, setLoadingReservation] = useState(true);
+
+  // 3-D tilt state for reservation card
+  const [tilt, setTilt] = useState({ rotX: 0, rotY: 0 });
+  const tiltRef = React.useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = tiltRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ rotX: -y * 8, rotY: x * 10 });
+  };
+  const handleMouseLeave = () => setTilt({ rotX: 0, rotY: 0 });
 
   useEffect(() => {
     async function loadData() {
@@ -99,7 +188,6 @@ export function Dashboard() {
   }).length;
 
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB");
-
 
   /* ── Stats config ────────────────────────────────────────────── */
   const quickStats = [
@@ -236,29 +324,62 @@ export function Dashboard() {
 
   const currentStep = getProgressStep(activeReservation);
 
+  /* ── Reservation card gradient by status ────────────────────── */
+  const getReservationGradient = () => {
+    if (!activeReservation) return "linear-gradient(145deg, #ffffff 0%, #f7fafd 100%)";
+    const s = activeReservation.status;
+    const ps = (activeReservation as any).paymentStatus;
+    if (s === "APPROVED" && ps === "APPROVED") return "linear-gradient(145deg, #f0fdf4 0%, #dcfce7 40%, #f7fff9 100%)";
+    if (s === "APPROVED") return "linear-gradient(145deg, #f0fdf4 0%, #f7fafd 100%)";
+    if (s === "PENDING") return "linear-gradient(145deg, #fffbf0 0%, #fef9ec 40%, #fffdf7 100%)";
+    if (s === "REJECTED" || s === "CANCELLED") return "linear-gradient(145deg, #fff8f8 0%, #fef2f2 40%, #fffbfb 100%)";
+    return "linear-gradient(145deg, #ffffff 0%, #f7fafd 100%)";
+  };
+
+  const getReservationBorderAccent = () => {
+    if (!activeReservation) return "#003366";
+    const s = activeReservation.status;
+    if (s === "APPROVED") return "#10b981";
+    if (s === "PENDING") return "#f59e0b";
+    if (s === "REJECTED" || s === "CANCELLED") return "#ef4444";
+    return "#003366";
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #f0f4f8 0%, #e8eef5 50%, #f0f4f8 100%)" }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #eef2f7 0%, #e8eef5 50%, #eef2f7 100%)" }}>
 
       {/* ═══ HEADER ══════════════════════════════════════════════ */}
       <motion.header
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="sticky top-0 z-50 border-b border-white/10"
         style={{
-          background: "rgba(0,40,80,0.94)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 4px 24px rgba(0,30,60,0.3)",
+          background: "rgba(0,28,60,0.96)",
+          backdropFilter: "blur(28px)",
+          WebkitBackdropFilter: "blur(28px)",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 6px 28px rgba(0,20,50,0.35)",
         }}
       >
+        {/* gradient border bottom */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "1.5px",
+            background: "linear-gradient(90deg, transparent, #c9a84c 30%, #4da6ff 60%, #c9a84c 80%, transparent)",
+            opacity: 0.6,
+          }}
+        />
         <div className="max-w-7xl mx-auto px-6 py-3.5">
           <div className="flex justify-between items-center">
             {/* Left — logo */}
             <Link to="/main" className="flex items-center gap-4 group">
               <motion.div
-                whileHover={{ scale: 1.03 }}
-                className="border border-[#c9a84c]/60 px-3 py-1.5 rounded"
+                whileHover={{ scale: 1.04 }}
+                className="border border-[#c9a84c]/60 px-3 py-1.5 rounded transition-all duration-300 group-hover:border-[#c9a84c] group-hover:shadow-[0_0_14px_rgba(201,168,76,0.25)]"
                 style={{ background: "rgba(201,168,76,0.08)" }}
               >
                 <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
@@ -292,9 +413,9 @@ export function Dashboard() {
 
               <Link to="/profile" className="flex items-center gap-2.5 group">
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.07, boxShadow: "0 0 14px rgba(255,255,255,0.12)" }}
                   className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(255,255,255,0.1)" }}
+                  style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.14)" }}
                 >
                   <User className="h-4 w-4 text-white/70" />
                 </motion.div>
@@ -317,73 +438,157 @@ export function Dashboard() {
           custom={0}
           className="mb-10 relative overflow-hidden rounded-3xl"
           style={{
-            background: "linear-gradient(135deg, #001f40 0%, #003366 45%, #004080 80%, #003366 100%)",
-            boxShadow: "0 20px 60px rgba(0,51,102,0.35), 0 1px 0 rgba(255,255,255,0.06) inset",
+            background: "linear-gradient(135deg, #000e1f 0%, #001f40 30%, #003366 60%, #004d80 85%, #001f40 100%)",
+            boxShadow: "0 24px 70px rgba(0,30,70,0.45), 0 1px 0 rgba(255,255,255,0.06) inset",
           }}
         >
-          {/* Decorative elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #c9a84c 0%, transparent 70%)" }} />
-            <div className="absolute -bottom-20 -left-10 w-80 h-80 rounded-full opacity-[0.06]" style={{ background: "radial-gradient(circle, #4da6ff 0%, transparent 70%)" }} />
-            <div className="absolute top-0 left-0 w-full h-px opacity-20" style={{ background: "linear-gradient(90deg, transparent, #c9a84c, transparent)" }} />
-            {/* Subtle grid pattern */}
-            <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-          </div>
+          {/* Aurora orbs */}
+          <div
+            className="absolute -top-20 -right-20 w-72 h-72 rounded-full pointer-events-none"
+            style={{
+              background: "radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)",
+              animation: "dashAurora1 12s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="absolute -bottom-24 -left-16 w-96 h-96 rounded-full pointer-events-none"
+            style={{
+              background: "radial-gradient(circle, rgba(77,166,255,0.09) 0%, transparent 70%)",
+              animation: "dashAurora2 15s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2"
+            style={{
+              background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
+              animation: "dashAurora3 20s ease-in-out infinite",
+            }}
+          />
 
-          <div className="relative px-8 py-9 sm:px-12 sm:py-11 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
+          {/* Gold top line */}
+          <div className="absolute top-0 left-0 w-full h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)", opacity: 0.6 }} />
+
+          {/* Subtle grid */}
+          <svg className="absolute inset-0 w-full h-full opacity-[0.025] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="dashGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dashGrid)" />
+          </svg>
+
+          {/* Floating geometric decorations */}
+          <div
+            className="absolute top-6 right-20 w-12 h-12 border border-white/5 pointer-events-none hidden md:block"
+            style={{ animation: "dashFloatA 7s ease-in-out infinite", transform: "rotate(12deg)" }}
+          />
+          <div
+            className="absolute bottom-8 right-40 w-7 h-7 border border-[#c9a84c]/10 pointer-events-none hidden md:block"
+            style={{ animation: "dashFloatB 9s ease-in-out infinite", transform: "rotate(-8deg)" }}
+          />
+          <div
+            className="absolute top-8 right-1/3 w-5 h-5 border border-white/8 pointer-events-none hidden lg:block"
+            style={{ animation: "dashFloatC 11s ease-in-out infinite", transform: "rotate(30deg)" }}
+          />
+
+          <div className="relative px-8 py-9 sm:px-12 sm:py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+            <div className="flex-1">
+              {/* Eyebrow */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="flex items-center gap-2 mb-3"
+                transition={{ delay: 0.22, duration: 0.55 }}
+                className="flex items-center gap-2 mb-4"
               >
-                <Star className="h-3.5 w-3.5 text-[#c9a84c]" fill="#c9a84c" />
-                <span className="text-[#c9a84c] text-xs font-semibold tracking-[3px] uppercase">
+                <Star className="h-3 w-3 text-[#c9a84c]" fill="#c9a84c" />
+                <span className="text-[#c9a84c]/90 text-[10px] font-bold tracking-[4px] uppercase">
                   Sabancı Üniversitesi
                 </span>
               </motion.div>
+
+              {/* Main greeting */}
               <motion.h1
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.28, duration: 0.55 }}
-                className="text-2xl sm:text-3xl font-light text-white tracking-tight mb-2"
+                transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-tight mb-3"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                {t("main.welcomeBack", { defaultValue: "Welcome back" })},{" "}
-                <span className="font-semibold">{userName.split(" ")[0]}</span>
+                {getGreeting()},{" "}
+                <span
+                  className="font-semibold"
+                  style={{
+                    background: "linear-gradient(90deg, #fff, #c9a84c, #f0d080, #fff)",
+                    backgroundSize: "300% auto",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    animation: "dashGoldShimmer 5s linear infinite",
+                  }}
+                >
+                  {userName.split(" ")[0]}
+                </span>
+                !
               </motion.h1>
+
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.38, duration: 0.5 }}
-                className="text-blue-200/70 text-sm leading-relaxed max-w-lg"
+                transition={{ delay: 0.42, duration: 0.55 }}
+                className="text-blue-200/60 text-sm leading-relaxed max-w-md mb-6"
               >
                 {t("dashboard.subtitle", { defaultValue: "Track your reservation requests, approvals, payments, and notifications in one place." })}
               </motion.p>
+
+              {/* Glass stat pills */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.52, duration: 0.5 }}
+                className="flex flex-wrap gap-3"
+              >
+                {[
+                  { label: t("dashboard.stats.totalReservations", { defaultValue: "Total" }), value: totalReservations, color: "#4da6ff" },
+                  { label: t("dashboard.stats.upcoming", { defaultValue: "Upcoming" }), value: upcomingStays, color: "#10b981" },
+                  { label: t("dashboard.stats.pending", { defaultValue: "Pending" }), value: pendingApprovals, color: "#f59e0b" },
+                ].map((pill, i) => (
+                  <div
+                    key={i}
+                    className="dash-stat-pill flex items-center gap-2 px-3.5 py-2 rounded-xl"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: pill.color, boxShadow: `0 0 6px ${pill.color}` }}
+                    />
+                    <span className="text-[11px] text-white/50 font-medium">{pill.label}</span>
+                    <span className="text-[13px] font-bold text-white">
+                      {loadingReservation ? "—" : pill.value}
+                    </span>
+                  </div>
+                ))}
+              </motion.div>
             </div>
 
+            {/* CTA button */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
+              transition={{ delay: 0.44, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="flex-shrink-0"
             >
               <motion.a
                 href="book-room"
-                whileHover={{ scale: 1.04, y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-semibold text-[#003366] transition-shadow duration-300"
+                whileHover={{ scale: 1.05, y: -2, boxShadow: "0 12px 30px rgba(201,168,76,0.45)" }}
+                whileTap={{ scale: 0.96 }}
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm font-bold text-[#001f40] transition-all duration-300"
                 style={{
-                  background: "linear-gradient(135deg, #f0d080 0%, #c9a84c 100%)",
-                  boxShadow: "0 4px 16px rgba(201,168,76,0.35)",
+                  background: "linear-gradient(135deg, #f0d080 0%, #c9a84c 60%, #e0b840 100%)",
+                  boxShadow: "0 6px 20px rgba(201,168,76,0.35)",
                 }}
               >
                 <Plus className="h-4 w-4" />
@@ -404,36 +609,37 @@ export function Dashboard() {
                 initial="hidden"
                 animate="visible"
                 custom={idx + 1}
-                whileHover={{ y: -4, boxShadow: "0 16px 40px rgba(0,0,0,0.1)" }}
+                whileHover={{ y: -5, boxShadow: "0 20px 48px rgba(0,0,0,0.12)" }}
                 className="group relative bg-white rounded-2xl p-5 cursor-default overflow-hidden"
                 style={{
                   borderTop: `3px solid ${s.accent}`,
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
+                  transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease",
                 }}
               >
                 {/* Glow on hover */}
                 <motion.div
                   className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ background: `radial-gradient(circle at 85% 20%, ${s.accent}10 0%, transparent 65%)` }}
+                  style={{ background: `radial-gradient(circle at 85% 15%, ${s.accent}12 0%, transparent 65%)` }}
                 />
                 <div className="relative flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[12px] text-gray-400 font-medium tracking-wide truncate">{s.title}</p>
+                    <p className="text-[11px] text-gray-400 font-semibold tracking-wider uppercase truncate">{s.title}</p>
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.7 }}
+                      initial={{ opacity: 0, scale: 0.6 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 + idx * 0.07, type: "spring", stiffness: 200 }}
-                      className="text-[30px] font-bold text-gray-900 leading-tight mt-1 tracking-tight"
+                      transition={{ delay: 0.35 + idx * 0.08, type: "spring", stiffness: 220 }}
+                      className="text-[32px] font-bold text-gray-900 leading-tight mt-1 tracking-tight"
                     >
                       {loadingReservation ? (
-                        <div className="w-8 h-7 bg-gray-100 rounded animate-pulse mt-1" />
+                        <div className="w-8 h-7 bg-gray-100 rounded-lg animate-pulse mt-1" />
                       ) : s.value}
                     </motion.div>
                     <p className="text-[10px] text-gray-400 mt-1.5 font-semibold uppercase tracking-widest">{s.sub}</p>
                   </div>
                   <motion.div
-                    whileHover={{ rotate: 8, scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    whileHover={{ rotate: 10, scale: 1.12 }}
+                    transition={{ type: "spring", stiffness: 350 }}
                     className={`p-2.5 rounded-xl ${s.bgSoft} ${s.textSoft} flex-shrink-0`}
                   >
                     <Icon className="h-5 w-5" strokeWidth={1.8} />
@@ -456,22 +662,27 @@ export function Dashboard() {
               initial="hidden"
               animate="visible"
               custom={5}
-              className="rounded-2xl overflow-hidden"
+              ref={tiltRef}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              className="rounded-2xl overflow-hidden dash-tilt-card"
               style={{
-                background: "linear-gradient(145deg, #ffffff 0%, #f7fafd 100%)",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,51,102,0.06)",
-                border: "1px solid rgba(0,51,102,0.07)",
+                background: getReservationGradient(),
+                boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 12px 36px rgba(0,51,102,0.08)",
+                border: `1px solid rgba(0,51,102,0.07)`,
+                borderLeft: `4px solid ${getReservationBorderAccent()}`,
+                transform: `perspective(900px) rotateX(${tilt.rotX}deg) rotateY(${tilt.rotY}deg)`,
+                transition: "transform 0.15s ease, box-shadow 0.3s ease",
               }}
             >
               {/* Card header */}
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between"
-                style={{ background: "linear-gradient(90deg, #f8fafc, #ffffff)" }}
-              >
+              <div className="px-6 py-5 border-b border-black/[0.04] flex items-center justify-between bg-white/40">
                 <div className="flex items-center gap-3">
                   <motion.div
-                    animate={{ scaleY: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="w-1 h-6 rounded-full bg-[#003366]"
+                    animate={{ scaleY: [1, 1.25, 1] }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-1 h-6 rounded-full"
+                    style={{ background: getReservationBorderAccent() }}
                   />
                   <h2 className="text-base font-semibold text-[#003366] tracking-tight">
                     {t("dashboard.activeReservation.title", { defaultValue: "Current Reservation Status" })}
@@ -504,14 +715,15 @@ export function Dashboard() {
               <div className="p-6">
                 {/* Progress timeline */}
                 {activeReservation && currentStep > 0 && (
-                  <div className="mb-7 px-1">
+                  <div className="mb-8 px-1">
                     <div className="flex items-start justify-between relative">
                       <div className="absolute top-[18px] left-[18px] right-[18px] h-[2px] bg-gray-100 rounded-full" />
                       <motion.div
-                        className="absolute top-[18px] left-[18px] h-[2px] bg-[#003366] rounded-full"
+                        className="absolute top-[18px] left-[18px] h-[2px] rounded-full"
+                        style={{ background: `linear-gradient(90deg, ${getReservationBorderAccent()}, ${getReservationBorderAccent()}aa)` }}
                         initial={{ width: "0%" }}
                         animate={{ width: `${((Math.min(currentStep, 5) - 1) / 4) * 91}%` }}
-                        transition={{ duration: 0.9, delay: 0.4, ease: "easeOut" }}
+                        transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
                       />
                       {progressSteps.map((step, idx) => {
                         const StepIcon = step.icon;
@@ -520,15 +732,15 @@ export function Dashboard() {
                         return (
                           <div key={idx} className="relative z-10 flex flex-col items-center gap-2" style={{ flex: 1 }}>
                             <motion.div
-                              initial={{ scale: 0.5, opacity: 0 }}
+                              initial={{ scale: 0.4, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
-                              transition={{ delay: 0.3 + idx * 0.1, type: "spring", stiffness: 250 }}
+                              transition={{ delay: 0.35 + idx * 0.11, type: "spring", stiffness: 280 }}
                               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 ${
                                 isActive
                                   ? currentStep === 5 ? "bg-emerald-600 text-white" : "bg-[#003366] text-white"
                                   : "bg-white border-2 border-gray-200 text-gray-400"
-                              } ${isCurrent ? "ring-4 ring-[#003366]/15 shadow-md" : ""}`}
-                              style={isActive ? { boxShadow: "0 4px 12px rgba(0,51,102,0.25)" } : {}}
+                              } ${isCurrent ? "ring-4 ring-[#003366]/15 shadow-lg" : ""}`}
+                              style={isActive ? { boxShadow: `0 4px 14px ${getReservationBorderAccent()}40` } : {}}
                             >
                               <StepIcon className="h-3.5 w-3.5" strokeWidth={2} />
                             </motion.div>
@@ -566,13 +778,14 @@ export function Dashboard() {
                   ].map((item, idx) => (
                     <motion.div
                       key={idx}
-                      initial={{ opacity: 0, y: 8 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 + idx * 0.07 }}
+                      transition={{ delay: 0.65 + idx * 0.08, ease: "easeOut" }}
                       className="rounded-xl p-4"
                       style={{
-                        background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-                        border: "1px solid rgba(0,51,102,0.06)",
+                        background: "linear-gradient(135deg, rgba(248,250,252,0.9) 0%, rgba(241,245,249,0.7) 100%)",
+                        border: "1px solid rgba(0,51,102,0.07)",
+                        backdropFilter: "blur(8px)",
                       }}
                     >
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">{item.label}</p>
@@ -585,7 +798,7 @@ export function Dashboard() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <motion.a
                     href="reservations"
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.97 }}
                     className="group/btn inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 border-2 border-[#003366]/20 text-[#003366] font-semibold text-sm hover:border-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-300"
                   >
@@ -595,10 +808,10 @@ export function Dashboard() {
 
                   <motion.a
                     href="book-room"
-                    whileHover={{ scale: 1.02, boxShadow: "0 8px 24px rgba(0,51,102,0.28)" }}
+                    whileHover={{ scale: 1.02, y: -1, boxShadow: "0 10px 28px rgba(0,51,102,0.3)" }}
                     whileTap={{ scale: 0.97 }}
                     className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 bg-[#003366] text-white font-semibold text-sm transition-all duration-300"
-                    style={{ boxShadow: "0 4px 14px rgba(0,51,102,0.2)" }}
+                    style={{ boxShadow: "0 4px 14px rgba(0,51,102,0.22)" }}
                   >
                     <Plus className="h-4 w-4" />
                     {t("dashboard.activeReservation.createNew", { defaultValue: "Create New Reservation" })}
@@ -608,7 +821,7 @@ export function Dashboard() {
                     whileHover={
                       activeReservation?.status === "APPROVED" &&
                       !["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "")
-                        ? { scale: 1.02, boxShadow: "0 8px 24px rgba(0,51,102,0.28)" }
+                        ? { scale: 1.02, y: -1, boxShadow: "0 10px 28px rgba(0,51,102,0.3)" }
                         : {}
                     }
                     whileTap={{ scale: 0.97 }}
@@ -642,7 +855,7 @@ export function Dashboard() {
               custom={6}
               className="bg-white rounded-2xl overflow-hidden"
               style={{
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
                 border: "1px solid rgba(0,51,102,0.06)",
               }}
             >
@@ -656,46 +869,62 @@ export function Dashboard() {
                 {/* Book a Room */}
                 <motion.a
                   href="book-room"
-                  whileHover={{ y: -3, boxShadow: "0 16px 40px rgba(0,51,102,0.28)" }}
+                  whileHover={{ y: -5, boxShadow: "0 20px 48px rgba(0,51,102,0.3)" }}
                   whileTap={{ scale: 0.97 }}
-                  className="group/qa relative rounded-2xl p-5 text-white flex items-center justify-between overflow-hidden cursor-pointer"
+                  className="dash-quick-action group/qa relative rounded-2xl p-5 text-white flex items-center justify-between overflow-hidden cursor-pointer"
                   style={{
-                    background: "linear-gradient(135deg, #001f40 0%, #003366 60%, #004d80 100%)",
-                    boxShadow: "0 4px 16px rgba(0,51,102,0.2)",
+                    background: "linear-gradient(135deg, #000e22 0%, #002952 50%, #004d80 100%)",
+                    boxShadow: "0 6px 20px rgba(0,51,102,0.22)",
                   }}
                 >
-                  <div className="absolute inset-0 opacity-0 group-hover/qa:opacity-100 transition-opacity duration-500"
-                    style={{ background: "radial-gradient(circle at 80% 50%, rgba(255,255,255,0.06) 0%, transparent 60%)" }}
+                  {/* Hover sheen */}
+                  <div className="absolute inset-0 opacity-0 group-hover/qa:opacity-100 transition-opacity duration-400"
+                    style={{ background: "radial-gradient(circle at 80% 40%, rgba(201,168,76,0.1) 0%, transparent 60%)" }}
+                  />
+                  {/* Micro grid */}
+                  <div className="absolute inset-0 opacity-[0.03]"
+                    style={{
+                      backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+                      backgroundSize: "18px 18px",
+                    }}
                   />
                   <div className="relative flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                    <motion.div
+                      whileHover={{ rotate: 90, scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center"
+                    >
                       <Plus className="h-5 w-5" />
-                    </div>
+                    </motion.div>
                     <span className="font-semibold text-sm">{t("main.quick.bookRoom", { defaultValue: "Book a Room" })}</span>
                   </div>
-                  <ArrowRight className="relative h-4 w-4 opacity-50 group-hover/qa:opacity-100 group-hover/qa:translate-x-1 transition-all duration-300" />
+                  <ArrowRight className="relative h-4 w-4 opacity-40 group-hover/qa:opacity-100 group-hover/qa:translate-x-1.5 transition-all duration-300" />
                 </motion.a>
 
                 {/* My Requests */}
                 <motion.a
                   href="reservations"
-                  whileHover={{ y: -3, boxShadow: "0 16px 40px rgba(0,51,102,0.12)" }}
+                  whileHover={{ y: -5, boxShadow: "0 20px 48px rgba(0,51,102,0.13)" }}
                   whileTap={{ scale: 0.97 }}
-                  className="group/qa rounded-2xl p-5 flex items-center justify-between cursor-pointer"
+                  className="dash-quick-action group/qa rounded-2xl p-5 flex items-center justify-between cursor-pointer"
                   style={{
-                    border: "2px solid rgba(0,51,102,0.15)",
+                    border: "2px solid rgba(0,51,102,0.12)",
                     background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#003366]/6 flex items-center justify-center group-hover/qa:bg-[#003366]/10 transition-colors">
+                    <motion.div
+                      whileHover={{ rotate: -5, scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="w-10 h-10 rounded-xl bg-[#003366]/6 flex items-center justify-center group-hover/qa:bg-[#003366]/10 transition-colors"
+                    >
                       <FileText className="h-5 w-5 text-[#003366]" />
-                    </div>
+                    </motion.div>
                     <span className="font-semibold text-sm text-[#003366]">
                       {t("dashboard.quick.viewReservations", { defaultValue: "My Reservation Requests" })}
                     </span>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-[#003366]/30 group-hover/qa:text-[#003366] group-hover/qa:translate-x-1 transition-all duration-300" />
+                  <ArrowRight className="h-4 w-4 text-[#003366]/25 group-hover/qa:text-[#003366] group-hover/qa:translate-x-1.5 transition-all duration-300" />
                 </motion.a>
 
                 {/* Notifications — Soon */}
@@ -746,7 +975,7 @@ export function Dashboard() {
               custom={7}
               className="bg-white rounded-2xl overflow-hidden"
               style={{
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
                 border: "1px solid rgba(0,51,102,0.06)",
               }}
             >
@@ -798,13 +1027,13 @@ export function Dashboard() {
               custom={5}
               className="rounded-2xl overflow-hidden"
               style={{
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
                 border: "1px solid rgba(0,51,102,0.07)",
               }}
             >
               <div
                 className="px-5 py-4 text-white relative overflow-hidden"
-                style={{ background: "linear-gradient(135deg, #001f40 0%, #003366 60%, #004d80 100%)" }}
+                style={{ background: "linear-gradient(135deg, #000e22 0%, #002952 50%, #004d80 100%)" }}
               >
                 <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10"
                   style={{ background: "radial-gradient(circle, #c9a84c, transparent)", transform: "translate(30%, -30%)" }}
@@ -814,7 +1043,7 @@ export function Dashboard() {
                   <h2 className="text-[14px] font-semibold tracking-tight">
                     {t("dashboard.notifications.title", { defaultValue: "Notifications" })}
                   </h2>
-                  <span className="ml-auto text-[10px] bg-white/15 px-2.5 py-1 rounded-full font-semibold">
+                  <span className="ml-auto text-[10px] bg-white/15 px-2.5 py-1 rounded-full font-bold">
                     {notifications.length} new
                   </span>
                 </div>
@@ -830,14 +1059,17 @@ export function Dashboard() {
                         initial="hidden"
                         animate="visible"
                         custom={idx}
-                        whileHover={{ x: 3 }}
-                        className={`rounded-xl p-4 border ${n.border} ${n.bg}/40 cursor-default transition-colors duration-200`}
-                        style={{ borderLeft: `3px solid ${n.accent}` }}
+                        whileHover={{ x: 4, transition: { duration: 0.15 } }}
+                        className={`rounded-xl p-4 border ${n.border} cursor-default`}
+                        style={{
+                          background: `${n.bg.replace("bg-", "")}`,
+                          borderLeft: `3px solid ${n.accent}`,
+                        }}
                       >
                         <div className="flex items-start gap-3">
                           <div
                             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                            style={{ background: `${n.accent}14`, color: n.accent }}
+                            style={{ background: `${n.accent}16`, color: n.accent }}
                           >
                             <Icon className="h-4 w-4" />
                           </div>
@@ -862,7 +1094,7 @@ export function Dashboard() {
               custom={6}
               className="bg-white rounded-2xl overflow-hidden"
               style={{
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
                 border: "1px solid rgba(0,51,102,0.06)",
               }}
             >
@@ -876,7 +1108,8 @@ export function Dashboard() {
                 {announcements.map((a, idx) => (
                   <motion.div
                     key={idx}
-                    whileHover={{ x: 3, backgroundColor: "rgba(248,250,252,1)" }}
+                    whileHover={{ x: 4, backgroundColor: "rgba(248,250,252,1)" }}
+                    transition={{ duration: 0.15 }}
                     className="group p-4 rounded-xl border border-gray-100 cursor-pointer transition-colors duration-200"
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -898,25 +1131,25 @@ export function Dashboard() {
               custom={7}
               className="rounded-2xl overflow-hidden relative"
               style={{
-                background: "linear-gradient(145deg, #001a33 0%, #003366 50%, #004d80 100%)",
-                boxShadow: "0 8px 32px rgba(0,51,102,0.3)",
+                background: "linear-gradient(145deg, #000e22 0%, #002952 45%, #004080 100%)",
+                boxShadow: "0 12px 40px rgba(0,41,82,0.35)",
               }}
             >
               {/* Decorative glow */}
-              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10"
+              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-12"
                 style={{ background: "radial-gradient(circle, #c9a84c, transparent)" }}
               />
-              <div className="absolute bottom-0 left-0 w-full h-px opacity-10"
+              <div className="absolute bottom-0 left-0 w-full h-px opacity-15"
                 style={{ background: "linear-gradient(90deg, transparent, #c9a84c, transparent)" }}
               />
 
               <div className="relative p-6 text-white">
                 <div className="flex items-start gap-4">
                   <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
+                    animate={{ rotate: [0, 6, -6, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.2)" }}
+                    style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.22)" }}
                   >
                     <AlertCircle className="h-5 w-5 text-[#c9a84c]" />
                   </motion.div>
@@ -924,14 +1157,14 @@ export function Dashboard() {
                     <p className="text-[15px] font-semibold mb-2 tracking-tight">
                       {t("dashboard.help.title", { defaultValue: "Need Help?" })}
                     </p>
-                    <p className="text-[12px] text-blue-200/70 leading-relaxed mb-4">
+                    <p className="text-[12px] text-blue-200/60 leading-relaxed mb-4">
                       {t("dashboard.help.msg", { defaultValue: "If you have issues with approvals, payment receipts, or cancellations, contact the support team." })}
                     </p>
                     <motion.button
                       type="button"
-                      whileHover={{ scale: 1.04, boxShadow: "0 6px 20px rgba(0,0,0,0.25)" }}
+                      whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(0,0,0,0.3)" }}
                       whileTap={{ scale: 0.96 }}
-                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[#003366] text-sm font-bold transition-all duration-300"
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[#001f40] text-sm font-bold transition-all duration-300"
                       style={{
                         background: "linear-gradient(135deg, #f0d080, #c9a84c)",
                       }}

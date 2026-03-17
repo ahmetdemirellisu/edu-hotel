@@ -1,15 +1,11 @@
 // src/components/admin/pages/ReservationsPage.tsx
 import React, { useState, useEffect, useMemo } from "react";
-import { Input } from "../../ui/input";
-import { Button } from "../../ui/button";
 import {
   Search,
   CheckCircle,
   XCircle,
   Eye,
   X,
-  ChevronDown,
-  CreditCard,
   Clock,
   AlertCircle,
   Users,
@@ -21,6 +17,7 @@ import {
   Phone,
   User,
   Bed,
+  CalendarDays,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -135,20 +132,20 @@ export function ReservationsPage() {
     return map[status] || status;
   };
 
-  const STATUS_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
-    PENDING:           { bg: "bg-amber-50",   text: "text-amber-700",   dot: "#f59e0b" },
-    APPROVED:          { bg: "bg-emerald-50", text: "text-emerald-700", dot: "#22c55e" },
-    REJECTED:          { bg: "bg-red-50",     text: "text-red-700",     dot: "#ef4444" },
-    CANCELLED:         { bg: "bg-gray-100",   text: "text-gray-600",    dot: "#9ca3af" },
-    REFUND_REQUESTED:  { bg: "bg-orange-50",  text: "text-orange-700",  dot: "#f97316" },
-    REFUNDED:          { bg: "bg-indigo-50",  text: "text-indigo-700",  dot: "#6366f1" },
+  const STATUS_STYLE: Record<string, { bg: string; text: string; dot: string; border: string }> = {
+    PENDING:          { bg: "bg-amber-50",   text: "text-amber-700",   dot: "#f59e0b", border: "border-amber-200" },
+    APPROVED:         { bg: "bg-emerald-50", text: "text-emerald-700", dot: "#22c55e", border: "border-emerald-200" },
+    REJECTED:         { bg: "bg-red-50",     text: "text-red-700",     dot: "#ef4444", border: "border-red-200" },
+    CANCELLED:        { bg: "bg-gray-100",   text: "text-gray-600",    dot: "#9ca3af", border: "border-gray-200" },
+    REFUND_REQUESTED: { bg: "bg-orange-50",  text: "text-orange-700",  dot: "#f97316", border: "border-orange-200" },
+    REFUNDED:         { bg: "bg-indigo-50",  text: "text-indigo-700",  dot: "#6366f1", border: "border-indigo-200" },
   };
 
-  const PAYMENT_STYLE: Record<string, { label: string; bg: string; text: string }> = {
-    NONE:                  { label: "—",              bg: "",              text: "text-gray-400" },
-    PENDING_VERIFICATION:  { label: t("tables.paymentPending"), bg: "bg-blue-50",    text: "text-blue-700" },
-    APPROVED:              { label: t("tables.paymentPaid"),    bg: "bg-emerald-50", text: "text-emerald-700" },
-    REJECTED:              { label: t("tables.paymentRejected"), bg: "bg-red-50",    text: "text-red-700" },
+  const PAYMENT_STYLE: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+    NONE:                 { label: "—",                              bg: "",              text: "text-gray-400", dot: "" },
+    PENDING_VERIFICATION: { label: t("tables.paymentPending"),       bg: "bg-blue-50",    text: "text-blue-700", dot: "#3b82f6" },
+    APPROVED:             { label: t("tables.paymentPaid"),          bg: "bg-emerald-50", text: "text-emerald-700", dot: "#22c55e" },
+    REJECTED:             { label: t("tables.paymentRejected"),      bg: "bg-red-50",     text: "text-red-700",   dot: "#ef4444" },
   };
 
   const getAccomLabel = (type: string): string => {
@@ -167,18 +164,32 @@ export function ReservationsPage() {
   };
 
   const filterTabs = [
-    { key: "all",       label: t("reservations.filterAll") },
-    { key: "PENDING",   label: t("reservations.filters.pending") },
-    { key: "APPROVED",  label: t("reservations.filters.approved") },
-    { key: "REJECTED",  label: t("reservations.filters.rejected") },
-    { key: "CANCELLED", label: t("reservations.filters.canceled") },
+    { key: "all",       label: t("reservations.filterAll"),             color: "" },
+    { key: "PENDING",   label: t("reservations.filters.pending"),       color: "#f59e0b" },
+    { key: "APPROVED",  label: t("reservations.filters.approved"),      color: "#22c55e" },
+    { key: "REJECTED",  label: t("reservations.filters.rejected"),      color: "#ef4444" },
+    { key: "CANCELLED", label: t("reservations.filters.canceled"),      color: "#9ca3af" },
   ];
+
+  const AVATAR_GRADIENTS = [
+    "from-blue-500 to-blue-700", "from-violet-500 to-violet-700",
+    "from-emerald-500 to-emerald-700", "from-amber-500 to-orange-600",
+    "from-rose-500 to-rose-700", "from-teal-500 to-teal-700",
+    "from-sky-500 to-sky-700", "from-indigo-500 to-indigo-700",
+  ];
+
+  const getInitials = (name: string) => {
+    if (!name || name === "—") return "?";
+    const parts = name.trim().split(" ");
+    return parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
+  };
 
   const StatusBadge = ({ status }: { status: string }) => {
     const style = STATUS_STYLE[status] || STATUS_STYLE.PENDING;
+    const isPending = status === "PENDING";
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.bg} ${style.text}`}>
-        <span className="w-1.5 h-1.5 rounded-full" style={{ background: style.dot }} />
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${style.bg} ${style.text} ${style.border}`}>
+        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isPending ? "animate-pulse" : ""}`} style={{ background: style.dot }} />
         {getStatusLabel(status)}
       </span>
     );
@@ -187,37 +198,57 @@ export function ReservationsPage() {
   const PaymentBadge = ({ status }: { status: string }) => {
     const cfg = PAYMENT_STYLE[status] || PAYMENT_STYLE.NONE;
     if (status === "NONE") return <span className="text-[10px] text-gray-400">—</span>;
-    return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>;
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.text}`}>
+        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cfg.dot }} />
+        {cfg.label}
+      </span>
+    );
   };
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      <style>{`
+        @keyframes resIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      {/* ── Header ───────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 tracking-tight">{t("pages.reservations.title")}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{t("reservations.totalCount", { count: reservations.length })}</p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+            <CalendarDays className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t("pages.reservations.title")}</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{t("reservations.totalCount", { count: reservations.length })}</p>
+          </div>
         </div>
       </div>
 
-      {/* Filter tabs + Search */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4">
+      {/* ── Filter tabs + Search ─────────────────── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           {/* Tabs */}
-          <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 flex-shrink-0">
+          <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 flex-shrink-0 flex-wrap">
             {filterTabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setStatusFilter(tab.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 flex items-center gap-1.5 ${
                   statusFilter === tab.key
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
+                {tab.color && (
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: tab.color }} />
+                )}
                 {tab.label}
-                {counts[tab.key === "all" ? "all" : tab.key] > 0 && (
-                  <span className={`ml-1.5 text-[10px] ${statusFilter === tab.key ? "text-blue-600" : "text-gray-400"}`}>
+                {(counts[tab.key === "all" ? "all" : tab.key] ?? 0) > 0 && (
+                  <span className={`text-[10px] font-bold ${statusFilter === tab.key ? "text-blue-600" : "text-gray-400"}`}>
                     {counts[tab.key === "all" ? "all" : tab.key]}
                   </span>
                 )}
@@ -227,12 +258,22 @@ export function ReservationsPage() {
 
           {/* Search */}
           <div className="flex-1">
-            <div className="flex items-center h-9 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-300 transition-all">
-              <div className="flex items-center justify-center w-9 h-9 flex-shrink-0">
+            <div className="flex items-center h-10 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-300 transition-all">
+              <div className="flex items-center justify-center w-10 h-10 flex-shrink-0">
                 <Search className="h-3.5 w-3.5 text-gray-400" />
               </div>
-              <input type="text" placeholder={t("reservations.searchByAll")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 h-full bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none pr-3" />
+              <input
+                type="text"
+                placeholder={t("reservations.searchByAll")}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 h-full bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none pr-3"
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm("")} className="flex items-center justify-center w-8 h-8 mr-1 rounded-lg hover:bg-gray-200 transition-colors">
+                  <X className="h-3.5 w-3.5 text-gray-400" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -246,27 +287,38 @@ export function ReservationsPage() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      {/* ── Table ────────────────────────────────── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center h-48">
-            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="p-6 space-y-3">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="flex items-center gap-4 animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 bg-gray-200 rounded w-32" />
+                  <div className="h-2.5 bg-gray-100 rounded w-48" />
+                </div>
+                <div className="h-5 bg-gray-100 rounded-full w-16" />
+                <div className="h-5 bg-gray-100 rounded-full w-16" />
+                <div className="h-7 bg-gray-100 rounded-xl w-24" />
+              </div>
+            ))}
           </div>
         ) : filteredReservations.length === 0 ? (
-          <div className="p-12 text-center">
-            <FileText className="h-8 w-8 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">{t("reservations.empty")}</p>
+          <div className="p-14 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
+              <FileText className="h-7 w-7 text-gray-300" />
+            </div>
+            <p className="text-sm font-semibold text-gray-500">{t("reservations.empty")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
+                <tr className="border-b border-gray-100 bg-gray-50/60">
                   {[
-                    t("tables.id"),
                     t("tables.guestName"),
                     t("reservations.tableColResType"),
-                    t("reservations.tableColEventType"),
                     t("tables.checkIn"),
                     t("tables.checkOut"),
                     t("tables.status"),
@@ -274,12 +326,12 @@ export function ReservationsPage() {
                     t("tables.room"),
                     t("tables.actions"),
                   ].map(h => (
-                    <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wider first:pl-6 last:pr-6">{h}</th>
+                    <th key={h} className="text-left py-3 px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest first:pl-6 last:pr-6">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredReservations.map((res) => {
+                {filteredReservations.map((res, rowIdx) => {
                   const name = joinName((res as any).firstName, (res as any).lastName);
                   const email = safe((res as any).contactEmail || res.user?.email);
                   const accomStyle = ACCOM_STYLE[res.accommodationType] || ACCOM_STYLE.PERSONAL;
@@ -287,62 +339,73 @@ export function ReservationsPage() {
                   const checkInDisplay = formatDateOnly(res.checkIn);
                   const checkInTime = (res as any).checkInTime;
                   const ps = (res as any).paymentStatus || "NONE";
+                  const initials = getInitials(name);
+                  const avatarGradient = AVATAR_GRADIENTS[rowIdx % AVATAR_GRADIENTS.length];
 
                   return (
-                    <tr key={res.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors group">
-                      <td className="py-3.5 pl-6 pr-4 text-xs font-mono text-gray-500">{formatId(res.id)}</td>
-                      <td className="py-3.5 px-4">
-                        <p className="text-[13px] font-medium text-gray-800 leading-tight">{name}</p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">{email}</p>
+                    <tr key={res.id} className="border-b border-gray-50 last:border-b-0 hover:bg-blue-50/20 transition-colors duration-150 group">
+                      <td className="py-3.5 pl-6 pr-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarGradient} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                            <span className="text-[10px] font-bold text-white">{initials}</span>
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-semibold text-gray-800 leading-tight">{name}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">{email}</p>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${accomStyle.bg} ${accomStyle.text}`}>{accomLabel}</span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {(res as any).eventType ? (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${accomStyle.bg} ${accomStyle.text}`}>{accomLabel}</span>
+                        {(res as any).eventType && (
+                          <span className="block mt-1 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 w-fit">
                             {((res as any).eventType as string).charAt(0).toUpperCase() + ((res as any).eventType as string).slice(1).toLowerCase()}
                           </span>
-                        ) : <span className="text-[10px] text-gray-400">—</span>}
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
-                        <p className="text-xs text-gray-700">{checkInDisplay}</p>
+                        <p className="text-xs font-semibold text-gray-700">{checkInDisplay}</p>
                         {checkInTime && <p className="text-[10px] text-gray-400">{checkInTime}</p>}
                       </td>
-                      <td className="py-3.5 px-4 text-xs text-gray-700">{formatDateOnly(res.checkOut)}</td>
+                      <td className="py-3.5 px-4 text-xs font-semibold text-gray-700">{formatDateOnly(res.checkOut)}</td>
                       <td className="py-3.5 px-4"><StatusBadge status={res.status} /></td>
                       <td className="py-3.5 px-4"><PaymentBadge status={ps} /></td>
                       <td className="py-3.5 px-4">
                         {res.room ? (
-                          <span className="text-xs font-medium text-gray-700 bg-gray-50 px-2 py-0.5 rounded">{res.room.name}</span>
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
+                            <Bed className="h-3 w-3 text-gray-400" />
+                            {res.room.name}
+                          </span>
                         ) : (
                           <span className="text-[10px] text-gray-400">—</span>
                         )}
                       </td>
                       <td className="py-3.5 pr-6 px-4">
-                        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
                           {res.status === "PENDING" && (
                             <>
                               <button
-                                className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors disabled:opacity-40"
+                                className="h-7 px-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1 text-emerald-700 text-[10px] font-bold transition-all disabled:opacity-40"
                                 title={t("common.approve")}
                                 onClick={() => handleApproveClick(res.id)}
                                 disabled={actionLoadingId === res.id}
                               >
-                                <CheckCircle className="h-3.5 w-3.5" />
+                                <CheckCircle className="h-3 w-3" />
+                                {t("common.approve")}
                               </button>
                               <button
-                                className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 transition-colors disabled:opacity-40"
+                                className="h-7 px-2.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 flex items-center gap-1 text-red-700 text-[10px] font-bold transition-all disabled:opacity-40"
                                 title={t("common.reject")}
                                 onClick={() => handleReject(res.id)}
                                 disabled={actionLoadingId === res.id}
                               >
-                                <XCircle className="h-3.5 w-3.5" />
+                                <XCircle className="h-3 w-3" />
+                                {t("common.reject")}
                               </button>
                             </>
                           )}
                           <button
-                            className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
+                            className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 transition-colors"
                             title={t("commonTable.view")}
                             onClick={() => setSelected(res)}
                           >
@@ -359,22 +422,29 @@ export function ReservationsPage() {
         )}
         {/* Footer count */}
         {!loading && filteredReservations.length > 0 && (
-          <div className="px-6 py-3 border-t border-gray-50 text-[11px] text-gray-400">
+          <div className="px-6 py-3 border-t border-gray-50 text-[11px] text-gray-400 font-medium">
             {t("reservations.showingCount", { shown: filteredReservations.length, total: reservations.length })}
           </div>
         )}
       </div>
 
-      {/* ═══ APPROVE MODAL (with price) ═══ */}
+      {/* ════ APPROVE MODAL (with price) ════ */}
       {approveModalId && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setApproveModalId(null)}>
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()} style={{ animation: "adminFadeIn 0.2s ease-out" }}>
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-base font-semibold text-gray-900">{t("reservations.approveModal.title", { id: formatId(approveModalId) })}</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{t("reservations.approveModal.desc")}</p>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setApproveModalId(null)}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ animation: "resIn 0.2s ease-out" }}>
+            <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
+                  <CheckCircle className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">{t("reservations.approveModal.title", { id: formatId(approveModalId) })}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{t("reservations.approveModal.desc")}</p>
+                </div>
+              </div>
             </div>
             <div className="px-6 py-5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">{t("reservations.approveModal.priceLabel")}</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">{t("reservations.approveModal.priceLabel")}</label>
               <input
                 type="number"
                 min="0"
@@ -382,23 +452,18 @@ export function ReservationsPage() {
                 placeholder={t("reservations.approveModal.pricePlaceholder")}
                 value={priceInput}
                 onChange={e => setPriceInput(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all"
               />
-              <p className="text-[10px] text-gray-400 mt-2">
-                {t("reservations.approveModal.priceHint")}
-              </p>
+              <p className="text-[10px] text-gray-400 mt-2">{t("reservations.approveModal.priceHint")}</p>
             </div>
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-              <button
-                onClick={() => setApproveModalId(null)}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-              >
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2">
+              <button onClick={() => setApproveModalId(null)} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-white transition-colors">
                 {t("common.cancel")}
               </button>
               <button
                 onClick={handleApproveConfirm}
                 disabled={actionLoadingId === approveModalId}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2 transition-all duration-150"
               >
                 <CheckCircle className="h-4 w-4" />
                 {actionLoadingId === approveModalId ? t("reservations.approveModal.approving") : t("reservations.approveModal.approveBtn")}
@@ -408,21 +473,26 @@ export function ReservationsPage() {
         </div>
       )}
 
-      {/* ═══ DETAIL MODAL ═══ */}
+      {/* ════ DETAIL MODAL ════ */}
       {selected && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()} style={{ animation: "adminFadeIn 0.2s ease-out" }}>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()} style={{ animation: "resIn 0.2s ease-out" }}>
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-              <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-xs font-mono text-gray-400">{formatId(selected.id)}</span>
-                  <StatusBadge status={selected.status} />
-                  <PaymentBadge status={(selected as any).paymentStatus || "NONE"} />
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${AVATAR_GRADIENTS[selected.id % AVATAR_GRADIENTS.length]} flex items-center justify-center shadow-md flex-shrink-0`}>
+                  <span className="text-sm font-bold text-white">{getInitials(joinName((selected as any).firstName, (selected as any).lastName))}</span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {joinName((selected as any).firstName, (selected as any).lastName)}
-                </h3>
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs font-mono text-gray-400">{formatId(selected.id)}</span>
+                    <StatusBadge status={selected.status} />
+                    <PaymentBadge status={(selected as any).paymentStatus || "NONE"} />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {joinName((selected as any).firstName, (selected as any).lastName)}
+                  </h3>
+                </div>
               </div>
               <button className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors" onClick={() => setSelected(null)}>
                 <X className="h-4 w-4 text-gray-500" />
@@ -433,42 +503,42 @@ export function ReservationsPage() {
             <div className="flex-1 overflow-y-auto px-6 py-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {/* Guest Info */}
-                <div>
-                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">{t("reservations.detail.guestInfo")}</h4>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{t("reservations.detail.guestInfo")}</h4>
                   <div className="space-y-2.5">
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><User className="h-3.5 w-3.5 text-gray-400" />{joinName((selected as any).firstName, (selected as any).lastName)}</div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><Mail className="h-3.5 w-3.5 text-gray-400" />{safe((selected as any).contactEmail)}</div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><Phone className="h-3.5 w-3.5 text-gray-400" />{safe((selected as any).phone)}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><User className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{joinName((selected as any).firstName, (selected as any).lastName)}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Mail className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{safe((selected as any).contactEmail)}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Phone className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{safe((selected as any).phone)}</div>
                     <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Users className="h-3.5 w-3.5 text-gray-400" />
+                      <Users className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                       {t(`reservations.detail.guest_${selected.guests === 1 ? "one" : "other"}`, { count: selected.guests })}
                     </div>
                   </div>
                 </div>
 
                 {/* Stay Details */}
-                <div>
-                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">{t("reservations.detail.stayDetails")}</h4>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{t("reservations.detail.stayDetails")}</h4>
                   <div className="space-y-2.5">
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
-                    {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400" />{t("reservations.detail.checkInLabel")}: {(selected as any).checkInTime}</div>}
-                    {selected.room && <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400" />{t("tables.room")} {selected.room.name} ({selected.room.type})</div>}
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />{selected.accommodationType} / {selected.invoiceType}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
+                    {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.checkInLabel")}: {(selected as any).checkInTime}</div>}
+                    {selected.room && <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("tables.room")} {selected.room.name} ({selected.room.type})</div>}
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{selected.accommodationType} / {selected.invoiceType}</div>
                   </div>
                 </div>
 
                 {/* Billing & Event */}
-                <div>
-                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">{t("reservations.detail.billingEvent")}</h4>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{t("reservations.detail.billingEvent")}</h4>
                   <div className="space-y-2.5">
-                    {(selected as any).eventType && <div className="flex items-center gap-2 text-sm text-gray-700"><FileText className="h-3.5 w-3.5 text-gray-400" />{t("reservations.detail.eventLabel")}: {(selected as any).eventType}</div>}
-                    {selected.eventCode && <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />{t("reservations.detail.codeLabel")}: {selected.eventCode}</div>}
-                    {(selected as any).freeAccommodation && <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium"><CheckCircle className="h-3.5 w-3.5" />{t("reservations.detail.freeAccommodation")}</div>}
+                    {(selected as any).eventType && <div className="flex items-center gap-2 text-sm text-gray-700"><FileText className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.eventLabel")}: {(selected as any).eventType}</div>}
+                    {selected.eventCode && <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.codeLabel")}: {selected.eventCode}</div>}
+                    {(selected as any).freeAccommodation && <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium"><CheckCircle className="h-3.5 w-3.5 flex-shrink-0" />{t("reservations.detail.freeAccommodation")}</div>}
                     {selected.invoiceType === "INDIVIDUAL" && (selected as any).nationalId && (
-                      <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />{t("reservations.detail.tcLabel")}: {(selected as any).nationalId}</div>
+                      <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.tcLabel")}: {(selected as any).nationalId}</div>
                     )}
                     {selected.invoiceType === "CORPORATE" && (selected as any).taxNumber && (
-                      <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400" />{t("reservations.detail.taxLabel")}: {(selected as any).taxNumber}</div>
+                      <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.taxLabel")}: {(selected as any).taxNumber}</div>
                     )}
                   </div>
                 </div>
@@ -477,10 +547,10 @@ export function ReservationsPage() {
               {/* Additional guests */}
               {Array.isArray((selected as any).guestList) && (selected as any).guestList.length > 0 && (
                 <div className="mt-5 pt-4 border-t border-gray-100">
-                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t("reservations.detail.additionalGuests")}</h4>
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t("reservations.detail.additionalGuests")}</h4>
                   <div className="flex flex-wrap gap-2">
                     {(selected as any).guestList.map((g: any, idx: number) => (
-                      <span key={idx} className="text-xs bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg text-gray-700">
+                      <span key={idx} className="text-xs bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg text-gray-700 font-medium">
                         {safe(g?.firstName)} {safe(g?.lastName)}
                       </span>
                     ))}
@@ -491,27 +561,26 @@ export function ReservationsPage() {
               {/* Note */}
               {(selected as any).note && (
                 <div className="mt-5 pt-4 border-t border-gray-100">
-                  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t("reservations.detail.note")}</h4>
-                  <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 whitespace-pre-wrap">{(selected as any).note}</p>
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t("reservations.detail.note")}</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">{(selected as any).note}</p>
                 </div>
               )}
 
-              {/* Created at */}
               <p className="text-[10px] text-gray-400 mt-4">{t("reservations.detail.created")}: {selected.createdAt?.slice(0, 10)}</p>
             </div>
 
             {/* Modal footer */}
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 flex-shrink-0">
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2 flex-shrink-0">
               {selected.status === "PENDING" && (
                 <>
                   <button
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-bold shadow-sm hover:shadow-md transition-all duration-150 flex items-center gap-2"
                     onClick={() => { setSelected(null); handleApproveClick(selected.id); }}
                   >
                     <CheckCircle className="h-4 w-4" /> {t("common.approve")}
                   </button>
                   <button
-                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-bold shadow-sm hover:shadow-md transition-all duration-150 flex items-center gap-2"
                     onClick={() => { const id = selected.id; setSelected(null); handleReject(id); }}
                   >
                     <XCircle className="h-4 w-4" /> {t("common.reject")}
@@ -519,7 +588,7 @@ export function ReservationsPage() {
                 </>
               )}
               <button
-                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-white transition-colors"
                 onClick={() => setSelected(null)}
               >
                 {t("common.close")}
