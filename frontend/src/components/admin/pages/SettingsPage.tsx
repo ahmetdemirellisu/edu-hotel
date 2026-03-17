@@ -90,13 +90,13 @@ export function SettingsPage() {
         .sett-card { animation: settIn 0.3s ease-out both; }
       `}</style>
 
-      {/* ── Header ───────────────────────────────── */}
+      {/* ── Page Header ───────────────────────────── */}
       <div className="flex items-center gap-3 sett-card">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center shadow-md">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-lg">
           <Sliders className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t("pages.settings.title", "Settings")}</h2>
+          <h1 className="text-[28px] font-semibold text-[#003366] tracking-tight leading-tight">{t("pages.settings.title", "Settings")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">{t("settings.subtitle", "Hotel configuration and system preferences")}</p>
         </div>
       </div>

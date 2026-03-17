@@ -163,9 +163,9 @@ export function CalendarPage() {
           <Calendar className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-[28px] font-semibold text-[#003366] tracking-tight leading-tight">
             {t("pages.calendar.roomOccupancyCalendar", "Room Occupancy Calendar")}
-          </h2>
+          </h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {monthLabel} · {t("pages.calendar.bookings", { count: totalBookings, defaultValue: `${totalBookings} bookings` })} · {t("pages.calendar.roomsOccupied", { occupied: occupiedRoomCount, total: rooms.length, defaultValue: `${occupiedRoomCount}/${rooms.length} rooms occupied` })}
           </p>

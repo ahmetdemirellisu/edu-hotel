@@ -78,7 +78,7 @@ export function ReportsPage() {
             <BarChart3 className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t("pages.reports.title", "Reports")}</h2>
+            <h1 className="text-[28px] font-semibold text-[#003366] tracking-tight leading-tight">{t("pages.reports.title", "Reports")}</h1>
             <p className="text-sm text-gray-500 mt-0.5">{t("reports.subtitle", "Generate and download operational reports")}</p>
           </div>
         </div>
