@@ -1,5 +1,5 @@
 // src/components/admin/AdminDashboard.tsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Calendar,
@@ -18,7 +18,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { DashboardPage } from "./pages/DashboardPage";
@@ -31,6 +31,7 @@ import { BlacklistPage } from "./pages/BlacklistPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { AdminProfilePage } from "./pages/AdminProfilePage";
 
 /* ═══════════════════════════════════════════════════════════
    Inject animations
@@ -57,9 +58,11 @@ type PageType =
   | "blacklist"
   | "reports"
   | "admin-users"
-  | "settings";
+  | "settings"
+  | "profile";
 
 export function AdminDashboard() {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation("admin");
   const initialLang = i18n.language?.toLowerCase().startsWith("tr") ? "TR" : "EN";
 
@@ -121,6 +124,7 @@ export function AdminDashboard() {
     reports: t("pages.reports.title", "Reports"),
     "admin-users": t("pages.adminUsers.title", "Admin Users"),
     settings: t("pages.settings.title", "Settings"),
+    profile: "My Profile",
   };
 
   const pageDescriptions: Record<PageType, string> = {
@@ -134,6 +138,7 @@ export function AdminDashboard() {
     reports: "Generate and download operational reports",
     "admin-users": "System administrators and role management",
     settings: "Hotel configuration and system preferences",
+    profile: "Manage your account and security settings",
   };
 
   const SidebarContent = () => (
@@ -345,21 +350,21 @@ export function AdminDashboard() {
                     <p className="text-xs text-gray-400">admin@sabanciuniv.edu</p>
                   </div>
                   <div className="py-1.5">
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[13px] text-gray-700 transition-colors">
+                    <button
+                      onClick={() => { setActivePage("profile"); setShowProfile(false); }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[13px] text-gray-700 transition-colors"
+                    >
                       {t("profile.profileSettings", "Profile Settings")}
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[13px] text-gray-700 transition-colors">
-                      {t("profile.changePassword", "Change Password")}
                     </button>
                   </div>
                   <div className="border-t border-gray-100 py-1.5">
-                    <Link
-                      to="/"
+                    <button
+                      onClick={() => { sessionStorage.removeItem("adminSession"); navigate("/admin-login", { replace: true }); }}
                       className="w-full text-left px-4 py-2 hover:bg-red-50 text-[13px] text-red-600 flex items-center gap-2 transition-colors"
                     >
                       <LogOut className="h-3.5 w-3.5" />
                       {t("profile.logout", "Logout")}
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
@@ -380,6 +385,7 @@ export function AdminDashboard() {
             {activePage === "reports" && <ReportsPage />}
             {activePage === "admin-users" && <AdminUsersPage />}
             {activePage === "settings" && <SettingsPage />}
+            {activePage === "profile" && <AdminProfilePage />}
           </div>
         </main>
       </div>
