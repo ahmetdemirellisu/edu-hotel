@@ -5,6 +5,7 @@ import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
 import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
+import { AdminLogin } from "./components/admin/AdminLogin";
 import { Dashboard } from "./components/Dashboard"; 
 import { Payment } from "./components/Payment";
 import { MyReservations } from "./components/Myreservations";
@@ -18,12 +19,18 @@ function RequireAuth({ children }: { children: ReactNode }) {
   return children;
 }
 
+function RequireAdminAuth({ children }: { children: ReactNode }) {
+  if (sessionStorage.getItem("adminSession") !== "1") return <Navigate to="/admin-login" replace />;
+  return children;
+}
+
 export default function App() {
   return (
     <Router basename={import.meta.env.VITE_BASE_PATH || "/"}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
         <Route
           path="/main"
@@ -75,9 +82,9 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <RequireAuth>
+            <RequireAdminAuth>
               <AdminDashboard />
-            </RequireAuth>
+            </RequireAdminAuth>
           }
         />
 
