@@ -75,6 +75,6 @@ jobs:
           
           # Podman login
           echo "${{ secrets.DEPLOY_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          podman-compose down
+          podman-compose -f docker-compose-server.yml down
           podman-compose pull
           podman-compose -f docker-compose-server.yml up -d --remove-orphans --force-recreate
