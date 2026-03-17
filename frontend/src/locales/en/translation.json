@@ -258,8 +258,8 @@
     "phone": "Phone: +90 (216) 483 9000",
     "emailAddress": "Email: hotel@sabanciuniv.edu",
     "supportEmail": "Support: support@sabanciuniv.edu",
-    "rights": "© 2025 Sabancı University. All rights reserved.",
-    "rightsEduHotel": "© 2025 Edu Hotel Management System - Sabancı University. All rights reserved."
+    "rights": "Sabancı University. All rights reserved.",
+    "rightsEduHotel": "Edu Hotel Management System - Sabancı University. All rights reserved."
   },
 
   "bookingRequest": {
