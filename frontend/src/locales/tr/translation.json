@@ -26,6 +26,13 @@
     "loading": "Yükleniyor..."
   },
 
+  "notificationBell": {
+    "title": "Bildirimler",
+    "new": "yeni",
+    "empty": "Bildirim yok",
+    "viewAll": "Tüm Bildirimleri Gör"
+  },
+
   "login": {
     "loginWith": "Giriş yöntemi",
     "email": "E-posta",
@@ -365,6 +372,11 @@
       "corporate": "Kurumsal (SÜ)",
       "education": "Eğitim"
     },
+    "steps": {
+      "stayDetails": "Konaklama Detayları",
+      "guestInfo": "Misafir Bilgileri",
+      "billingSubmit": "Fatura & Gönder"
+    },
     "roomAssignmentInfo": "Oda ataması onaydan sonra EDU resepsiyonu tarafından yapılır. Kullanıcılar oda seçemez.",
     "afterSubmitInfo": "Talebiniz gönderildikten sonra EDU ekibi inceleyecektir. İnceleme sonrası e-posta veya bildirim alacaksınız.",
     "afterSubmitPaymentNote": "Ödeme (varsa) sadece onaydan sonra istenir.",
@@ -395,6 +407,18 @@
 
   "account": {
     "title": "Hesabım",
+    "passwordStrength": {
+      "tooShort": "Çok kısa",
+      "weak": "Zayıf",
+      "fair": "Orta",
+      "good": "İyi",
+      "strong": "Güçlü"
+    },
+    "userType": {
+      "student": "Öğrenci",
+      "staff": "Personel",
+      "admin": "Yönetici"
+    },
     "subtitle": "Hesap ayarlarınızı ve kişisel bilgilerinizi yönetin",
     "profile": {
       "title": "Profil Bilgileri",
@@ -486,6 +510,34 @@
       "noReservation": "Aktif rezervasyon bulunamadı."
     },
     "success": "Ödeme dekontu başarıyla gönderildi!"
+  },
+
+  "notifications": {
+    "pageTitle": "Bildirimler",
+    "unreadCount_one": "{{count}} okunmamış bildirim",
+    "unreadCount_other": "{{count}} okunmamış bildirim",
+    "newBadgeLabel": "Yeni",
+    "viewReservation": "Rezervasyonu Görüntüle",
+    "showingCount_one": "{{count}} bildirim gösteriliyor",
+    "showingCount_other": "{{count}} bildirim gösteriliyor",
+    "filter": {
+      "all": "Tümü",
+      "approved": "Onaylanan",
+      "rejected": "Reddedilen",
+      "warnings": "Uyarılar",
+      "info": "Bilgi",
+      "reminders": "Hatırlatma"
+    },
+    "readFilter": {
+      "all": "Tümü",
+      "unread": "Okunmamış",
+      "read": "Okunmuş"
+    },
+    "empty": {
+      "title": "Henüz bildirim yok",
+      "subtitle": "Rezervasyon güncellemeleri ve uyarılar burada görünecektir.",
+      "backToHome": "Ana Sayfaya Dön"
+    }
   },
 
   "reservations": {

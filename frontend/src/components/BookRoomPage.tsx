@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Footer } from "./layout/Footer";
-import { NotificationBell } from "./NotificationBell";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -28,7 +27,6 @@ import {
   User,
   Users,
   XCircle,
-  LayoutGrid,
   ArrowRight,
   Home,
   ChevronRight,
@@ -72,7 +70,7 @@ if (!document.getElementById("book-anim")) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Helpers (unchanged)
+   Helpers
    ═══════════════════════════════════════════════════════════ */
 function isSunday(dateStr: string) {
   if (!dateStr) return false;
@@ -109,12 +107,13 @@ const labelClass = "text-[11px] font-bold text-slate-400 uppercase tracking-wide
    Step Indicator
    ═══════════════════════════════════════════════════════════ */
 const steps = [
-  { id: 1, label: "Stay Details", icon: CalendarIcon },
-  { id: 2, label: "Guest Info", icon: User },
-  { id: 3, label: "Billing & Submit", icon: CreditCard },
+  { id: 1, labelKey: "bookingRequest.steps.stayDetails", icon: CalendarIcon },
+  { id: 2, labelKey: "bookingRequest.steps.guestInfo", icon: User },
+  { id: 3, labelKey: "bookingRequest.steps.billingSubmit", icon: CreditCard },
 ];
 
 function StepIndicator({ active }: { active: number }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-center gap-0 mb-8">
       {steps.map((step, idx) => {
@@ -140,7 +139,7 @@ function StepIndicator({ active }: { active: number }) {
                   isActive ? "text-[#003366]" : isDone ? "text-emerald-600" : "text-slate-400"
                 }`}
               >
-                {step.label}
+                {t(step.labelKey)}
               </span>
             </div>
             {idx < steps.length - 1 && (
@@ -161,7 +160,7 @@ function StepIndicator({ active }: { active: number }) {
    Component
    ═══════════════════════════════════════════════════════════ */
 export function BookRoomPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const formTopRef = useRef<HTMLDivElement | null>(null);
 
   const storedUser = useMemo(() => {
@@ -173,11 +172,8 @@ export function BookRoomPage() {
   }, []);
 
   const userId: number | undefined = storedUser?.id ? Number(storedUser.id) : undefined;
-  const userName = localStorage.getItem("userName") || "User";
-  const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
-  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
 
-  // ── State (unchanged) ──────────────────────
+  // ── State ──────────────────────
   const [accommodationTypeUI, setAccommodationTypeUI] = useState<"personal" | "corporate" | "education" | "">("");
   const [billingTypeUI, setBillingTypeUI] = useState<"individual" | "corporate" | "">("");
   const [requestFreeAccommodation, setRequestFreeAccommodation] = useState(false);
@@ -211,7 +207,7 @@ export function BookRoomPage() {
 
   const nights = daysBetween(checkInDate, checkOutDate);
 
-  // ── Handlers (unchanged) ───────────────────
+  // ── Handlers ───────────────────
   const handleNumberOfGuestsChange = (value: string) => {
     const num = Math.max(1, Math.min(10, parseInt(value, 10) || 1));
     setNumberOfGuests(String(num));
@@ -325,49 +321,6 @@ export function BookRoomPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #f0f4f8 0%, #e8eef5 50%, #f0f4f8 100%)" }}>
-      {/* ═══ HEADER ═══════════════════════════════════════ */}
-      <header
-        className="sticky top-0 z-50 border-b border-white/10"
-        style={{ background: "rgba(0,51,102,0.94)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Link to="/main" className="flex items-center gap-4">
-                <div className="border border-[#c9a84c] px-3 py-1.5 rounded">
-                  <div className="text-[11px] font-semibold text-[#c9a84c] leading-tight">Sabancı</div>
-                  <div className="text-[10px] text-[#c9a84c]/80 leading-tight">Üniversitesi</div>
-                </div>
-                <div className="w-px h-8 bg-white/15 hidden sm:block" />
-                <h1 className="text-white text-lg font-semibold tracking-[6px] hidden sm:block" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>EDU HOTEL</h1>
-              </Link>
-            </div>
-            <h1 className="sm:hidden text-white text-base font-bold tracking-[4px]">EDU HOTEL</h1>
-            <div className="flex items-center gap-3 sm:gap-5">
-              <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors tracking-wide">
-                <LayoutGrid className="h-3.5 w-3.5" />
-                {t("header.mainPage", { defaultValue: "Main Page" })}
-              </Link>
-              <Select value={currentLang} onValueChange={switchLanguage}>
-                <SelectTrigger className="w-[58px] h-8 bg-white/5 border-white/20 text-white text-xs font-semibold hover:bg-white/10 focus:ring-0 rounded-lg">
-                  <SelectValue placeholder={currentLang} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EN">EN</SelectItem>
-                  <SelectItem value="TR">TR</SelectItem>
-                </SelectContent>
-              </Select>
-              <NotificationBell lang={currentLang} />
-              <Link to="/profile" className="flex items-center gap-2.5 pl-1 group">
-                <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
-                  <User className="h-4 w-4 text-white/70" />
-                </div>
-                <span className="text-xs text-white/70 group-hover:text-white font-medium hidden md:block max-w-[100px] truncate transition-colors">{userName}</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* ═══ HERO BANNER ══════════════════════════════════ */}
       <div

@@ -124,21 +124,21 @@ export function AdminDashboard() {
     reports: t("pages.reports.title", "Reports"),
     "admin-users": t("pages.adminUsers.title", "Admin Users"),
     settings: t("pages.settings.title", "Settings"),
-    profile: "My Profile",
+    profile: t("pages.profile.title", "My Profile"),
   };
 
   const pageDescriptions: Record<PageType, string> = {
-    dashboard: "Overview of hotel operations and key metrics",
-    reservations: "Manage reservation requests, approvals, and assignments",
-    calendar: "Monthly room occupancy and booking timeline",
-    rooms: "Room inventory, status, and floor plan management",
-    guests: "Guest profiles, history, and blacklist management",
-    payments: "Payment verification queue and receipt management",
-    blacklist: "Blocked users and access restrictions",
-    reports: "Generate and download operational reports",
-    "admin-users": "System administrators and role management",
-    settings: "Hotel configuration and system preferences",
-    profile: "Manage your account and security settings",
+    dashboard: t("pageDescriptions.dashboard", "Overview of hotel operations and key metrics"),
+    reservations: t("pageDescriptions.reservations", "Manage reservation requests, approvals, and assignments"),
+    calendar: t("pageDescriptions.calendar", "Monthly room occupancy and booking timeline"),
+    rooms: t("pageDescriptions.rooms", "Room inventory, status, and floor plan management"),
+    guests: t("pageDescriptions.guests", "Guest profiles, history, and blacklist management"),
+    payments: t("pageDescriptions.payments", "Payment verification queue and receipt management"),
+    blacklist: t("pageDescriptions.blacklist", "Blocked users and access restrictions"),
+    reports: t("pageDescriptions.reports", "Generate and download operational reports"),
+    "admin-users": t("pageDescriptions.adminUsers", "System administrators and role management"),
+    settings: t("pageDescriptions.settings", "Hotel configuration and system preferences"),
+    profile: t("pageDescriptions.profile", "Manage your account and security settings"),
   };
 
   const SidebarContent = () => (

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Bell,
   CheckCircle2,
@@ -42,11 +43,12 @@ function timeAgo(timestamp: string): string {
 }
 
 export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const isTR = lang === "TR";
+  const isTR = lang === "TR" || i18n.language?.toLowerCase().startsWith("tr");
 
   const userId = Number(localStorage.getItem("userId"));
 
@@ -95,11 +97,11 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900">
-              {isTR ? "Bildirimler" : "Notifications"}
+              {t("notificationBell.title", "Notifications")}
             </h3>
             {unreadCount > 0 && (
               <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                {unreadCount} {isTR ? "yeni" : "new"}
+                {unreadCount} {t("notificationBell.new", "new")}
               </span>
             )}
           </div>
@@ -110,7 +112,7 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
               <div className="px-4 py-8 text-center">
                 <Bell className="h-6 w-6 text-gray-300 mx-auto mb-2" />
                 <p className="text-xs text-gray-400">
-                  {isTR ? "Bildirim yok" : "No notifications"}
+                  {t("notificationBell.empty", "No notifications")}
                 </p>
               </div>
             ) : (
@@ -157,7 +159,7 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
               onClick={() => setOpen(false)}
               className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-[#003366] hover:text-[#004d99] transition-colors"
             >
-              {isTR ? "Tüm Bildirimleri Gör" : "View All Notifications"}
+              {t("notificationBell.viewAll", "View All Notifications")}
               <ChevronRight className="h-3 w-3" />
             </Link>
           </div>

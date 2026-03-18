@@ -14,8 +14,6 @@ import {
 } from "./ui/select";
 import {
   User,
-  Mail,
-  Phone,
   Lock,
   AlertCircle,
   CheckCircle2,
@@ -28,6 +26,9 @@ import {
   Shield,
   Bell,
   Sliders,
+  IdCard,
+  AtSign,
+  Smartphone
 } from "lucide-react";
 
 /* ═══════════════════════════════════════════════════════════
@@ -116,11 +117,11 @@ function getPasswordStrength(pw: string): { score: number; label: string; color:
   if (/[0-9]/.test(pw)) score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;
   const map: Record<number, { label: string; color: string }> = {
-    0: { label: "Too short", color: "#ef4444" },
-    1: { label: "Weak", color: "#f97316" },
-    2: { label: "Fair", color: "#f59e0b" },
-    3: { label: "Good", color: "#22c55e" },
-    4: { label: "Strong", color: "#10b981" },
+    0: { label: "tooShort", color: "#ef4444" },
+    1: { label: "weak",     color: "#f97316" },
+    2: { label: "fair",     color: "#f59e0b" },
+    3: { label: "good",     color: "#22c55e" },
+    4: { label: "strong",   color: "#10b981" },
   };
   return { score, ...map[score] };
 }
@@ -188,13 +189,15 @@ export function MyAccount() {
 
   /* User type display */
   const userTypeDisplay = (type: string) => {
-    const map: Record<string, { label: string; bg: string; text: string }> = {
-      STUDENT: { label: "Student", bg: "bg-blue-50", text: "text-blue-700" },
-      STAFF: { label: "Staff", bg: "bg-emerald-50", text: "text-emerald-700" },
-      ADMIN: { label: "Admin", bg: "bg-violet-50", text: "text-violet-700" },
-      OTHER: { label: type, bg: "bg-gray-100", text: "text-gray-700" },
+    const map: Record<string, { labelKey: string; bg: string; text: string }> = {
+      STUDENT: { labelKey: "account.userType.student", bg: "bg-blue-50", text: "text-blue-700" },
+      STAFF:   { labelKey: "account.userType.staff",   bg: "bg-emerald-50", text: "text-emerald-700" },
+      ADMIN:   { labelKey: "account.userType.admin",   bg: "bg-violet-50", text: "text-violet-700" },
     };
-    return map[type] || map.OTHER;
+    const entry = map[type];
+    return entry
+      ? { label: t(entry.labelKey, type), bg: entry.bg, text: entry.text }
+      : { label: type, bg: "bg-gray-100", text: "text-gray-700" };
   };
 
   const typeStyle = userTypeDisplay(userData.userType);
@@ -424,19 +427,22 @@ export function MyAccount() {
                 </div>
                 <div className="p-7">
                   <form className="space-y-6">
+                    
                     {/* Full Name */}
                     <div className="space-y-1.5">
                       <Label htmlFor="fullName" className="text-[11px] font-bold text-gray-500 uppercase tracking-[2px]">
                         {t("signup.fullNameLabel", "Full Name")}
                       </Label>
                       <div className="relative group">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <IdCard className="h-5 w-5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                        </div>
                         <Input
                           id="fullName"
                           value={userData.fullName}
                           onChange={handleInputChange}
                           placeholder={t("signup.fullNamePlaceholder")}
-                          className="account-input-field h-12 pl-10 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm placeholder:text-gray-400"
+                          className="account-input-field w-full h-12 !pl-12 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm placeholder:text-gray-400"
                         />
                       </div>
                     </div>
@@ -447,13 +453,15 @@ export function MyAccount() {
                         {t("account.profile.email")}
                       </Label>
                       <div className="relative group">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <AtSign className="h-5 w-5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                        </div>
                         <Input
                           id="email"
                           type="email"
                           value={userData.email}
                           onChange={handleInputChange}
-                          className="account-input-field h-12 pl-10 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm"
+                          className="account-input-field w-full h-12 !pl-12 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm"
                         />
                       </div>
                     </div>
@@ -464,13 +472,15 @@ export function MyAccount() {
                         {t("account.profile.phone")}
                       </Label>
                       <div className="relative group">
-                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Smartphone className="h-5 w-5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                        </div>
                         <Input
                           id="phone"
                           type="tel"
                           value={userData.phone}
                           onChange={handleInputChange}
-                          className="account-input-field h-12 pl-10 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm"
+                          className="account-input-field w-full h-12 !pl-12 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm"
                         />
                       </div>
                     </div>
@@ -591,7 +601,7 @@ export function MyAccount() {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold" style={{ color: pwStrength.color }}>
-                              {pwStrength.label}
+                              {pwStrength.label ? t(`account.passwordStrength.${pwStrength.label}`, pwStrength.label) : ""}
                             </span>
                             <span className="text-[10px] text-gray-400">{newPassword.length} chars</span>
                           </div>
@@ -660,11 +670,11 @@ export function MyAccount() {
                         <Bell className="h-4 w-4 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">Email Notifications</p>
-                        <p className="text-[11px] text-gray-400">Receive updates via email</p>
+                        <p className="text-sm font-semibold text-gray-800">{t("account.prefs.emailNotifs", "Email Notifications")}</p>
+                        <p className="text-[11px] text-gray-400">{t("account.prefs.emailNotifsDesc", "Receive updates via email")}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full ring-1 ring-emerald-200">Enabled</span>
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full ring-1 ring-emerald-200">{t("account.prefs.enabled", "Enabled")}</span>
                   </div>
 
                   <div
@@ -673,20 +683,20 @@ export function MyAccount() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
-                        <Phone className="h-4 w-4 text-gray-400" />
+                        <Smartphone className="h-4 w-4 text-gray-400" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-500">SMS Notifications</p>
-                        <p className="text-[11px] text-gray-400">Receive updates via SMS</p>
+                        <p className="text-sm font-semibold text-gray-500">{t("account.prefs.smsNotifs", "SMS Notifications")}</p>
+                        <p className="text-[11px] text-gray-400">{t("account.prefs.smsNotifsDesc", "Receive updates via SMS")}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full ring-1 ring-gray-200">Disabled</span>
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full ring-1 ring-gray-200">{t("account.prefs.disabled", "Disabled")}</span>
                   </div>
 
                   <div className="pt-2 border-t border-gray-100">
                     <p className="text-[11px] text-gray-400 flex items-center gap-1.5">
                       <Settings className="h-3 w-3" />
-                      Language can be changed from the header.
+                      {t("account.prefs.langNote", "Language can be changed from the header.")}
                     </p>
                   </div>
                 </div>
@@ -758,9 +768,9 @@ export function MyAccount() {
             >
               <div className="divide-y divide-gray-100/80">
                 {[
-                  { to: "/main", label: "Back to Dashboard" },
-                  { to: "/reservations", label: "My Reservations" },
-                  { to: "/book-room", label: "Book a Room" },
+                  { to: "/main",         label: t("account.nav.backToDashboard", "Back to Dashboard") },
+                  { to: "/reservations", label: t("account.nav.myReservations",  "My Reservations") },
+                  { to: "/book-room",    label: t("account.nav.bookRoom",        "Book a Room") },
                 ].map((link) => (
                   <Link
                     key={link.to}

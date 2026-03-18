@@ -5,7 +5,7 @@ import { Label } from "./ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
-import { Eye, EyeOff, BedDouble, MapPin, Clock } from "lucide-react";
+import { Eye, EyeOff, AtSign, Smartphone, Lock, CalendarCheck, Zap, Headphones } from "lucide-react";
 
 import {
   Select as UISelect,
@@ -19,15 +19,8 @@ const API_URL =
   (import.meta.env.VITE_API_URL as string) || "/ehp/api";
 
 /* ═══════════════════════════════════════════════════════════
-   Pre-calculate window animation data OUTSIDE the component
+   Pre-calculate particle data
    ═══════════════════════════════════════════════════════════ */
-const WIN_DATA = Array.from({ length: 30 }, (_, i) => ({
-  delay: ((i * 0.73 + i * i * 0.031) % 7).toFixed(2),
-  duration: (2.5 + (i * 0.41 + (i % 5) * 0.6) % 4).toFixed(2),
-  startLit: i % 3 !== 0,
-}));
-
-/* Pre-calculate particle data */
 const PARTICLE_DATA = Array.from({ length: 22 }, (_, i) => ({
   left: ((i * 137.5 + 13) % 100).toFixed(1),
   size: (1.5 + (i * 0.37 % 2.5)).toFixed(1),
@@ -44,34 +37,21 @@ void (document.getElementById("login-animations") ?? (() => {
   s.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-    @keyframes aurora {
-      0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
-      33%  { transform: translate(40px, -30px) scale(1.15) rotate(120deg); }
-      66%  { transform: translate(-25px, 20px) scale(0.9) rotate(240deg); }
-      100% { transform: translate(0, 0) scale(1) rotate(360deg); }
+    @keyframes cinematicZoom {
+      0%   { transform: scale(1); }
+      100% { transform: scale(1.15); }
     }
-    @keyframes aurora2 {
-      0%   { transform: translate(0, 0) scale(1.1) rotate(0deg); }
-      50%  { transform: translate(-50px, 40px) scale(0.85) rotate(180deg); }
-      100% { transform: translate(0, 0) scale(1.1) rotate(360deg); }
+    @keyframes loginCardSlideLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to   { opacity: 1; transform: translateX(0); }
     }
-    @keyframes aurora3 {
-      0%   { transform: translate(0, 0) scale(0.9) rotate(0deg); }
-      40%  { transform: translate(60px, 20px) scale(1.2) rotate(144deg); }
-      100% { transform: translate(0, 0) scale(0.9) rotate(360deg); }
+    @keyframes loginFadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes winBlink {
-      0%,100% { opacity: 0.05; }
-      50%     { opacity: 0.85; }
-    }
-    @keyframes floatCard {
-      0%,100% { transform: translateY(0px); }
-      50%     { transform: translateY(-10px); }
-    }
-    @keyframes shimmerText {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    @keyframes loginShimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
     }
     @keyframes particleFloat {
       0%   { transform: translateY(100vh); opacity: 0; }
@@ -79,25 +59,18 @@ void (document.getElementById("login-animations") ?? (() => {
       92%  { opacity: 0.5; }
       100% { transform: translateY(-10vh); opacity: 0; }
     }
-    @keyframes loginCardSlide {
-      from { opacity: 0; transform: translateX(30px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes loginShimmer {
-      0%,100% { background-position: 0% 50%; }
-      50%     { background-position: 100% 50%; }
-    }
-    @keyframes loginFadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes shimmerSweep {
-      from { transform: translateX(-100%); }
-      to   { transform: translateX(100%); }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(0px); }
+      50%     { transform: translateY(-10px); }
     }
     @keyframes goldPulse {
       0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.15); }
       50%     { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+    }
+    @keyframes shimmerText {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
   `;
   document.head.appendChild(s);
@@ -156,11 +129,8 @@ export function Login() {
   };
 
   const stagger = (i: number): React.CSSProperties => ({
-    animation: `loginFadeUp 0.55s ease-out ${0.1 + i * 0.07}s both`,
+    animation: `loginFadeUp 0.55s ease-out ${0.1 + i * 0.05}s both`,
   });
-
-  /* Keep backgroundImage import used (suppress unused warning) */
-  void backgroundImage;
 
   return (
     <div
@@ -172,384 +142,7 @@ export function Login() {
       }}
     >
       {/* ══════════════════════════════════════════════════════
-          LEFT PANEL — Cinematic Hotel Showcase
-          ══════════════════════════════════════════════════════ */}
-      <div
-        style={{
-          display: "none",
-          width: "58%",
-          flexShrink: 0,
-          position: "relative",
-          overflow: "hidden",
-          background: "linear-gradient(160deg, #020817 0%, #0a1628 50%, #0d1f3c 100%)",
-        }}
-        className="lg:!flex lg:!flex-col"
-      >
-        {/* Aurora blobs */}
-        {[
-          { w: 700, h: 700, top: "-20%", left: "-15%", color1: "rgba(59,130,246,0.18)", color2: "rgba(99,102,241,0.12)", dur: "22s", anim: "aurora" },
-          { w: 600, h: 600, top: "30%", left: "40%", color1: "rgba(139,92,246,0.15)", color2: "rgba(59,130,246,0.10)", dur: "28s", anim: "aurora2" },
-          { w: 500, h: 500, top: "60%", left: "-10%", color1: "rgba(14,165,233,0.12)", color2: "rgba(99,102,241,0.08)", dur: "18s", anim: "aurora3" },
-        ].map((b, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              width: b.w,
-              height: b.h,
-              top: b.top,
-              left: b.left,
-              borderRadius: "50%",
-              background: `radial-gradient(circle at 40% 40%, ${b.color1} 0%, ${b.color2} 40%, transparent 70%)`,
-              animation: `${b.anim} ${b.dur} ease-in-out infinite`,
-              pointerEvents: "none",
-              filter: "blur(2px)",
-            }}
-          />
-        ))}
-
-        {/* Grid overlay */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            backgroundImage: `
-              linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        />
-
-        {/* Floating particles */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-          {PARTICLE_DATA.map((p, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: `${p.left}%`,
-                width: `${p.size}px`,
-                height: `${p.size}px`,
-                borderRadius: "50%",
-                background: i % 3 === 0 ? "rgba(201,168,76,0.6)" : "rgba(255,255,255,0.3)",
-                animation: `particleFloat ${p.duration}s linear ${p.delay}s infinite`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Content */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 10,
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            padding: "40px 48px",
-          }}
-        >
-          {/* Sabancı badge top-left */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                border: "1px solid rgba(201,168,76,0.6)",
-                padding: "8px 14px",
-                borderRadius: 8,
-                animation: "goldPulse 4s ease-in-out infinite",
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#c9a84c", letterSpacing: "0.5px" }}>Sabancı</div>
-              <div style={{ fontSize: 10, color: "rgba(201,168,76,0.75)", letterSpacing: "0.3px" }}>Üniversitesi</div>
-            </div>
-          </div>
-
-          {/* Center content */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 0 }}>
-            {/* WELCOME TO label */}
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: "6px",
-                color: "#c9a84c",
-                fontWeight: 500,
-                marginBottom: 16,
-                textTransform: "uppercase",
-              }}
-            >
-              WELCOME TO
-            </div>
-
-            {/* EDU HOTEL title */}
-            <h1
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontSize: "clamp(52px, 5vw, 80px)",
-                fontWeight: 700,
-                letterSpacing: "12px",
-                margin: 0,
-                background: "linear-gradient(90deg, #c9a84c 0%, #fff5d6 25%, #c9a84c 50%, #fff8e1 75%, #c9a84c 100%)",
-                backgroundSize: "300% 100%",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                animation: "shimmerText 5s ease-in-out infinite",
-              }}
-            >
-              EDU HOTEL
-            </h1>
-
-            {/* Stars */}
-            <div style={{ display: "flex", gap: 6, marginTop: 20, marginBottom: 48 }}>
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} width="18" height="18" viewBox="0 0 24 24" fill="#c9a84c">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              ))}
-            </div>
-
-            {/* Hotel building */}
-            <div style={{ position: "relative", marginBottom: 48 }}>
-              {/* Building container */}
-              <div
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                  filter: "drop-shadow(0 20px 60px rgba(59,130,246,0.3))",
-                }}
-              >
-                {/* Main building facade */}
-                <div
-                  style={{
-                    background: "linear-gradient(180deg, #1a2744 0%, #0f1a2e 100%)",
-                    border: "1px solid rgba(201,168,76,0.2)",
-                    borderRadius: "6px 6px 0 0",
-                    padding: "16px 20px 12px",
-                    position: "relative",
-                    width: 220,
-                  }}
-                >
-                  {/* Roof */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: -18,
-                      left: -8,
-                      right: -8,
-                      height: 20,
-                      background: "linear-gradient(180deg, #0d1528 0%, #1a2744 100%)",
-                      borderRadius: "4px 4px 0 0",
-                      border: "1px solid rgba(201,168,76,0.25)",
-                      borderBottom: "none",
-                    }}
-                  />
-                  {/* Roof pinnacle */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: -30,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: 0,
-                      height: 0,
-                      borderLeft: "10px solid transparent",
-                      borderRight: "10px solid transparent",
-                      borderBottom: "14px solid #0d1528",
-                    }}
-                  />
-
-                  {/* Floor labels + windows grid */}
-                  {[0, 1, 2, 3, 4].map((floor) => (
-                    <div
-                      key={floor}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        marginBottom: floor < 4 ? 8 : 0,
-                      }}
-                    >
-                      {/* Floor label */}
-                      <span
-                        style={{
-                          fontSize: 8,
-                          color: "rgba(201,168,76,0.5)",
-                          fontWeight: 600,
-                          letterSpacing: "0.5px",
-                          width: 20,
-                          textAlign: "right",
-                          flexShrink: 0,
-                        }}
-                      >
-                        FL{5 - floor}
-                      </span>
-                      {/* 6 windows per floor */}
-                      <div style={{ display: "flex", gap: 6 }}>
-                        {[0, 1, 2, 3, 4, 5].map((col) => {
-                          const idx = floor * 6 + col;
-                          const win = WIN_DATA[idx];
-                          return (
-                            <div
-                              key={col}
-                              style={{
-                                width: 20,
-                                height: 16,
-                                borderRadius: 3,
-                                background: win.startLit
-                                  ? "rgba(255,200,80,0.85)"
-                                  : "rgba(255,200,80,0.05)",
-                                border: "1px solid rgba(201,168,76,0.2)",
-                                boxShadow: win.startLit
-                                  ? "0 0 8px rgba(255,200,80,0.6), 0 0 2px rgba(255,200,80,0.4)"
-                                  : "none",
-                                animation: `winBlink ${win.duration}s ${win.delay}s ease-in-out infinite`,
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Lobby/entrance */}
-                <div
-                  style={{
-                    background: "linear-gradient(180deg, #0f1a2e 0%, #080f1e 100%)",
-                    border: "1px solid rgba(201,168,76,0.25)",
-                    borderTop: "2px solid rgba(201,168,76,0.35)",
-                    borderRadius: "0 0 4px 4px",
-                    padding: "8px 20px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                  }}
-                >
-                  {/* Entrance arch */}
-                  <div
-                    style={{
-                      width: 28,
-                      height: 20,
-                      background: "rgba(201,168,76,0.1)",
-                      border: "1px solid rgba(201,168,76,0.3)",
-                      borderRadius: "14px 14px 0 0",
-                    }}
-                  />
-                  <span style={{ fontSize: 9, color: "rgba(201,168,76,0.7)", letterSpacing: "2px", fontWeight: 600 }}>
-                    LOBBY
-                  </span>
-                  <div
-                    style={{
-                      width: 28,
-                      height: 20,
-                      background: "rgba(201,168,76,0.1)",
-                      border: "1px solid rgba(201,168,76,0.3)",
-                      borderRadius: "14px 14px 0 0",
-                    }}
-                  />
-                </div>
-
-                {/* Dark base */}
-                <div
-                  style={{
-                    height: 8,
-                    background: "#050c18",
-                    borderRadius: "0 0 4px 4px",
-                    border: "1px solid rgba(201,168,76,0.15)",
-                    borderTop: "none",
-                  }}
-                />
-
-                {/* Glow reflection */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: -24,
-                    left: "10%",
-                    right: "10%",
-                    height: 20,
-                    background: "radial-gradient(ellipse, rgba(59,130,246,0.25) 0%, transparent 70%)",
-                    filter: "blur(6px)",
-                    pointerEvents: "none",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* 3 floating feature cards */}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-              {[
-                { icon: <BedDouble size={16} color="#c9a84c" strokeWidth={1.8} />, title: "49 Rooms", sub: "Comfortable & Modern", delay: "0s" },
-                { icon: <MapPin size={16} color="#c9a84c" strokeWidth={1.8} />, title: "Campus Location", sub: "Sabancı University", delay: "0.4s" },
-                { icon: <Clock size={16} color="#c9a84c" strokeWidth={1.8} />, title: "24/7 Service", sub: "Always Here For You", delay: "0.8s" },
-              ].map((card, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: "12px 16px",
-                    borderRadius: 12,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    animation: `floatCard ${4 + i * 0.8}s ${card.delay} ease-in-out infinite`,
-                    minWidth: 140,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      background: "rgba(201,168,76,0.1)",
-                      border: "1px solid rgba(201,168,76,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {card.icon}
-                  </div>
-                  <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.9)", lineHeight: 1.2 }}>
-                      {card.title}
-                    </div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 2 }}>
-                      {card.sub}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom copyright */}
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                height: 1,
-                background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)",
-                marginBottom: 16,
-              }}
-            />
-            <p style={{ fontSize: 10, color: "rgba(201,168,76,0.4)", letterSpacing: "0.8px", margin: 0 }}>
-              © 2026 Sabancı University · All Rights Reserved
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════
-          RIGHT PANEL — Login Form
+          LEFT PANEL — Login Form (Mirrored from Signup)
           ══════════════════════════════════════════════════════ */}
       <div
         style={{
@@ -561,33 +154,21 @@ export function Login() {
           justifyContent: "center",
           padding: "32px 24px",
           position: "relative",
-          animation: "loginCardSlide 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both",
+          animation: "loginCardSlideLeft 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both",
           minHeight: "100vh",
         }}
       >
-        {/* Top-right: language selector + brand */}
+        {/* Top-left: language selector (moved to left to mirror design) */}
         <div
           style={{
             position: "absolute",
             top: 24,
-            right: 28,
+            left: 28,
             display: "flex",
             alignItems: "center",
             gap: 12,
           }}
         >
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "4px",
-              color: "#94a3b8",
-              display: "none",
-            }}
-            className="sm:!inline"
-          >
-            EDU HOTEL
-          </span>
           <div
             style={{
               display: "flex",
@@ -633,7 +214,7 @@ export function Login() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 24,
+                marginBottom: 20,
                 boxShadow: "0 8px 24px rgba(0,51,102,0.25)",
               }}
             >
@@ -665,7 +246,7 @@ export function Login() {
               Welcome back
             </h1>
             <p style={{ fontSize: 14, color: "#9ca3af", margin: "0 0 20px" }}>
-              Sign in to your account
+              Sign in to your EDU Hotel account
             </p>
           </div>
 
@@ -677,13 +258,14 @@ export function Login() {
               backgroundSize: "200% 100%",
               animation: "loginShimmer 4s ease-in-out infinite",
               borderRadius: 2,
-              marginBottom: 28,
+              marginBottom: 24,
               ...stagger(2),
             }}
           />
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            
             {/* Login method */}
             <div style={stagger(3)}>
               <Label
@@ -697,7 +279,7 @@ export function Login() {
                   marginBottom: 6,
                 }}
               >
-                {t("login.loginWith")}
+                {t("login.loginWith", "Login With")}
               </Label>
               <UISelect
                 value={loginMethod}
@@ -707,8 +289,8 @@ export function Login() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="email">{t("login.email")}</SelectItem>
-                  <SelectItem value="phone">{t("login.phone")}</SelectItem>
+                  <SelectItem value="email">{t("login.email", "Email")}</SelectItem>
+                  <SelectItem value="phone">{t("login.phone", "Phone")}</SelectItem>
                 </SelectContent>
               </UISelect>
             </div>
@@ -726,41 +308,67 @@ export function Login() {
                   marginBottom: 6,
                 }}
               >
-                {loginMethod === "email" ? t("login.emailAddress") : t("login.phoneNumber")}
+                {loginMethod === "email" ? t("login.emailAddress", "Email Address") : t("login.phoneNumber", "Phone Number")}
               </Label>
-              <Input
-                type={loginMethod === "email" ? "email" : "tel"}
-                placeholder={loginMethod === "email" ? t("login.enterEmail") : t("login.enterPhone")}
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                required
-                className="h-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
-              />
+              <div className="relative group flex items-center w-full">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  {loginMethod === "email" ? (
+                    <AtSign className="h-4.5 w-4.5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                  ) : (
+                    <Smartphone className="h-4.5 w-4.5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                  )}
+                </div>
+                <Input
+                  type={loginMethod === "email" ? "email" : "tel"}
+                  placeholder={loginMethod === "email" ? t("login.enterEmail", "Enter your email") : t("login.enterPhone", "Enter your phone")}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  className="w-full h-11 !pl-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
             </div>
 
             {/* Password */}
             <div style={stagger(5)}>
-              <Label
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.8px",
-                  marginBottom: 6,
-                }}
-              >
-                {t("login.password")}
-              </Label>
-              <div style={{ position: "relative" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <Label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                  }}
+                >
+                  {t("login.password", "Password")}
+                </Label>
+                <a
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#003366",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#0066cc")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#003366")}
+                >
+                  {t("login.forgotPassword", "Forgot password?")}
+                </a>
+              </div>
+              <div className="relative group flex items-center w-full">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-4.5 w-4.5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
+                </div>
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder={t("login.enterPassword")}
+                  placeholder={t("login.enterPassword", "••••••••")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-11 pr-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full h-11 !pl-11 pr-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <button
                   type="button"
@@ -788,7 +396,7 @@ export function Login() {
               </div>
             </div>
 
-            {/* Error */}
+            {/* Error Message */}
             {error && (
               <div
                 style={{
@@ -806,7 +414,7 @@ export function Login() {
             )}
 
             {/* Submit button */}
-            <div style={stagger(6)}>
+            <div style={stagger(7)} className="pt-2">
               <Button
                 type="submit"
                 disabled={loading}
@@ -827,39 +435,29 @@ export function Login() {
                   className="group-hover:!translate-x-full"
                 />
                 <span style={{ position: "relative" }}>
-                  {loading ? t("login.loggingIn") : t("login.loginButton")}
+                  {loading ? t("login.loggingIn", "Logging in...") : t("login.loginButton", "Login to your account")}
                 </span>
               </Button>
             </div>
 
-            {/* Links */}
-            <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8, ...stagger(7) }}>
-              <a
-                style={{
-                  fontSize: 13,
-                  color: "#9ca3af",
-                  cursor: "pointer",
-                  textDecoration: "none",
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#003366")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
-              >
-                {t("login.forgotPassword")}
-              </a>
+            {/* Link to Signup */}
+            <div style={{ textAlign: "center", marginTop: 4, ...stagger(8) }}>
+              <span style={{ fontSize: 13, color: "#9ca3af" }}>
+                First time user?{" "}
+              </span>
               <Link
                 to="/signup"
                 style={{
                   fontSize: 13,
                   color: "#003366",
-                  fontWeight: 500,
+                  fontWeight: 600,
                   textDecoration: "none",
                   transition: "color 0.2s",
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#0066cc")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#003366")}
               >
-                {t("login.firstTime")}
+                {t("login.firstTime", "Create account")}
               </Link>
             </div>
           </form>
@@ -875,11 +473,217 @@ export function Login() {
             letterSpacing: "0.4px",
             textAlign: "center",
             margin: 0,
-            ...stagger(8),
+            ...stagger(9),
           }}
         >
           Protected by Sabancı University IT Infrastructure
         </p>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          RIGHT PANEL — Cinematic Image Showcase (Now on Right)
+          ══════════════════════════════════════════════════════ */}
+      <div
+        style={{
+          display: "none",
+          width: "58%",
+          flexShrink: 0,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#020817",
+        }}
+        className="lg:!flex lg:!flex-col"
+      >
+        {/* Animated Background Image */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            transformOrigin: "center center",
+            animation: "cinematicZoom 35s alternate infinite ease-in-out",
+          }}
+        />
+
+        {/* Navy Gradient Overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(160deg, rgba(2,8,23,0.9) 0%, rgba(10,22,40,0.65) 50%, rgba(13,31,60,0.9) 100%)",
+          }}
+        />
+
+        {/* Grid overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            backgroundImage: `
+              linear-gradient(rgba(201,168,76,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(201,168,76,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: "50px 50px",
+          }}
+        />
+
+        {/* Floating particles */}
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+          {PARTICLE_DATA.map((p, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: `${p.left}%`,
+                width: `${p.size}px`,
+                height: `${p.size}px`,
+                borderRadius: "50%",
+                background: i % 3 === 0 ? "rgba(201,168,76,0.7)" : "rgba(255,255,255,0.4)",
+                animation: `particleFloat ${p.duration}s linear ${p.delay}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Content */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            padding: "40px 48px",
+          }}
+        >
+          {/* Sabancı badge top-right (mirrored from Signup) */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 16 }}>
+            <div
+              style={{
+                border: "1px solid rgba(201,168,76,0.6)",
+                padding: "8px 14px",
+                borderRadius: 8,
+                animation: "goldPulse 4s ease-in-out infinite",
+                background: "rgba(0,0,0,0.2)",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#c9a84c", letterSpacing: "0.5px" }}>Sabancı</div>
+              <div style={{ fontSize: 10, color: "rgba(201,168,76,0.75)", letterSpacing: "0.3px" }}>Üniversitesi</div>
+            </div>
+          </div>
+
+          {/* Center content */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 0 }}>
+            {/* WELCOME BACK label */}
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: "6px",
+                color: "#c9a84c",
+                fontWeight: 500,
+                marginBottom: 16,
+                textTransform: "uppercase",
+              }}
+            >
+              WELCOME BACK TO
+            </div>
+
+            {/* EDU HOTEL title */}
+            <h1
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(52px, 5vw, 80px)",
+                fontWeight: 700,
+                letterSpacing: "12px",
+                margin: 0,
+                background: "linear-gradient(90deg, #c9a84c 0%, #fff5d6 25%, #c9a84c 50%, #fff8e1 75%, #c9a84c 100%)",
+                backgroundSize: "300% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                animation: "shimmerText 5s ease-in-out infinite",
+                filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))",
+              }}
+            >
+              EDU HOTEL
+            </h1>
+
+            {/* Subtitle */}
+            <p style={{ color: "rgba(255,255,255,0.7)", maxWidth: 400, marginTop: 24, marginBottom: 48, fontSize: 14, lineHeight: 1.6, fontWeight: 300 }}>
+              Access your dashboard to manage reservations, explore room availability, and customize your upcoming stays.
+            </p>
+
+            {/* 3 floating feature cards (Targeted for returning users) */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              {[
+                { icon: <CalendarCheck size={16} color="#c9a84c" strokeWidth={1.8} />, title: "Manage Stays", sub: "View & Edit Bookings", delay: "0s" },
+                { icon: <Zap size={16} color="#c9a84c" strokeWidth={1.8} />, title: "Instant Access", sub: "Fast Check-in Portal", delay: "0.4s" },
+                { icon: <Headphones size={16} color="#c9a84c" strokeWidth={1.8} />, title: "24/7 Support", sub: "Contact Reception", delay: "0.8s" },
+              ].map((card, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    background: "rgba(10,22,40,0.4)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    backdropFilter: "blur(16px)",
+                    WebkitBackdropFilter: "blur(16px)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    animation: `floatCard ${4 + i * 0.8}s ${card.delay} ease-in-out infinite`,
+                    minWidth: 150,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      background: "rgba(201,168,76,0.15)",
+                      border: "1px solid rgba(201,168,76,0.3)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {card.icon}
+                  </div>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.95)", lineHeight: 1.2 }}>
+                      {card.title}
+                    </div>
+                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>
+                      {card.sub}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom copyright */}
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                height: 1,
+                background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)",
+                marginBottom: 16,
+              }}
+            />
+            <p style={{ fontSize: 10, color: "rgba(201,168,76,0.6)", letterSpacing: "0.8px", margin: 0 }}>
+              © 2026 Sabancı University · All Rights Reserved
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

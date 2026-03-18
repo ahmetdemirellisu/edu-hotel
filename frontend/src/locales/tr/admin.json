@@ -115,7 +115,24 @@
 
       "settings": {
         "title": "Sistem Ayarları"
+      },
+      "profile": {
+        "title": "Profilim"
       }
+    },
+
+    "pageDescriptions": {
+      "dashboard": "Otel operasyonlarına genel bakış ve temel metrikler",
+      "reservations": "Rezervasyon taleplerini, onayları ve atamalarını yönetin",
+      "calendar": "Aylık oda doluluk ve rezervasyon takvimi",
+      "rooms": "Oda envanteri, durumu ve kat planı yönetimi",
+      "guests": "Misafir profilleri, geçmiş ve kara liste yönetimi",
+      "payments": "Ödeme doğrulama kuyruğu ve makbuz yönetimi",
+      "blacklist": "Engellenen kullanıcılar ve erişim kısıtlamaları",
+      "reports": "Operasyonel raporlar oluşturun ve indirin",
+      "adminUsers": "Sistem yöneticileri ve rol yönetimi",
+      "settings": "Otel yapılandırması ve sistem tercihleri",
+      "profile": "Hesabınızı ve güvenlik ayarlarınızı yönetin"
     },
 
     "tables": {

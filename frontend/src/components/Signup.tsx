@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Card, CardContent } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
-import { Footer } from "./layout/Footer";
-import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { Eye, EyeOff, BedDouble, MapPin, ShieldCheck } from "lucide-react";
 
 import {
   Select as UISelect,
@@ -22,15 +20,31 @@ const API_URL =
   (import.meta.env.VITE_API_URL as string) || "/ehp/api";
 
 /* ═══════════════════════════════════════════════════════════
-   Inline keyframes (inject once)
+   Pre-calculate particle data
    ═══════════════════════════════════════════════════════════ */
-const _style = document.getElementById("signup-animations") ?? (() => {
+const PARTICLE_DATA = Array.from({ length: 22 }, (_, i) => ({
+  left: ((i * 137.5 + 13) % 100).toFixed(1),
+  size: (1.5 + (i * 0.37 % 2.5)).toFixed(1),
+  duration: (14 + (i * 2.3 % 18)).toFixed(1),
+  delay: (i * 0.6 % 12).toFixed(1),
+}));
+
+/* ═══════════════════════════════════════════════════════════
+   Inject keyframes once
+   ═══════════════════════════════════════════════════════════ */
+void (document.getElementById("signup-animations") ?? (() => {
   const s = document.createElement("style");
   s.id = "signup-animations";
   s.textContent = `
-    @keyframes signupCardIn {
-      from { opacity: 0; transform: translateY(24px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    @keyframes cinematicZoom {
+      0%   { transform: scale(1); }
+      100% { transform: scale(1.15); }
+    }
+    @keyframes signupCardSlide {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
     }
     @keyframes signupFadeUp {
       from { opacity: 0; transform: translateY(14px); }
@@ -40,20 +54,29 @@ const _style = document.getElementById("signup-animations") ?? (() => {
       0%, 100% { background-position: 0% 50%; }
       50%      { background-position: 100% 50%; }
     }
-    @keyframes signupIconPulse {
-      0%, 100% { box-shadow: 0 4px 16px rgba(0,51,102,0.25); }
-      50%      { box-shadow: 0 4px 28px rgba(0,102,204,0.35); }
+    @keyframes particleFloat {
+      0%   { transform: translateY(100vh); opacity: 0; }
+      8%   { opacity: 0.7; }
+      92%  { opacity: 0.5; }
+      100% { transform: translateY(-10vh); opacity: 0; }
     }
-    @keyframes signupFloat {
-      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
-      10%  { opacity: 0.6; }
-      90%  { opacity: 0.6; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(0px); }
+      50%     { transform: translateY(-10px); }
+    }
+    @keyframes goldPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.15); }
+      50%     { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+    }
+    @keyframes shimmerText {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
   `;
   document.head.appendChild(s);
   return s;
-})();
+})());
 
 /* ═══════════════════════════════════════════════════════════
    Component
@@ -161,348 +184,660 @@ export function Signup() {
     }
   };
 
-  /* ── Stagger helper ─────────────────────── */
   const stagger = (i: number): React.CSSProperties => ({
-    animation: `signupFadeUp 0.55s ease-out ${0.3 + i * 0.07}s both`,
+    animation: `signupFadeUp 0.55s ease-out ${0.1 + i * 0.05}s both`,
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#003366]">
-      {/* ═══ HEADER ═══════════════════════════════════════ */}
-      <header
-        className="sticky top-0 z-50 border-b border-white/10"
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        fontFamily: "'Inter', sans-serif",
+        overflow: "hidden",
+      }}
+    >
+      {/* ══════════════════════════════════════════════════════
+          LEFT PANEL — Cinematic Image Showcase
+          ══════════════════════════════════════════════════════ */}
+      <div
         style={{
-          background: "rgba(0,51,102,0.85)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          display: "none",
+          width: "58%",
+          flexShrink: 0,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#020817",
         }}
+        className="lg:!flex lg:!flex-col"
       >
-        <div className="max-w-7xl mx-auto px-6 py-3.5">
-          <div className="flex justify-between items-center">
-            {/* Left — logo group */}
-            <div className="flex items-center gap-4">
-              <div className="border border-[#c9a84c] px-3 py-1.5 rounded">
-                <div className="text-[11px] font-semibold text-[#c9a84c] leading-tight">
-                  Sabancı
-                </div>
-                <div className="text-[10px] text-[#c9a84c]/80 leading-tight">
-                  Üniversitesi
-                </div>
-              </div>
-              <div className="w-px h-8 bg-white/15 hidden sm:block" />
-              <div className="hidden sm:block">
-                <h1
-                  className="text-white text-lg font-semibold tracking-[6px]"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                >
-                  EDU HOTEL
-                </h1>
-              </div>
-            </div>
-
-            {/* Center title (mobile) */}
-            <h1 className="sm:hidden text-white text-base font-bold tracking-[4px]">
-              EDU HOTEL
-            </h1>
-
-            {/* Right — nav */}
-            <div className="flex items-center gap-5">
-              <a
-                href="#"
-                className="text-xs text-white/60 hover:text-white transition-colors hidden md:inline tracking-wide"
-              >
-                {t("header.mySU")}
-              </a>
-              <UISelect value={currentLang} onValueChange={switchLanguage}>
-                <SelectTrigger className="w-[58px] h-8 bg-white/5 border-white/20 text-white text-xs font-semibold hover:bg-white/10 focus:ring-0 rounded-lg">
-                  <SelectValue placeholder={currentLang} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EN">EN</SelectItem>
-                  <SelectItem value="TR">TR</SelectItem>
-                </SelectContent>
-              </UISelect>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* ═══ MAIN ═════════════════════════════════════════ */}
-      <main className="relative flex-1">
-        {/* Background photo */}
+        {/* Animated Background Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
-        />
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0"
           style={{
-            background:
-              "radial-gradient(ellipse at 50% 40%, rgba(0,51,102,0.15) 0%, rgba(0,51,102,0.45) 70%, rgba(0,20,50,0.65) 100%)",
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            transformOrigin: "center center",
+            animation: "cinematicZoom 35s alternate infinite ease-in-out",
           }}
         />
-        {/* Noise texture */}
+
+        {/* Navy Gradient Overlay for text legibility & branding */}
         <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
-            backgroundImage:
-              'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(160deg, rgba(2,8,23,0.9) 0%, rgba(10,22,40,0.65) 50%, rgba(13,31,60,0.9) 100%)",
           }}
         />
+
+        {/* Grid overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            backgroundImage: `
+              linear-gradient(rgba(201,168,76,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(201,168,76,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: "50px 50px",
+          }}
+        />
+
         {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 20 }).map((_, i) => (
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+          {PARTICLE_DATA.map((p, i) => (
             <div
               key={i}
-              className="absolute rounded-full bg-white/20"
               style={{
-                width: 1.5 + Math.random() * 2,
-                height: 1.5 + Math.random() * 2,
-                left: `${Math.random() * 100}%`,
-                animation: `signupFloat ${14 + Math.random() * 18}s linear ${Math.random() * 12}s infinite`,
+                position: "absolute",
+                bottom: 0,
+                left: `${p.left}%`,
+                width: `${p.size}px`,
+                height: `${p.size}px`,
+                borderRadius: "50%",
+                background: i % 3 === 0 ? "rgba(201,168,76,0.7)" : "rgba(255,255,255,0.4)",
+                animation: `particleFloat ${p.duration}s linear ${p.delay}s infinite`,
               }}
             />
           ))}
         </div>
 
-        {/* ── Card ─────────────────────────────── */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-          <div className="flex justify-center">
+        {/* Content */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            padding: "40px 48px",
+          }}
+        >
+          {/* Sabancı badge top-left */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div
-              className="w-full max-w-[420px]"
-              style={{ animation: "signupCardIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.15s both" }}
+              style={{
+                border: "1px solid rgba(201,168,76,0.6)",
+                padding: "8px 14px",
+                borderRadius: 8,
+                animation: "goldPulse 4s ease-in-out infinite",
+                background: "rgba(0,0,0,0.2)",
+                backdropFilter: "blur(4px)",
+              }}
             >
-              <Card
-                className="border-0 rounded-2xl overflow-hidden"
-                style={{
-                  background: "rgba(255,255,255,0.92)",
-                  backdropFilter: "blur(40px)",
-                  WebkitBackdropFilter: "blur(40px)",
-                  boxShadow:
-                    "0 32px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5)",
-                }}
-              >
-                {/* Shimmer strip */}
-                <div
-                  style={{
-                    height: 3,
-                    background: "linear-gradient(90deg, #c9a84c, #0066cc, #c9a84c)",
-                    backgroundSize: "200% 100%",
-                    animation: "signupShimmer 4s ease-in-out infinite",
-                  }}
-                />
-
-                <CardContent className="pt-7 pb-7 px-7 sm:px-8">
-                  {/* Icon + title */}
-                  <div className="text-center mb-6" style={stagger(0)}>
-                    <div
-                      className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center"
-                      style={{
-                        background: "linear-gradient(135deg, #003366 0%, #004080 100%)",
-                        animation: "signupIconPulse 3s ease-in-out infinite",
-                      }}
-                    >
-                      <UserPlus className="w-5 h-5 text-[#c9a84c]" strokeWidth={1.8} />
-                    </div>
-                    <h2 className="text-xl font-semibold text-[#003366] tracking-tight">
-                      {t("signup.createAccount")}
-                    </h2>
-                    <p className="text-[13px] text-gray-400 mt-1">
-                      {t("signup.signupWith")}
-                    </p>
-                  </div>
-
-                  <form className="space-y-4" onSubmit={handleSubmit}>
-                    {/* Full name */}
-                    <div className="space-y-1.5" style={stagger(1)}>
-                      <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {t("signup.fullNameLabel")}
-                      </Label>
-                      <Input
-                        type="text"
-                        placeholder={t("signup.fullNamePlaceholder")}
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
-                        className="h-11 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm placeholder:text-gray-400
-                                   transition-all duration-200 focus:bg-white focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20"
-                      />
-                    </div>
-
-                    {/* Signup method */}
-                    <div className="space-y-1.5" style={stagger(2)}>
-                      <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {t("signup.signupWith")}
-                      </Label>
-                      <UISelect
-                        value={signupMethod}
-                        onValueChange={(v) => setSignupMethod(v as "email" | "phone")}
-                      >
-                        <SelectTrigger className="h-11 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc]/40 transition-all">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="email">{t("signup.email")}</SelectItem>
-                          <SelectItem value="phone">{t("signup.phone")}</SelectItem>
-                        </SelectContent>
-                      </UISelect>
-                    </div>
-
-                    {/* Contact (email / phone) */}
-                    <div className="space-y-1.5" style={stagger(3)}>
-                      <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {signupMethod === "email"
-                          ? t("signup.emailAddress")
-                          : t("signup.phoneNumber")}
-                      </Label>
-                      <Input
-                        type={signupMethod === "email" ? "email" : "tel"}
-                        placeholder={
-                          signupMethod === "email"
-                            ? t("signup.enterEmail")
-                            : t("signup.enterPhone")
-                        }
-                        value={contact}
-                        onChange={(e) => setContact(e.target.value)}
-                        required
-                        className="h-11 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm placeholder:text-gray-400
-                                   transition-all duration-200 focus:bg-white focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20"
-                      />
-                    </div>
-
-                    {/* Password */}
-                    <div className="space-y-1.5" style={stagger(4)}>
-                      <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {t("signup.passwordLabel")}
-                      </Label>
-                      <div className="relative flex items-center">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder={t("signup.passwordPlaceholder")}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          className="h-11 pr-11 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm placeholder:text-gray-400
-                                     transition-all duration-200 focus:bg-white focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-0 h-11 w-11 flex items-center justify-center text-gray-400 hover:text-[#003366] transition-colors"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Confirm password */}
-                    <div className="space-y-1.5" style={stagger(5)}>
-                      <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {t("signup.confirmPasswordLabel")}
-                      </Label>
-                      <div className="relative flex items-center">
-                        <Input
-                          type={showConfirm ? "text" : "password"}
-                          placeholder={t("signup.confirmPasswordPlaceholder")}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          required
-                          className="h-11 pr-11 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm placeholder:text-gray-400
-                                     transition-all duration-200 focus:bg-white focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirm(!showConfirm)}
-                          className="absolute right-0 h-11 w-11 flex items-center justify-center text-gray-400 hover:text-[#003366] transition-colors"
-                        >
-                          {showConfirm ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Messages */}
-                    {error && (
-                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {error}
-                      </div>
-                    )}
-                    {success && (
-                      <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                        {success}
-                      </div>
-                    )}
-
-                    {/* KVKK Consent */}
-                    <div className="space-y-2 pt-1" style={stagger(6)}>
-                      <div className="flex items-start gap-3 p-3.5 rounded-xl bg-blue-50/60 border border-blue-100">
-                        <Checkbox
-                          id="kvkk"
-                          checked={kvkkChecked}
-                          onCheckedChange={(v) => setKvkkChecked(v as boolean)}
-                          className="mt-0.5"
-                        />
-                        <Label htmlFor="kvkk" className="text-[12px] text-gray-600 leading-relaxed cursor-pointer">
-                          {t("signup.kvkk", "6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında kişisel verilerimin yalnızca konaklama ve rezervasyon hizmetleri amacıyla EDU Hotel tarafından işlenmesine onay veriyorum. Verilerim üçüncü şahıslarla paylaşılmayacak ve mevzuata aykırı kullanılmayacaktır.")}
-                          <span className="text-red-400 ml-0.5">*</span>
-                        </Label>
-                      </div>
-                    </div>
-
-                    {/* Submit */}
-                    <div style={stagger(7)}>
-                      <Button
-                        type="submit"
-                        disabled={loading || !kvkkChecked}
-                        className="w-full h-11 rounded-xl text-white text-sm font-semibold relative overflow-hidden group
-                                   transition-all duration-300 hover:shadow-lg active:scale-[0.99] disabled:opacity-60"
-                        style={{
-                          background: "linear-gradient(135deg, #003366 0%, #004080 50%, #003366 100%)",
-                          backgroundSize: "200% 200%",
-                        }}
-                      >
-                        {/* Shimmer sweep on hover */}
-                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                        <span className="relative">
-                          {loading ? t("signup.creatingAccount") : t("signup.createAccount")}
-                        </span>
-                      </Button>
-                    </div>
-
-                    {/* Link to login */}
-                    <div className="text-center pt-1" style={stagger(8)}>
-                      <Link
-                        to="/"
-                        className="text-[13px] text-[#003366] hover:text-[#0066cc] transition-colors font-medium"
-                      >
-                        {t("signup.alreadyHaveAccount")}
-                      </Link>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-
-              {/* Security note */}
-              <p
-                className="text-center text-[10px] text-white/30 mt-5 tracking-wide"
-                style={stagger(8)}
-              >
-                Protected by Sabancı University IT Infrastructure
-              </p>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#c9a84c", letterSpacing: "0.5px" }}>Sabancı</div>
+              <div style={{ fontSize: 10, color: "rgba(201,168,76,0.75)", letterSpacing: "0.3px" }}>Üniversitesi</div>
             </div>
           </div>
-        </div>
-      </main>
 
-      <Footer />
+          {/* Center content */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 0 }}>
+            {/* JOIN COMMUNITY label */}
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: "6px",
+                color: "#c9a84c",
+                fontWeight: 500,
+                marginBottom: 16,
+                textTransform: "uppercase",
+              }}
+            >
+              JOIN OUR COMMUNITY
+            </div>
+
+            {/* EDU HOTEL title */}
+            <h1
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(52px, 5vw, 80px)",
+                fontWeight: 700,
+                letterSpacing: "12px",
+                margin: 0,
+                background: "linear-gradient(90deg, #c9a84c 0%, #fff5d6 25%, #c9a84c 50%, #fff8e1 75%, #c9a84c 100%)",
+                backgroundSize: "300% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                animation: "shimmerText 5s ease-in-out infinite",
+                filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))",
+              }}
+            >
+              EDU HOTEL
+            </h1>
+
+            {/* Subtitle */}
+            <p style={{ color: "rgba(255,255,255,0.7)", maxWidth: 400, marginTop: 24, marginBottom: 48, fontSize: 14, lineHeight: 1.6, fontWeight: 300 }}>
+              Experience academic excellence and unparalleled comfort right in the heart of the Sabancı University campus.
+            </p>
+
+            {/* 3 floating feature cards */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              {[
+                { icon: <BedDouble size={16} color="#c9a84c" strokeWidth={1.8} />, title: "Premium Stay", sub: "Modern & Comfortable", delay: "0s" },
+                { icon: <MapPin size={16} color="#c9a84c" strokeWidth={1.8} />, title: "Campus Core", sub: "Steps from faculties", delay: "0.4s" },
+                { icon: <ShieldCheck size={16} color="#c9a84c" strokeWidth={1.8} />, title: "Secure Access", sub: "University Protected", delay: "0.8s" },
+              ].map((card, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    background: "rgba(10,22,40,0.4)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    backdropFilter: "blur(16px)",
+                    WebkitBackdropFilter: "blur(16px)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    animation: `floatCard ${4 + i * 0.8}s ${card.delay} ease-in-out infinite`,
+                    minWidth: 150,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      background: "rgba(201,168,76,0.15)",
+                      border: "1px solid rgba(201,168,76,0.3)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {card.icon}
+                  </div>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.95)", lineHeight: 1.2 }}>
+                      {card.title}
+                    </div>
+                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>
+                      {card.sub}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom copyright */}
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                height: 1,
+                background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)",
+                marginBottom: 16,
+              }}
+            />
+            <p style={{ fontSize: 10, color: "rgba(201,168,76,0.6)", letterSpacing: "0.8px", margin: 0 }}>
+              © 2026 Sabancı University · All Rights Reserved
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          RIGHT PANEL — Signup Form
+          ══════════════════════════════════════════════════════ */}
+      <div
+        style={{
+          flex: 1,
+          background: "#ffffff",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "32px 24px",
+          position: "relative",
+          animation: "signupCardSlide 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both",
+          minHeight: "100vh",
+        }}
+      >
+        {/* Top-right: language selector + brand */}
+        <div
+          style={{
+            position: "absolute",
+            top: 24,
+            right: 28,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "4px",
+              color: "#94a3b8",
+              display: "none",
+            }}
+            className="sm:!inline"
+          >
+            EDU HOTEL
+          </span>
+          <div
+            style={{
+              display: "flex",
+              gap: 2,
+              background: "#f1f5f9",
+              borderRadius: 8,
+              padding: 3,
+            }}
+          >
+            {["EN", "TR"].map((lang) => (
+              <button
+                key={lang}
+                onClick={() => switchLanguage(lang)}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 6,
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.5px",
+                  transition: "all 0.2s ease",
+                  background: currentLang === lang ? "#003366" : "transparent",
+                  color: currentLang === lang ? "#ffffff" : "#64748b",
+                }}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Form container */}
+        <div style={{ width: "100%", maxWidth: 400 }}>
+          {/* Logo mark */}
+          <div style={stagger(0)}>
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #003366 0%, #0a1f4e 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 20,
+                boxShadow: "0 8px 24px rgba(0,51,102,0.25)",
+              }}
+            >
+              <span
+                style={{
+                  color: "#c9a84c",
+                  fontSize: 22,
+                  fontWeight: 700,
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  lineHeight: 1,
+                }}
+              >
+                E
+              </span>
+            </div>
+          </div>
+
+          {/* Heading */}
+          <div style={stagger(1)}>
+            <h1
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#111827",
+                margin: "0 0 6px",
+                letterSpacing: "-0.5px",
+              }}
+            >
+              Create an account
+            </h1>
+            <p style={{ fontSize: 14, color: "#9ca3af", margin: "0 0 20px" }}>
+              Sign up to get started with EDU Hotel
+            </p>
+          </div>
+
+          {/* Separator */}
+          <div
+            style={{
+              height: 2,
+              background: "linear-gradient(90deg, #c9a84c, #0066cc, #c9a84c)",
+              backgroundSize: "200% 100%",
+              animation: "signupShimmer 4s ease-in-out infinite",
+              borderRadius: 2,
+              marginBottom: 24,
+              ...stagger(2),
+            }}
+          />
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            
+            {/* Full Name */}
+            <div style={stagger(3)}>
+              <Label
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "#6b7280",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.8px",
+                  marginBottom: 6,
+                }}
+              >
+                {t("signup.fullNameLabel", "Full Name")}
+              </Label>
+              <Input
+                type="text"
+                placeholder={t("signup.fullNamePlaceholder", "Enter your full name")}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="h-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+              />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
+              {/* Signup method */}
+              <div style={stagger(4)}>
+                <Label
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                    marginBottom: 6,
+                  }}
+                >
+                  {t("signup.signupWith", "Method")}
+                </Label>
+                <UISelect
+                  value={signupMethod}
+                  onValueChange={(v) => setSignupMethod(v as "email" | "phone")}
+                >
+                  <SelectTrigger className="h-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/40 transition-all">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">{t("signup.email", "Email")}</SelectItem>
+                    <SelectItem value="phone">{t("signup.phone", "Phone")}</SelectItem>
+                  </SelectContent>
+                </UISelect>
+              </div>
+
+              {/* Identifier */}
+              <div style={stagger(5)}>
+                <Label
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                    marginBottom: 6,
+                  }}
+                >
+                  {signupMethod === "email" ? t("signup.emailAddress", "Email Address") : t("signup.phoneNumber", "Phone Number")}
+                </Label>
+                <Input
+                  type={signupMethod === "email" ? "email" : "tel"}
+                  placeholder={signupMethod === "email" ? t("signup.enterEmail", "Enter your email") : t("signup.enterPhone", "Enter your phone")}
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                  required
+                  className="h-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              {/* Password */}
+              <div style={stagger(6)}>
+                <Label
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                    marginBottom: 6,
+                  }}
+                >
+                  {t("signup.passwordLabel", "Password")}
+                </Label>
+                <div style={{ position: "relative" }}>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="h-11 pr-9 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                      height: 44,
+                      width: 36,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#9ca3af",
+                      transition: "color 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#003366")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm password */}
+              <div style={stagger(7)}>
+                <Label
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#6b7280",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                    marginBottom: 6,
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  {t("signup.confirmPasswordLabel", "Confirm Pw")}
+                </Label>
+                <div style={{ position: "relative" }}>
+                  <Input
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="h-11 pr-9 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm placeholder:text-gray-400 transition-all duration-200 focus:bg-white focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                      height: 44,
+                      width: 36,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#9ca3af",
+                      transition: "color 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#003366")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+                  >
+                    {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Error / Success Messages */}
+            {error && (
+              <div
+                style={{
+                  borderRadius: 10,
+                  border: "1px solid #fecaca",
+                  background: "#fef2f2",
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  color: "#b91c1c",
+                  ...stagger(8),
+                }}
+              >
+                {error}
+              </div>
+            )}
+            {success && (
+              <div
+                style={{
+                  borderRadius: 10,
+                  border: "1px solid #bbf7d0",
+                  background: "#f0fdf4",
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  color: "#15803d",
+                  ...stagger(8),
+                }}
+              >
+                {success}
+              </div>
+            )}
+
+            {/* KVKK Consent */}
+            <div style={stagger(9)} className="pt-1">
+              <div className="flex items-start gap-3 p-3.5 rounded-xl bg-blue-50/50 border border-blue-100/60 transition-colors hover:bg-blue-50">
+                <Checkbox
+                  id="kvkk"
+                  checked={kvkkChecked}
+                  onCheckedChange={(v) => setKvkkChecked(v as boolean)}
+                  className="mt-0.5 border-blue-300 data-[state=checked]:bg-[#003366] data-[state=checked]:border-[#003366]"
+                />
+                <Label htmlFor="kvkk" className="text-[10px] text-gray-500 leading-relaxed cursor-pointer font-medium">
+                  {t("signup.kvkk", "I consent to the processing of my personal data for accommodation services according to KVKK Law No. 6698. My data will not be shared with 3rd parties.")}
+                  <span className="text-red-400 ml-0.5">*</span>
+                </Label>
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <div style={stagger(10)} className="pt-1">
+              <Button
+                type="submit"
+                disabled={loading || !kvkkChecked}
+                className="w-full h-11 rounded-xl text-white text-sm font-semibold relative overflow-hidden group transition-all duration-300 hover:shadow-lg active:scale-[0.99] disabled:opacity-60"
+                style={{
+                  background: "linear-gradient(135deg, #003366 0%, #004080 50%, #003366 100%)",
+                  backgroundSize: "200% 200%",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)",
+                    transform: "translateX(-100%)",
+                    transition: "transform 0.7s ease",
+                  }}
+                  className="group-hover:!translate-x-full"
+                />
+                <span style={{ position: "relative" }}>
+                  {loading ? t("signup.creatingAccount", "Creating Account...") : t("signup.createAccount", "Create Account")}
+                </span>
+              </Button>
+            </div>
+
+            {/* Link to login */}
+            <div style={{ textAlign: "center", marginTop: 4, ...stagger(11) }}>
+              <span style={{ fontSize: 13, color: "#9ca3af" }}>
+                Already have an account?{" "}
+              </span>
+              <Link
+                to="/"
+                style={{
+                  fontSize: 13,
+                  color: "#003366",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#0066cc")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#003366")}
+              >
+                {t("signup.loginLink", "Log in")}
+              </Link>
+            </div>
+          </form>
+        </div>
+
+        {/* Bottom security note */}
+        <p
+          style={{
+            position: "absolute",
+            bottom: 20,
+            fontSize: 10,
+            color: "#d1d5db",
+            letterSpacing: "0.4px",
+            textAlign: "center",
+            margin: 0,
+            ...stagger(12),
+          }}
+        >
+          Protected by Sabancı University IT Infrastructure
+        </p>
+      </div>
     </div>
   );
 }

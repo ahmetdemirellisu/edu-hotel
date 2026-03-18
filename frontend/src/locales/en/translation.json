@@ -26,6 +26,13 @@
     "loading": "Loading..."
   },
 
+  "notificationBell": {
+    "title": "Notifications",
+    "new": "new",
+    "empty": "No notifications",
+    "viewAll": "View All Notifications"
+  },
+
   "login": {
     "loginWith": "Login with",
     "email": "Email",
@@ -365,6 +372,11 @@
       "corporate": "Corporate (SU)",
       "education": "Education"
     },
+    "steps": {
+      "stayDetails": "Stay Details",
+      "guestInfo": "Guest Info",
+      "billingSubmit": "Billing & Submit"
+    },
     "roomAssignmentInfo": "Rooms are assigned by the EDU reception after approval. Users cannot select rooms.",
     "afterSubmitInfo": "After submission, your request will be reviewed by the EDU team. You will receive an email or push notification after review.",
     "afterSubmitPaymentNote": "Payment will be requested only after approval if applicable.",
@@ -395,6 +407,18 @@
 
   "account": {
     "title": "My Account",
+    "passwordStrength": {
+      "tooShort": "Too short",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "userType": {
+      "student": "Student",
+      "staff": "Staff",
+      "admin": "Admin"
+    },
     "subtitle": "Manage your account settings and personal information",
     "profile": {
       "title": "Profile Information",
@@ -486,6 +510,34 @@
       "noReservation": "No active reservation found."
     },
     "success": "Payment receipt submitted successfully!"
+  },
+
+  "notifications": {
+    "pageTitle": "Notifications",
+    "unreadCount_one": "{{count}} unread notification",
+    "unreadCount_other": "{{count}} unread notifications",
+    "newBadgeLabel": "New",
+    "viewReservation": "View Reservation",
+    "showingCount_one": "Showing {{count}} notification",
+    "showingCount_other": "Showing {{count}} notifications",
+    "filter": {
+      "all": "All",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "warnings": "Warnings",
+      "info": "Info",
+      "reminders": "Reminders"
+    },
+    "readFilter": {
+      "all": "All",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "empty": {
+      "title": "No notifications yet",
+      "subtitle": "Reservation updates and alerts will appear here when available.",
+      "backToHome": "Back to Home"
+    }
   },
 
   "reservations": {

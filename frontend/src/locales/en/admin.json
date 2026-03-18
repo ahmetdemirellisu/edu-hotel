@@ -115,7 +115,24 @@
 
       "settings": {
         "title": "System Settings"
+      },
+      "profile": {
+        "title": "My Profile"
       }
+    },
+
+    "pageDescriptions": {
+      "dashboard": "Overview of hotel operations and key metrics",
+      "reservations": "Manage reservation requests, approvals, and assignments",
+      "calendar": "Monthly room occupancy and booking timeline",
+      "rooms": "Room inventory, status, and floor plan management",
+      "guests": "Guest profiles, history, and blacklist management",
+      "payments": "Payment verification queue and receipt management",
+      "blacklist": "Blocked users and access restrictions",
+      "reports": "Generate and download operational reports",
+      "adminUsers": "System administrators and role management",
+      "settings": "Hotel configuration and system preferences",
+      "profile": "Manage your account and security settings"
     },
 
     "tables": {

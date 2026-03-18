@@ -91,7 +91,7 @@ function timeAgo(timestamp: string): string {
 }
 
 export function NotificationsPage() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const userId = Number(localStorage.getItem("userId"));
   const userName = localStorage.getItem("userName") || "User";
   const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
@@ -134,18 +134,18 @@ export function NotificationsPage() {
   });
 
   const filterTabs = [
-    { key: "all",      label: isTR ? "Tümü"      : "All" },
-    { key: "success",  label: isTR ? "Onaylanan"  : "Approved" },
-    { key: "error",    label: isTR ? "Reddedilen" : "Rejected" },
-    { key: "warning",  label: isTR ? "Uyarılar"   : "Warnings" },
-    { key: "info",     label: isTR ? "Bilgi"       : "Info" },
-    { key: "reminder", label: isTR ? "Hatırlatma" : "Reminders" },
+    { key: "all",      label: t("notifications.filter.all",      "All") },
+    { key: "success",  label: t("notifications.filter.approved",  "Approved") },
+    { key: "error",    label: t("notifications.filter.rejected",  "Rejected") },
+    { key: "warning",  label: t("notifications.filter.warnings",  "Warnings") },
+    { key: "info",     label: t("notifications.filter.info",      "Info") },
+    { key: "reminder", label: t("notifications.filter.reminders", "Reminders") },
   ];
 
   const readFilterTabs: Array<{ key: "all" | "unread" | "read"; label: string }> = [
-    { key: "all",    label: isTR ? "Tümü"        : "All" },
-    { key: "unread", label: isTR ? "Okunmamış"   : "Unread" },
-    { key: "read",   label: isTR ? "Okunmuş"     : "Read" },
+    { key: "all",    label: t("notifications.readFilter.all",    "All") },
+    { key: "unread", label: t("notifications.readFilter.unread", "Unread") },
+    { key: "read",   label: t("notifications.readFilter.read",   "Read") },
   ];
 
   return (
@@ -180,7 +180,7 @@ export function NotificationsPage() {
                 className="hidden md:flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors tracking-wide"
               >
                 <LayoutGrid className="h-3.5 w-3.5" />
-                {isTR ? "Ana Sayfa" : "Main Page"}
+                {t("header.mainPage", "Main Page")}
               </Link>
               <UISelect value={currentLang} onValueChange={switchLanguage}>
                 <SelectTrigger className="w-[58px] h-8 bg-white/5 border-white/20 text-white text-xs font-semibold hover:bg-white/10 focus:ring-0 rounded-lg">
@@ -270,13 +270,11 @@ export function NotificationsPage() {
                   lineHeight: 1.1,
                 }}
               >
-                {isTR ? "Bildirimler" : "Notifications"}
+                {t("notifications.pageTitle", "Notifications")}
               </h1>
             </div>
             <p className="text-white/40 text-sm ml-16">
-              {isTR
-                ? `${unreadCount} okunmamış bildirim`
-                : `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}`}
+              {t("notifications.unreadCount", { count: unreadCount, defaultValue: `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` })}
             </p>
           </div>
 
@@ -296,7 +294,7 @@ export function NotificationsPage() {
                 {unreadCount}
               </span>
               <span className="text-[#c9a84c]/60 text-[9px] font-bold uppercase tracking-widest mt-0.5">
-                {isTR ? "Yeni" : "New"}
+                {t("notifications.newBadgeLabel", "New")}
               </span>
             </div>
           )}
@@ -391,7 +389,7 @@ export function NotificationsPage() {
               style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.04)" }}
             >
               <div className="w-10 h-10 border-2 border-[#003366]/20 border-t-[#003366] rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm text-slate-400 font-medium">{isTR ? "Yükleniyor..." : "Loading..."}</p>
+              <p className="text-sm text-slate-400 font-medium">{t("common.loading", "Loading...")}</p>
             </div>
           ) : filtered.length === 0 ? (
             <motion.div
@@ -413,19 +411,17 @@ export function NotificationsPage() {
                 <div className="absolute -inset-6 rounded-[36px] border border-slate-100/60" />
               </div>
               <p className="text-lg font-bold text-slate-600 mb-2">
-                {isTR ? "Bildirim yok" : "No notifications yet"}
+                {t("notifications.empty.title", "No notifications yet")}
               </p>
               <p className="text-sm text-slate-400 max-w-xs mx-auto leading-relaxed">
-                {isTR
-                  ? "Rezervasyon güncellemeleri ve bilgiler burada görünecek."
-                  : "Reservation updates and alerts will appear here when available."}
+                {t("notifications.empty.subtitle", "Reservation updates and alerts will appear here when available.")}
               </p>
               <Link
                 to="/main"
                 className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:shadow-lg"
                 style={{ background: "linear-gradient(135deg, #003366 0%, #0052a3 100%)" }}
               >
-                {isTR ? "Ana Sayfaya Dön" : "Back to Home"}
+                {t("notifications.empty.backToHome", "Back to Home")}
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </motion.div>
@@ -509,7 +505,7 @@ export function NotificationsPage() {
                           className="inline-flex items-center gap-1 text-[12px] font-bold transition-all duration-200 hover:gap-1.5"
                           style={{ color: cfg.color }}
                         >
-                          {isTR ? "Rezervasyonu Görüntüle" : "View Reservation"}
+                          {t("notifications.viewReservation", "View Reservation")}
                           <ChevronRight className="h-3.5 w-3.5" />
                         </Link>
                       </div>
@@ -529,9 +525,7 @@ export function NotificationsPage() {
             transition={{ delay: 0.3 }}
             className="text-center text-[12px] text-slate-400 mt-8 font-medium"
           >
-            {isTR
-              ? `${filtered.length} bildirim gösteriliyor`
-              : `Showing ${filtered.length} notification${filtered.length !== 1 ? "s" : ""}`}
+            {t("notifications.showingCount", { count: filtered.length, defaultValue: `Showing ${filtered.length} notification${filtered.length !== 1 ? "s" : ""}` })}
           </motion.p>
         )}
       </main>

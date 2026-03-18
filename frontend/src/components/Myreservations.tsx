@@ -117,7 +117,7 @@ const nightsBetween = (checkIn: string, checkOut: string) => {
 type StatusKey = string;
 
 const statusConfig: Record<StatusKey, {
-  label: string;
+  labelKey: string;
   color: string;
   bg: string;
   ring: string;
@@ -125,24 +125,25 @@ const statusConfig: Record<StatusKey, {
   dotColor: string;
   icon: typeof CheckCircle2;
 }> = {
-  PENDING:          { label: "Pending",          color: "text-amber-700",   bg: "bg-amber-50",   ring: "ring-amber-200",   accentBar: "#f59e0b", dotColor: "#f59e0b", icon: Clock },
-  APPROVED:         { label: "Approved",          color: "text-emerald-700", bg: "bg-emerald-50", ring: "ring-emerald-200", accentBar: "#10b981", dotColor: "#10b981", icon: CheckCircle2 },
-  REJECTED:         { label: "Rejected",          color: "text-red-700",     bg: "bg-red-50",     ring: "ring-red-200",     accentBar: "#ef4444", dotColor: "#ef4444", icon: XCircle },
-  CANCELLED:        { label: "Cancelled",         color: "text-gray-600",    bg: "bg-gray-50",    ring: "ring-gray-200",    accentBar: "#9ca3af", dotColor: "#9ca3af", icon: XCircle },
-  REFUND_REQUESTED: { label: "Refund Requested",  color: "text-orange-700",  bg: "bg-orange-50",  ring: "ring-orange-200",  accentBar: "#f97316", dotColor: "#f97316", icon: AlertCircle },
-  REFUNDED:         { label: "Refunded",          color: "text-indigo-700",  bg: "bg-indigo-50",  ring: "ring-indigo-200",  accentBar: "#6366f1", dotColor: "#6366f1", icon: CheckCircle2 },
+  PENDING:          { labelKey: "reservations.status.pending",          color: "text-amber-700",   bg: "bg-amber-50",   ring: "ring-amber-200",   accentBar: "#f59e0b", dotColor: "#f59e0b", icon: Clock },
+  APPROVED:         { labelKey: "reservations.status.approved",         color: "text-emerald-700", bg: "bg-emerald-50", ring: "ring-emerald-200", accentBar: "#10b981", dotColor: "#10b981", icon: CheckCircle2 },
+  REJECTED:         { labelKey: "reservations.status.rejected",         color: "text-red-700",     bg: "bg-red-50",     ring: "ring-red-200",     accentBar: "#ef4444", dotColor: "#ef4444", icon: XCircle },
+  CANCELLED:        { labelKey: "reservations.status.cancelled",        color: "text-gray-600",    bg: "bg-gray-50",    ring: "ring-gray-200",    accentBar: "#9ca3af", dotColor: "#9ca3af", icon: XCircle },
+  REFUND_REQUESTED: { labelKey: "reservations.status.refundRequested",  color: "text-orange-700",  bg: "bg-orange-50",  ring: "ring-orange-200",  accentBar: "#f97316", dotColor: "#f97316", icon: AlertCircle },
+  REFUNDED:         { labelKey: "reservations.status.refunded",         color: "text-indigo-700",  bg: "bg-indigo-50",  ring: "ring-indigo-200",  accentBar: "#6366f1", dotColor: "#6366f1", icon: CheckCircle2 },
 };
 
 const paymentStatusConfig: Record<string, {
-  label: string; color: string; bg: string; ring: string; icon: typeof CheckCircle2;
+  labelKey: string; color: string; bg: string; ring: string; icon: typeof CheckCircle2;
 }> = {
-  PENDING_VERIFICATION: { label: "Payment Pending",    color: "text-amber-700",   bg: "bg-amber-50",   ring: "ring-amber-200",   icon: Clock },
-  APPROVED:             { label: "Payment Confirmed",  color: "text-emerald-700", bg: "bg-emerald-50", ring: "ring-emerald-200", icon: CheckCircle2 },
-  REJECTED:             { label: "Payment Rejected",   color: "text-red-700",     bg: "bg-red-50",     ring: "ring-red-200",     icon: XCircle },
+  PENDING_VERIFICATION: { labelKey: "reservations.paymentStatus.pending",    color: "text-amber-700",   bg: "bg-amber-50",   ring: "ring-amber-200",   icon: Clock },
+  APPROVED:             { labelKey: "reservations.paymentStatus.confirmed",  color: "text-emerald-700", bg: "bg-emerald-50", ring: "ring-emerald-200", icon: CheckCircle2 },
+  REJECTED:             { labelKey: "reservations.paymentStatus.rejected",   color: "text-red-700",     bg: "bg-red-50",     ring: "ring-red-200",     icon: XCircle },
 };
 
 /* ── Status badge ────────────────────────────────────────── */
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const cfg = statusConfig[status] || statusConfig.PENDING;
   const Icon = cfg.icon;
   return (
@@ -159,13 +160,14 @@ function StatusBadge({ status }: { status: string }) {
         }}
       />
       <Icon className="h-3 w-3" />
-      {cfg.label}
+      {t(cfg.labelKey, status)}
     </span>
   );
 }
 
 /* ── Payment badge ───────────────────────────────────────── */
 function PaymentBadge({ paymentStatus }: { paymentStatus?: string }) {
+  const { t } = useTranslation();
   if (!paymentStatus || paymentStatus === "NONE") return null;
   const cfg = paymentStatusConfig[paymentStatus];
   if (!cfg) return null;
@@ -173,7 +175,7 @@ function PaymentBadge({ paymentStatus }: { paymentStatus?: string }) {
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide ${cfg.bg} ${cfg.color} ring-1 ${cfg.ring}`}>
       <CreditCard className="h-3 w-3" />
-      {cfg.label}
+      {t(cfg.labelKey, paymentStatus)}
     </span>
   );
 }
