@@ -23,7 +23,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 function RequireAdminAuth({ children }: { children: ReactNode }) {
-  if (sessionStorage.getItem("adminSession") !== "1") return <Navigate to="/admin-login" replace />;
+  if (!sessionStorage.getItem("adminToken")) return <Navigate to="/admin-login" replace />;
   return children;
 }
 

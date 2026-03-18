@@ -111,4 +111,37 @@ router.post("/login", async (req, res) => {
     }
 });
 
+// POST /auth/admin-login
+router.post("/admin-login", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: "Username and password are required." });
+        }
+
+        const adminUser = process.env.ADMIN_USER;
+        const adminPass = process.env.ADMIN_PASS;
+
+        if (!adminUser || !adminPass) {
+            console.error("ADMIN_USER or ADMIN_PASS env vars are not set.");
+            return res.status(500).json({ error: "Admin authentication is not configured." });
+        }
+
+        if (username !== adminUser || password !== adminPass) {
+            return res.status(401).json({ error: "Invalid admin credentials." });
+        }
+
+        const token = jwt.sign(
+            { role: "admin", username },
+            process.env.JWT_SECRET,
+            { expiresIn: "8h" }
+        );
+
+        res.json({ token });
+    } catch (err) {
+        console.error("Admin login error:", err);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
 module.exports = router;

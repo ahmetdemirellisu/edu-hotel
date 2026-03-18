@@ -8,6 +8,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 const checkBlacklist = require("../middleware/checkBlacklist");
+const requireAdmin = require("../middleware/requireAdmin");
 
 /**
  * Helpers
@@ -292,7 +293,7 @@ router.get("/user/:userId", async (req, res) => {
 /**
  * GET /reservations/admin
  */
-router.get("/admin", async (req, res) => {
+router.get("/admin", requireAdmin, async (req, res) => {
     try {
         const { status, guestType } = req.query;
         const where = {};
@@ -315,7 +316,7 @@ router.get("/admin", async (req, res) => {
 /**
  * PATCH /reservations/admin/:id/approve
  */
-router.patch("/admin/:id/approve", async (req, res) => {
+router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const { price } = req.body;
@@ -415,7 +416,7 @@ ${heading('Sıradaki Adım')}
 /**
  * PATCH /reservations/admin/:id/reject
  */
-router.patch("/admin/:id/reject", async (req, res) => {
+router.patch("/admin/:id/reject", requireAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const { note } = req.body;

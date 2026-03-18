@@ -75,6 +75,8 @@ jobs:
           EMAIL_HOST=${{ secrets.EMAIL_HOST }}
           SMTP_PORT=${{ secrets.EMAIL_PORT }}
           SMTP_HOST=${{ secrets.EMAIL_HOST }}
+          ADMIN_USER=${{ secrets.ADMIN_USER }}
+          ADMIN_PASS=${{ secrets.ADMIN_PASS }}
           EOF
 
           cd "$DEPLOY_DIR"

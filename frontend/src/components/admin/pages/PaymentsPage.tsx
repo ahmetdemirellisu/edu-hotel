@@ -1,6 +1,7 @@
 // src/components/admin/pages/PaymentsPage.tsx
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { adminFetch } from "../../../api/adminFetch";
 import {
   Clock,
   Eye,
@@ -23,7 +24,7 @@ export function PaymentsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/ehp/api/admin/pending-payments");
+      const response = await adminFetch("/ehp/api/admin/pending-payments");
       if (!response.ok) {
         const d = await response.json().catch(() => ({}));
         throw new Error(d.error || `Server error ${response.status}`);
@@ -41,7 +42,7 @@ export function PaymentsPage() {
   const handleApprove = async (id: number) => {
     if (!window.confirm(t("payments.confirmApproval", "Confirm payment approval?"))) return;
     try {
-      const res = await fetch(`/ehp/api/admin/approve-payment/${id}`, { method: "POST" });
+      const res = await adminFetch(`/ehp/api/admin/approve-payment/${id}`, { method: "POST" });
       if (res.ok) setPayments(prev => prev.filter(p => p.id !== id));
       else { const d = await res.json().catch(() => ({})); alert(d.error || "Failed to approve."); }
     } catch (err) { console.error("Approval error:", err); }
@@ -50,7 +51,7 @@ export function PaymentsPage() {
   const handleReject = async (id: number) => {
     const reason = window.prompt(t("payments.rejectReasonPrompt", "Enter rejection reason (optional):")) || undefined;
     try {
-      const res = await fetch(`/ehp/api/admin/reject-payment/${id}`, {
+      const res = await adminFetch(`/ehp/api/admin/reject-payment/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),

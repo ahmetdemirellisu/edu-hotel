@@ -1,5 +1,6 @@
 // src/api/reservations.ts
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
+import { adminFetch } from "./adminFetch";
 
 export type AccommodationType = "PERSONAL" | "CORPORATE" | "EDUCATION";
 export type InvoiceType = "INDIVIDUAL" | "CORPORATE";
@@ -159,7 +160,7 @@ export async function getAdminReservations(params?: {
       ? `${API_BASE_URL}/reservations/admin?${q.toString()}`
       : `${API_BASE_URL}/reservations/admin`;
 
-  const res = await fetch(url);
+  const res = await adminFetch(url);
 
   if (!res.ok) {
     throw new Error(await parseError(res, "Failed to fetch admin reservations"));
@@ -172,11 +173,9 @@ export async function approveReservation(
   id: number,
   price?: number
 ): Promise<Reservation> {
-  const res = await fetch(`${API_BASE_URL}/reservations/admin/${id}/approve`, {
+  const res = await adminFetch(`${API_BASE_URL}/reservations/admin/${id}/approve`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(price !== undefined ? { price } : {}),
   });
 
@@ -191,11 +190,9 @@ export async function rejectReservation(
   id: number,
   note?: string
 ): Promise<Reservation> {
-  const res = await fetch(`${API_BASE_URL}/reservations/admin/${id}/reject`, {
+  const res = await adminFetch(`${API_BASE_URL}/reservations/admin/${id}/reject`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(note ? { note } : {}),
   });
 

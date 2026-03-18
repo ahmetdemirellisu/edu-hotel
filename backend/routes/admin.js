@@ -7,6 +7,10 @@ const fs = require("fs");
 
 const router = express.Router();
 const prisma = new PrismaClient();
+const requireAdmin = require("../middleware/requireAdmin");
+
+// Apply admin auth to every route in this file
+router.use(requireAdmin);
 
 // --- Dashboard Stats Route ---
 router.get("/dashboard-stats", async (req, res) => {

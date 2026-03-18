@@ -3,10 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Shield, Lock, User, AlertCircle, ChevronRight } from "lucide-react";
 
-/* ─── Hardcoded admin credentials ─────────────────────────── */
-const ADMIN_USER = "eduhotel_admin";
-const ADMIN_PASS = "EduH0tel@2026";
-const SESSION_KEY = "adminSession";
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
+const SESSION_KEY = "adminToken";
 
 /* ─── Inject keyframes once ───────────────────────────────── */
 const _s = document.getElementById("admin-login-styles") ?? (() => {
@@ -50,7 +48,7 @@ export function AdminLogin() {
 
   // Already logged in?
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY) === "1") navigate("/admin", { replace: true });
+    if (sessionStorage.getItem(SESSION_KEY)) navigate("/admin", { replace: true });
   }, [navigate]);
 
   // Lockout countdown
@@ -73,26 +71,34 @@ export function AdminLogin() {
     setLoading(true);
     setError("");
 
-    // Artificial delay for realism
-    await new Promise(r => setTimeout(r, 900));
+    try {
+      const res = await fetch(`${API_BASE}/auth/admin-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-      setSuccess(true);
-      sessionStorage.setItem(SESSION_KEY, "1");
-      setTimeout(() => navigate("/admin", { replace: true }), 1200);
-    } else {
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-
-      if (newAttempts >= 5) {
-        setLocked(true);
-        setLockTimer(30);
-        setError("Too many failed attempts. Locked for 30 seconds.");
+      if (res.ok) {
+        const { token } = await res.json();
+        sessionStorage.setItem(SESSION_KEY, token);
+        setSuccess(true);
+        setTimeout(() => navigate("/admin", { replace: true }), 1200);
       } else {
-        setError(`Invalid credentials. ${5 - newAttempts} attempt${5 - newAttempts !== 1 ? "s" : ""} remaining.`);
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+
+        if (newAttempts >= 5) {
+          setLocked(true);
+          setLockTimer(30);
+          setError("Too many failed attempts. Locked for 30 seconds.");
+        } else {
+          setError(`Invalid credentials. ${5 - newAttempts} attempt${5 - newAttempts !== 1 ? "s" : ""} remaining.`);
+        }
       }
+    } catch {
+      setError("Could not reach the server. Please try again.");
     }
     setLoading(false);
   };

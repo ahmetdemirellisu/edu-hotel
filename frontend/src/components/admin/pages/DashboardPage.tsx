@@ -1,5 +1,6 @@
 // src/components/admin/pages/DashboardPage.tsx
 import React, { useEffect, useState } from "react";
+import { adminFetch } from "../../../api/adminFetch";
 import {
   Clock,
   CheckCircle,
@@ -53,7 +54,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/ehp/api/admin/dashboard-stats");
+        const res = await adminFetch("/ehp/api/admin/dashboard-stats");
         if (res.ok) setStats(await res.json());
       } catch (err) { console.error("Failed to load dashboard stats:", err); }
       finally { setLoadingStats(false); }
