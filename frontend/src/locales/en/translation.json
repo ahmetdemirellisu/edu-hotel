@@ -527,6 +527,7 @@
 
   "notifications": {
     "pageTitle": "Notifications",
+    "subtitle": "Stay updated with your latest reservation status and campus alerts.",
     "unreadCount_one": "{{count}} unread notification",
     "unreadCount_other": "{{count}} unread notifications",
     "newBadgeLabel": "New",

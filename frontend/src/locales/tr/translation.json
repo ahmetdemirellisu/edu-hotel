@@ -527,6 +527,7 @@
 
   "notifications": {
     "pageTitle": "Bildirimler",
+    "subtitle": "En son rezervasyon durumunuz ve kampüs duyuruları hakkında güncel kalın.",
     "unreadCount_one": "{{count}} okunmamış bildirim",
     "unreadCount_other": "{{count}} okunmamış bildirim",
     "newBadgeLabel": "Yeni",

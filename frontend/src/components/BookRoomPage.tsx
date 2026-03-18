@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 import { Footer } from "./layout/Footer";
+import { NotificationBell } from "./NotificationBell";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import {
@@ -117,7 +118,8 @@ function todayISO() {
 export function BookRoomPage() {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
-  const switchLanguage = () => i18n.changeLanguage(currentLang === "TR" ? "en" : "tr");
+  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
+  const userName = localStorage.getItem("userName") || "";
 
   // ── Wizard navigation ──────────────────────────────────
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -362,28 +364,57 @@ export function BookRoomPage() {
           boxShadow: "0 1px 0 rgba(255,255,255,0.05), 0 6px 28px rgba(0,20,50,0.4)",
         }}
       >
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "1.5px",
-          background: "linear-gradient(90deg, transparent, #c9a84c 30%, #4da6ff 60%, #c9a84c 80%, transparent)", opacity: 0.55 }} />
-        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-          <Link to="/main" className="flex items-center gap-4">
-            <div className="border border-[#c9a84c]/55 px-3 py-1.5 rounded hover:border-[#c9a84c] transition-all"
-              style={{ background: "rgba(201,168,76,0.07)" }}>
-              <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-              <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "1.5px",
+          background: "linear-gradient(90deg, transparent, #c9a84c 30%, #4da6ff 60%, #c9a84c 80%, transparent)",
+          opacity: 0.55,
+        }} />
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Link to="/main" className="flex items-center gap-4">
+                <div
+                  className="border border-[#c9a84c]/55 px-3 py-1.5 rounded transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_14px_rgba(201,168,76,0.2)]"
+                  style={{ background: "rgba(201,168,76,0.07)" }}
+                >
+                  <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
+                  <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
+                </div>
+                <div className="w-px h-8 bg-white/15 hidden sm:block" />
+                <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  EDU HOTEL
+                </h1>
+              </Link>
             </div>
-            <div className="w-px h-8 bg-white/15 hidden sm:block" />
-            <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>EDU HOTEL</h1>
-          </Link>
-          <div className="flex items-center gap-4">
-            <button onClick={switchLanguage}
-              className="text-xs text-white/55 hover:text-white border border-white/15 px-3 py-1.5 rounded-lg hover:border-white/30 transition-all">
-              {currentLang === "TR" ? "EN" : "TR"}
-            </button>
-            <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/55 hover:text-white transition-colors">
-              <LayoutGrid className="h-3.5 w-3.5" />
-              {t("header.mainPage", "Main Page")}
-            </Link>
+            <h1 className="sm:hidden text-white text-base font-light tracking-[5px] uppercase">EDU HOTEL</h1>
+            <div className="flex items-center gap-3 sm:gap-5">
+              <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/55 hover:text-white transition-colors tracking-wide">
+                <LayoutGrid className="h-3.5 w-3.5" />
+                {t("header.mainPage", { defaultValue: "Main Page" })}
+              </Link>
+              <Select value={currentLang} onValueChange={switchLanguage}>
+                <SelectTrigger className="w-[58px] h-8 bg-white/6 border-white/18 text-white text-xs font-semibold hover:bg-white/10 focus:ring-0 rounded-lg">
+                  <SelectValue placeholder={currentLang} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EN">EN</SelectItem>
+                  <SelectItem value="TR">TR</SelectItem>
+                </SelectContent>
+              </Select>
+              <NotificationBell lang={currentLang} />
+              <Link to="/profile" className="flex items-center gap-2.5 pl-1 group">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:shadow-[0_0_12px_rgba(255,255,255,0.12)]"
+                  style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.14)" }}
+                >
+                  <User className="h-4 w-4 text-white/70" />
+                </div>
+                <span className="text-xs text-white/70 group-hover:text-white font-medium hidden md:block max-w-[100px] truncate transition-colors">
+                  {userName}
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
