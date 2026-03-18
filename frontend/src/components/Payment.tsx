@@ -158,6 +158,10 @@ export function Payment() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadedFile || !reservation) return;
+    if (totalAmount === null) {
+      setUploadError(t("payment.errors.priceNotSet", { defaultValue: "Price has not been set by admin yet. Please wait." }));
+      return;
+    }
 
     setIsSubmitting(true);
     const formData = new FormData();
@@ -752,6 +756,18 @@ export function Payment() {
                   </motion.p>
                 )}
 
+                {totalAmount === null && (
+                  <div className="rounded-2xl p-4 bg-amber-50 border border-amber-200 flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-amber-800">{t("payment.errors.priceNotSetTitle", { defaultValue: "Price not set yet" })}</p>
+                      <p className="text-[12px] text-amber-700 leading-relaxed mt-0.5">{t("payment.errors.priceNotSet", { defaultValue: "The admin hasn't set a price for your reservation yet. You cannot submit a receipt until the price is confirmed." })}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="rounded-2xl p-4 bg-blue-50 border border-blue-100 flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <Shield className="h-4 w-4 text-blue-600" />
@@ -761,7 +777,7 @@ export function Payment() {
 
                 <button
                   type="submit"
-                  disabled={!uploadedFile || isSubmitting}
+                  disabled={!uploadedFile || isSubmitting || totalAmount === null}
                   className="w-full py-4 rounded-2xl font-bold text-white text-[15px] relative overflow-hidden group transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-blue-900/20 active:scale-[0.99]"
                   style={{
                     background: !uploadedFile || isSubmitting

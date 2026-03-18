@@ -97,11 +97,15 @@ export function ReservationsPage() {
 
   const handleApproveConfirm = async () => {
     if (!approveModalId) return;
+    const parsedPrice = parseFloat(priceInput.trim());
+    if (!priceInput.trim() || isNaN(parsedPrice) || parsedPrice <= 0) {
+      toast.error(t("reservations.approveModal.priceRequired", { defaultValue: "Please enter a valid price greater than 0." }));
+      return;
+    }
     try {
       setActionLoadingId(approveModalId);
       setError(null);
-      const price = priceInput.trim() !== "" ? parseFloat(priceInput) : undefined;
-      const updated = await approveReservation(approveModalId, price);
+      const updated = await approveReservation(approveModalId, parsedPrice);
       setReservations(prev => prev.map(r => r.id === approveModalId ? { ...r, ...updated } as AdminReservation : r));
       setApproveModalId(null);
       toast.success(t("reservations.toasts.approved", { id: `#${approveModalId}` }));
@@ -477,6 +481,11 @@ export function ReservationsPage() {
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all"
               />
               <p className="text-[10px] text-gray-400 mt-2">{t("reservations.approveModal.priceHint")}</p>
+              {priceInput.trim() && (isNaN(parseFloat(priceInput)) || parseFloat(priceInput) <= 0) && (
+                <p className="text-[11px] text-red-500 font-semibold mt-1">
+                  {t("reservations.approveModal.priceRequired", { defaultValue: "Enter a valid price greater than 0." })}
+                </p>
+              )}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2">
               <button onClick={() => setApproveModalId(null)} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-white transition-colors">
@@ -484,8 +493,8 @@ export function ReservationsPage() {
               </button>
               <button
                 onClick={handleApproveConfirm}
-                disabled={actionLoadingId === approveModalId}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2 transition-all duration-150"
+                disabled={actionLoadingId === approveModalId || !priceInput.trim() || isNaN(parseFloat(priceInput)) || parseFloat(priceInput) <= 0}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-150"
               >
                 <CheckCircle className="h-4 w-4" />
                 {actionLoadingId === approveModalId ? t("reservations.approveModal.approving") : t("reservations.approveModal.approveBtn")}

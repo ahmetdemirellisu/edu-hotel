@@ -58,6 +58,20 @@ router.post(
         return res.status(400).json({ error: "No file uploaded" });
       }
 
+      // Guard: reservation must be APPROVED and have a price set
+      const existing = await prisma.reservation.findUnique({
+        where: { id: parseInt(reservationId) },
+      });
+      if (!existing) {
+        return res.status(404).json({ error: "Reservation not found." });
+      }
+      if (existing.status !== "APPROVED") {
+        return res.status(400).json({ error: "Payment can only be submitted for approved reservations." });
+      }
+      if (existing.price == null) {
+        return res.status(400).json({ error: "Admin has not set a price for this reservation yet. Please wait." });
+      }
+
       const reservation = await prisma.reservation.update({
         where: { id: parseInt(reservationId) },
         data: { paymentStatus: "PENDING_VERIFICATION" },

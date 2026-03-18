@@ -684,11 +684,13 @@ export function Dashboard() {
                     whileTap={{ scale: 0.97 }}
                     disabled={
                       activeReservation?.status !== "APPROVED" ||
+                      (activeReservation as any)?.price == null ||
                       ["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "")
                     }
                     onClick={() => navigate("/payment")}
                     className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-sm transition-all duration-300 ${
                       activeReservation?.status === "APPROVED" &&
+                      (activeReservation as any)?.price != null &&
                       !["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "")
                         ? "bg-[#003366] text-white cursor-pointer"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -698,6 +700,8 @@ export function Dashboard() {
                       ? t("dashboard.activeReservation.paymentConfirmed", { defaultValue: "Payment Confirmed" })
                       : (activeReservation as any)?.paymentStatus === "PENDING_VERIFICATION"
                       ? t("dashboard.activeReservation.paymentSent", { defaultValue: "Payment Sent" })
+                      : (activeReservation as any)?.price == null && activeReservation?.status === "APPROVED"
+                      ? t("dashboard.activeReservation.awaitingPrice", { defaultValue: "Awaiting Price" })
                       : t("dashboard.activeReservation.proceedPayment", { defaultValue: "Proceed to Payment" })}
                   </motion.button>
                 </div>
