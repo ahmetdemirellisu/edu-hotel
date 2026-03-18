@@ -66,7 +66,15 @@ export function PaymentsPage() {
   const openReceipt = async (id: number) => {
     for (const name of receiptCandidates(id)) {
       const url = `/ehp/api/view-pending/${name}`;
-      try { const res = await fetch(url, { method: "HEAD" }); if (res.ok) { window.open(url, "_blank"); return; } } catch {}
+      try {
+        const res = await adminFetch(url);
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, "_blank");
+          return;
+        }
+      } catch {}
     }
     alert(t("payments.receiptNotFound", "Receipt file not found."));
   };
@@ -75,8 +83,19 @@ export function PaymentsPage() {
     for (const name of receiptCandidates(id)) {
       const url = `/ehp/api/view-pending/${name}`;
       try {
-        const res = await fetch(url, { method: "HEAD" });
-        if (res.ok) { const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); return; }
+        const res = await adminFetch(url);
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(blobUrl);
+          return;
+        }
       } catch {}
     }
     alert(t("payments.receiptNotFound", "Receipt file not found."));
