@@ -50,17 +50,17 @@ function normalizeGuestList(guestList) {
  * POST /reservations
  * Create a pre-reservation request (PENDING).
  */
-router.post("/", checkBlacklist, async (req, res) => {
+router.post("/", requireAuth, checkBlacklist, async (req, res) => {
     try {
+        const userId = req.user.userId;
+
         const {
-            userId: rawUserId, checkIn, checkOut, checkInTime,
+            checkIn, checkOut, checkInTime,
             guests, accommodationType, invoiceType, eventCode, note,
             firstName, lastName, phone, contactEmail,
             nationalId, taxNumber, eventType, priceType,
             freeAccommodation, guestList, billingTitle, billingAddress,
         } = req.body;
-
-        const userId = parseInt(rawUserId, 10);
 
         if (!userId || !checkIn || !checkOut || !guests || !accommodationType || !invoiceType) {
             return res.status(400).json({ error: "Missing required fields." });
@@ -522,13 +522,11 @@ ${detailTable([
  * PATCH /reservations/:id/cancel
  * User cancels their own reservation.
  */
-router.patch("/:id/cancel", async (req, res) => {
+router.patch("/:id/cancel", requireAuth, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const { userId: rawUserId, reason } = req.body;
-
-        const userId = parseInt(rawUserId, 10);
-        if (!userId || isNaN(userId)) return res.status(400).json({ error: "userId is required." });
+        const userId = req.user.userId;
+        const { reason } = req.body;
 
         const reservation = await prisma.reservation.findUnique({
             where: { id },

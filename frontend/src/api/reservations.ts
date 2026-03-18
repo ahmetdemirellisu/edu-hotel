@@ -32,8 +32,6 @@ export type GuestListItem = {
  * Matches updated backend reservations.js
  */
 export interface ReservationPayload {
-  userId: number;
-
   // Dates
   checkIn: string; // "YYYY-MM-DD"
   checkOut: string; // "YYYY-MM-DD"
@@ -116,7 +114,7 @@ async function parseError(res: Response, fallback: string) {
 export async function createReservation(
   payload: ReservationPayload
 ): Promise<Reservation> {
-  const res = await fetch(`${API_BASE_URL}/reservations`, {
+  const res = await userFetch(`${API_BASE_URL}/reservations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -230,15 +228,14 @@ export async function getMyLatestReservation(userId: number) {
  */
 export async function cancelReservation(
   id: number,
-  userId: number,
   reason?: string
 ): Promise<Reservation> {
-  const res = await fetch(`${API_BASE_URL}/reservations/${id}/cancel`, {
+  const res = await userFetch(`${API_BASE_URL}/reservations/${id}/cancel`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ userId, reason }),
+    body: JSON.stringify({ reason }),
   });
 
   if (!res.ok) {

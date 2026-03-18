@@ -278,7 +278,6 @@ export function BookRoomPage() {
     setErrorMessage(null);
     try {
       await createReservation({
-        userId: Number(userId),
         checkIn: checkInDate,
         checkOut: checkOutDate,
         checkInTime: checkInTime.trim(),

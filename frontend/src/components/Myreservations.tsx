@@ -852,7 +852,7 @@ export function MyReservations() {
                               );
                               if (reason === null) return;
                               try {
-                                await cancelReservation(r.id, userId, reason || undefined);
+                                await cancelReservation(r.id, reason || undefined);
                                 setReservations((prev) =>
                                   prev.map((res) =>
                                     res.id === r.id ? { ...res, status: "CANCELLED" as any } : res
