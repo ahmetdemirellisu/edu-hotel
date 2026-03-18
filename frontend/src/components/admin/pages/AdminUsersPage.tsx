@@ -74,7 +74,7 @@ export function AdminUsersPage() {
         style={{ animation: "auIn 0.3s ease-out" }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
             <Shield className="h-5 w-5 text-white" />
           </div>
           <div>
