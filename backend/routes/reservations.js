@@ -324,6 +324,19 @@ router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
         const id = parseInt(req.params.id, 10);
         const { price } = req.body;
 
+        // Re-validate date rules before approving
+        const existing = await prisma.reservation.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: "Reservation not found." });
+
+        const checkInDate = new Date(existing.checkIn);
+        const checkOutDate = new Date(existing.checkOut);
+        if (checkInDate.getDay() === 0) {
+            return res.status(400).json({ error: "Cannot approve: Sunday check-in is not allowed." });
+        }
+        if (checkInDate.getDay() === 6 && checkOutDate.getDay() === 0) {
+            return res.status(400).json({ error: "Cannot approve: Saturday check-in & Sunday check-out combination is not allowed." });
+        }
+
         const parsedPrice = price !== undefined && price !== null && price !== "" ? parseFloat(price) : null;
 
         const data = { status: "APPROVED" };
