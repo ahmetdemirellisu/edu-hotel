@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { userFetch } from "../api/userFetch";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
@@ -109,7 +110,7 @@ export function NotificationsPage() {
     (async () => {
       if (!userId || isNaN(userId)) { setLoading(false); return; }
       try {
-        const res = await fetch(`/ehp/api/notifications/user/${userId}`);
+        const res = await userFetch(`/ehp/api/notifications/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setNotifications(data.notifications || []);

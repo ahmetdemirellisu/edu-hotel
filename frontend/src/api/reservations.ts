@@ -1,6 +1,7 @@
 // src/api/reservations.ts
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
 import { adminFetch } from "./adminFetch";
+import { userFetch } from "./userFetch";
 
 export type AccommodationType = "PERSONAL" | "CORPORATE" | "EDUCATION";
 export type InvoiceType = "INDIVIDUAL" | "CORPORATE";
@@ -133,7 +134,7 @@ export async function createReservation(
 export async function getUserReservations(
   userId: number
 ): Promise<Reservation[]> {
-  const res = await fetch(`${API_BASE_URL}/reservations/user/${userId}`);
+  const res = await userFetch(`${API_BASE_URL}/reservations/user/${userId}`);
 
   if (!res.ok) {
     throw new Error(await parseError(res, "Failed to fetch reservations"));
@@ -208,7 +209,7 @@ export async function rejectReservation(
  * Fetch latest reservation for dashboard
  */
 export async function getMyLatestReservation(userId: number) {
-  const res = await fetch(
+  const res = await userFetch(
     `${API_BASE_URL}/reservations/my/latest?userId=${userId}`
   );
 

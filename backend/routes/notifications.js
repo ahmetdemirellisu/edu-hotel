@@ -1,5 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -10,10 +11,11 @@ const prisma = new PrismaClient();
  * Since we don't have a dedicated Notifications table,
  * we derive notifications from reservation data.
  */
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", requireAuth, async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
         if (isNaN(userId)) return res.status(400).json({ error: "Invalid userId." });
+        if (req.user.userId !== userId) return res.status(403).json({ error: "Access denied." });
 
         const reservations = await prisma.reservation.findMany({
             where: { userId },

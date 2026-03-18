@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 
 const checkBlacklist = require("../middleware/checkBlacklist");
 const requireAdmin = require("../middleware/requireAdmin");
+const requireAuth = require("../middleware/requireAuth");
 
 /**
  * Helpers
@@ -250,10 +251,11 @@ ${heading('Sırada ne var?')}
 /**
  * GET /reservations/my/latest
  */
-router.get("/my/latest", async (req, res) => {
+router.get("/my/latest", requireAuth, async (req, res) => {
     try {
         const userId = parseInt(req.query.userId, 10);
         if (!userId || isNaN(userId)) return res.status(400).json({ error: "userId query parameter is required." });
+        if (req.user.userId !== userId) return res.status(403).json({ error: "Access denied." });
 
         const reservation = await prisma.reservation.findFirst({
             where: { userId },
@@ -272,10 +274,11 @@ router.get("/my/latest", async (req, res) => {
 /**
  * GET /reservations/user/:userId
  */
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", requireAuth, async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
         if (isNaN(userId)) return res.status(400).json({ error: "Invalid userId." });
+        if (req.user.userId !== userId) return res.status(403).json({ error: "Access denied." });
 
         const reservations = await prisma.reservation.findMany({
             where: { userId },

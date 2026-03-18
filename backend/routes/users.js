@@ -1,6 +1,8 @@
 // backend/routes/users.js
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const requireAdmin = require("../middleware/requireAdmin");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -14,7 +16,7 @@ const prisma = new PrismaClient();
  *   /users/search?query=john
  * --------------------------------------------------------------------------
  */
-router.get("/search", async (req, res) => {
+router.get("/search", requireAdmin, async (req, res) => {
   try {
     const query = String(req.query.query || "").trim();
 
@@ -70,7 +72,7 @@ router.get("/search", async (req, res) => {
  *   - reservations[] for history
  * --------------------------------------------------------------------------
  */
-router.get("/admin", async (req, res) => {
+router.get("/admin", requireAdmin, async (req, res) => {
   try {
     const { type, search, blacklisted } = req.query;
 
@@ -141,11 +143,14 @@ router.get("/admin", async (req, res) => {
  * Fetch one user with reservations + blacklist info
  * --------------------------------------------------------------------------
  */
-router.get("/:id", async (req, res) => {
+router.get("/:id", requireAuth, async (req, res) => {
   try {
     const userId = Number(req.params.id);
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID." });
+    }
+    if (req.user.userId !== userId) {
+      return res.status(403).json({ error: "Access denied." });
     }
 
     const user = await prisma.user.findUnique({

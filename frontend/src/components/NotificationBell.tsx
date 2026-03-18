@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { userFetch } from "../api/userFetch";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -56,7 +57,7 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
     if (!userId || isNaN(userId)) return;
     (async () => {
       try {
-        const res = await fetch(`/ehp/api/notifications/user/${userId}`);
+        const res = await userFetch(`/ehp/api/notifications/user/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setNotifications((data.notifications || []).slice(0, 8));
