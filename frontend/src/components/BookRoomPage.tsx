@@ -1,14 +1,11 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { Footer } from "./layout/Footer";
-
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
+import { Checkbox } from "./ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -16,24 +13,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Checkbox } from "./ui/checkbox";
+import { SlideTransition } from "./ui/slide-transition";
+import campusBg from "@/assets/campus.png";
 
 import {
   AlertCircle,
   CalendarIcon,
   CheckCircle2,
   Clock,
-  Info,
   User,
-  Users,
-  XCircle,
   ArrowRight,
-  Home,
-  ChevronRight,
-  BedDouble,
-  CreditCard,
+  ArrowLeft,
+  Briefcase,
+  GraduationCap,
+  Check,
+  Building2,
+  LayoutGrid,
+  Info,
   Sparkles,
-  MapPin,
+  Mail,
+  ShieldCheck,
+  BanIcon,
 } from "lucide-react";
 
 import {
@@ -42,955 +42,1090 @@ import {
   type InvoiceType,
 } from "../api/reservations";
 
-/* ═══════════════════════════════════════════════════════════
-   Animations
-   ═══════════════════════════════════════════════════════════ */
-if (!document.getElementById("book-anim")) {
+/* ══════════════════════════════════════════════════════════
+   Inject keyframes once
+   ══════════════════════════════════════════════════════════ */
+if (!document.getElementById("book-wizard-anim")) {
   const s = document.createElement("style");
-  s.id = "book-anim";
+  s.id = "book-wizard-anim";
   s.textContent = `
-    @keyframes bookFadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+    @keyframes wizardFadeUp {
+      from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes floatDot {
-      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.4; }
-      50% { transform: translateY(-8px) scale(1.1); opacity: 0.7; }
+    @keyframes campusPanBook {
+      0%   { background-position-x: 0%; }
+      50%  { background-position-x: 100%; }
+      100% { background-position-x: 0%; }
     }
-    @keyframes shimmer {
-      0% { background-position: -200% center; }
-      100% { background-position: 200% center; }
+    .tile-accom {
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
     }
-    @keyframes pulse-ring {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(1.4); opacity: 0; }
+    .tile-accom:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.2), 0 0 0 1.5px rgba(201,168,76,0.35);
+    }
+    .tile-accom.selected {
+      box-shadow: 0 0 0 2.5px #c9a84c, 0 8px 30px rgba(201,168,76,0.25);
+    }
+    .wiz-input {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.14);
+      color: white;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+    }
+    .wiz-input::placeholder { color: rgba(255,255,255,0.25); }
+    .wiz-input:focus {
+      border-color: rgba(201,168,76,0.55) !important;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.1) !important;
+      background: rgba(255,255,255,0.07) !important;
+    }
+    .bp-dash {
+      background-image: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.18) 0px,
+        rgba(255,255,255,0.18) 6px,
+        transparent 6px,
+        transparent 12px
+      );
     }
   `;
   document.head.appendChild(s);
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════
    Helpers
-   ═══════════════════════════════════════════════════════════ */
-function isSunday(dateStr: string) {
-  if (!dateStr) return false;
-  return new Date(dateStr + "T00:00:00").getDay() === 0;
+   ══════════════════════════════════════════════════════════ */
+function toDisplayDate(iso: string): string {
+  if (!iso) return "—";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
 }
-function isSaturday(dateStr: string) {
-  if (!dateStr) return false;
-  return new Date(dateStr + "T00:00:00").getDay() === 6;
+function daysBetween(a: string, b: string): number {
+  if (!a || !b) return 0;
+  return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
 }
-function daysBetween(checkIn: string, checkOut: string) {
-  if (!checkIn || !checkOut) return 0;
-  const ms = new Date(checkOut + "T00:00:00").getTime() - new Date(checkIn + "T00:00:00").getTime();
-  return Math.round(ms / (1000 * 60 * 60 * 24));
-}
-function isMoreThanDaysAhead(dateStr: string, days: number) {
-  if (!dateStr) return false;
-  const max = new Date();
-  max.setDate(max.getDate() + days);
-  return new Date(dateStr + "T00:00:00").getTime() > max.getTime();
+function todayISO() {
+  return new Date().toISOString().split("T")[0];
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Shared input class
-   ═══════════════════════════════════════════════════════════ */
-const inputClass =
-  "h-11 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm placeholder:text-slate-400 transition-all duration-200 focus:bg-white focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/15 shadow-sm";
-
-const selectTriggerClass =
-  "h-11 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm focus:ring-2 focus:ring-blue-400/15 focus:border-blue-400/60 transition-all shadow-sm";
-
-const labelClass = "text-[11px] font-bold text-slate-400 uppercase tracking-widest";
-
-/* ═══════════════════════════════════════════════════════════
-   Step Indicator
-   ═══════════════════════════════════════════════════════════ */
-const steps = [
-  { id: 1, labelKey: "bookingRequest.steps.stayDetails", icon: CalendarIcon },
-  { id: 2, labelKey: "bookingRequest.steps.guestInfo", icon: User },
-  { id: 3, labelKey: "bookingRequest.steps.billingSubmit", icon: CreditCard },
-];
-
-function StepIndicator({ active }: { active: number }) {
-  const { t } = useTranslation();
-  return (
-    <div className="flex items-center justify-center gap-0 mb-8">
-      {steps.map((step, idx) => {
-        const Icon = step.icon;
-        const isActive = step.id === active;
-        const isDone = step.id < active;
-        return (
-          <React.Fragment key={step.id}>
-            <div className="flex flex-col items-center gap-1.5">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                  isDone
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
-                    : isActive
-                    ? "bg-[#003366] text-white shadow-lg shadow-blue-200 scale-110"
-                    : "bg-slate-100 text-slate-400 border border-slate-200"
-                }`}
-              >
-                {isDone ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-4 w-4" />}
-              </div>
-              <span
-                className={`text-[10px] font-semibold uppercase tracking-wider hidden sm:block ${
-                  isActive ? "text-[#003366]" : isDone ? "text-emerald-600" : "text-slate-400"
-                }`}
-              >
-                {t(step.labelKey)}
-              </span>
-            </div>
-            {idx < steps.length - 1 && (
-              <div
-                className={`flex-1 h-0.5 mx-2 max-w-[60px] transition-all duration-500 ${
-                  step.id < active ? "bg-emerald-400" : "bg-slate-200"
-                }`}
-              />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════
    Component
-   ═══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
 export function BookRoomPage() {
   const { t, i18n } = useTranslation();
-  const formTopRef = useRef<HTMLDivElement | null>(null);
-
   const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
-  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
-  const userName = localStorage.getItem("userName") || "User";
+  const switchLanguage = () => i18n.changeLanguage(currentLang === "TR" ? "en" : "tr");
 
+  // ── Wizard navigation ──────────────────────────────────
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [direction, setDirection] = useState(1);
+
+  // ── Stored user ────────────────────────────────────────
   const storedUser = useMemo(() => {
-    if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem("user");
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return {
+        id: u.id || u.userId || localStorage.getItem("userId"),
+        firstName: u.firstName || u.name?.split(" ")[0] || "",
+        lastName: u.lastName || u.surname || u.name?.split(" ").slice(1).join(" ") || "",
+        email: u.email || localStorage.getItem("userEmail") || "",
+        phone: u.phone || "",
+      };
+    } catch {
+      return { id: null, firstName: "", lastName: "", email: "", phone: "" };
+    }
   }, []);
 
-  const userId: number | undefined = storedUser?.id ? Number(storedUser.id) : undefined;
-
-  // ── State ──────────────────────
-  const [accommodationTypeUI, setAccommodationTypeUI] = useState<"personal" | "corporate" | "education" | "">("");
-  const [billingTypeUI, setBillingTypeUI] = useState<"individual" | "corporate" | "">("");
-  const [requestFreeAccommodation, setRequestFreeAccommodation] = useState(false);
+  // ── Step 1 state ───────────────────────────────────────
   const [checkInDate, setCheckInDate] = useState("");
-  const [checkInDisplay, setCheckInDisplay] = useState("");
-  const [checkInTime, setCheckInTime] = useState("");
+  const [checkInTime, setCheckInTime] = useState("14:00");
   const [checkOutDate, setCheckOutDate] = useState("");
-  const [checkOutDisplay, setCheckOutDisplay] = useState("");
+  const nights = useMemo(() => daysBetween(checkInDate, checkOutDate), [checkInDate, checkOutDate]);
+
+  // ── Step 2 state ───────────────────────────────────────
+  const [accommodationTypeUI, setAccommodationTypeUI] = useState<"personal" | "corporate" | "education" | "">("");
   const [numberOfGuests, setNumberOfGuests] = useState("1");
-  const [guestList, setGuestList] = useState<Array<{ firstName: string; lastName: string }>>([]);
+  const [firstName, setFirstName] = useState(storedUser.firstName);
+  const [lastName, setLastName] = useState(storedUser.lastName);
+  const [phone, setPhone] = useState(storedUser.phone);
+  const [email, setEmail] = useState(storedUser.email);
+  const [guestList, setGuestList] = useState<{ firstName: string; lastName: string }[]>([]);
   const [eventCode, setEventCode] = useState("");
-  const [eventType, setEventType] = useState<string>("");
-  const [priceType, setPriceType] = useState<string>("");
-  const [firstName, setFirstName] = useState(storedUser?.firstName || storedUser?.name || "");
-  const [lastName, setLastName] = useState(storedUser?.lastName || storedUser?.surname || "");
-  const [phone, setPhone] = useState(storedUser?.phone || "");
-  const [email, setEmail] = useState(storedUser?.email || "");
+  const [eventType, setEventType] = useState("");
+  const [priceType, setPriceType] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const showCorporateCode = accommodationTypeUI === "corporate" || accommodationTypeUI === "education";
+  const showPriceType = accommodationTypeUI === "corporate" || accommodationTypeUI === "education";
+  const numGuests = parseInt(numberOfGuests) || 1;
+
+  const syncGuestList = (n: number) => {
+    const extra = Math.max(0, n - 1);
+    setGuestList(prev => {
+      const next = [...prev];
+      while (next.length < extra) next.push({ firstName: "", lastName: "" });
+      return next.slice(0, extra);
+    });
+  };
+
+  // ── Step 3 state ───────────────────────────────────────
+  const [billingTypeUI, setBillingTypeUI] = useState<"individual" | "corporate" | "">("");
   const [nationalIdType, setNationalIdType] = useState<"tc" | "passport">("tc");
   const [tcKimlikNo, setTcKimlikNo] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
   const [billingTitle, setBillingTitle] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
-  const [notes, setNotes] = useState("");
+  const [requestFreeAccommodation, setRequestFreeAccommodation] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+
+  // ���─ Submit state ───────────────────────────────────────
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const showCorporateCode = accommodationTypeUI === "corporate" || accommodationTypeUI === "education";
-  const showPriceType = accommodationTypeUI === "corporate" || accommodationTypeUI === "education";
-
-  const nights = daysBetween(checkInDate, checkOutDate);
-
-  // ── Handlers ───────────────────
-  const handleNumberOfGuestsChange = (value: string) => {
-    const num = Math.max(1, Math.min(10, parseInt(value, 10) || 1));
-    setNumberOfGuests(String(num));
-    if (num > 1) {
-      const newGuestList = Array.from({ length: num - 1 }, (_, i) => guestList[i] || { firstName: "", lastName: "" });
-      setGuestList(newGuestList);
-    } else { setGuestList([]); }
-  };
-
-  const updateGuestInList = (index: number, field: "firstName" | "lastName", value: string) => {
-    const updated = [...guestList];
-    updated[index] = { ...updated[index], [field]: value };
-    setGuestList(updated);
-  };
-
-  const scrollToTopOfForm = () => { formTopRef.current?.scrollIntoView({ behavior: "smooth" }); };
-
-  const mapToApiTypes = (): { accommodationType: AccommodationType; invoiceType: InvoiceType } => ({
-    accommodationType: accommodationTypeUI === "corporate" ? "CORPORATE" : accommodationTypeUI === "education" ? "EDUCATION" : "PERSONAL",
-    invoiceType: billingTypeUI === "corporate" ? "CORPORATE" : "INDIVIDUAL",
-  });
-
-  const validateAgainstRules = () => {
-    if (!userId) return t("dashboard.validation.notLoggedIn", "Please log in to make a reservation.");
-    if (!accommodationTypeUI) return t("bookingRequest.validation.accommodationTypeRequired", "Please select an accommodation type.");
-    if (!billingTypeUI) return t("bookingRequest.validation.billingTypeRequired", "Please select a billing type.");
-    if (!checkInDate || !checkOutDate) return t("dashboard.validation.datesRequired", "Please select check-in and check-out dates.");
-    const nights = daysBetween(checkInDate, checkOutDate);
-    if (nights <= 0) return t("bookingRequest.validation.dateOrder", "Check-out date must be after check-in date.");
-    if (isSunday(checkInDate)) return t("bookingRequest.validation.noSundayCheckin", "Sunday check-in is not allowed.");
-    if (isSaturday(checkInDate) && isSunday(checkOutDate)) return t("bookingRequest.validation.noSatInSunOut", "Saturday check-in and Sunday check-out reservations are not allowed.");
-    if (isMoreThanDaysAhead(checkInDate, 30)) return t("bookingRequest.validation.max30Days", "Reservations are allowed up to 30 days in advance.");
-    if (accommodationTypeUI === "personal" && nights > 5) return t("bookingRequest.validation.max5Nights", "Personal bookings cannot exceed 5 consecutive nights.");
-    if (showCorporateCode && !eventCode.trim()) return t("bookingRequest.validation.codeRequired", "Event / Education code is required for Corporate or Education stays.");
-    if (accommodationTypeUI === "education" && !notes.trim()) return t("bookingRequest.validation.explanationRequired", "Please provide an explanation for education-related reservations.");
-    if (billingTypeUI === "individual" && !tcKimlikNo.trim()) return t("bookingRequest.validation.tcRequired", "T.C. Kimlik No is required for individual billing.");
-    if (billingTypeUI === "corporate" && !taxNumber.trim()) return t("bookingRequest.validation.taxRequired", "Tax Number is required for corporate billing.");
-    if (billingTypeUI === "corporate" && !billingTitle.trim()) return t("bookingRequest.validation.billingTitleRequired", "Fatura unvanı is required for corporate billing.");
-    if (billingTypeUI === "corporate" && !billingAddress.trim()) return t("bookingRequest.validation.billingAddressRequired", "Fatura adresi is required for corporate billing.");
-    const g = parseInt(numberOfGuests, 10);
-    if (!g || Number.isNaN(g) || g < 1) return t("dashboard.validation.guestsRequired", "Please select number of guests.");
-    if (!consentChecked) return t("bookingRequest.validation.consentRequired", "Please confirm the information and accept the reservation rules.");
-    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !email.trim()) return t("bookingRequest.validation.identityRequired", "Please ensure your name, phone, and email are filled.");
-    if (g > 1) { for (let i = 0; i < guestList.length; i++) { if (!guestList[i].firstName.trim() || !guestList[i].lastName.trim()) return t("bookingRequest.validation.additionalGuestsRequired", "Please fill first and last names for all additional guests."); } }
+  // ── Validation ─────────────────────────────────────────
+  const validateStep1 = (): string | null => {
+    if (!checkInDate || !checkOutDate)
+      return t("bookRoom.validation.datesRequired", "Please select check-in and check-out dates.");
+    if (daysBetween(checkInDate, checkOutDate) <= 0)
+      return t("bookRoom.validation.checkoutAfterCheckin", "Check-out must be after check-in.");
+    const dow = new Date(checkInDate).getDay();
+    if (dow === 0)
+      return t("bookRoom.validation.noSundayCheckin", "Check-in on Sundays is not available.");
+    if (dow === 6 && new Date(checkOutDate).getDay() === 0)
+      return t("bookRoom.validation.noSatSunStay", "Saturday check-in with Sunday check-out is not allowed.");
+    if (daysBetween(todayISO(), checkInDate) > 30)
+      return t("bookRoom.validation.tooFarAhead", "Reservations can only be made up to 30 days in advance.");
+    if (!checkInTime.trim())
+      return t("bookRoom.validation.timeRequired", "Please select a check-in time.");
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSuccessMessage(null);
-    setErrorMessage(null);
-    const ruleError = validateAgainstRules();
-    if (ruleError) { setErrorMessage(ruleError); scrollToTopOfForm(); return; }
-    const { accommodationType, invoiceType } = mapToApiTypes();
-    try {
-      setLoading(true);
-      await createReservation({
-        userId: Number(userId), checkIn: checkInDate, checkOut: checkOutDate, checkInTime: checkInTime.trim(),
-        guests: parseInt(numberOfGuests, 10), accommodationType, invoiceType,
-        eventCode: showCorporateCode ? eventCode.trim() : undefined,
-        firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), contactEmail: email.trim(),
-        eventType: eventType.trim(), priceType: priceType?.trim() || undefined,
-        freeAccommodation: requestFreeAccommodation, guestList,
-        nationalId: tcKimlikNo?.trim() || undefined, taxNumber: taxNumber?.trim() || undefined,
-        billingTitle: billingTitle?.trim() || undefined, billingAddress: billingAddress?.trim() || undefined,
-        note: notes?.trim() || undefined,
-      });
-      setSuccessMessage(t("dashboard.reservation.success", "Your reservation request has been submitted for approval."));
-      setAccommodationTypeUI(""); setBillingTypeUI(""); setRequestFreeAccommodation(false);
-      setCheckInDate(""); setCheckInDisplay(""); setCheckInTime(""); setCheckOutDate(""); setCheckOutDisplay(""); setNumberOfGuests("1"); setGuestList([]); setNationalIdType("tc");
-      setEventCode(""); setEventType(""); setPriceType(""); setTcKimlikNo(""); setTaxNumber(""); setBillingTitle(""); setBillingAddress(""); setNotes(""); setConsentChecked(false);
-      scrollToTopOfForm();
-    } catch (err: any) { setErrorMessage(err?.message || "Failed to create reservation."); scrollToTopOfForm(); }
-    finally { setLoading(false); }
+  const validateStep2 = (): string | null => {
+    if (!accommodationTypeUI)
+      return t("bookRoom.validation.accommodationRequired", "Please select an accommodation type.");
+    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !email.trim())
+      return t("bookRoom.validation.guestInfoRequired", "Please fill all guest information fields.");
+    if (numGuests < 1 || numGuests > 10)
+      return t("bookRoom.validation.guestCount", "Number of guests must be between 1 and 10.");
+    if (numGuests > 1) {
+      for (const g of guestList) {
+        if (!g.firstName.trim() || !g.lastName.trim())
+          return t("bookRoom.validation.guestListIncomplete", "Please fill all guest names.");
+      }
+    }
+    if (accommodationTypeUI === "personal" && nights > 5)
+      return t("bookRoom.validation.personalMaxNights", "Personal stays cannot exceed 5 consecutive nights.");
+    if (showCorporateCode && !eventCode.trim())
+      return t("bookRoom.validation.eventCodeRequired", "Event code is required for this accommodation type.");
+    if (accommodationTypeUI === "education" && !notes.trim())
+      return t("bookRoom.validation.notesRequired", "Please provide an explanation for educational stays.");
+    if (!eventType.trim())
+      return t("bookRoom.validation.eventTypeRequired", "Please select a purpose of stay.");
+    return null;
   };
 
-  const stagger = (i: number): React.CSSProperties => ({ animation: `bookFadeUp 0.5s ease-out ${0.1 + i * 0.06}s both` });
+  const validateStep3 = (): string | null => {
+    if (!billingTypeUI)
+      return t("bookRoom.validation.billingRequired", "Please select a billing type.");
+    if (billingTypeUI === "individual" && !tcKimlikNo.trim())
+      return t("bookRoom.validation.idRequired", "National ID or Passport number is required.");
+    if (billingTypeUI === "corporate") {
+      if (!taxNumber.trim()) return t("bookRoom.validation.taxRequired", "Tax number is required.");
+      if (!billingTitle.trim()) return t("bookRoom.validation.billingTitleRequired", "Company name is required.");
+      if (!billingAddress.trim()) return t("bookRoom.validation.billingAddressRequired", "Billing address is required.");
+    }
+    if (!consentChecked)
+      return t("bookRoom.validation.consent", "Please accept the terms and conditions.");
+    return null;
+  };
 
-  // ── DD/MM/YYYY date helpers ─────────────────
-  const handleDateTyping = (
-    raw: string,
-    setDisplay: (v: string) => void,
-    setISO: (v: string) => void
-  ) => {
-    const digits = raw.replace(/\D/g, "").slice(0, 8);
-    let display = digits;
-    if (digits.length > 4) display = digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
-    else if (digits.length > 2) display = digits.slice(0, 2) + "/" + digits.slice(2);
-    setDisplay(display);
-    if (digits.length === 8) {
-      const d = digits.slice(0, 2), m = digits.slice(2, 4), y = digits.slice(4, 8);
-      setISO(`${y}-${m}-${d}`);
-    } else {
-      setISO("");
+  // ── Navigation ─────────────────────────────────────────
+  const goNext = () => {
+    let err: string | null = null;
+    if (step === 1) err = validateStep1();
+    if (step === 2) err = validateStep2();
+    if (err) { setErrorMessage(err); return; }
+    setErrorMessage(null);
+    setDirection(1);
+    setStep(s => (s + 1) as 1 | 2 | 3);
+  };
+  const goBack = () => {
+    setErrorMessage(null);
+    setDirection(-1);
+    setStep(s => (s - 1) as 1 | 2 | 3);
+  };
+
+  // ── Submit ─────────────────────────────────────────────
+  const handleSubmit = async () => {
+    const err = validateStep3();
+    if (err) { setErrorMessage(err); return; }
+    const userId = storedUser.id;
+    if (!userId) { setErrorMessage(t("bookRoom.validation.notLoggedIn", "You must be logged in.")); return; }
+
+    const accommodationType: AccommodationType =
+      accommodationTypeUI === "corporate" ? "CORPORATE"
+      : accommodationTypeUI === "education" ? "EDUCATION"
+      : "PERSONAL";
+    const invoiceType: InvoiceType = billingTypeUI === "corporate" ? "CORPORATE" : "INDIVIDUAL";
+
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      await createReservation({
+        userId: Number(userId),
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        checkInTime: checkInTime.trim(),
+        guests: numGuests,
+        accommodationType,
+        invoiceType,
+        eventCode: showCorporateCode ? eventCode.trim() : undefined,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        contactEmail: email.trim(),
+        eventType: eventType.trim(),
+        priceType: priceType?.trim() || undefined,
+        freeAccommodation: requestFreeAccommodation,
+        guestList,
+        nationalId: tcKimlikNo?.trim() || undefined,
+        taxNumber: taxNumber?.trim() || undefined,
+        billingTitle: billingTitle?.trim() || undefined,
+        billingAddress: billingAddress?.trim() || undefined,
+        note: notes?.trim() || undefined,
+      });
+      setSuccessMessage(t("bookRoom.successMessage", "Your reservation has been submitted! The reception will review your request and assign you a room."));
+      // Reset
+      setStep(1); setDirection(1);
+      setCheckInDate(""); setCheckInTime("14:00"); setCheckOutDate("");
+      setAccommodationTypeUI(""); setNumberOfGuests("1"); setGuestList([]);
+      setFirstName(storedUser.firstName); setLastName(storedUser.lastName);
+      setPhone(storedUser.phone); setEmail(storedUser.email);
+      setEventCode(""); setEventType(""); setPriceType(""); setNotes("");
+      setBillingTypeUI(""); setTcKimlikNo(""); setTaxNumber(""); setBillingTitle(""); setBillingAddress("");
+      setRequestFreeAccommodation(false); setConsentChecked(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
+      const msg = e?.response?.data?.message || e?.response?.data?.error || e?.message || "Unknown error";
+      setErrorMessage(`${t("bookRoom.errorMessage", "Reservation failed")}: ${msg}`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  /* ── Section header helper ──────────────── */
-  const SectionHeader = ({ title, accent = "#003366", subtitle }: { title: string; accent?: string; subtitle?: string }) => (
-    <div className="flex items-start gap-3 pb-5 mb-6 border-b border-slate-100">
-      <div className="w-1 h-6 rounded-full mt-0.5 flex-shrink-0" style={{ background: accent }} />
-      <div>
-        <h3 className="text-[15px] font-bold text-slate-800 tracking-tight">{title}</h3>
-        {subtitle && <p className="text-[12px] text-slate-400 mt-0.5">{subtitle}</p>}
-      </div>
-    </div>
-  );
+  // ── Accommodation tiles data ────────────────────────────
+  const accommodationTiles = [
+    { key: "personal" as const, icon: User, label: t("bookRoom.accommodationType.personal", "Personal"), desc: t("bookRoom.accommodationType.personalDesc", "Individual stay") },
+    { key: "corporate" as const, icon: Briefcase, label: t("bookRoom.accommodationType.corporate", "Corporate"), desc: t("bookRoom.accommodationType.corporateDesc", "Business & events") },
+    { key: "education" as const, icon: GraduationCap, label: t("bookRoom.accommodationType.education", "Academic"), desc: t("bookRoom.accommodationType.educationDesc", "Seminars & workshops") },
+  ];
 
-  /* ── Required star ──────────────────────── */
-  const Req = () => <span className="text-red-400 ml-0.5">*</span>;
+  const stepLabels = [
+    t("bookRoom.step1.label", "When?"),
+    t("bookRoom.step2.label", "Who & Why?"),
+    t("bookRoom.step3.label", "Confirm"),
+  ];
+
+  // ── Common input class ─────────────────────────────────
+  const wi = "wiz-input w-full rounded-xl text-sm";
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #f0f4f8 0%, #e8eef5 50%, #f0f4f8 100%)" }}>
-
-      {/* ═══ HERO BANNER ══════════════════════════════════ */}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Campus panoramic background */}
       <div
-        className="relative overflow-hidden"
+        className="fixed inset-0 z-[-2] bg-[#001428]"
         style={{
-          background: "linear-gradient(135deg, #001a3a 0%, #003366 40%, #004080 70%, #0052a3 100%)",
-          minHeight: "220px",
+          backgroundImage: `url(${campusBg})`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "0% 50%",
+          transform: "scale(1.05)",
+          transformOrigin: "center center",
+          animation: "campusPanBook 90s ease-in-out infinite",
+        }}
+      />
+      <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-[#001428]/97 via-[#002244]/92 to-[#001428]/97" />
+
+      {/* ── Header ─────────────────────────────────────────── */}
+      <header
+        className="sticky top-0 z-50 border-b border-white/10"
+        style={{
+          background: "rgba(0,25,51,0.96)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.05), 0 6px 28px rgba(0,20,50,0.4)",
         }}
       >
-        {/* Decorative grid */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-
-        {/* Floating decorative dots */}
-        {[
-          { size: 6, x: "8%", y: "20%", delay: "0s" },
-          { size: 4, x: "15%", y: "70%", delay: "0.8s" },
-          { size: 8, x: "75%", y: "15%", delay: "0.3s" },
-          { size: 5, x: "88%", y: "65%", delay: "1.2s" },
-          { size: 3, x: "55%", y: "80%", delay: "0.6s" },
-          { size: 7, x: "32%", y: "25%", delay: "1.5s" },
-          { size: 4, x: "92%", y: "35%", delay: "0.4s" },
-        ].map((dot, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white"
-            style={{
-              width: dot.size,
-              height: dot.size,
-              left: dot.x,
-              top: dot.y,
-              animation: `floatDot ${3 + i * 0.5}s ease-in-out ${dot.delay} infinite`,
-            }}
-          />
-        ))}
-
-        {/* Gold accent line */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: "linear-gradient(90deg, transparent, #c9a84c 30%, #e8c96d 50%, #c9a84c 70%, transparent)" }} />
-
-        {/* Content */}
-        <div className="relative max-w-7xl mx-auto px-6 py-12 flex flex-col justify-center" style={{ minHeight: "220px" }}>
-          {/* Breadcrumb + nav controls */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2">
-              <Link to="/main" className="flex items-center gap-1.5 text-white/50 hover:text-white/80 text-xs font-medium transition-colors">
-                <Home className="h-3.5 w-3.5" />
-                Home
-              </Link>
-              <ChevronRight className="h-3.5 w-3.5 text-white/30" />
-              <span className="text-[#c9a84c] text-xs font-semibold">
-                {t("bookingRequest.pageTitle", "Book a Room")}
-              </span>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "1.5px",
+          background: "linear-gradient(90deg, transparent, #c9a84c 30%, #4da6ff 60%, #c9a84c 80%, transparent)", opacity: 0.55 }} />
+        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+          <Link to="/main" className="flex items-center gap-4">
+            <div className="border border-[#c9a84c]/55 px-3 py-1.5 rounded hover:border-[#c9a84c] transition-all"
+              style={{ background: "rgba(201,168,76,0.07)" }}>
+              <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
+              <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
             </div>
-            <div className="flex items-center gap-3">
-              <Select value={currentLang} onValueChange={switchLanguage}>
-                <SelectTrigger className="w-[58px] h-8 bg-white/10 border-white/20 text-white text-xs font-semibold hover:bg-white/20 focus:ring-0 rounded-lg">
-                  <SelectValue placeholder={currentLang} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EN">EN</SelectItem>
-                  <SelectItem value="TR">TR</SelectItem>
-                </SelectContent>
-              </Select>
-              <Link to="/profile" className="flex items-center gap-2 group">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}>
-                  <User className="h-4 w-4 text-white/70" />
-                </div>
-                <span className="text-xs text-white/60 group-hover:text-white font-medium hidden md:block max-w-[100px] truncate transition-colors">{userName}</span>
-              </Link>
-            </div>
+            <div className="w-px h-8 bg-white/15 hidden sm:block" />
+            <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>EDU HOTEL</h1>
+          </Link>
+          <div className="flex items-center gap-4">
+            <button onClick={switchLanguage}
+              className="text-xs text-white/55 hover:text-white border border-white/15 px-3 py-1.5 rounded-lg hover:border-white/30 transition-all">
+              {currentLang === "TR" ? "EN" : "TR"}
+            </button>
+            <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/55 hover:text-white transition-colors">
+              <LayoutGrid className="h-3.5 w-3.5" />
+              {t("header.mainPage", "Main Page")}
+            </Link>
           </div>
+        </div>
+      </header>
 
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.3)" }}>
-                  <BedDouble className="h-5 w-5 text-[#c9a84c]" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#c9a84c]" />
-                  <span className="text-[#c9a84c] text-xs font-bold uppercase tracking-widest">EDU Hotel</span>
+      {/* ── Success screen ──────────────────────────────────── */}
+      {successMessage && (
+        <div className="flex items-center justify-center min-h-[calc(100vh-65px)] p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="max-w-md w-full rounded-3xl p-10 text-center"
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              backdropFilter: "blur(28px)",
+              WebkitBackdropFilter: "blur(28px)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 24px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+            }}
+          >
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-light text-white tracking-wide mb-3"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              {t("bookRoom.successTitle", "Reservation Submitted")}
+            </h2>
+            <p className="text-white/55 text-sm leading-relaxed mb-8">{successMessage}</p>
+            <div className="flex gap-3 justify-center flex-wrap">
+              <Link to="/reservations"
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white"
+                style={{ background: "linear-gradient(135deg, #001f40, #003366)" }}>
+                {t("bookRoom.viewReservations", "View Reservations")}
+              </Link>
+              <button onClick={() => setSuccessMessage(null)}
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white/60 border border-white/15 hover:bg-white/5 transition-colors">
+                {t("bookRoom.bookAnother", "Book Another")}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* ── Wizard ─────────────────────────────────────────── */}
+      {!successMessage && (
+        <main className="flex justify-center min-h-[calc(100vh-65px)] p-4 sm:p-6 py-10">
+          <div className="w-full max-w-2xl" style={{ animation: "wizardFadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both" }}>
+
+            {/* Progress header */}
+            <div className="mb-6 px-1">
+              <div className="flex items-center justify-between mb-3">
+                {stepLabels.map((label, i) => {
+                  const s = i + 1;
+                  const isActive = step === s;
+                  const isDone = step > s;
+                  return (
+                    <React.Fragment key={i}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-300 flex-shrink-0"
+                          style={{
+                            background: isDone ? "#10b981" : isActive ? "#c9a84c" : "rgba(255,255,255,0.1)",
+                            color: isDone || isActive ? "#000" : "rgba(255,255,255,0.35)",
+                            boxShadow: isActive ? "0 0 14px rgba(201,168,76,0.4)" : isDone ? "0 0 10px rgba(16,185,129,0.3)" : "none",
+                          }}
+                        >
+                          {isDone ? <Check className="h-3.5 w-3.5" /> : s}
+                        </div>
+                        <span className={`text-xs font-semibold transition-colors ${isActive ? "text-[#c9a84c]" : isDone ? "text-emerald-400" : "text-white/30"}`}>
+                          {label}
+                        </span>
+                      </div>
+                      {i < 2 && (
+                        <div className="flex-1 mx-3 hidden sm:block">
+                          <div className="h-px bg-white/10 relative">
+                            <div className="h-px absolute left-0 top-0 transition-all duration-500"
+                              style={{ background: "#c9a84c", width: isDone ? "100%" : "0%" }} />
+                          </div>
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: "linear-gradient(90deg, #c9a84c, #f0d080)" }}
+                  animate={{ width: `${((step - 1) / 2) * 100}%` }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                />
+              </div>
+            </div>
+
+            {/* Frosted glass card */}
+            <div
+              className="rounded-3xl overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                backdropFilter: "blur(32px)",
+                WebkitBackdropFilter: "blur(32px)",
+                border: "1px solid rgba(255,255,255,0.11)",
+                boxShadow: "0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.09), inset 0 -1px 0 rgba(0,0,0,0.2)",
+              }}
+            >
+              {/* Card header */}
+              <div className="px-8 pt-8 pb-5 border-b border-white/8">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-8 rounded-full flex-shrink-0"
+                    style={{ background: "linear-gradient(180deg, #c9a84c, #f0d080)" }} />
+                  <div>
+                    <p className="text-[10px] font-bold text-[#c9a84c]/65 uppercase tracking-[3px]">
+                      {t("bookRoom.wizard.title", "Room Reservation")} · {t("bookRoom.wizard.step", "Step")} {step} {t("bookRoom.wizard.of", "of")} 3
+                    </p>
+                    <h2 className="text-xl font-light text-white mt-0.5"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                      {step === 1 ? t("bookRoom.step1.title", "Select Your Dates")
+                        : step === 2 ? t("bookRoom.step2.title", "Guest & Purpose")
+                        : t("bookRoom.step3.title", "Billing & Confirm")}
+                    </h2>
+                  </div>
                 </div>
               </div>
-              <h2
-                className="text-white mb-2"
-                style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontSize: "clamp(28px, 4vw, 44px)",
-                  fontWeight: 700,
-                  lineHeight: 1.1,
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                {t("bookingRequest.pageTitle", "Book a Room")}
-              </h2>
-              <p className="text-white/50 text-sm max-w-md">
-                {t("bookingRequest.pageSubtitle", "Submit your pre-reservation request. The EDU team will review and confirm.")}
-              </p>
-            </div>
 
-            {/* Location badge */}
-            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}>
-              <MapPin className="h-4 w-4 text-[#c9a84c]" />
-              <span className="text-white/60 text-xs font-medium">Sabancı University Campus</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ MAIN ═════════════════════════════════════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div ref={formTopRef} />
-
-        {/* Step Indicator */}
-        <div style={stagger(0)}>
-          <StepIndicator active={1} />
-        </div>
-
-        {/* Success / Error */}
-        <AnimatePresence>
-          {(successMessage || errorMessage) && (
-            <motion.div
-              className="mb-7"
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.3 }}
-            >
-              {successMessage && (
-                <div className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4 flex items-start gap-3 shadow-sm">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <p className="font-bold mb-0.5 text-emerald-900">{t("common.success", "Success")}</p>
-                    <p className="text-emerald-700">{successMessage}</p>
-                    <button type="button" className="mt-2 text-xs font-semibold underline underline-offset-2 text-emerald-600 hover:text-emerald-800 transition-colors" onClick={() => setSuccessMessage(null)}>{t("common.dismiss", "Dismiss")}</button>
-                  </div>
-                </div>
-              )}
+              {/* Error banner */}
               {errorMessage && (
-                <div className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-2xl px-5 py-4 flex items-start gap-3 shadow-sm">
-                  <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <AlertCircle className="h-5 w-5 text-red-500" />
-                  </div>
-                  <div>
-                    <p className="font-bold mb-0.5 text-red-900">{t("common.error", "Error")}</p>
-                    <p className="text-red-700">{errorMessage}</p>
-                    <button type="button" className="mt-2 text-xs font-semibold underline underline-offset-2 text-red-600 hover:text-red-800 transition-colors" onClick={() => setErrorMessage(null)}>{t("common.dismiss", "Dismiss")}</button>
-                  </div>
+                <div className="mx-8 mt-5 flex items-start gap-3 p-4 rounded-2xl"
+                  style={{ background: "rgba(239,68,68,0.09)", border: "1px solid rgba(239,68,68,0.22)" }}>
+                  <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300 leading-relaxed">{errorMessage}</p>
                 </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-7">
-          {/* ── Main Form (2/3) ───────────────────────── */}
-          <div className="lg:col-span-2" style={stagger(1)}>
-            <div
-              className="bg-white rounded-3xl border border-slate-100 overflow-hidden"
-              style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.04), 0 20px 50px -10px rgba(0,51,102,0.08)" }}
-            >
-              <div className="p-7 sm:p-9">
-                <form onSubmit={handleSubmit} className="space-y-10">
+              {/* Step content */}
+              <div className="p-8 pt-6">
+                <SlideTransition step={step} direction={direction}>
 
-                  {/* ── Reservation Information ─────────── */}
-                  <div>
-                    <SectionHeader
-                      title={t("bookingRequest.sections.reservationInfo", "Reservation Information")}
-                      subtitle="Select your accommodation type and preferences"
-                    />
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className={labelClass}>{t("bookingRequest.form.accommodationType", "Accommodation Type")}<Req /></Label>
-                        <Select value={accommodationTypeUI} onValueChange={(v) => setAccommodationTypeUI(v as any)}>
-                          <SelectTrigger className={selectTriggerClass}><SelectValue placeholder={t("common.select", "Select")} /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="personal">{t("bookingRequest.accommodation.personal", "Personal")}</SelectItem>
-                            <SelectItem value="corporate">{t("bookingRequest.accommodation.corporate", "Corporate (SU)")}</SelectItem>
-                            <SelectItem value="education">{t("bookingRequest.accommodation.education", "Education")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <AnimatePresence>
-                        {showCorporateCode && (
-                          <motion.div
-                            className="space-y-2"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.25 }}
-                          >
-                            <Label className={labelClass}>{t("bookingRequest.form.eventCode", "Event / Education Code")}<Req /></Label>
-                            <Input placeholder={t("bookingRequest.form.eventCodePlaceholder", "Enter SAT-KAF or Education Code")} className={inputClass} value={eventCode} onChange={(e) => setEventCode(e.target.value)} />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* ── Stay Details ─────────────────────── */}
-                  <div>
-                    <SectionHeader
-                      title={t("bookingRequest.sections.stayDetails", "Stay Details")}
-                      accent="#22c55e"
-                      subtitle="Choose your check-in and check-out dates"
-                    />
-                    <div className="space-y-4">
-                      {/* Date cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="rounded-2xl border border-slate-100 p-4 bg-slate-50/50 space-y-2 hover:border-green-200 hover:bg-green-50/30 transition-all duration-200">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                              <CalendarIcon className="h-4 w-4 text-green-600" />
+                  {/* ════════════════════════════════════════
+                      STEP 1 — When?
+                      ════════════════════════════════════════ */}
+                  {step === 1 && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {/* Check-in date */}
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.checkIn", "Check-In Date")}
+                          </Label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                              <CalendarIcon className="h-4 w-4 text-[#c9a84c]/55" />
                             </div>
-                            <Label className={labelClass}>{t("bookingRequest.form.checkIn", "Check-in Date")}<Req /></Label>
-                          </div>
-                          <Input
-                            type="text"
-                            placeholder={t("bookingRequest.form.datePlaceholder", "DD/MM/YYYY")}
-                            value={checkInDisplay}
-                            onChange={(e) => handleDateTyping(e.target.value, setCheckInDisplay, setCheckInDate)}
-                            className={inputClass}
-                            maxLength={10}
-                          />
-                        </div>
-                        <div className="rounded-2xl border border-slate-100 p-4 bg-slate-50/50 space-y-2 hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
-                              <CalendarIcon className="h-4 w-4 text-orange-600" />
-                            </div>
-                            <Label className={labelClass}>{t("bookingRequest.form.checkOut", "Check-out Date")}<Req /></Label>
-                          </div>
-                          <Input
-                            type="text"
-                            placeholder={t("bookingRequest.form.datePlaceholder", "DD/MM/YYYY")}
-                            value={checkOutDisplay}
-                            onChange={(e) => handleDateTyping(e.target.value, setCheckOutDisplay, setCheckOutDate)}
-                            className={inputClass}
-                            maxLength={10}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                            <Clock className="h-4 w-4 text-blue-600" />
-                          </div>
-                          <Label className={labelClass}>{t("bookingRequest.form.checkInTime", "Check-in Time")}<Req /></Label>
-                        </div>
-                        <Input type="time" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)} className={inputClass} />
-                      </div>
-
-                      {/* Rules inline */}
-                      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 space-y-2.5">
-                        <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                          <AlertCircle className="h-3.5 w-3.5" />
-                          Reservation Rules
-                        </p>
-                        {[
-                          t("bookingRequest.rules.noSunday", "No Sunday check-in"),
-                          t("bookingRequest.rules.max5", "Max 5 nights for personal bookings"),
-                          t("bookingRequest.rules.max30", "Reservations allowed up to 30 days ahead"),
-                          t("bookingRequest.rules.noSatInSunOut", "No Saturday check-in + Sunday check-out"),
-                        ].map((rule, idx) => (
-                          <div key={idx} className="flex items-center gap-2.5 text-[13px] text-amber-800">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
-                            {rule}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ── Guest Information ────────────────── */}
-                  <div>
-                    <SectionHeader
-                      title={t("bookingRequest.sections.guestInfo", "Guest Information")}
-                      accent="#8b5cf6"
-                      subtitle="Enter details for all guests"
-                    />
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className={labelClass}>{t("bookingRequest.form.guests", "Number of Guests")}<Req /></Label>
-                        <Input type="number" min="1" max="10" value={numberOfGuests} onChange={(e) => handleNumberOfGuestsChange(e.target.value)} className={inputClass} />
-                        <p className="text-[11px] text-slate-400">{t("bookingRequest.form.guestsHint", "Main guest information below + additional guests")}</p>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className={labelClass}>{t("bookingRequest.form.firstName", "First Name")}<Req /></Label>
-                          <Input placeholder={t("bookingRequest.form.firstNamePlaceholder", "Enter first name")} className={inputClass} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className={labelClass}>{t("bookingRequest.form.lastName", "Last Name")}<Req /></Label>
-                          <Input placeholder={t("bookingRequest.form.lastNamePlaceholder", "Enter last name")} className={inputClass} value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className={labelClass}>{t("bookingRequest.form.phone", "Phone Number")}<Req /></Label>
-                          <Input type="tel" placeholder={t("bookingRequest.form.phonePlaceholder", "+90 (5xx) xxx xx xx")} className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className={labelClass}>{t("bookingRequest.form.email", "Email Address")}<Req /></Label>
-                          <Input type="email" placeholder={t("bookingRequest.form.emailPlaceholder", "example@email.com")} className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} />
-                        </div>
-                      </div>
-
-                      <AnimatePresence>
-                        {parseInt(numberOfGuests, 10) > 1 && (
-                          <motion.div
-                            className="space-y-3 pl-5 border-l-2 border-violet-200 mt-2"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{t("bookingRequest.form.additionalGuests", "Additional Guests")} ({guestList.length})</p>
-                            {guestList.map((guest, index) => (
-                              <div key={index} className="space-y-1.5">
-                                <p className="text-[11px] text-slate-400 font-medium">{t("bookingRequest.form.guest", "Guest")} {index + 2}</p>
-                                <div className="flex gap-3">
-                                  <Input placeholder={t("bookingRequest.form.firstName", "First Name")} value={guest.firstName} onChange={(e) => updateGuestInList(index, "firstName", e.target.value)} className={inputClass} />
-                                  <Input placeholder={t("bookingRequest.form.lastName", "Last Name")} value={guest.lastName} onChange={(e) => updateGuestInList(index, "lastName", e.target.value)} className={inputClass} />
-                                </div>
-                              </div>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* ── Room Assignment ──────────────────── */}
-                  <div>
-                    <SectionHeader
-                      title={t("bookingRequest.sections.roomAssignment", "Room Assignment")}
-                      accent="#8b5cf6"
-                    />
-                    <div className="bg-violet-50 border border-violet-100 rounded-2xl p-4 flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
-                        <Info className="h-4.5 w-4.5 text-violet-600" style={{ width: "18px", height: "18px" }} />
-                      </div>
-                      <p className="text-[13px] text-violet-800 leading-relaxed">{t("bookingRequest.roomAssignmentInfo", "Rooms are assigned by the EDU reception after approval. Users cannot select rooms.")}</p>
-                    </div>
-                  </div>
-
-                  {/* ── Event & Billing ──────────────────── */}
-                  <div>
-                    <SectionHeader
-                      title={t("bookingRequest.sections.eventBilling", "Event & Billing")}
-                      accent="#f59e0b"
-                      subtitle="Select your event type and billing preferences"
-                    />
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className={labelClass}>{t("bookingRequest.form.eventType", "Event Type")}<Req /></Label>
-                        <Select value={eventType} onValueChange={setEventType}>
-                          <SelectTrigger className={selectTriggerClass}><SelectValue placeholder={t("common.select", "Select")} /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="conference">{t("bookingRequest.eventTypes.conference", "Conference")}</SelectItem>
-                            <SelectItem value="seminar">{t("bookingRequest.eventTypes.seminar", "Seminar")}</SelectItem>
-                            <SelectItem value="workshop">{t("bookingRequest.eventTypes.workshop", "Workshop")}</SelectItem>
-                            <SelectItem value="training">{t("bookingRequest.eventTypes.training", "Training")}</SelectItem>
-                            <SelectItem value="meeting">{t("bookingRequest.eventTypes.meeting", "Meeting")}</SelectItem>
-                            <SelectItem value="other">{t("bookingRequest.eventTypes.other", "Other")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <AnimatePresence>
-                        {showPriceType && (
-                          <motion.div
-                            className="space-y-2"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            <Label className={labelClass}>{t("bookingRequest.form.priceType", "Price Type")}<Req /></Label>
-                            <Select value={priceType} onValueChange={setPriceType}>
-                              <SelectTrigger className={selectTriggerClass}><SelectValue placeholder={t("common.select", "Select")} /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="standard">{t("bookingRequest.priceTypes.standard", "Standard")}</SelectItem>
-                                <SelectItem value="corporate">{t("bookingRequest.priceTypes.corporate", "Corporate Rate")}</SelectItem>
-                                <SelectItem value="discounted">{t("bookingRequest.priceTypes.discounted", "Discounted")}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                      <div className="space-y-2">
-                        <Label className={labelClass}>{t("bookingRequest.form.invoiceType", "Billing Type")}<Req /></Label>
-                        <Select value={billingTypeUI} onValueChange={(v) => setBillingTypeUI(v as any)}>
-                          <SelectTrigger className={selectTriggerClass}><SelectValue placeholder={t("common.select", "Select")} /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="individual">{t("bookingRequest.billing.individual", "Individual")}</SelectItem>
-                            <SelectItem value="corporate">{t("bookingRequest.billing.corporate", "Corporate")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <AnimatePresence>
-                        {billingTypeUI === "individual" && (
-                          <motion.div
-                            className="space-y-3"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            <Label className={labelClass}>{t("bookingRequest.form.idType", "ID Type")}<Req /></Label>
-                            <div className="flex gap-5">
-                              {(["tc", "passport"] as const).map((type) => (
-                                <label key={type} className="flex items-center gap-2 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="nationalIdType"
-                                    value={type}
-                                    checked={nationalIdType === type}
-                                    onChange={() => { setNationalIdType(type); setTcKimlikNo(""); }}
-                                    className="accent-[#003366]"
-                                  />
-                                  <span className="text-sm text-slate-700">
-                                    {type === "tc" ? t("bookingRequest.form.tcKimlik", "T.C. Identity No") : t("bookingRequest.form.passport", "Passport No")}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                            <Input
-                              placeholder={nationalIdType === "tc"
-                                ? t("bookingRequest.form.tcKimlikPlaceholder", "Enter your T.C. Identity Number")
-                                : t("bookingRequest.form.passportPlaceholder", "Enter your Passport Number")}
-                              className={inputClass}
-                              value={tcKimlikNo}
-                              onChange={(e) => setTcKimlikNo(e.target.value)}
+                            <input
+                              type="date"
+                              value={checkInDate}
+                              onChange={e => setCheckInDate(e.target.value)}
+                              min={todayISO()}
+                              className={`${wi} h-14 pl-11 pr-4`}
+                              style={{ colorScheme: "dark" }}
                             />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                      <AnimatePresence>
-                        {billingTypeUI === "corporate" && (
-                          <motion.div
-                            className="space-y-3"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            <div className="space-y-2">
-                              <Label className={labelClass}>{t("bookingRequest.form.taxNumber", "Tax Number")}<Req /></Label>
-                              <Input placeholder={t("bookingRequest.form.taxNumberPlaceholder", "Enter Tax Number")} className={inputClass} value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className={labelClass}>{t("bookingRequest.form.billingTitle", "Billing Title")}<Req /></Label>
-                              <Input placeholder={t("bookingRequest.form.billingTitlePlaceholder", "Enter company / institution name")} className={inputClass} value={billingTitle} onChange={(e) => setBillingTitle(e.target.value)} />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className={labelClass}>{t("bookingRequest.form.billingAddress", "Billing Address")}<Req /></Label>
-                              <Input placeholder={t("bookingRequest.form.billingAddressPlaceholder", "Enter billing address")} className={inputClass} value={billingAddress} onChange={(e) => setBillingAddress(e.target.value)} />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                      <div className="flex items-center space-x-3 pt-1">
-                        <Checkbox id="free-accommodation" checked={requestFreeAccommodation} onCheckedChange={(checked) => setRequestFreeAccommodation(checked as boolean)} />
-                        <Label htmlFor="free-accommodation" className="text-sm cursor-pointer text-slate-600">{t("bookingRequest.form.freeAccommodation", "Free Accommodation (No payment required)")}</Label>
-                      </div>
-                      <AnimatePresence>
-                        {requestFreeAccommodation && (
-                          <motion.div
-                            className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            <p className="text-xs text-emerald-700 flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5" />{t("bookingRequest.form.freeAccommodationHint", "If approved, payment will not be requested for this reservation.")}</p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
+                          </div>
+                        </div>
 
-                  {/* ── Extra Information ────────────────── */}
-                  <div>
-                    <SectionHeader
-                      title={t("bookingRequest.sections.extraInfo", "Extra Information")}
-                      accent="#64748b"
-                    />
-                    <div className="space-y-4">
+                        {/* Check-out date */}
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.checkOut", "Check-Out Date")}
+                          </Label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                              <CalendarIcon className="h-4 w-4 text-[#c9a84c]/55" />
+                            </div>
+                            <input
+                              type="date"
+                              value={checkOutDate}
+                              onChange={e => setCheckOutDate(e.target.value)}
+                              min={checkInDate || todayISO()}
+                              className={`${wi} h-14 pl-11 pr-4`}
+                              style={{ colorScheme: "dark" }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Check-in time */}
                       <div className="space-y-2">
-                        <Label className={labelClass}>
-                          {t("bookingRequest.form.explanation", "Explanation / Reason")}
-                          {accommodationTypeUI === "education" && <Req />}
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.checkInTime", "Expected Check-In Time")}
                         </Label>
-                        <Textarea
-                          placeholder={t("bookingRequest.form.explanationPlaceholder", "Enter any special requests or additional information (required for education-related stays).")}
-                          className="rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm placeholder:text-slate-400 min-h-[100px] transition-all duration-200 focus:bg-white focus:border-blue-400/60 focus:ring-2 focus:ring-blue-400/15 shadow-sm"
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                            <Clock className="h-4 w-4 text-[#c9a84c]/55" />
+                          </div>
+                          <input
+                            type="time"
+                            value={checkInTime}
+                            onChange={e => setCheckInTime(e.target.value)}
+                            className={`${wi} h-14 pl-11 pr-4`}
+                            style={{ colorScheme: "dark" }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Nights summary */}
+                      {nights > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center justify-between p-4 rounded-2xl"
+                          style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.18)" }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-black text-[#c9a84c]"
+                              style={{ background: "rgba(201,168,76,0.12)" }}>
+                              {nights}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-white">
+                                {nights} {nights === 1 ? t("bookRoom.night", "night") : t("bookRoom.nights", "nights")}
+                              </p>
+                              <p className="text-xs text-white/35 mt-0.5">
+                                {toDisplayDate(checkInDate)} → {toDisplayDate(checkOutDate)}
+                              </p>
+                            </div>
+                          </div>
+                          <Sparkles className="h-4 w-4 text-[#c9a84c]/40" />
+                        </motion.div>
+                      )}
+
+                      {/* Reservation Rules card */}
+                      <div className="rounded-2xl overflow-hidden"
+                        style={{ border: "1px solid rgba(255,255,255,0.09)" }}>
+
+                        {/* Header */}
+                        <div className="px-5 py-3 flex items-center gap-2.5"
+                          style={{ background: "rgba(201,168,76,0.08)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                          <ShieldCheck className="h-4 w-4 text-[#c9a84c]" />
+                          <p className="text-xs font-bold text-[#c9a84c] uppercase tracking-[2px]">
+                            {t("dashboard.rules.title", "Reservation Rules")}
+                          </p>
+                        </div>
+
+                        {/* Rule rows */}
+                        <div className="px-5 py-4 space-y-3"
+                          style={{ background: "rgba(255,255,255,0.025)" }}>
+                          {[
+                            { icon: BanIcon,      color: "text-red-400",     bg: "rgba(239,68,68,0.1)",    text: t("dashboard.rules.r1", "No check-in on Sundays.") },
+                            { icon: Clock,        color: "text-amber-400",   bg: "rgba(251,191,36,0.1)",   text: t("dashboard.rules.r2", "Personal stays: max 5 consecutive nights.") },
+                            { icon: CalendarIcon, color: "text-blue-400",    bg: "rgba(96,165,250,0.1)",   text: t("dashboard.rules.r3", "Reservations: max 30 days in advance.") },
+                            { icon: Mail,         color: "text-emerald-400", bg: "rgba(52,211,153,0.1)",   text: t("bookRoom.rules.emailNotif", "Email notifications sent automatically after review.") },
+                          ].map(({ icon: Icon, color, bg, text }, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                                style={{ background: bg }}>
+                                <Icon className={`h-3.5 w-3.5 ${color}`} />
+                              </div>
+                              <p className="text-xs text-white/60 leading-relaxed mt-0.5">{text}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Note / approval info */}
+                        <div className="px-5 py-4 flex gap-3"
+                          style={{ background: "rgba(77,166,255,0.04)", borderTop: "1px solid rgba(77,166,255,0.1)" }}>
+                          <Info className="h-4 w-4 text-blue-400/65 flex-shrink-0 mt-0.5" />
+                          <div className="text-xs text-blue-200/55 leading-relaxed space-y-1.5">
+                            <p>
+                              <span className="font-semibold text-blue-200/75">
+                                {t("bookRoom.rules.approvalTitle", "All pre-reservations require manual approval")}
+                              </span>
+                              {" "}{t("bookRoom.rules.approvalDesc", "by the EDU team. You will receive confirmation after review.")}
+                            </p>
+                            <p>{t("bookRoom.rules.notifDesc", "After submission, your request will be reviewed. You will receive an email or push notification after review.")}</p>
+                            <p>{t("bookRoom.rules.paymentNote", "Payment will be requested only after approval if applicable.")}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ════════════════════════════════════════
+                      STEP 2 — Who & Why?
+                      ════════════════════════════════════════ */}
+                  {step === 2 && (
+                    <div className="space-y-7">
+                      {/* Accommodation type tiles */}
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.accommodationType.label", "Accommodation Type")}
+                        </Label>
+                        <div className="grid grid-cols-3 gap-3">
+                          {accommodationTiles.map((tile) => {
+                            const Icon = tile.icon;
+                            const isSelected = accommodationTypeUI === tile.key;
+                            return (
+                              <button
+                                key={tile.key}
+                                type="button"
+                                onClick={() => setAccommodationTypeUI(tile.key)}
+                                className={`tile-accom relative flex flex-col items-center gap-2.5 p-4 rounded-2xl text-center ${isSelected ? "selected" : ""}`}
+                                style={{
+                                  background: isSelected ? "rgba(201,168,76,0.09)" : "rgba(255,255,255,0.04)",
+                                  border: isSelected ? "2px solid #c9a84c" : "1.5px solid rgba(255,255,255,0.09)",
+                                }}
+                              >
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-[#c9a84c] flex items-center justify-center">
+                                    <Check style={{ width: 9, height: 9, color: "#000" }} />
+                                  </div>
+                                )}
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                                  style={{ background: isSelected ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.06)" }}>
+                                  <Icon className="h-5 w-5" style={{ color: isSelected ? "#c9a84c" : "rgba(255,255,255,0.45)" }} />
+                                </div>
+                                <div>
+                                  <p className={`text-xs font-bold ${isSelected ? "text-[#c9a84c]" : "text-white/60"}`}>{tile.label}</p>
+                                  <p className="text-[10px] text-white/25 mt-0.5 leading-tight hidden sm:block">{tile.desc}</p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Number of guests */}
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.numberOfGuests", "Number of Guests")}
+                        </Label>
+                        <div className="flex gap-2 flex-wrap items-center">
+                          {[1, 2, 3, 4, 5, 6].map(n => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => { setNumberOfGuests(String(n)); syncGuestList(n); }}
+                              className="w-11 h-11 rounded-xl text-sm font-bold transition-all duration-200"
+                              style={{
+                                background: numGuests === n ? "rgba(201,168,76,0.13)" : "rgba(255,255,255,0.05)",
+                                border: numGuests === n ? "2px solid #c9a84c" : "1.5px solid rgba(255,255,255,0.09)",
+                                color: numGuests === n ? "#c9a84c" : "rgba(255,255,255,0.45)",
+                                boxShadow: numGuests === n ? "0 0 12px rgba(201,168,76,0.18)" : "none",
+                              }}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                          {/* 7+ tile */}
+                          {numGuests <= 6 ? (
+                            <button
+                              type="button"
+                              onClick={() => { setNumberOfGuests("7"); syncGuestList(7); }}
+                              className="px-3 h-11 rounded-xl text-xs font-bold transition-all duration-200"
+                              style={{
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1.5px solid rgba(255,255,255,0.09)",
+                                color: "rgba(255,255,255,0.35)",
+                              }}
+                            >7+</button>
+                          ) : (
+                            <input
+                              type="number"
+                              min="7" max="10"
+                              value={numberOfGuests}
+                              onChange={e => { setNumberOfGuests(e.target.value); syncGuestList(parseInt(e.target.value) || 7); }}
+                              className="wiz-input w-16 h-11 rounded-xl text-sm text-center"
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Primary guest info */}
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.guestInfo", "Primary Guest")}
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <input value={firstName} onChange={e => setFirstName(e.target.value)}
+                            placeholder={t("signup.firstNamePlaceholder", "First Name")}
+                            className={`${wi} h-12 px-4`} />
+                          <input value={lastName} onChange={e => setLastName(e.target.value)}
+                            placeholder={t("signup.lastNamePlaceholder", "Last Name")}
+                            className={`${wi} h-12 px-4`} />
+                          <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                            placeholder={t("login.email", "Email")}
+                            className={`${wi} h-12 px-4`} />
+                          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                            placeholder={t("account.profile.phone", "Phone")}
+                            className={`${wi} h-12 px-4`} />
+                        </div>
+                      </div>
+
+                      {/* Additional guests */}
+                      {guestList.length > 0 && (
+                        <div className="space-y-3">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.additionalGuests", "Additional Guests")}
+                          </Label>
+                          {guestList.map((g, i) => (
+                            <div key={i} className="grid grid-cols-2 gap-3">
+                              <input
+                                value={g.firstName}
+                                onChange={e => setGuestList(prev => prev.map((x, j) => j === i ? { ...x, firstName: e.target.value } : x))}
+                                placeholder={`Guest ${i + 2} — First Name`}
+                                className={`${wi} h-11 px-4`}
+                              />
+                              <input
+                                value={g.lastName}
+                                onChange={e => setGuestList(prev => prev.map((x, j) => j === i ? { ...x, lastName: e.target.value } : x))}
+                                placeholder="Last Name"
+                                className={`${wi} h-11 px-4`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Event code */}
+                      {showCorporateCode && (
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.eventCode", "Event / Education Code")} <span className="text-red-400 ml-1">*</span>
+                          </Label>
+                          <input
+                            value={eventCode}
+                            onChange={e => setEventCode(e.target.value)}
+                            placeholder="e.g. CONF-2026-001"
+                            className={`${wi} h-12 px-4`}
+                          />
+                        </div>
+                      )}
+
+                      {/* Purpose of stay */}
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.eventType", "Purpose of Stay")}
+                        </Label>
+                        <Select value={eventType} onValueChange={setEventType}>
+                          <SelectTrigger className="h-12 rounded-xl border-white/[0.14] text-white text-sm focus:ring-0 focus:ring-offset-0"
+                            style={{ background: "rgba(255,255,255,0.04)" }}>
+                            <SelectValue placeholder={t("bookRoom.eventTypePlaceholder", "Select purpose...")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["conference", "seminar", "workshop", "training", "meeting", "personal", "other"].map(v => (
+                              <SelectItem key={v} value={v}>
+                                {t(`bookRoom.eventTypes.${v}`, v.charAt(0).toUpperCase() + v.slice(1))}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Price type */}
+                      {showPriceType && (
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.priceType", "Price Type")}
+                          </Label>
+                          <Select value={priceType} onValueChange={setPriceType}>
+                            <SelectTrigger className="h-12 rounded-xl border-white/[0.14] text-white text-sm focus:ring-0 focus:ring-offset-0"
+                              style={{ background: "rgba(255,255,255,0.04)" }}>
+                              <SelectValue placeholder={t("bookRoom.priceTypePlaceholder", "Select price type...")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["standard", "corporate", "discounted"].map(v => (
+                                <SelectItem key={v} value={v}>
+                                  {t(`bookRoom.priceTypes.${v}`, v.charAt(0).toUpperCase() + v.slice(1))}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.notes", "Notes / Explanation")}
+                          {accommodationTypeUI === "education" && <span className="text-red-400 ml-1">*</span>}
+                        </Label>
+                        <textarea
                           value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
+                          onChange={e => setNotes(e.target.value)}
+                          rows={3}
+                          placeholder={t("bookRoom.notesPlaceholder", "Purpose of your stay, special requirements...")}
+                          className={`${wi} px-4 py-3 resize-none`}
                         />
                       </div>
+                    </div>
+                  )}
 
-                      {/* Post-submission info */}
-                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <Sparkles className="h-4 w-4 text-blue-600" />
+                  {/* ════════════════════════════════════════
+                      STEP 3 — Billing & Confirm
+                      ════════════════════════════════════════ */}
+                  {step === 3 && (
+                    <div className="space-y-7">
+                      {/* ── Boarding pass ── */}
+                      <div
+                        className="rounded-2xl overflow-visible"
+                        style={{
+                          background: "linear-gradient(135deg, #000e1f 0%, #001f40 50%, #001428 100%)",
+                          border: "1px solid rgba(201,168,76,0.22)",
+                          boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
+                        }}
+                      >
+                        {/* Top half */}
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-5">
+                            <div>
+                              <p className="text-[9px] font-black text-[#c9a84c]/60 tracking-[3px] uppercase">Sabancı University</p>
+                              <p className="text-[13px] font-light text-white tracking-[4px] uppercase mt-0.5"
+                                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>EDU HOTEL</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[9px] text-white/25 uppercase tracking-[2px]">{t("bookRoom.boardingPass.reservation", "Reservation")}</p>
+                              <p className="text-xs font-black text-[#c9a84c] tracking-[3px] mt-0.5">PASS</p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.checkIn", "Check-In")}</p>
+                              <p className="text-sm font-bold text-white">{toDisplayDate(checkInDate)}</p>
+                              <p className="text-[10px] text-white/35 mt-0.5">{checkInTime}</p>
+                            </div>
+                            <div className="flex flex-col items-center pt-1">
+                              <div className="flex items-center gap-1">
+                                <div className="w-5 h-px bg-white/20" />
+                                <ArrowRight className="h-3 w-3 text-[#c9a84c]/55" />
+                                <div className="w-5 h-px bg-white/20" />
+                              </div>
+                              <p className="text-xs font-black text-[#c9a84c] mt-1.5">{nights}N</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.checkOut", "Check-Out")}</p>
+                              <p className="text-sm font-bold text-white">{toDisplayDate(checkOutDate)}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-[13px] text-blue-800">
-                          <p className="font-semibold mb-1">{t("bookingRequest.afterSubmitInfo", "After submission, your request will be reviewed by the EDU team. You will receive an email or push notification after review.")}</p>
-                          <p className="text-[11px] text-blue-500">{t("bookingRequest.afterSubmitPaymentNote", "Payment will be requested only after approval if applicable.")}</p>
+
+                        {/* Perforation */}
+                        <div className="relative h-5 flex items-center">
+                          <div className="absolute -left-2.5 w-5 h-5 rounded-full"
+                            style={{ background: "rgba(0,36,77,0.8)", border: "1px solid rgba(201,168,76,0.1)" }} />
+                          <div className="w-full bp-dash h-px mx-3" />
+                          <div className="absolute -right-2.5 w-5 h-5 rounded-full"
+                            style={{ background: "rgba(0,36,77,0.8)", border: "1px solid rgba(201,168,76,0.1)" }} />
                         </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* ── Consent + Submit ─────────────────── */}
-                  <div className="space-y-5 pt-2">
-                    <div className="flex items-start space-x-3">
-                      <Checkbox id="consent" checked={consentChecked} onCheckedChange={(checked) => setConsentChecked(checked as boolean)} required className="mt-0.5" />
-                      <Label htmlFor="consent" className="text-sm cursor-pointer text-slate-600 leading-relaxed">
-                        {t("bookingRequest.form.consent", "I confirm that the information provided is correct and I accept the reservation rules.")}<Req />
-                      </Label>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={loading || !consentChecked}
-                      className="w-full h-14 rounded-2xl text-white text-base font-bold relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/20 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ background: "linear-gradient(135deg, #001a3a 0%, #003366 40%, #0052a3 100%)" }}
-                    >
-                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                      <span className="relative flex items-center justify-center gap-2.5">
-                        {loading ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            {t("bookingRequest.form.submitting", "Submitting...")}
-                          </>
-                        ) : (
-                          <>
-                            {t("bookingRequest.form.submitButton", "Submit Pre-Reservation")}
-                            <ArrowRight className="h-4 w-4" />
-                          </>
-                        )}
-                      </span>
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Sidebar (1/3) ─────────────────────────── */}
-          <div className="lg:col-span-1" style={stagger(2)}>
-            <div className="sticky top-20 space-y-5">
-
-              {/* Price Summary Card */}
-              <div
-                className="rounded-3xl overflow-hidden"
-                style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.04), 0 20px 50px -10px rgba(0,51,102,0.1)" }}
-              >
-                <div
-                  className="px-6 py-5"
-                  style={{ background: "linear-gradient(135deg, #001a3a 0%, #003366 60%, #004080 100%)" }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-white text-[14px] font-bold tracking-tight">Price Summary</h3>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(201,168,76,0.2)" }}>
-                      <CreditCard className="h-3.5 w-3.5 text-[#c9a84c]" />
-                    </div>
-                  </div>
-                  <p className="text-white/40 text-[11px]">Estimate based on your selection</p>
-                </div>
-                <div className="bg-white p-6 space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Check-in</span>
-                      <span className="font-semibold text-slate-800 tabular-nums">
-                        {checkInDisplay || <span className="text-slate-300 font-normal">—</span>}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Check-out</span>
-                      <span className="font-semibold text-slate-800 tabular-nums">
-                        {checkOutDisplay || <span className="text-slate-300 font-normal">—</span>}
-                      </span>
-                    </div>
-                    <div className="border-t border-slate-100 pt-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500 text-sm">Duration</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-2xl font-bold text-[#003366] tabular-nums">{nights > 0 ? nights : "—"}</span>
-                          {nights > 0 && <span className="text-slate-400 text-sm">{nights === 1 ? "night" : "nights"}</span>}
+                        {/* Bottom half */}
+                        <div className="p-6 pt-3">
+                          <div className="grid grid-cols-3 gap-3 mb-3">
+                            <div>
+                              <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.boardingPass.guest", "Guest")}</p>
+                              <p className="text-xs font-bold text-white truncate">{firstName} {lastName}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.boardingPass.type", "Type")}</p>
+                              <p className="text-xs font-bold text-[#c9a84c] uppercase">{accommodationTypeUI}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.numberOfGuests", "Guests")}</p>
+                              <p className="text-xs font-bold text-white">{numberOfGuests}</p>
+                            </div>
+                          </div>
+                          {eventType && (
+                            <div className="pt-3 border-t border-white/[0.07]">
+                              <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.eventType", "Purpose")}</p>
+                              <p className="text-xs text-white/55 capitalize">{eventType}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="rounded-2xl p-4 border border-slate-100 bg-slate-50/60">
-                    <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-2">Guests</p>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-slate-400" />
-                      <span className="text-slate-800 font-semibold text-sm">{numberOfGuests} {parseInt(numberOfGuests) === 1 ? "guest" : "guests"}</span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="rounded-2xl p-4"
-                    style={{ background: "linear-gradient(135deg, #003366 0%, #0052a3 100%)" }}
-                  >
-                    <p className="text-white/60 text-xs mb-1">Estimated Total</p>
-                    <p className="text-white/50 text-[11px]">Price set by EDU team after approval</p>
-                    <div className="mt-3 pt-3 border-t border-white/10">
-                      <p className="text-white/70 text-xs">Room price will be confirmed upon approval of your pre-reservation request.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Rules card */}
-              <div
-                className="rounded-3xl overflow-hidden"
-                style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.03)" }}
-              >
-                <div className="px-6 py-5 text-white" style={{ background: "linear-gradient(135deg, #003366 0%, #004d99 100%)" }}>
-                  <div className="flex items-center gap-2.5">
-                    <Info className="h-4.5 w-4.5 opacity-80" style={{ width: "18px", height: "18px" }} />
-                    <h3 className="text-[14px] font-bold tracking-tight">{t("bookingRequest.rules.title", "Reservation Rules")}</h3>
-                  </div>
-                </div>
-                <div className="bg-white p-6 space-y-4">
-                  {[
-                    { icon: XCircle, color: "#ef4444", bg: "bg-red-50", border: "border-red-100", text: t("bookingRequest.rules.noSunday", "No Sunday check-in") },
-                    { icon: Clock, color: "#f59e0b", bg: "bg-amber-50", border: "border-amber-100", text: t("bookingRequest.rules.max5short", "Max 5-day consecutive stay (personal)") },
-                    { icon: CalendarIcon, color: "#3b82f6", bg: "bg-blue-50", border: "border-blue-100", text: t("bookingRequest.rules.max30short", "30-day advance reservation limit") },
-                    { icon: CheckCircle2, color: "#22c55e", bg: "bg-emerald-50", border: "border-emerald-100", text: t("bookingRequest.rules.emailAuto", "Email notifications sent automatically") },
-                  ].map((rule, idx) => {
-                    const Icon = rule.icon;
-                    return (
-                      <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border ${rule.bg} ${rule.border}`}>
-                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                          <Icon className="h-4 w-4" style={{ color: rule.color }} />
+                      {/* Billing type */}
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.billingType", "Billing Type")}
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {([
+                            { key: "individual" as const, icon: User, label: t("bookRoom.billing.individual", "Individual") },
+                            { key: "corporate" as const, icon: Building2, label: t("bookRoom.billing.corporate", "Corporate") },
+                          ] as const).map(({ key, icon: Icon, label }) => (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => setBillingTypeUI(key)}
+                              className="tile-accom flex items-center gap-3 p-4 rounded-2xl"
+                              style={{
+                                background: billingTypeUI === key ? "rgba(201,168,76,0.09)" : "rgba(255,255,255,0.04)",
+                                border: billingTypeUI === key ? "2px solid #c9a84c" : "1.5px solid rgba(255,255,255,0.09)",
+                              }}
+                            >
+                              <Icon className="h-5 w-5 flex-shrink-0"
+                                style={{ color: billingTypeUI === key ? "#c9a84c" : "rgba(255,255,255,0.4)" }} />
+                              <span className={`text-sm font-semibold ${billingTypeUI === key ? "text-[#c9a84c]" : "text-white/55"}`}>{label}</span>
+                              {billingTypeUI === key && <Check className="h-4 w-4 ml-auto text-[#c9a84c]" />}
+                            </button>
+                          ))}
                         </div>
-                        <p className="text-[12px] text-slate-700 font-medium">{rule.text}</p>
                       </div>
-                    );
-                  })}
 
-                  <div className="border-t border-slate-100 pt-4 mt-4">
-                    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
-                      <div className="flex items-start gap-2.5">
-                        <Users className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      {/* Individual billing fields */}
+                      {billingTypeUI === "individual" && (
+                        <div className="space-y-3">
+                          <div className="flex gap-2">
+                            {(["tc", "passport"] as const).map(t2 => (
+                              <button key={t2} type="button" onClick={() => setNationalIdType(t2)}
+                                className="px-4 h-9 rounded-lg text-xs font-bold transition-all"
+                                style={{
+                                  background: nationalIdType === t2 ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.04)",
+                                  border: nationalIdType === t2 ? "1.5px solid rgba(201,168,76,0.45)" : "1px solid rgba(255,255,255,0.09)",
+                                  color: nationalIdType === t2 ? "#c9a84c" : "rgba(255,255,255,0.35)",
+                                }}>
+                                {t2 === "tc" ? t("bookRoom.tcId", "T.C. Kimlik") : t("bookRoom.passport", "Passport")}
+                              </button>
+                            ))}
+                          </div>
+                          <input
+                            value={tcKimlikNo}
+                            onChange={e => setTcKimlikNo(e.target.value)}
+                            placeholder={nationalIdType === "tc" ? "T.C. Kimlik No" : t("bookRoom.passportNo", "Passport Number")}
+                            className={`${wi} h-12 px-4`}
+                          />
+                        </div>
+                      )}
+
+                      {/* Corporate billing fields */}
+                      {billingTypeUI === "corporate" && (
+                        <div className="space-y-3">
+                          <input value={taxNumber} onChange={e => setTaxNumber(e.target.value)}
+                            placeholder={t("bookRoom.taxNumber", "Tax Number")}
+                            className={`${wi} h-12 px-4`} />
+                          <input value={billingTitle} onChange={e => setBillingTitle(e.target.value)}
+                            placeholder={t("bookRoom.billingTitle", "Company / Institution Name")}
+                            className={`${wi} h-12 px-4`} />
+                          <textarea value={billingAddress} onChange={e => setBillingAddress(e.target.value)}
+                            rows={2}
+                            placeholder={t("bookRoom.billingAddress", "Billing Address")}
+                            className={`${wi} px-4 py-3 resize-none`} />
+                        </div>
+                      )}
+
+                      {/* Free accommodation checkbox */}
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <Checkbox
+                          checked={requestFreeAccommodation}
+                          onCheckedChange={(v: boolean | "indeterminate") => setRequestFreeAccommodation(v === true)}
+                          className="mt-0.5 border-white/25 data-[state=checked]:bg-[#c9a84c] data-[state=checked]:border-[#c9a84c]"
+                        />
                         <div>
-                          <p className="text-xs text-amber-900 font-bold mb-1">{t("common.note", "Note")}</p>
-                          <p className="text-[11px] text-amber-700 leading-relaxed">{t("bookingRequest.rules.manualApproval", "All pre-reservations require manual approval by the EDU team.")}</p>
-                          <p className="text-[11px] text-amber-500 mt-1">{t("bookingRequest.rules.confirmationTime", "You will receive confirmation after review.")}</p>
+                          <p className="text-sm text-white/65 font-medium group-hover:text-white/85 transition-colors">
+                            {t("bookRoom.freeAccommodation.label", "Request Free Accommodation")}
+                          </p>
+                          <p className="text-xs text-white/28 mt-0.5">{t("bookRoom.freeAccommodation.desc", "Subject to approval by reception")}</p>
                         </div>
-                      </div>
+                      </label>
+
+                      {/* Consent */}
+                      <label className="flex items-start gap-3 cursor-pointer group pt-4 border-t border-white/[0.07]">
+                        <Checkbox
+                          checked={consentChecked}
+                          onCheckedChange={(v: boolean | "indeterminate") => setConsentChecked(v === true)}
+                          className="mt-0.5 border-white/25 data-[state=checked]:bg-[#c9a84c] data-[state=checked]:border-[#c9a84c]"
+                        />
+                        <p className="text-sm text-white/55 leading-relaxed group-hover:text-white/75 transition-colors">
+                          {t("bookRoom.consent", "I confirm that all provided information is accurate and I agree to the reservation terms and hotel policies.")}
+                        </p>
+                      </label>
                     </div>
-                  </div>
+                  )}
+
+                </SlideTransition>
+              </div>
+
+              {/* ── Navigation footer ───────────────────────────── */}
+              <div className="px-8 pb-8 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/45 border border-white/10 hover:bg-white/5 hover:text-white/70 transition-all duration-200"
+                  style={{ visibility: step === 1 ? "hidden" : "visible" }}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  {t("bookRoom.back", "Back")}
+                </button>
+
+                {/* Step dots */}
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3].map(s => (
+                    <div key={s}
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: step === s ? 20 : 6,
+                        height: 6,
+                        background: step === s ? "#c9a84c" : step > s ? "#10b981" : "rgba(255,255,255,0.18)",
+                      }} />
+                  ))}
                 </div>
+
+                {step < 3 ? (
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="flex items-center gap-2 px-7 py-2.5 rounded-xl text-sm font-black text-[#001428] transition-all duration-200 hover:-translate-y-0.5"
+                    style={{
+                      background: "linear-gradient(135deg, #c9a84c, #f0d080)",
+                      boxShadow: "0 4px 16px rgba(201,168,76,0.25)",
+                    }}
+                  >
+                    {t("bookRoom.next", "Next")}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-7 py-2.5 rounded-xl text-sm font-black text-[#001428] transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "linear-gradient(135deg, #c9a84c, #f0d080)",
+                      boxShadow: "0 4px 16px rgba(201,168,76,0.25)",
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-[#001428]/30 border-t-[#001428] rounded-full animate-spin" />
+                        {t("bookRoom.submitting", "Submitting...")}
+                      </>
+                    ) : (
+                      <>
+                        {t("bookRoom.submitBtn", "Confirm Reservation")}
+                        <CheckCircle2 className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </main>
+      )}
 
       <Footer />
     </div>

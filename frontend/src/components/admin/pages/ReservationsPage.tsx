@@ -20,6 +20,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import {
   getAdminReservations,
   approveReservation,
@@ -103,7 +104,9 @@ export function ReservationsPage() {
       const updated = await approveReservation(approveModalId, price);
       setReservations(prev => prev.map(r => r.id === approveModalId ? { ...r, ...updated } as AdminReservation : r));
       setApproveModalId(null);
+      toast.success(t("reservations.toasts.approved", { id: `#${approveModalId}` }));
     } catch (err: any) {
+      toast.error(err.message || "Failed to approve.");
       setError(err.message || "Failed to approve.");
     } finally { setActionLoadingId(null); }
   };
@@ -115,7 +118,9 @@ export function ReservationsPage() {
       setError(null);
       const updated = await rejectReservation(id, reason);
       setReservations(prev => prev.map(r => r.id === id ? { ...r, ...updated } as AdminReservation : r));
+      toast.success(t("reservations.toasts.rejected", { id: `#${id}` }));
     } catch (err: any) {
+      toast.error(err.message || "Failed to reject.");
       setError(err.message || "Failed to reject.");
     } finally { setActionLoadingId(null); }
   };
@@ -148,6 +153,18 @@ export function ReservationsPage() {
     REJECTED:             { label: t("tables.paymentRejected"),      bg: "bg-red-50",     text: "text-red-700",   dot: "#ef4444" },
   };
 
+  const getEventTypeLabel = (type: string): string => {
+    const map: Record<string, string> = {
+      CONFERENCE: t("reservations.eventTypes.conference"),
+      SEMINAR:    t("reservations.eventTypes.seminar"),
+      WORKSHOP:   t("reservations.eventTypes.workshop"),
+      TRAINING:   t("reservations.eventTypes.training"),
+      MEETING:    t("reservations.eventTypes.meeting"),
+      OTHER:      t("reservations.eventTypes.other"),
+    };
+    return map[(type || "").toUpperCase()] || type;
+  };
+
   const getAccomLabel = (type: string): string => {
     const map: Record<string, string> = {
       PERSONAL: t("reservations.guestTypes.personal"),
@@ -155,18 +172,6 @@ export function ReservationsPage() {
       EDUCATION: t("reservations.guestTypes.education"),
     };
     return map[type] || type;
-  };
-
-  const getEventTypeLabel = (type: string): string => {
-    const map: Record<string, string> = {
-      conference: t("reservations.eventTypes.conference"),
-      seminar:    t("reservations.eventTypes.seminar"),
-      workshop:   t("reservations.eventTypes.workshop"),
-      training:   t("reservations.eventTypes.training"),
-      meeting:    t("reservations.eventTypes.meeting"),
-      other:      t("reservations.eventTypes.other"),
-    };
-    return map[type?.toLowerCase()] || type;
   };
 
   const ACCOM_STYLE: Record<string, { bg: string; text: string }> = {
@@ -184,14 +189,14 @@ export function ReservationsPage() {
   ];
 
   const AVATAR_COLORS = [
-    { bg: "bg-blue-600",   text: "text-white" },
-    { bg: "bg-violet-600", text: "text-white" },
-    { bg: "bg-emerald-600",text: "text-white" },
-    { bg: "bg-amber-500",  text: "text-white" },
-    { bg: "bg-rose-600",   text: "text-white" },
-    { bg: "bg-teal-600",   text: "text-white" },
-    { bg: "bg-sky-600",    text: "text-white" },
-    { bg: "bg-indigo-600", text: "text-white" },
+    { from: "#3b82f6", to: "#1d4ed8" },
+    { from: "#8b5cf6", to: "#6d28d9" },
+    { from: "#10b981", to: "#047857" },
+    { from: "#f59e0b", to: "#ea580c" },
+    { from: "#f43f5e", to: "#be123c" },
+    { from: "#14b8a6", to: "#0f766e" },
+    { from: "#0ea5e9", to: "#0369a1" },
+    { from: "#6366f1", to: "#4338ca" },
   ];
 
   const getInitials = (name: string) => {
@@ -362,8 +367,9 @@ export function ReservationsPage() {
                     <tr key={res.id} className="border-b border-gray-50 last:border-b-0 hover:bg-blue-50/20 transition-colors duration-150 group">
                       <td className="py-3.5 pl-6 pr-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full ${avatarColor.bg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                            <span className={`text-[10px] font-bold ${avatarColor.text}`}>{initials}</span>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm"
+                            style={{ background: `linear-gradient(135deg, ${avatarColor.from}, ${avatarColor.to})` }}>
+                            <span className="text-[10px] font-bold text-white">{initials}</span>
                           </div>
                           <div>
                             <p className="text-[13px] font-semibold text-gray-800 leading-tight">{name}</p>
@@ -397,7 +403,7 @@ export function ReservationsPage() {
                         )}
                       </td>
                       <td className="py-3.5 pr-6 px-4">
-                        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
+                        <div className="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity duration-150">
                           {res.status === "PENDING" && (
                             <>
                               <button
@@ -496,8 +502,9 @@ export function ReservationsPage() {
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl ${AVATAR_COLORS[selected.id % AVATAR_COLORS.length].bg} flex items-center justify-center shadow-md flex-shrink-0`}>
-                  <span className={`text-sm font-bold ${AVATAR_COLORS[selected.id % AVATAR_COLORS.length].text}`}>{getInitials(joinName((selected as any).firstName, (selected as any).lastName))}</span>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${AVATAR_COLORS[selected.id % AVATAR_COLORS.length].from}, ${AVATAR_COLORS[selected.id % AVATAR_COLORS.length].to})` }}>
+                  <span className="text-sm font-bold text-white">{getInitials(joinName((selected as any).firstName, (selected as any).lastName))}</span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
@@ -539,7 +546,7 @@ export function ReservationsPage() {
                     <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
                     {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.checkInLabel")}: {(selected as any).checkInTime}</div>}
                     {selected.room && <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("tables.room")} {selected.room.name} ({selected.room.type})</div>}
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{getAccomLabel(selected.accommodationType)} / {(selected.invoiceType === "INDIVIDUAL" ? t("reservations.invoiceTypes.individual") : t("reservations.invoiceTypes.corporate"))}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{getAccomLabel(selected.accommodationType)} / {selected.invoiceType === "INDIVIDUAL" ? t("reservations.invoiceTypes.individual") : t("reservations.invoiceTypes.corporate")}</div>
                   </div>
                 </div>
 
@@ -547,7 +554,7 @@ export function ReservationsPage() {
                 <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{t("reservations.detail.billingEvent")}</h4>
                   <div className="space-y-2.5">
-                    {(selected as any).eventType && <div className="flex items-center gap-2 text-sm text-gray-700"><FileText className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.eventLabel")}: {(selected as any).eventType}</div>}
+                    {(selected as any).eventType && <div className="flex items-center gap-2 text-sm text-gray-700"><FileText className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.eventLabel")}: {getEventTypeLabel((selected as any).eventType)}</div>}
                     {selected.eventCode && <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.codeLabel")}: {selected.eventCode}</div>}
                     {(selected as any).freeAccommodation && <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium"><CheckCircle className="h-3.5 w-3.5 flex-shrink-0" />{t("reservations.detail.freeAccommodation")}</div>}
                     {selected.invoiceType === "INDIVIDUAL" && (selected as any).nationalId && (

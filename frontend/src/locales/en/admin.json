@@ -408,6 +408,10 @@
           "loading": "Loading reservations...",
           "empty": "No reservations found for the selected filters.",
           "createReservationDisabledHint": "Admin-created reservations will be implemented later.",
+          "toasts": {
+            "approved": "Reservation {{id}} approved successfully.",
+            "rejected": "Reservation {{id}} has been rejected."
+          },
           "approveModal": {
             "title": "Approve Reservation {{id}}",
             "desc": "Set the price for this reservation. The user will be notified by email.",

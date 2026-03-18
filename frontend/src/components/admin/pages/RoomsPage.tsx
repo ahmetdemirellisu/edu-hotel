@@ -84,6 +84,7 @@ const STATUS = {
 
 type StatusKey = keyof typeof STATUS;
 
+
 /* ════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════ */
@@ -137,17 +138,15 @@ export function RoomsPage() {
   const fmtDate = (s: string) => new Date(s + "T12:00:00").toLocaleDateString(locale, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
 
   /* ── Enhanced SVG Floor Plan ─────────────────────── */
-  const C = 28; // Slightly larger grid scale for better breathing room
+  const C = 28;
   const SVG_W = 28 * C;
   const SVG_H = 28 * C;
 
   const FloorPlan = () => (
     <div className="flex gap-0">
       <div className="flex-1 bg-[#f8fafc] rounded-3xl border border-gray-200 shadow-inner p-2 sm:p-6 overflow-auto relative">
-        
         <svg viewBox={`-20 -20 ${SVG_W + 40} ${SVG_H + 40}`} className="w-full mx-auto block drop-shadow-sm" style={{ maxWidth: 880 }}>
           <defs>
-            {/* Soft architectural drop shadows */}
             <filter id="shadow-building" x="-10%" y="-10%" width="120%" height="120%">
               <feDropShadow dx="0" dy="16" stdDeviation="24" floodColor="#0f172a" floodOpacity="0.06" />
             </filter>
@@ -157,8 +156,6 @@ export function RoomsPage() {
             <filter id="shadow-tree" x="-30%" y="-30%" width="160%" height="160%">
               <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#064e3b" floodOpacity="0.15" />
             </filter>
-            
-            {/* Architectural Patterns */}
             <pattern id="dot-grid" width="24" height="24" patternUnits="userSpaceOnUse">
               <circle cx="2" cy="2" r="1.5" fill="#cbd5e1" opacity="0.4" />
             </pattern>
@@ -173,65 +170,54 @@ export function RoomsPage() {
           {/* Blueprint background grid */}
           <rect x={-30} y={-30} width={SVG_W + 60} height={SVG_H + 60} fill="url(#dot-grid)" rx={16} />
 
-          {/* Main Building Base (Provides the solid 3D elevation) */}
+          {/* Main Building Base */}
           <rect x={-8} y={-8} width={SVG_W + 16} height={SVG_H + 16} rx={24} fill="#ffffff" filter="url(#shadow-building)" stroke="#f1f5f9" strokeWidth={2} />
 
           {/* Terraces */}
-          <g className="terraces">
+          <g>
             <rect x={1.5*C} y={-4*C} width={8*C} height={3.5*C} fill="url(#terrace-hatch)" rx={8} />
             <rect x={22.5*C} y={-4*C} width={6*C} height={3.5*C} fill="url(#terrace-hatch)" rx={8} />
             <rect x={-5*C} y={20*C} width={4.5*C} height={6*C} fill="url(#terrace-hatch)" rx={8} />
             <rect x={27.5*C} y={13*C} width={4.5*C} height={6*C} fill="url(#terrace-hatch)" rx={8} />
-            
-            {/* Terrace Labels */}
             <text x={5.5*C} y={-2*C} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={700} letterSpacing={3}>TERAS</text>
             <text x={25.5*C} y={-2*C} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={700} letterSpacing={3}>TERAS</text>
             <text x={-2.75*C} y={23*C} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={700} letterSpacing={3}>TERAS</text>
             <text x={29.75*C} y={16*C} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={700} letterSpacing={3}>TERAS</text>
           </g>
 
-          {/* Central Courtyard (AVLU) - Landscaped */}
-          <g className="courtyard">
-            {/* Grass base */}
-            <rect x={5.5 * C} y={5.5 * C} width={16 * C} height={17 * C} rx={16} fill="#f0fdf4" stroke="#dcfce7" strokeWidth={2} />
-            
-            {/* Geometric paths */}
-            <circle cx={13.5 * C} cy={14 * C} r={7 * C} fill="#ffffff" opacity={0.6} />
-            <circle cx={13.5 * C} cy={14 * C} r={4.5 * C} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
-            
-            <text x={13.5 * C} y={13.8 * C} textAnchor="middle" fontSize={14} fill="#64748b" fontWeight={800} letterSpacing={6}>AVLU</text>
-            <text x={13.5 * C} y={15 * C} textAnchor="middle" fontSize={9} fill="#94a3b8" letterSpacing={4} fontWeight={600}>COURTYARD</text>
-
-            {/* Trees (Top-down view) */}
+          {/* Central Courtyard (AVLU) */}
+          <g>
+            <rect x={5.5*C} y={5.5*C} width={16*C} height={17*C} rx={16} fill="#f0fdf4" stroke="#dcfce7" strokeWidth={2} />
+            <circle cx={13.5*C} cy={14*C} r={7*C} fill="#ffffff" opacity={0.6} />
+            <circle cx={13.5*C} cy={14*C} r={4.5*C} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
+            <text x={13.5*C} y={13.8*C} textAnchor="middle" fontSize={14} fill="#64748b" fontWeight={800} letterSpacing={6}>AVLU</text>
+            <text x={13.5*C} y={15*C} textAnchor="middle" fontSize={9} fill="#94a3b8" letterSpacing={4} fontWeight={600}>COURTYARD</text>
             <g filter="url(#shadow-tree)">
-              <circle cx={7.5 * C} cy={7.5 * C} r={1.8 * C} fill="#86efac" opacity={0.9} />
-              <circle cx={7.5 * C} cy={7.5 * C} r={1.2 * C} fill="#4ade80" />
-              
-              <circle cx={19.5 * C} cy={8.5 * C} r={2.2 * C} fill="#86efac" opacity={0.9} />
-              <circle cx={19.5 * C} cy={8.5 * C} r={1.4 * C} fill="#4ade80" />
-              
-              <circle cx={8.5 * C} cy={20.5 * C} r={2 * C} fill="#86efac" opacity={0.9} />
-              <circle cx={8.5 * C} cy={20.5 * C} r={1.3 * C} fill="#4ade80" />
-              
-              <circle cx={18.5 * C} cy={21 * C} r={1.6 * C} fill="#86efac" opacity={0.9} />
-              <circle cx={18.5 * C} cy={21 * C} r={1 * C} fill="#4ade80" />
+              <circle cx={7.5*C} cy={7.5*C} r={1.8*C} fill="#86efac" opacity={0.9} />
+              <circle cx={7.5*C} cy={7.5*C} r={1.2*C} fill="#4ade80" />
+              <circle cx={19.5*C} cy={8.5*C} r={2.2*C} fill="#86efac" opacity={0.9} />
+              <circle cx={19.5*C} cy={8.5*C} r={1.4*C} fill="#4ade80" />
+              <circle cx={8.5*C} cy={20.5*C} r={2*C} fill="#86efac" opacity={0.9} />
+              <circle cx={8.5*C} cy={20.5*C} r={1.3*C} fill="#4ade80" />
+              <circle cx={18.5*C} cy={21*C} r={1.6*C} fill="#86efac" opacity={0.9} />
+              <circle cx={18.5*C} cy={21*C} r={1*C} fill="#4ade80" />
             </g>
           </g>
 
-          {/* Corridors (Inset aesthetic) */}
-          <g className="corridors">
-            <rect x={2.2 * C} y={2.2 * C} width={22.6 * C} height={C * 0.7} rx={6} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
-            <rect x={2.2 * C} y={2.2 * C} width={C * 0.7} height={21 * C} rx={6} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
-            <rect x={24.1 * C} y={2.2 * C} width={C * 0.7} height={23.5 * C} rx={6} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
-            <text x={13.5 * C} y={2.75 * C} textAnchor="middle" fontSize={8} fill="#cbd5e1" letterSpacing={6} fontWeight={700}>KORİDOR</text>
+          {/* Corridors */}
+          <g>
+            <rect x={2.2*C} y={2.2*C} width={22.6*C} height={C*0.7} rx={6} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
+            <rect x={2.2*C} y={2.2*C} width={C*0.7} height={21*C} rx={6} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
+            <rect x={24.1*C} y={2.2*C} width={C*0.7} height={23.5*C} rx={6} fill="#f1f5f9" stroke="#e2e8f0" strokeWidth={1} />
+            <text x={13.5*C} y={2.75*C} textAnchor="middle" fontSize={8} fill="#cbd5e1" letterSpacing={6} fontWeight={700}>KORİDOR</text>
           </g>
 
           {/* Service area 2055 */}
-          <rect x={10.5 * C} y={-0.5*C} width={3 * C} height={2.5 * C} rx={6} fill="url(#service-hatch)" stroke="#cbd5e1" strokeWidth={1} />
-          <rect x={10.5 * C} y={-0.5*C} width={3 * C} height={2.5 * C} rx={6} fill="#ffffff" opacity={0.7} />
-          <text x={12 * C} y={1 * C} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={700}>2055</text>
+          <rect x={10.5*C} y={-0.5*C} width={3*C} height={2.5*C} rx={6} fill="url(#service-hatch)" stroke="#cbd5e1" strokeWidth={1} />
+          <rect x={10.5*C} y={-0.5*C} width={3*C} height={2.5*C} rx={6} fill="#ffffff" opacity={0.7} />
+          <text x={12*C} y={1*C} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={700}>2055</text>
 
-          {/* Premium Room Cells */}
+          {/* Room Cells */}
           {LAYOUT.map(([num, col, row, w, h]) => {
             const room = roomMap.get(String(num));
             if (!room) return null;
@@ -242,7 +228,7 @@ export function RoomsPage() {
             const act = isH || isS;
             const x = col * C;
             const y = row * C;
-            const rw = w * C - 3; // slight gap between rooms
+            const rw = w * C - 3;
             const rh = h * C - 3;
             const dbl = room.type === "DOUBLE";
 
@@ -251,46 +237,30 @@ export function RoomsPage() {
                 onMouseEnter={() => setHovered(String(num))}
                 onMouseLeave={() => setHovered(null)}
                 onClick={() => setSelected(room)}>
-                
-                {/* Elevated Shadow on Hover */}
                 {act && <rect x={x+1} y={y+1} width={rw} height={rh} rx={8} fill="#fff" filter="url(#shadow-room)" />}
-                
-                {/* Room Base Rect */}
-                <rect x={x + 1} y={y + 1} width={rw} height={rh} rx={8}
+                <rect x={x+1} y={y+1} width={rw} height={rh} rx={8}
                   fill={act ? cfg.bgH : cfg.bg}
                   stroke={isS ? cfg.dot : cfg.border}
                   strokeWidth={isS ? 2.5 : 1}
                   style={{ transition: "all 0.2s ease" }} />
-                
-                {/* Top Colored Accent Bar */}
-                <path 
-                  d={`M ${x+1} ${y+7} Q ${x+1} ${y+1} ${x+7} ${y+1} L ${x+rw-6} ${y+1} Q ${x+rw} ${y+1} ${x+rw} ${y+7} L ${x+rw} ${y+5} L ${x+1} ${y+5} Z`} 
-                  fill={cfg.accent} 
-                  opacity={act ? 1 : 0.6}
-                />
-
-                {/* Room Number */}
-                <text x={x + 1 + rw / 2} y={y + 1 + rh / 2 + (dbl ? -4 : 1)}
+                <path
+                  d={`M ${x+1} ${y+7} Q ${x+1} ${y+1} ${x+7} ${y+1} L ${x+rw-6} ${y+1} Q ${x+rw} ${y+1} ${x+rw} ${y+7} L ${x+rw} ${y+5} L ${x+1} ${y+5} Z`}
+                  fill={cfg.accent} opacity={act ? 1 : 0.6} />
+                <text x={x+1+rw/2} y={y+1+rh/2+(dbl ? -4 : 1)}
                   textAnchor="middle" dominantBaseline="middle"
                   fontSize={act ? 13 : 12} fontWeight={800} fill={cfg.text}
                   style={{ pointerEvents: "none", transition: "all 0.2s ease" }}>
                   {num}
                 </text>
-                
-                {/* Status Dot */}
-                <circle cx={x + rw - 6} cy={y + 8} r={3.5} fill={cfg.dot} opacity={act ? 1 : 0.8} />
-                {isS && <circle cx={x + rw - 6} cy={y + 8} r={6} fill="none" stroke={cfg.dot} strokeWidth={1.5} opacity={0.5} className="animate-ping" />}
-
-                {/* Double Label */}
+                <circle cx={x+rw-6} cy={y+8} r={3.5} fill={cfg.dot} opacity={act ? 1 : 0.8} />
+                {isS && <circle cx={x+rw-6} cy={y+8} r={6} fill="none" stroke={cfg.dot} strokeWidth={1.5} opacity={0.5} className="animate-ping" />}
                 {dbl && (
-                  <text x={x + 1 + rw / 2} y={y + rh - 6} textAnchor="middle"
+                  <text x={x+1+rw/2} y={y+rh-6} textAnchor="middle"
                     fontSize={6.5} fill={cfg.text} fontWeight={800} letterSpacing={1} opacity={0.6}
                     style={{ pointerEvents: "none" }}>DOUBLE</text>
                 )}
-
-                {/* Glassmorphic Hover Tooltip for Occupied/Reserved */}
                 {room.reservation && act && (
-                  <foreignObject x={x - 40} y={y + rh + 6} width={rw + 80} height={40} style={{ pointerEvents: "none", zIndex: 10 }}>
+                  <foreignObject x={x-40} y={y+rh+6} width={rw+80} height={40} style={{ pointerEvents: "none", zIndex: 10 }}>
                     <div style={{
                       background: "rgba(15,23,42,0.85)", color: "#fff", fontSize: 10,
                       padding: "6px 10px", borderRadius: 8, textAlign: "center",
@@ -306,8 +276,8 @@ export function RoomsPage() {
             );
           })}
 
-          {/* Elegant Floor Label */}
-          <text x={SVG_W / 2} y={SVG_H + 20} textAnchor="middle" fontSize={10} fill="#64748b" fontWeight={800} letterSpacing={6}>
+          {/* Floor Label */}
+          <text x={SVG_W/2} y={SVG_H+20} textAnchor="middle" fontSize={10} fill="#64748b" fontWeight={800} letterSpacing={6}>
             KAT 2 — EDU EĞİTİM OTELİ
           </text>
         </svg>

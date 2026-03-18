@@ -181,7 +181,8 @@
       "soon": "Yakında"
     },
     "rules": {
-      "title": "Rezervasyon Kuralları (Önemli)",
+      "title": "Rezervasyon Kuralları",
+      "important": "Önemli",
       "r1": "Pazar günleri giriş yapılamaz.",
       "r2": "En fazla 30 gün sonrası için rezervasyon talebi oluşturabilirsiniz.",
       "r3": "Bireysel konaklamalar (yetki verilmedikçe) 5 ardışık günü geçemez.",
@@ -496,6 +497,17 @@
     "paymentRef": "Önemli: Lütfen transfer yaparken açıklama kısmına #{{id}} nolu Rezervasyon numaranızı yazınız.",
     "uploadTitle": "Ödeme Dekontu Yükle",
     "uploadLabel": "Ödeme Dekontu Yükle (Dekont)",
+    "loadingDetails": "Ödeme bilgileri yükleniyor…",
+    "portal": "Ödeme Portalı",
+    "priceBreakdown": "Fiyat Dökümü",
+    "roomRateLabel": "Oda ücreti",
+    "taxesLabel": "Vergi ve hizmet ücretleri",
+    "taxesValue": "Dahil",
+    "bankTransferDetails": "Banka transfer bilgileri",
+    "copyIban": "IBAN Kopyala",
+    "releaseToUpload": "Yüklemek için bırakın",
+    "max5mb": "Maks 5MB",
+    "fileReady": "Dosya yüklemeye hazır",
     "dragDrop": "Dekontu buraya sürükleyin veya",
     "browse": "Dosyalara Göz At",
     "acceptedFormats": "Geçerli formatlar: PDF, JPG, PNG (Maks 5MB)",
@@ -507,7 +519,8 @@
       "invalidFormat": "Geçersiz dosya formatı. Lütfen PDF, JPG veya PNG yükleyin.",
       "tooLarge": "Dosya boyutu 5MB'ı aşıyor.",
       "uploadFailed": "Dekont yüklenemedi. Lütfen tekrar deneyin.",
-      "noReservation": "Aktif rezervasyon bulunamadı."
+      "noReservation": "Aktif rezervasyon bulunamadı.",
+      "serverError": "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyiniz."
     },
     "success": "Ödeme dekontu başarıyla gönderildi!"
   },
@@ -537,6 +550,12 @@
       "title": "Henüz bildirim yok",
       "subtitle": "Rezervasyon güncellemeleri ve uyarılar burada görünecektir.",
       "backToHome": "Ana Sayfaya Dön"
+    },
+    "timeAgo": {
+      "justNow": "Az önce",
+      "minutesAgo": "{{count}} dk önce",
+      "hoursAgo": "{{count}} sa önce",
+      "daysAgo": "{{count}} gün önce"
     }
   },
 

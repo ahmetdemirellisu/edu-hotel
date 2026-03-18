@@ -496,6 +496,17 @@
     "paymentRef": "Important: Please use your Reservation ID #{{id}} as the payment reference/description.",
     "uploadTitle": "Upload Payment Receipt",
     "uploadLabel": "Upload Payment Receipt (Dekont)",
+    "loadingDetails": "Loading payment details…",
+    "portal": "Payment Portal",
+    "priceBreakdown": "Price Breakdown",
+    "roomRateLabel": "Room rate",
+    "taxesLabel": "Taxes & service fees",
+    "taxesValue": "Included",
+    "bankTransferDetails": "Bank transfer details",
+    "copyIban": "Copy IBAN",
+    "releaseToUpload": "Release to upload",
+    "max5mb": "Max 5MB",
+    "fileReady": "File ready to upload",
     "dragDrop": "Drag and drop your receipt here, or",
     "browse": "Browse Files",
     "acceptedFormats": "Accepted formats: PDF, JPG, PNG (Max 5MB)",
@@ -507,7 +518,8 @@
       "invalidFormat": "Invalid file format. Please upload PDF, JPG, or PNG.",
       "tooLarge": "File size exceeds 5MB.",
       "uploadFailed": "Failed to upload receipt. Please try again.",
-      "noReservation": "No active reservation found."
+      "noReservation": "No active reservation found.",
+      "serverError": "Could not connect to server. Please try again later."
     },
     "success": "Payment receipt submitted successfully!"
   },
@@ -537,6 +549,12 @@
       "title": "No notifications yet",
       "subtitle": "Reservation updates and alerts will appear here when available.",
       "backToHome": "Back to Home"
+    },
+    "timeAgo": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
     }
   },
 

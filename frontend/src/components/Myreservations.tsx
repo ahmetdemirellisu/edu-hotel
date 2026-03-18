@@ -2,8 +2,9 @@ import React from "react";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getUserReservations, cancelReservation, type Reservation } from "../api/reservations";
+import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
@@ -72,6 +73,14 @@ void (document.getElementById("myres-anim") ?? (() => {
     @keyframes myresCardIn {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes myresApprovedGlow {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.55), 0 1px 3px rgba(0,0,0,0.03), 0 4px 14px rgba(0,0,0,0.04); }
+      35%  { box-shadow: 0 0 0 8px rgba(16,185,129,0.12), 0 4px 24px rgba(16,185,129,0.28); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0),    0 1px 3px rgba(0,0,0,0.03), 0 4px 14px rgba(0,0,0,0.04); }
+    }
+    .myres-approved {
+      border-left-color: #10b981 !important;
     }
     .myres-card {
       transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
@@ -218,6 +227,10 @@ export function MyReservations() {
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [justApproved, setJustApproved] = useState<Set<number>>(new Set());
+
+  // Tracks the last-known status of each reservation for change detection
+  const prevStatusesRef = useRef<Map<number, string>>(new Map());
 
   useEffect(() => {
     async function load() {
@@ -226,6 +239,10 @@ export function MyReservations() {
         const data = await getUserReservations(userId);
         data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setReservations(data);
+        // Seed the ref so the first poll has a baseline to diff against
+        const map = new Map<number, string>();
+        data.forEach(r => map.set(r.id, r.status));
+        prevStatusesRef.current = map;
       } catch (err) {
         console.error("Failed to load reservations", err);
       } finally {
@@ -234,6 +251,58 @@ export function MyReservations() {
     }
     load();
   }, [userId]);
+
+  // ── Live polling ──────────────────────────────────────────
+  useEffect(() => {
+    if (!userId || isNaN(userId)) return;
+
+    const poll = async () => {
+      try {
+        const data = await getUserReservations(userId);
+        data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        const newlyApproved: number[] = [];
+        data.forEach(r => {
+          const prev = prevStatusesRef.current.get(r.id);
+          if (prev === "PENDING" && r.status === "APPROVED") {
+            newlyApproved.push(r.id);
+            toast.success(t("reservations.poll.approved", { defaultValue: "Your reservation has been approved!" }), {
+              description: t("reservations.poll.approvedDesc", { id: r.id, defaultValue: `Reservation #${r.id} — you can now proceed to payment.` }),
+              duration: 7000,
+            });
+          }
+        });
+
+        // Update baseline
+        const map = new Map<number, string>();
+        data.forEach(r => map.set(r.id, r.status));
+        prevStatusesRef.current = map;
+
+        setReservations(data);
+
+        if (newlyApproved.length > 0) {
+          setJustApproved(prev => {
+            const next = new Set(prev);
+            newlyApproved.forEach(id => next.add(id));
+            return next;
+          });
+          // Remove glow after animation completes
+          setTimeout(() => {
+            setJustApproved(prev => {
+              const next = new Set(prev);
+              newlyApproved.forEach(id => next.delete(id));
+              return next;
+            });
+          }, 4000);
+        }
+      } catch {
+        // Silent — polling errors shouldn't surface to the user
+      }
+    };
+
+    const interval = setInterval(poll, 30_000);
+    return () => clearInterval(interval);
+  }, [userId, t]);
 
   /* ── Filtering ──────────────────────────── */
   const filtered = reservations.filter((r) => {
@@ -369,6 +438,10 @@ export function MyReservations() {
               <p className="text-blue-200/55 text-sm leading-relaxed max-w-md">
                 {t("reservations.subtitle", { defaultValue: "View and manage all your reservation requests." })}
               </p>
+              <div className="flex items-center gap-1.5 mt-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ animation: "myresPulseDot 1.8s ease-in-out infinite", boxShadow: "0 0 4px #34d39980" }} />
+                <span className="text-[10px] font-bold tracking-[2px] uppercase text-emerald-400/80">Live</span>
+              </div>
             </div>
 
             <Link
@@ -529,14 +602,17 @@ export function MyReservations() {
               const canCancel = (r.status === "PENDING" || r.status === "APPROVED") && ps !== "APPROVED";
               const cfg = statusConfig[r.status] || statusConfig.PENDING;
 
+              const isGlowing = justApproved.has(r.id);
+
               return (
                 <div
                   key={r.id}
-                  className="myres-card bg-white rounded-2xl border border-gray-100 overflow-hidden"
+                  className={`myres-card bg-white rounded-2xl border border-gray-100 overflow-hidden${isGlowing ? " myres-approved" : ""}`}
                   style={{
                     ...stagger(idx + 3),
                     boxShadow: "0 1px 3px rgba(0,0,0,0.03), 0 4px 14px rgba(0,0,0,0.04)",
                     borderLeft: `4px solid ${cfg.accentBar}`,
+                    ...(isGlowing && { animation: "myresApprovedGlow 1.4s ease-out 3 forwards" }),
                   }}
                 >
                   {/* ── Card header (always visible) ────── */}

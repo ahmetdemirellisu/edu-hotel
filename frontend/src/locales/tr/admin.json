@@ -412,6 +412,10 @@
         "loading": "Rezervasyonlar yükleniyor...",
         "empty": "Seçili filtrelere göre rezervasyon bulunamadı.",
         "createReservationDisabledHint": "Yönetici tarafından oluşturulan rezervasyonlar daha sonra eklenecektir.",
+        "toasts": {
+          "approved": "Rezervasyon {{id}} başarıyla onaylandı.",
+          "rejected": "Rezervasyon {{id}} reddedildi."
+        },
         "approveModal": {
           "title": "Rezervasyonu Onayla {{id}}",
           "desc": "Bu rezervasyon için fiyat belirleyin. Kullanıcıya e-posta ile bildirim yapılacaktır.",

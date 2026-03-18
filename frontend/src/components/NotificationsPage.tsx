@@ -76,17 +76,17 @@ const TYPE_CONFIG: Record<string, { icon: typeof Bell; color: string; bg: string
   reminder: { icon: Calendar,     color: "#8b5cf6",  bg: "#f5f3ff",  dot: "#8b5cf6",  ring: "rgba(139,92,246,0.15)" },
 };
 
-function timeAgo(timestamp: string): string {
+function timeAgo(timestamp: string, t: (key: string, opts?: object) => string): string {
   const now = new Date();
   const then = new Date(timestamp);
   const diff = now.getTime() - then.getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t("notifications.timeAgo.justNow");
+  if (mins < 60) return t("notifications.timeAgo.minutesAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("notifications.timeAgo.hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return t("notifications.timeAgo.daysAgo", { count: days });
   return then.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 }
 
@@ -491,7 +491,7 @@ export function NotificationsPage() {
                             {title}
                           </h3>
                           <span className="text-[11px] text-slate-400 font-medium flex-shrink-0 tabular-nums mt-0.5">
-                            {timeAgo(n.timestamp)}
+                            {timeAgo(n.timestamp, t)}
                           </span>
                         </div>
                         <p

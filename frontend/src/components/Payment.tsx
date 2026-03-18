@@ -174,10 +174,10 @@ export function Payment() {
         navigate("/dashboard");
       } else {
         const errData = await response.json();
-        setUploadError(errData.error || "Upload failed");
+        setUploadError(errData.error || t("payment.errors.uploadFailed"));
       }
     } catch (err) {
-      setUploadError("Could not connect to server. Check if backend is running on port 3000.");
+      setUploadError(t("payment.errors.serverError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -196,7 +196,7 @@ export function Payment() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #001a3a 0%, #003366 100%)" }}>
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-[#c9a84c]/30 border-t-[#c9a84c] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/50 text-sm">Loading payment details…</p>
+          <p className="text-white/50 text-sm">{t("payment.loadingDetails")}</p>
         </div>
       </div>
     );
@@ -322,7 +322,7 @@ export function Payment() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
-                <span className="text-white/70 text-xs font-bold uppercase tracking-widest">Payment Portal</span>
+                <span className="text-white/70 text-xs font-bold uppercase tracking-widest">{t("payment.portal")}</span>
               </div>
               <h1
                 className="text-white mb-2"
@@ -505,11 +505,11 @@ export function Payment() {
                 <div className="border-t border-slate-100 pt-4">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                     <CreditCard className="h-3.5 w-3.5" />
-                    Price Breakdown
+                    {t("payment.priceBreakdown")}
                   </p>
                   <div className="space-y-2 text-sm mb-3">
                     <div className="flex justify-between text-slate-600">
-                      <span>Room rate × {nights} {nights === 1 ? "night" : "nights"}</span>
+                      <span>{t("payment.roomRateLabel")} × {nights} {t("payment.night", { count: nights })}</span>
                       <span className="text-slate-400 font-medium">
                         {totalAmount !== null
                           ? `₺${totalAmount.toLocaleString()}`
@@ -518,8 +518,8 @@ export function Payment() {
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
-                      <span className="text-[12px]">Taxes & service fees</span>
-                      <span className="text-[12px] text-slate-400">Included</span>
+                      <span className="text-[12px]">{t("payment.taxesLabel")}</span>
+                      <span className="text-[12px] text-slate-400">{t("payment.taxesValue")}</span>
                     </div>
                   </div>
                 </div>
@@ -566,7 +566,7 @@ export function Payment() {
                 </div>
                 <div>
                   <h2 className="text-white text-[15px] font-bold">{t("payment.bankInfo")}</h2>
-                  <p className="text-white/60 text-[11px]">Bank transfer details</p>
+                  <p className="text-white/60 text-[11px]">{t("payment.bankTransferDetails")}</p>
                 </div>
               </div>
               <div className="p-6 space-y-5">
@@ -593,7 +593,7 @@ export function Payment() {
                       onClick={copyIban}
                       className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0"
                       style={{ background: copied ? "#22c55e" : "#003366" }}
-                      title="Copy IBAN"
+                      title={t("payment.copyIban")}
                     >
                       {copied
                         ? <CheckCircle2 className="h-4 w-4 text-white" />
@@ -667,7 +667,7 @@ export function Payment() {
                         </div>
 
                         <p className="text-[15px] font-bold text-slate-700 mb-1">
-                          {isDragging ? "Release to upload" : t("payment.dragDrop")}
+                          {isDragging ? t("payment.releaseToUpload") : t("payment.dragDrop")}
                         </p>
                         <p className="text-sm text-slate-400 mb-4">{t("payment.acceptedFormats")}</p>
 
@@ -682,7 +682,7 @@ export function Payment() {
                               {ext}
                             </span>
                           ))}
-                          <span className="text-[11px] text-slate-400">• Max 5MB</span>
+                          <span className="text-[11px] text-slate-400">• {t("payment.max5mb")}</span>
                         </div>
 
                         <input
@@ -734,7 +734,7 @@ export function Payment() {
                       {uploadProgress >= 100 && (
                         <div className="px-4 pb-3 flex items-center gap-1.5">
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                          <span className="text-[11px] text-emerald-600 font-semibold">File ready to upload</span>
+                          <span className="text-[11px] text-emerald-600 font-semibold">{t("payment.fileReady")}</span>
                         </div>
                       )}
                     </motion.div>

@@ -76,6 +76,11 @@ void (document.getElementById("dashboard-anim") ?? (() => {
     @keyframes dashProgressBar {
       from { width: 0%; }
     }
+    @keyframes campusPan {
+      0%   { background-position-x: 0%; }
+      50%  { background-position-x: 100%; }
+      100% { background-position-x: 0%; }
+    }
     @keyframes dashCardTilt {
       0%   { transform: perspective(800px) rotateX(0deg) rotateY(0deg); }
     }
@@ -340,7 +345,24 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #eef2f7 0%, #e8eef5 50%, #eef2f7 100%)" }}>
+    <div className="min-h-screen relative">
+
+      {/* ── Animated campus panorama ── */}
+      <div
+        className="fixed inset-0 z-[-2] min-h-screen w-full bg-[#001428]"
+        style={{
+          backgroundImage: `url(${campusBg})`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "0% 50%",
+          transform: "scale(1.05)",
+          transformOrigin: "center center",
+          animation: "campusPan 90s ease-in-out infinite",
+        }}
+      />
+
+      {/* ── Dark navy overlay ── */}
+      <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-[#001428]/95 via-[#002244]/85 to-[#001428]/95" />
 
       {/* ═══ HEADER ══════════════════════════════════════════════ */}
       <motion.header

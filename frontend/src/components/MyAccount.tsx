@@ -16,7 +16,6 @@ import {
   User,
   Lock,
   AlertCircle,
-  CheckCircle2,
   LogOut,
   Eye,
   EyeOff,
@@ -30,6 +29,7 @@ import {
   AtSign,
   Smartphone
 } from "lucide-react";
+import { GlareCard } from "./ui/glare-card";
 
 /* ═══════════════════════════════════════════════════════════
    Inject animations once
@@ -706,55 +706,100 @@ export function MyAccount() {
 
           {/* ── Right column (1/3) ────────────────────── */}
           <div className="lg:col-span-1 space-y-7">
-            {/* ── Account Status ──────────────────────── */}
-            <div
-              className="rounded-2xl border border-gray-100 overflow-hidden"
-              style={{
-                ...stagger(1),
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02), 0 6px 18px rgba(0,51,102,0.05)",
-              }}
-            >
-              <div
-                className="px-6 py-5 text-white relative overflow-hidden"
-                style={{ background: "linear-gradient(135deg, #001428 0%, #003366 60%, #004d99 100%)" }}
-              >
-                <div className="absolute top-0 right-0 w-28 h-28 rounded-full opacity-8"
-                  style={{ background: "radial-gradient(circle, #c9a84c, transparent)", transform: "translate(40%,-40%)" }} />
-                <div className="relative flex items-center gap-2.5">
-                  <User className="h-5 w-5 opacity-75" />
-                  <h3 className="text-[15px] font-semibold tracking-tight">
-                    {t("account.status.title")}
-                  </h3>
-                </div>
-              </div>
-              <div className="bg-white p-5 space-y-4">
-                {/* User initials avatar */}
-                <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
+            {/* ── Membership Card (GlareCard) ──────────── */}
+            <div style={stagger(1)}>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[2px] px-1 mb-3">
+                {t("account.status.title", "Membership Card")}
+              </p>
+              <div style={{ height: "210px" }}>
+                <GlareCard className="!bg-none border-[#c9a84c]/30">
+                  {/* Card background gradient */}
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold text-white"
-                    style={{ background: "linear-gradient(135deg, #001428, #003d80)", border: "1.5px solid rgba(201,168,76,0.3)" }}
-                  >
-                    {initials}
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      background: "linear-gradient(135deg, #000e1f 0%, #001f40 45%, #002d60 75%, #001428 100%)",
+                    }}
+                  />
+                  {/* Subtle diagonal shine stripe */}
+                  <div
+                    className="absolute inset-0 rounded-2xl pointer-events-none"
+                    style={{
+                      background: "linear-gradient(115deg, transparent 40%, rgba(201,168,76,0.06) 50%, transparent 60%)",
+                    }}
+                  />
+                  {/* Horizontal scan lines watermark */}
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none opacity-[0.035]">
+                    {[...Array(9)].map((_, i) => (
+                      <div key={i} className="absolute w-full h-px bg-white" style={{ top: `${10 + i * 10}%` }} />
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">{userData.fullName}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{userData.email}</p>
+                  {/* Big EDU watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03]">
+                    <span className="text-8xl font-black text-white tracking-[12px]">EDU</span>
                   </div>
-                </div>
 
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-xs text-gray-500 font-medium">{t("account.status.type")}</span>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${typeStyle.bg} ${typeStyle.text}`}>
-                    {typeStyle.label}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-xs text-gray-500 font-medium">{t("account.status.label")}</span>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    {t("account.status.active")}
+                  {/* Card content */}
+                  <div className="relative z-10 h-full w-full p-5 flex flex-col justify-between">
+                    {/* Top row: branding + EMV chip */}
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="text-[9px] font-bold tracking-[3px] uppercase text-[#c9a84c]/75">
+                          Sabancı University
+                        </div>
+                        <div
+                          className="text-[13px] font-light tracking-[5px] uppercase text-white mt-0.5"
+                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        >
+                          EDU HOTEL
+                        </div>
+                      </div>
+                      {/* EMV Chip */}
+                      <svg width="38" height="30" viewBox="0 0 38 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0.5" y="0.5" width="37" height="29" rx="5.5" fill="rgba(201,168,76,0.12)" stroke="rgba(201,168,76,0.55)" strokeWidth="1"/>
+                        <rect x="14" y="0" width="10" height="30" fill="rgba(201,168,76,0.07)"/>
+                        <rect x="0" y="10" width="38" height="10" fill="rgba(201,168,76,0.07)"/>
+                        <rect x="14" y="10" width="10" height="10" rx="1.5" fill="rgba(201,168,76,0.22)" stroke="rgba(201,168,76,0.65)" strokeWidth="0.75"/>
+                        <line x1="14" y1="0" x2="14" y2="10" stroke="rgba(201,168,76,0.4)" strokeWidth="0.5"/>
+                        <line x1="24" y1="0" x2="24" y2="10" stroke="rgba(201,168,76,0.4)" strokeWidth="0.5"/>
+                        <line x1="14" y1="20" x2="14" y2="30" stroke="rgba(201,168,76,0.4)" strokeWidth="0.5"/>
+                        <line x1="24" y1="20" x2="24" y2="30" stroke="rgba(201,168,76,0.4)" strokeWidth="0.5"/>
+                      </svg>
+                    </div>
+
+                    {/* Active status pill */}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px rgba(52,211,153,0.8)" }} />
+                      <span className="text-[9px] font-bold text-emerald-400/80 tracking-[2px] uppercase">
+                        {t("account.status.active", "Active")}
+                      </span>
+                    </div>
+
+                    {/* Bottom: name + badge + since */}
+                    <div>
+                      <p
+                        className="text-white text-[15px] font-semibold tracking-wide truncate"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif", textShadow: "0 1px 8px rgba(201,168,76,0.2)" }}
+                      >
+                        {userData.fullName || userName}
+                      </p>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <span className="text-[10px] text-[#c9a84c]/65 tracking-[2px] uppercase font-medium">
+                          {t("account.card.memberSince", "Member Since")} 2026
+                        </span>
+                        <span
+                          className="text-[9px] font-black px-2.5 py-0.5 rounded-full tracking-[1px] uppercase"
+                          style={{
+                            background: "linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1))",
+                            border: "1px solid rgba(201,168,76,0.45)",
+                            color: "#c9a84c",
+                          }}
+                        >
+                          {userData.userType || "STUDENT"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </GlareCard>
               </div>
             </div>
 
