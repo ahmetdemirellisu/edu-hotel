@@ -784,43 +784,57 @@ export function Dashboard() {
                   <ArrowRight className="h-4 w-4 text-[#003366]/25 group-hover/qa:text-[#003366] group-hover/qa:translate-x-1.5 transition-all duration-300" />
                 </motion.a>
 
-                {/* Notifications — Soon */}
-                <motion.div
-                  whileHover={{ y: -2 }}
-                  className="rounded-2xl p-5 flex items-center justify-between cursor-default"
-                  style={{ background: "#f8fafc", border: "1px solid #e8eef5" }}
+                {/* Notifications */}
+                <motion.a
+                  href="notifications"
+                  whileHover={{ y: -5, boxShadow: "0 20px 48px rgba(0,51,102,0.13)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="dash-quick-action group/qa rounded-2xl p-5 flex items-center justify-between cursor-pointer"
+                  style={{
+                    border: "2px solid rgba(0,51,102,0.12)",
+                    background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+                  }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                      <Bell className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <span className="font-medium text-sm text-gray-500">
+                    <motion.div
+                      whileHover={{ rotate: -5, scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="w-10 h-10 rounded-xl bg-[#003366]/6 flex items-center justify-center group-hover/qa:bg-[#003366]/10 transition-colors"
+                    >
+                      <Bell className="h-5 w-5 text-[#003366]" />
+                    </motion.div>
+                    <span className="font-semibold text-sm text-[#003366]">
                       {t("dashboard.quick.notifications", { defaultValue: "Notifications" })}
                     </span>
                   </div>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-200/70 px-2.5 py-1 rounded-full">
-                    {t("dashboard.quick.soon", { defaultValue: "Soon" })}
-                  </span>
-                </motion.div>
+                  <ArrowRight className="h-4 w-4 text-[#003366]/25 group-hover/qa:text-[#003366] group-hover/qa:translate-x-1.5 transition-all duration-300" />
+                </motion.a>
 
-                {/* Support — Soon */}
-                <motion.div
-                  whileHover={{ y: -2 }}
-                  className="rounded-2xl p-5 flex items-center justify-between cursor-default"
-                  style={{ background: "#f8fafc", border: "1px solid #e8eef5" }}
+                {/* Contact Support */}
+                <motion.a
+                  href="contact"
+                  whileHover={{ y: -5, boxShadow: "0 20px 48px rgba(0,51,102,0.13)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="dash-quick-action group/qa rounded-2xl p-5 flex items-center justify-between cursor-pointer"
+                  style={{
+                    border: "2px solid rgba(0,51,102,0.12)",
+                    background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+                  }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                      <AlertCircle className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <span className="font-medium text-sm text-gray-500">
+                    <motion.div
+                      whileHover={{ rotate: -5, scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="w-10 h-10 rounded-xl bg-[#003366]/6 flex items-center justify-center group-hover/qa:bg-[#003366]/10 transition-colors"
+                    >
+                      <AlertCircle className="h-5 w-5 text-[#003366]" />
+                    </motion.div>
+                    <span className="font-semibold text-sm text-[#003366]">
                       {t("dashboard.quick.contactSupport", { defaultValue: "Contact Support" })}
                     </span>
                   </div>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-200/70 px-2.5 py-1 rounded-full">
-                    {t("dashboard.quick.soon", { defaultValue: "Soon" })}
-                  </span>
-                </motion.div>
+                  <ArrowRight className="h-4 w-4 text-[#003366]/25 group-hover/qa:text-[#003366] group-hover/qa:translate-x-1.5 transition-all duration-300" />
+                </motion.a>
               </div>
             </motion.div>
 

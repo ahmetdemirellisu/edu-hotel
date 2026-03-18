@@ -13,6 +13,7 @@ import { Payment } from "./components/Payment";
 import { MyReservations } from "./components/Myreservations";
 import { MyAccount } from "./components/MyAccount";
 import { NotificationsPage } from "./components/NotificationsPage";
+import { ContactSupportPage } from "./components/ContactSupportPage";
 import { LandingPage } from "./components/LandingPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -120,6 +121,15 @@ function AnimatedRoutes() {
           element={
             <RequireAuth>
               <PageTransition><NotificationsPage /></PageTransition>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/contact"
+          element={
+            <RequireAuth>
+              <PageTransition><ContactSupportPage /></PageTransition>
             </RequireAuth>
           }
         />

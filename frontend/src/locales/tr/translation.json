@@ -613,5 +613,25 @@
     "showing": "Gösterilen",
     "of": "/",
     "reservations": "rezervasyon"
+  },
+
+  "contact": {
+    "pageTitle": "Destek İletişim",
+    "subtitle": "Ekibimiz rezervasyon, ödeme ve otelle ilgili her türlü sorunuzda yardımcı olmaya hazır.",
+    "emailTitle": "E-posta Desteği",
+    "phoneTitle": "Telefon Desteği",
+    "hoursTitle": "Çalışma Saatleri",
+    "hours": "Pazartesi – Cuma, 09:00 – 17:00",
+    "emailNote": "Genellikle 24 saat içinde yanıt veririz.",
+    "phoneNote": "Acil durumlarda lütfen doğrudan arayın.",
+    "backToDashboard": "Ana Sayfaya Dön",
+    "topics": {
+      "reservations": "Rezervasyon Yardımı",
+      "reservationsDesc": "Rezervasyon talebiniz, onay durumunuz veya tarihler hakkında sorularınız.",
+      "payment": "Ödeme Sorunları",
+      "paymentDesc": "Banka transferi, dekont yükleme veya ödeme onayı ile ilgili sorunlar.",
+      "cancellation": "İptal & İade",
+      "cancellationDesc": "Rezervasyon iptali veya iade durumu hakkında talepler."
+    }
   }
 }

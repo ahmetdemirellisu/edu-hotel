@@ -181,7 +181,8 @@
       "contactSupport": "Contact Support"
     },
     "rules": {
-      "title": "Reservation Rules (Important)",
+      "title": "Reservation Rules",
+      "important": "Important",
       "r1": "Sunday check-in is not allowed.",
       "r2": "You can request reservations up to 30 days ahead.",
       "r3": "Individual stays cannot exceed 5 consecutive days (unless authorized).",
@@ -612,5 +613,25 @@
     "showing": "Showing",
     "of": "of",
     "reservations": "reservations"
+  },
+
+  "contact": {
+    "pageTitle": "Contact Support",
+    "subtitle": "Our team is available to help you with reservations, payments, and any hotel-related questions.",
+    "emailTitle": "Email Support",
+    "phoneTitle": "Phone Support",
+    "hoursTitle": "Office Hours",
+    "hours": "Monday – Friday, 09:00 – 17:00",
+    "emailNote": "We usually respond within 24 hours.",
+    "phoneNote": "For urgent matters, please call directly.",
+    "backToDashboard": "Back to Dashboard",
+    "topics": {
+      "reservations": "Reservation Help",
+      "reservationsDesc": "Questions about your reservation request, approval status, or dates.",
+      "payment": "Payment Issues",
+      "paymentDesc": "Problems with bank transfer, receipt upload, or payment confirmation.",
+      "cancellation": "Cancellation & Refunds",
+      "cancellationDesc": "Requests to cancel your reservation or inquire about refund status."
+    }
   }
 }
