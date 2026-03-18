@@ -78,7 +78,7 @@ function AnimatedRoutes() {
           }
         />
 
-        <Route path="/payment" element={<PageTransition><Payment /></PageTransition>} />
+        <Route path="/payment" element={<RequireAuth><PageTransition><Payment /></PageTransition></RequireAuth>} />
 
         <Route
           path="/book-room"
