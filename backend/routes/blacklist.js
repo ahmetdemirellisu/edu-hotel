@@ -1,6 +1,9 @@
 const express = require("express");
 const prisma = require("../prismaClient");
+const requireAdmin = require("../middleware/requireAdmin");
 const router = express.Router();
+
+router.use(requireAdmin);
 
 /**
  * GET /blacklist
