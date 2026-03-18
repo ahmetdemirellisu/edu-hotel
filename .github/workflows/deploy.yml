@@ -69,6 +69,8 @@ jobs:
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          SMTP_USER=${{ secrets.EMAIL_USER }}
+          SMTP_PASS=${{ secrets.EMAIL_PASS }}
           EMAIL_PORT=${{ secrets.EMAIL_PORT }}
           EMAIL_HOST=${{ secrets.EMAIL_HOST }}
           SMTP_PORT=${{ secrets.EMAIL_PORT }}
