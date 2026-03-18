@@ -97,7 +97,27 @@ ${detailTable([
 ])}
 <p style="margin:0;font-size:13px;color:#475569;">Doğrulama genellikle 1 iş günü içinde tamamlanır. Sorularınız için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-          const text = `EDU Hotel – Payment receipt for reservation #${reservation.id} received and awaiting verification.\nCheck-in: ${checkInStr} | Check-out: ${checkOutStr}\n\nYou will be notified once it is verified.\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyonunuz için ödeme dekontunuz alındı ve doğrulama bekleniyor.`;
+          const text = [
+            `Dear ${guestName},`,
+            ``,
+            `We have received your payment receipt for reservation #${reservation.id}. It is now awaiting verification.`,
+            ``,
+            `Check-in:  ${checkInStr}`,
+            `Check-out: ${checkOutStr}`,
+            ``,
+            `Verification is typically completed within 1 business day. You will be notified by email once confirmed.`,
+            ``,
+            `---`,
+            ``,
+            `Sayın ${guestName},`,
+            ``,
+            `#${reservation.id} numaralı rezervasyonunuz için ödeme dekontunuz alınmıştır. Şu an doğrulama beklenmektedir.`,
+            ``,
+            `Giriş:  ${checkInStr}`,
+            `Çıkış:  ${checkOutStr}`,
+            ``,
+            `Doğrulama genellikle 1 iş günü içinde tamamlanır. Sonuç e-posta ile bildirilecektir.`,
+          ].join('\n');
 
           const html = emailTemplate(bodyEN, bodyTR);
           await sendMail({ to: reservation.user.email, subject, text, html });
