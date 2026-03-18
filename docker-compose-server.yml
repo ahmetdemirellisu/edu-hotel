@@ -29,6 +29,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
       JWT_EXPIRES_IN: 1d
       JWT_REFRESH_EXPIRES_IN: 7d
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
       # Frontend'in dışarıdan erişildiği URL
       CLIENT_URL: https://student-projects.sabanciuniv.edu/ehp
     depends_on:
