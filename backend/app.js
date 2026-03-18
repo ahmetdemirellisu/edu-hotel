@@ -40,12 +40,22 @@ app.use("/rooms", roomsRouter);
 app.use("/notifications", require("./routes/notifications"));
 
 // --- 3. STATIC FILE SERVING ---
-// FIX: Defining rootDir to point to the project root (one level up from /backend)
-const rootDir = path.join(__dirname, '..'); 
+const rootDir = path.join(__dirname, '..');
+const requireAdmin = require('./middleware/requireAdmin');
+const fs = require('fs');
 
-// Serving the PDF receipt folders using the defined rootDir
-app.use('/view-pending', express.static(path.join(rootDir, 'paymentRecieptsPending')));
-app.use('/view-approved', express.static(path.join(rootDir, 'paymentRecieptsAprooved')));
+// Receipt files are admin-only — strip path traversal and send directly
+function serveReceipt(dir) {
+    return [requireAdmin, (req, res) => {
+        const filename = path.basename(req.path); // strips any ../ attempts
+        const filepath = path.join(rootDir, dir, filename);
+        if (!fs.existsSync(filepath)) return res.status(404).json({ error: "File not found." });
+        res.sendFile(filepath);
+    }];
+}
+
+app.use('/view-pending',  serveReceipt('paymentRecieptsPending'));
+app.use('/view-approved', serveReceipt('paymentRecieptsAprooved'));
 
 // Serving the public folder (CSS, images, etc.) inside the backend folder
 app.use(express.static(path.join(__dirname, 'public')));
