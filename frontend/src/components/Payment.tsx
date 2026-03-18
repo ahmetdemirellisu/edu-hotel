@@ -218,30 +218,50 @@ export function Payment() {
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #f0f4f8 0%, #e8eef5 50%, #f0f4f8 100%)" }}>
       {/* ═══ HEADER ═══════════════════════════════════════ */}
-      <header
+      <motion.header
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="sticky top-0 z-50 border-b border-white/10"
-        style={{ background: "rgba(0,51,102,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+        style={{
+          background: "rgba(0,28,60,0.96)",
+          backdropFilter: "blur(28px)",
+          WebkitBackdropFilter: "blur(28px)",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 6px 28px rgba(0,20,50,0.35)",
+        }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-3">
+        {/* Animated gradient border bottom */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0, left: 0, right: 0,
+            height: "1.5px",
+            background: "linear-gradient(90deg, transparent, #c9a84c 30%, #4da6ff 60%, #c9a84c 80%, transparent)",
+            opacity: 0.6,
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-6 py-3.5">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Link to="/main" className="flex items-center gap-4">
-                <div className="border border-[#c9a84c] px-3 py-1.5 rounded">
-                  <div className="text-[11px] font-semibold text-[#c9a84c] leading-tight">Sabancı</div>
-                  <div className="text-[10px] text-[#c9a84c]/80 leading-tight">Üniversitesi</div>
-                </div>
-                <div className="w-px h-8 bg-white/15 hidden sm:block" />
-                <h1 className="text-white text-lg font-semibold tracking-[6px] hidden sm:block" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>EDU HOTEL</h1>
-              </Link>
-            </div>
-            <h1 className="sm:hidden text-white text-base font-bold tracking-[4px]">EDU HOTEL</h1>
-            <div className="flex items-center gap-3 sm:gap-5">
-              <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/60 hover:text-white transition-colors tracking-wide">
-                <LayoutGrid className="h-3.5 w-3.5" />
-                {t("header.mainPage", { defaultValue: "Main Page" })}
-              </Link>
+            <Link to="/main" className="flex items-center gap-4 group">
+              <motion.div
+                whileHover={{ scale: 1.04 }}
+                className="border border-[#c9a84c]/60 px-3 py-1.5 rounded transition-all duration-300 group-hover:border-[#c9a84c] group-hover:shadow-[0_0_14px_rgba(201,168,76,0.25)]"
+                style={{ background: "rgba(201,168,76,0.08)" }}
+              >
+                <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
+                <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">Üniversitesi</div>
+              </motion.div>
+              <div className="w-px h-8 bg-white/10 hidden sm:block" />
+              <div className="hidden sm:flex items-center gap-2.5">
+                <h1 className="text-white text-base font-light tracking-[8px] uppercase" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  EDU HOTEL
+                </h1>
+              </div>
+            </Link>
+            <h1 className="sm:hidden text-white text-sm font-light tracking-[5px] uppercase">EDU HOTEL</h1>
+            <div className="flex items-center gap-3 sm:gap-4">
               <Select value={currentLang} onValueChange={switchLanguage}>
-                <SelectTrigger className="w-[58px] h-8 bg-white/5 border-white/20 text-white text-xs font-semibold hover:bg-white/10 focus:ring-0 rounded-lg">
+                <SelectTrigger className="w-[58px] h-8 bg-white/6 border-white/15 text-white text-xs font-semibold hover:bg-white/12 focus:ring-0 rounded-lg">
                   <SelectValue placeholder={currentLang} />
                 </SelectTrigger>
                 <SelectContent>
@@ -250,16 +270,22 @@ export function Payment() {
                 </SelectContent>
               </Select>
               <NotificationBell lang={currentLang} />
-              <Link to="/profile" className="flex items-center gap-2.5 pl-1 group">
-                <div className="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
+              <Link to="/profile" className="flex items-center gap-2.5 group">
+                <motion.div
+                  whileHover={{ scale: 1.07, boxShadow: "0 0 14px rgba(255,255,255,0.12)" }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.14)" }}
+                >
                   <User className="h-4 w-4 text-white/70" />
-                </div>
-                <span className="text-xs text-white/70 group-hover:text-white font-medium hidden md:block max-w-[100px] truncate transition-colors">{userName}</span>
+                </motion.div>
+                <span className="text-xs text-white/60 group-hover:text-white/90 font-medium hidden md:block max-w-[100px] truncate transition-colors duration-200">
+                  {userName}
+                </span>
               </Link>
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* ═══ HERO BANNER ══════════════════════════════════ */}
       <div

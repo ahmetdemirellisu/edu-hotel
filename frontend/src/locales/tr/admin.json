@@ -178,13 +178,6 @@
       }
     },
 
-    "profile": {
-      "name": "Yönetici",
-      "role": "Otel yöneticisi",
-      "profileSettings": "Profil ayarları",
-      "changePassword": "Şifreyi değiştir",
-      "logout": "Çıkış yap"
-    },
 
     "adminUsers": {
       "addNewAdmin": "Yeni yönetici ekle",
@@ -398,6 +391,18 @@
             "corporate": "Kurumsal",
             "education": "Eğitim"
         },
+        "eventTypes": {
+            "conference": "Konferans",
+            "seminar":    "Seminer",
+            "workshop":   "Atölye",
+            "training":   "Eğitim",
+            "meeting":    "Toplantı",
+            "other":      "Diğer"
+        },
+        "invoiceTypes": {
+            "individual": "Bireysel",
+            "corporate":  "Kurumsal"
+        },
         "rejectReasonPrompt": "Lütfen reddetme sebebini yazınız (isteğe bağlı):",
         "guestTypeDisabledHint": "Misafir türü konaklama türünden türetilir (kişisel / kurumsal / eğitim).",
         "summary": {
@@ -497,6 +502,68 @@
         "emailNotifications": "E-posta Bildirimleri",
         "emailNotificationsDesc": "Rezervasyon durum değişikliklerinde e-posta bildirimi gönder.",
         "saved": "Ayarlar kaydedildi!"
+    },
+
+    "profile": {
+        "name": "Yönetici",
+        "role": "Otel yöneticisi",
+        "profileSettings": "Profil ayarları",
+        "changePassword": "Şifreyi değiştir",
+        "logout": "Çıkış yap",
+        "activeSession": "Aktif Oturum",
+        "sessionStarted": "Oturum başladı {{date}} saat {{time}}",
+        "signOut": "Çıkış Yap",
+        "accountInfo": {
+            "title": "Hesap Bilgileri",
+            "subtitle": "Yönetici hesap bilgileriniz",
+            "username": "Kullanıcı Adı",
+            "role": "Rol",
+            "email": "E-posta",
+            "memberSince": "Üyelik Tarihi",
+            "memberSinceValue": "Mart 2026",
+            "status": "Durum",
+            "statusValue": "✓ Aktif",
+            "roleValue": "Süper Yönetici"
+        },
+        "sessionInfo": {
+            "title": "Mevcut Oturum",
+            "subtitle": "Canlı oturum bilgileri",
+            "loginTime": "Giriş Saati",
+            "loginDate": "Giriş Tarihi",
+            "browser": "Tarayıcı",
+            "platform": "Platform",
+            "sessionType": "Oturum Türü",
+            "sessionTypeValue": "sessionStorage (sekme)"
+        },
+        "changePassword": {
+            "title": "Şifre Değiştir",
+            "subtitle": "Yönetici kimlik bilgilerinizi güncelleyin",
+            "currentPassword": "Mevcut Şifre",
+            "currentPlaceholder": "Mevcut şifrenizi girin",
+            "newPassword": "Yeni Şifre",
+            "newPlaceholder": "Yeni şifrenizi girin",
+            "confirmPassword": "Şifreyi Onayla",
+            "confirmPlaceholder": "Yeni şifrenizi tekrar girin",
+            "updateBtn": "Şifreyi Güncelle",
+            "strength": {
+                "weak": "Zayıf",
+                "fair": "Orta",
+                "good": "İyi",
+                "strong": "Güçlü",
+                "veryStrong": "Çok Güçlü"
+            },
+            "errors": {
+                "wrongCurrent": "Mevcut şifre yanlış.",
+                "tooShort": "Yeni şifre en az 8 karakter olmalıdır.",
+                "noMatch": "Şifreler eşleşmiyor.",
+                "sameAsCurrent": "Yeni şifre mevcut şifreden farklı olmalıdır."
+            },
+            "success": "Şifre başarıyla güncellendi. (Uygulamayı yeniden başlatarak uygulayın.)"
+        },
+        "securityNote": {
+            "label": "Güvenlik notu:",
+            "text": "Bu oturum <code>sessionStorage</code> içinde saklanmaktadır ve bu tarayıcı sekmesini kapattığınızda otomatik olarak temizlenecektir. Tüm yönetici etkinlikleri kaydedilmektedir."
+        }
     }
 
 

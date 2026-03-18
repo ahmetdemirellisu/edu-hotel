@@ -157,6 +157,18 @@ export function ReservationsPage() {
     return map[type] || type;
   };
 
+  const getEventTypeLabel = (type: string): string => {
+    const map: Record<string, string> = {
+      conference: t("reservations.eventTypes.conference"),
+      seminar:    t("reservations.eventTypes.seminar"),
+      workshop:   t("reservations.eventTypes.workshop"),
+      training:   t("reservations.eventTypes.training"),
+      meeting:    t("reservations.eventTypes.meeting"),
+      other:      t("reservations.eventTypes.other"),
+    };
+    return map[type?.toLowerCase()] || type;
+  };
+
   const ACCOM_STYLE: Record<string, { bg: string; text: string }> = {
     PERSONAL:  { bg: "bg-sky-50",    text: "text-sky-700" },
     CORPORATE: { bg: "bg-violet-50", text: "text-violet-700" },
@@ -171,11 +183,15 @@ export function ReservationsPage() {
     { key: "CANCELLED", label: t("reservations.filters.canceled"),      color: "#9ca3af" },
   ];
 
-  const AVATAR_GRADIENTS = [
-    "from-blue-500 to-blue-700", "from-violet-500 to-violet-700",
-    "from-emerald-500 to-emerald-700", "from-amber-500 to-orange-600",
-    "from-rose-500 to-rose-700", "from-teal-500 to-teal-700",
-    "from-sky-500 to-sky-700", "from-indigo-500 to-indigo-700",
+  const AVATAR_COLORS = [
+    { bg: "bg-blue-600",   text: "text-white" },
+    { bg: "bg-violet-600", text: "text-white" },
+    { bg: "bg-emerald-600",text: "text-white" },
+    { bg: "bg-amber-500",  text: "text-white" },
+    { bg: "bg-rose-600",   text: "text-white" },
+    { bg: "bg-teal-600",   text: "text-white" },
+    { bg: "bg-sky-600",    text: "text-white" },
+    { bg: "bg-indigo-600", text: "text-white" },
   ];
 
   const getInitials = (name: string) => {
@@ -331,7 +347,7 @@ export function ReservationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredReservations.map((res, rowIdx) => {
+                {filteredReservations.map((res) => {
                   const name = joinName((res as any).firstName, (res as any).lastName);
                   const email = safe((res as any).contactEmail || res.user?.email);
                   const accomStyle = ACCOM_STYLE[res.accommodationType] || ACCOM_STYLE.PERSONAL;
@@ -340,14 +356,14 @@ export function ReservationsPage() {
                   const checkInTime = (res as any).checkInTime;
                   const ps = (res as any).paymentStatus || "NONE";
                   const initials = getInitials(name);
-                  const avatarGradient = AVATAR_GRADIENTS[rowIdx % AVATAR_GRADIENTS.length];
+                  const avatarColor = AVATAR_COLORS[res.userId % AVATAR_COLORS.length];
 
                   return (
                     <tr key={res.id} className="border-b border-gray-50 last:border-b-0 hover:bg-blue-50/20 transition-colors duration-150 group">
                       <td className="py-3.5 pl-6 pr-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarGradient} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                            <span className="text-[10px] font-bold text-white">{initials}</span>
+                          <div className={`w-8 h-8 rounded-full ${avatarColor.bg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                            <span className={`text-[10px] font-bold ${avatarColor.text}`}>{initials}</span>
                           </div>
                           <div>
                             <p className="text-[13px] font-semibold text-gray-800 leading-tight">{name}</p>
@@ -359,7 +375,7 @@ export function ReservationsPage() {
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${accomStyle.bg} ${accomStyle.text}`}>{accomLabel}</span>
                         {(res as any).eventType && (
                           <span className="block mt-1 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 w-fit">
-                            {((res as any).eventType as string).charAt(0).toUpperCase() + ((res as any).eventType as string).slice(1).toLowerCase()}
+                            {getEventTypeLabel((res as any).eventType)}
                           </span>
                         )}
                       </td>
@@ -463,7 +479,7 @@ export function ReservationsPage() {
               <button
                 onClick={handleApproveConfirm}
                 disabled={actionLoadingId === approveModalId}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2 transition-all duration-150"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2 transition-all duration-150"
               >
                 <CheckCircle className="h-4 w-4" />
                 {actionLoadingId === approveModalId ? t("reservations.approveModal.approving") : t("reservations.approveModal.approveBtn")}
@@ -480,8 +496,8 @@ export function ReservationsPage() {
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${AVATAR_GRADIENTS[selected.id % AVATAR_GRADIENTS.length]} flex items-center justify-center shadow-md flex-shrink-0`}>
-                  <span className="text-sm font-bold text-white">{getInitials(joinName((selected as any).firstName, (selected as any).lastName))}</span>
+                <div className={`w-10 h-10 rounded-xl ${AVATAR_COLORS[selected.id % AVATAR_COLORS.length].bg} flex items-center justify-center shadow-md flex-shrink-0`}>
+                  <span className={`text-sm font-bold ${AVATAR_COLORS[selected.id % AVATAR_COLORS.length].text}`}>{getInitials(joinName((selected as any).firstName, (selected as any).lastName))}</span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
@@ -523,7 +539,7 @@ export function ReservationsPage() {
                     <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
                     {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.checkInLabel")}: {(selected as any).checkInTime}</div>}
                     {selected.room && <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("tables.room")} {selected.room.name} ({selected.room.type})</div>}
-                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{selected.accommodationType} / {selected.invoiceType}</div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{getAccomLabel(selected.accommodationType)} / {(selected.invoiceType === "INDIVIDUAL" ? t("reservations.invoiceTypes.individual") : t("reservations.invoiceTypes.corporate"))}</div>
                   </div>
                 </div>
 

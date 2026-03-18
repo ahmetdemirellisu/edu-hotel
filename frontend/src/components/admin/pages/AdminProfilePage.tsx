@@ -6,12 +6,14 @@ import {
   Globe, Cpu, Calendar,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ADMIN_PASS = "EduH0tel@2026";
 const SESSION_KEY = "adminSession";
 
 export function AdminProfilePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation("admin");
 
   // Password change state
   const [currentPass, setCurrentPass]   = useState("");
@@ -35,7 +37,14 @@ export function AdminProfilePage() {
     if (/[A-Z]/.test(p)) s++;
     if (/[0-9]/.test(p)) s++;
     if (/[^A-Za-z0-9]/.test(p)) s++;
-    const labels  = ["", "Weak", "Fair", "Good", "Strong", "Very Strong"];
+    const labels  = [
+      "",
+      t("profile.changePassword.strength.weak"),
+      t("profile.changePassword.strength.fair"),
+      t("profile.changePassword.strength.good"),
+      t("profile.changePassword.strength.strong"),
+      t("profile.changePassword.strength.veryStrong"),
+    ];
     const colors  = ["", "#ef4444", "#f97316", "#eab308", "#22c55e", "#10b981"];
     return { score: s, label: labels[s], color: colors[s] };
   };
@@ -45,23 +54,22 @@ export function AdminProfilePage() {
   const handleChangePassword = () => {
     setPassMsg(null);
     if (currentPass !== ADMIN_PASS) {
-      setPassMsg({ type: "error", text: "Current password is incorrect." });
+      setPassMsg({ type: "error", text: t("profile.changePassword.errors.wrongCurrent") });
       return;
     }
     if (newPass.length < 8) {
-      setPassMsg({ type: "error", text: "New password must be at least 8 characters." });
+      setPassMsg({ type: "error", text: t("profile.changePassword.errors.tooShort") });
       return;
     }
     if (newPass !== confirmPass) {
-      setPassMsg({ type: "error", text: "Passwords do not match." });
+      setPassMsg({ type: "error", text: t("profile.changePassword.errors.noMatch") });
       return;
     }
     if (newPass === ADMIN_PASS) {
-      setPassMsg({ type: "error", text: "New password must be different from current." });
+      setPassMsg({ type: "error", text: t("profile.changePassword.errors.sameAsCurrent") });
       return;
     }
-    // In this frontend-only setup, just show success (real change requires backend)
-    setPassMsg({ type: "success", text: "Password updated successfully. (Restart app to apply.)" });
+    setPassMsg({ type: "success", text: t("profile.changePassword.success") });
     setCurrentPass(""); setNewPass(""); setConfirmPass("");
   };
 
@@ -126,6 +134,10 @@ export function AdminProfilePage() {
     );
   };
 
+  const browser = navigator.userAgent.includes("Firefox") ? "Firefox"
+    : navigator.userAgent.includes("Safari") ? "Safari"
+    : "Chrome";
+
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
@@ -176,12 +188,12 @@ export function AdminProfilePage() {
                 borderRadius: 20, padding: "2px 10px",
               }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 6px rgba(34,197,94,0.8)" }} />
-                <span style={{ color: "#22c55e", fontSize: 11, fontWeight: 600 }}>Active Session</span>
+                <span style={{ color: "#22c55e", fontSize: 11, fontWeight: 600 }}>{t("profile.activeSession")}</span>
               </div>
             </div>
-            <p style={{ margin: 0, color: "rgba(148,163,184,0.8)", fontSize: 13 }}>eduhotel_admin · Super Administrator</p>
+            <p style={{ margin: 0, color: "rgba(148,163,184,0.8)", fontSize: 13 }}>eduhotel_admin · {t("profile.accountInfo.roleValue")}</p>
             <p style={{ margin: "6px 0 0", color: "rgba(148,163,184,0.5)", fontSize: 12 }}>
-              Session started {sessionDate} at {sessionTime}
+              {t("profile.sessionStarted", { date: sessionDate, time: sessionTime })}
             </p>
           </div>
 
@@ -200,7 +212,7 @@ export function AdminProfilePage() {
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.1)"; }}
           >
             <LogOut size={14} />
-            Sign Out
+            {t("profile.signOut")}
           </button>
         </div>
       </div>
@@ -214,15 +226,15 @@ export function AdminProfilePage() {
               <User size={16} color="#3b82f6" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>Account Information</h3>
-              <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>Your admin account details</p>
+              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{t("profile.accountInfo.title")}</h3>
+              <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>{t("profile.accountInfo.subtitle")}</p>
             </div>
           </div>
-          <InfoRow icon={User}     label="Username"   value="eduhotel_admin" />
-          <InfoRow icon={Shield}   label="Role"       value="Super Administrator" />
-          <InfoRow icon={Globe}    label="Email"      value="admin@sabanciuniv.edu" />
-          <InfoRow icon={Calendar} label="Member Since" value="March 2026" />
-          <InfoRow icon={Activity} label="Status"     value="✓ Active" />
+          <InfoRow icon={User}     label={t("profile.accountInfo.username")}    value="eduhotel_admin" />
+          <InfoRow icon={Shield}   label={t("profile.accountInfo.role")}        value={t("profile.accountInfo.roleValue")} />
+          <InfoRow icon={Globe}    label={t("profile.accountInfo.email")}       value="admin@sabanciuniv.edu" />
+          <InfoRow icon={Calendar} label={t("profile.accountInfo.memberSince")} value={t("profile.accountInfo.memberSinceValue")} />
+          <InfoRow icon={Activity} label={t("profile.accountInfo.status")}      value={t("profile.accountInfo.statusValue")} />
         </div>
 
         {/* ── Session Info ── */}
@@ -232,15 +244,15 @@ export function AdminProfilePage() {
               <Monitor size={16} color="#22c55e" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>Current Session</h3>
-              <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>Live session details</p>
+              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{t("profile.sessionInfo.title")}</h3>
+              <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>{t("profile.sessionInfo.subtitle")}</p>
             </div>
           </div>
-          <InfoRow icon={Clock}    label="Login Time"   value={sessionTime} />
-          <InfoRow icon={Calendar} label="Login Date"   value={sessionDate} />
-          <InfoRow icon={Monitor}  label="Browser"      value={navigator.userAgent.includes("Firefox") ? "Firefox" : navigator.userAgent.includes("Safari") ? "Safari" : "Chrome"} />
-          <InfoRow icon={Cpu}      label="Platform"     value={navigator.platform || "Web"} />
-          <InfoRow icon={Globe}    label="Session Type" value="sessionStorage (tab)" />
+          <InfoRow icon={Clock}    label={t("profile.sessionInfo.loginTime")}    value={sessionTime} />
+          <InfoRow icon={Calendar} label={t("profile.sessionInfo.loginDate")}    value={sessionDate} />
+          <InfoRow icon={Monitor}  label={t("profile.sessionInfo.browser")}      value={browser} />
+          <InfoRow icon={Cpu}      label={t("profile.sessionInfo.platform")}     value={navigator.platform || "Web"} />
+          <InfoRow icon={Globe}    label={t("profile.sessionInfo.sessionType")}  value={t("profile.sessionInfo.sessionTypeValue")} />
         </div>
 
         {/* ── Change Password ── */}
@@ -250,28 +262,28 @@ export function AdminProfilePage() {
               <Key size={16} color="#8b5cf6" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>Change Password</h3>
-              <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>Update your admin credentials</p>
+              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{t("profile.changePassword.title")}</h3>
+              <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>{t("profile.changePassword.subtitle")}</p>
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
             <InputField
-              label="Current Password"
+              label={t("profile.changePassword.currentPassword")}
               value={currentPass}
               onChange={setCurrentPass}
               show={showCurrent}
               onToggle={() => setShowCurrent(v => !v)}
-              placeholder="Enter current password"
+              placeholder={t("profile.changePassword.currentPlaceholder")}
             />
             <div>
               <InputField
-                label="New Password"
+                label={t("profile.changePassword.newPassword")}
                 value={newPass}
                 onChange={setNewPass}
                 show={showNew}
                 onToggle={() => setShowNew(v => !v)}
-                placeholder="Enter new password"
+                placeholder={t("profile.changePassword.newPlaceholder")}
               />
               {/* Strength bar */}
               {newPass && (
@@ -290,12 +302,12 @@ export function AdminProfilePage() {
               )}
             </div>
             <InputField
-              label="Confirm Password"
+              label={t("profile.changePassword.confirmPassword")}
               value={confirmPass}
               onChange={setConfirmPass}
               show={showConfirm}
               onToggle={() => setShowConfirm(v => !v)}
-              placeholder="Confirm new password"
+              placeholder={t("profile.changePassword.confirmPlaceholder")}
             />
           </div>
 
@@ -330,7 +342,7 @@ export function AdminProfilePage() {
               boxShadow: (!currentPass || !newPass || !confirmPass) ? "none" : "0 4px 14px rgba(139,92,246,0.35)",
             }}
           >
-            Update Password
+            {t("profile.changePassword.updateBtn")}
           </button>
         </div>
 
@@ -345,7 +357,8 @@ export function AdminProfilePage() {
         }}>
           <Shield size={16} color="#3b82f6" />
           <p style={{ margin: 0, fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
-            <strong style={{ color: "#475569" }}>Security note:</strong> This session is stored in <code style={{ background: "#f1f5f9", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>sessionStorage</code> and will be cleared automatically when you close this browser tab. All admin activity is logged.
+            <strong style={{ color: "#475569" }}>{t("profile.securityNote.label")}</strong>{" "}
+            {t("profile.securityNote.text")}
           </p>
         </div>
       </div>

@@ -1,4 +1,6 @@
 import React from "react";
+import campusBg from "@/assets/campus.png";
+import { DashboardHero } from "./DashboardHero";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
 import { useTranslation } from "react-i18next";
@@ -18,7 +20,6 @@ import {
   Sparkles,
   User,
   Building2,
-  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -116,13 +117,6 @@ const slideLeft = {
   }),
 };
 
-/* ── Time-based greeting ─────────────────────────────────────── */
-function getGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
 
 export function Dashboard() {
   const { t, i18n } = useTranslation();
@@ -431,172 +425,13 @@ export function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {/* ═══ HERO WELCOME ════════════════════════════════════════ */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          custom={0}
-          className="mb-10 relative overflow-hidden rounded-3xl"
-          style={{
-            background: "linear-gradient(135deg, #000e1f 0%, #001f40 30%, #003366 60%, #004d80 85%, #001f40 100%)",
-            boxShadow: "0 24px 70px rgba(0,30,70,0.45), 0 1px 0 rgba(255,255,255,0.06) inset",
-          }}
-        >
-          {/* Aurora orbs */}
-          <div
-            className="absolute -top-20 -right-20 w-72 h-72 rounded-full pointer-events-none"
-            style={{
-              background: "radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)",
-              animation: "dashAurora1 12s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute -bottom-24 -left-16 w-96 h-96 rounded-full pointer-events-none"
-            style={{
-              background: "radial-gradient(circle, rgba(77,166,255,0.09) 0%, transparent 70%)",
-              animation: "dashAurora2 15s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2"
-            style={{
-              background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
-              animation: "dashAurora3 20s ease-in-out infinite",
-            }}
-          />
-
-          {/* Gold top line */}
-          <div className="absolute top-0 left-0 w-full h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)", opacity: 0.6 }} />
-
-          {/* Subtle grid */}
-          <svg className="absolute inset-0 w-full h-full opacity-[0.025] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="dashGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dashGrid)" />
-          </svg>
-
-          {/* Floating geometric decorations */}
-          <div
-            className="absolute top-6 right-20 w-12 h-12 border border-white/5 pointer-events-none hidden md:block"
-            style={{ animation: "dashFloatA 7s ease-in-out infinite", transform: "rotate(12deg)" }}
-          />
-          <div
-            className="absolute bottom-8 right-40 w-7 h-7 border border-[#c9a84c]/10 pointer-events-none hidden md:block"
-            style={{ animation: "dashFloatB 9s ease-in-out infinite", transform: "rotate(-8deg)" }}
-          />
-          <div
-            className="absolute top-8 right-1/3 w-5 h-5 border border-white/8 pointer-events-none hidden lg:block"
-            style={{ animation: "dashFloatC 11s ease-in-out infinite", transform: "rotate(30deg)" }}
-          />
-
-          <div className="relative px-8 py-9 sm:px-12 sm:py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
-            <div className="flex-1">
-              {/* Eyebrow */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.22, duration: 0.55 }}
-                className="flex items-center gap-2 mb-4"
-              >
-                <Star className="h-3 w-3 text-[#c9a84c]" fill="#c9a84c" />
-                <span className="text-[#c9a84c]/90 text-[10px] font-bold tracking-[4px] uppercase">
-                  Sabancı Üniversitesi
-                </span>
-              </motion.div>
-
-              {/* Main greeting */}
-              <motion.h1
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-tight mb-3"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-              >
-                {getGreeting()},{" "}
-                <span
-                  className="font-semibold"
-                  style={{
-                    background: "linear-gradient(90deg, #fff, #c9a84c, #f0d080, #fff)",
-                    backgroundSize: "300% auto",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    animation: "dashGoldShimmer 5s linear infinite",
-                  }}
-                >
-                  {userName.split(" ")[0]}
-                </span>
-                !
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.42, duration: 0.55 }}
-                className="text-blue-200/60 text-sm leading-relaxed max-w-md mb-6"
-              >
-                {t("dashboard.subtitle", { defaultValue: "Track your reservation requests, approvals, payments, and notifications in one place." })}
-              </motion.p>
-
-              {/* Glass stat pills */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.52, duration: 0.5 }}
-                className="flex flex-wrap gap-3"
-              >
-                {[
-                  { label: t("dashboard.stats.totalReservations", { defaultValue: "Total" }), value: totalReservations, color: "#4da6ff" },
-                  { label: t("dashboard.stats.upcoming", { defaultValue: "Upcoming" }), value: upcomingStays, color: "#10b981" },
-                  { label: t("dashboard.stats.pending", { defaultValue: "Pending" }), value: pendingApprovals, color: "#f59e0b" },
-                ].map((pill, i) => (
-                  <div
-                    key={i}
-                    className="dash-stat-pill flex items-center gap-2 px-3.5 py-2 rounded-xl"
-                    style={{
-                      background: "rgba(255,255,255,0.07)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ background: pill.color, boxShadow: `0 0 6px ${pill.color}` }}
-                    />
-                    <span className="text-[11px] text-white/50 font-medium">{pill.label}</span>
-                    <span className="text-[13px] font-bold text-white">
-                      {loadingReservation ? "—" : pill.value}
-                    </span>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* CTA button */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.88 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.44, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="flex-shrink-0"
-            >
-              <motion.a
-                href="book-room"
-                whileHover={{ scale: 1.05, y: -2, boxShadow: "0 12px 30px rgba(201,168,76,0.45)" }}
-                whileTap={{ scale: 0.96 }}
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm font-bold text-[#001f40] transition-all duration-300"
-                style={{
-                  background: "linear-gradient(135deg, #f0d080 0%, #c9a84c 60%, #e0b840 100%)",
-                  boxShadow: "0 6px 20px rgba(201,168,76,0.35)",
-                }}
-              >
-                <Plus className="h-4 w-4" />
-                {t("main.quick.bookRoom", { defaultValue: "Book a Room" })}
-              </motion.a>
-            </motion.div>
-          </div>
-        </motion.div>
+        <DashboardHero
+          userName={userName}
+          totalReservations={totalReservations}
+          upcomingStays={upcomingStays}
+          pendingApprovals={pendingApprovals}
+          loading={loadingReservation}
+        />
 
         {/* ═══ STATS ═══════════════════════════════════════════════ */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-9">

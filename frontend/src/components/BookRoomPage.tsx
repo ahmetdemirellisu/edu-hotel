@@ -160,8 +160,12 @@ function StepIndicator({ active }: { active: number }) {
    Component
    ═══════════════════════════════════════════════════════════ */
 export function BookRoomPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const formTopRef = useRef<HTMLDivElement | null>(null);
+
+  const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
+  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
+  const userName = localStorage.getItem("userName") || "User";
 
   const storedUser = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -366,16 +370,35 @@ export function BookRoomPage() {
 
         {/* Content */}
         <div className="relative max-w-7xl mx-auto px-6 py-12 flex flex-col justify-center" style={{ minHeight: "220px" }}>
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 mb-5">
-            <Link to="/main" className="flex items-center gap-1.5 text-white/50 hover:text-white/80 text-xs font-medium transition-colors">
-              <Home className="h-3.5 w-3.5" />
-              Home
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-white/30" />
-            <span className="text-[#c9a84c] text-xs font-semibold">
-              {t("bookingRequest.pageTitle", "Book a Room")}
-            </span>
+          {/* Breadcrumb + nav controls */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <Link to="/main" className="flex items-center gap-1.5 text-white/50 hover:text-white/80 text-xs font-medium transition-colors">
+                <Home className="h-3.5 w-3.5" />
+                Home
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5 text-white/30" />
+              <span className="text-[#c9a84c] text-xs font-semibold">
+                {t("bookingRequest.pageTitle", "Book a Room")}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={currentLang} onValueChange={switchLanguage}>
+                <SelectTrigger className="w-[58px] h-8 bg-white/10 border-white/20 text-white text-xs font-semibold hover:bg-white/20 focus:ring-0 rounded-lg">
+                  <SelectValue placeholder={currentLang} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EN">EN</SelectItem>
+                  <SelectItem value="TR">TR</SelectItem>
+                </SelectContent>
+              </Select>
+              <Link to="/profile" className="flex items-center gap-2 group">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <User className="h-4 w-4 text-white/70" />
+                </div>
+                <span className="text-xs text-white/60 group-hover:text-white font-medium hidden md:block max-w-[100px] truncate transition-colors">{userName}</span>
+              </Link>
+            </div>
           </div>
 
           <div className="flex items-end justify-between">

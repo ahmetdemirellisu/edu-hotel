@@ -178,13 +178,6 @@
       }
     },
 
-    "profile": {
-      "name": "Admin",
-      "role": "Hotel manager",
-      "profileSettings": "Profile settings",
-      "changePassword": "Change password",
-      "logout": "Log out"
-    },
 
     "adminUsers": {
       "addNewAdmin": "Add new admin",
@@ -394,6 +387,18 @@
             "corporate": "Corporate",
             "education": "Education"
           },
+          "eventTypes": {
+            "conference": "Conference",
+            "seminar":    "Seminar",
+            "workshop":   "Workshop",
+            "training":   "Training",
+            "meeting":    "Meeting",
+            "other":      "Other"
+          },
+          "invoiceTypes": {
+            "individual": "Individual",
+            "corporate":  "Corporate"
+          },
           "rejectReasonPrompt": "Please enter a reason for rejection (optional):",
           "guestTypeDisabledHint": "Guest type is derived from accommodation type (personal / corporate / education).",
           "summary": {
@@ -493,6 +498,68 @@
         "emailNotifications": "Email Notifications",
         "emailNotificationsDesc": "Send email notifications for reservation status changes.",
         "saved": "Settings saved!"
+    },
+
+    "profile": {
+        "name": "Admin",
+        "role": "Hotel manager",
+        "profileSettings": "Profile settings",
+        "changePassword": "Change password",
+        "logout": "Log out",
+        "activeSession": "Active Session",
+        "sessionStarted": "Session started {{date}} at {{time}}",
+        "signOut": "Sign Out",
+        "accountInfo": {
+            "title": "Account Information",
+            "subtitle": "Your admin account details",
+            "username": "Username",
+            "role": "Role",
+            "email": "Email",
+            "memberSince": "Member Since",
+            "memberSinceValue": "March 2026",
+            "status": "Status",
+            "statusValue": "✓ Active",
+            "roleValue": "Super Administrator"
+        },
+        "sessionInfo": {
+            "title": "Current Session",
+            "subtitle": "Live session details",
+            "loginTime": "Login Time",
+            "loginDate": "Login Date",
+            "browser": "Browser",
+            "platform": "Platform",
+            "sessionType": "Session Type",
+            "sessionTypeValue": "sessionStorage (tab)"
+        },
+        "changePassword": {
+            "title": "Change Password",
+            "subtitle": "Update your admin credentials",
+            "currentPassword": "Current Password",
+            "currentPlaceholder": "Enter current password",
+            "newPassword": "New Password",
+            "newPlaceholder": "Enter new password",
+            "confirmPassword": "Confirm Password",
+            "confirmPlaceholder": "Confirm new password",
+            "updateBtn": "Update Password",
+            "strength": {
+                "weak": "Weak",
+                "fair": "Fair",
+                "good": "Good",
+                "strong": "Strong",
+                "veryStrong": "Very Strong"
+            },
+            "errors": {
+                "wrongCurrent": "Current password is incorrect.",
+                "tooShort": "New password must be at least 8 characters.",
+                "noMatch": "Passwords do not match.",
+                "sameAsCurrent": "New password must be different from current."
+            },
+            "success": "Password updated successfully. (Restart app to apply.)"
+        },
+        "securityNote": {
+            "label": "Security note:",
+            "text": "This session is stored in sessionStorage and will be cleared automatically when you close this browser tab. All admin activity is logged."
+        }
     }
 
 
