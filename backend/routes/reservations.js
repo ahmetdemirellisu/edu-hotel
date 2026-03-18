@@ -2,6 +2,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { sendMail } = require("../services/mail");
+const { emailTemplate, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS } = require("../services/mailTemplate");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -144,78 +145,57 @@ router.post("/", checkBlacklist, async (req, res) => {
         // ✉️ EMAIL — Reservation Request Received (EN + TR)
         try {
             if (user.email) {
-                const checkInStr = checkInDate.toISOString().slice(0, 10);
+                const checkInStr  = checkInDate.toISOString().slice(0, 10);
                 const checkOutStr = checkOutDate.toISOString().slice(0, 10);
-                const guestName = firstName.trim();
+                const fullName    = `${firstName.trim()} ${lastName.trim()}`;
+                const accommEN    = ACCOMM_LABELS[accommodationType]?.en || accommodationType;
+                const accommTR    = ACCOMM_LABELS[accommodationType]?.tr || accommodationType;
+                const invoiceEN   = INVOICE_LABELS[invoiceType]?.en || invoiceType;
+                const invoiceTR   = INVOICE_LABELS[invoiceType]?.tr || invoiceType;
 
-                const subject = "EDU Hotel – Reservation request received / Rezervasyon talebi alındı";
+                const subject = `EDU Hotel – Reservation request received #${reservation.id} / Rezervasyon talebi alındı #${reservation.id}`;
 
-                const text = `
-Dear ${guestName} ${lastName.trim()},
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${fullName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Thank you for choosing EDU Hotel. We have received your reservation request and it is now pending review by our administration team.</p>
+${badge('Request Received', 'blue')}
+${heading('Reservation Details')}
+${detailTable([
+    row('Reservation ID', `#${reservation.id}`),
+    row('Check-in',       `${checkInStr} at ${checkInTime}`),
+    row('Check-out',      checkOutStr),
+    row('Guests',         guestsInt),
+    row('Accommodation',  accommEN),
+    row('Invoice type',   invoiceEN),
+    row('Event type',     eventType || null),
+    row('Event code',     isNonEmptyString(eventCode) ? eventCode : null),
+    row('Note',           isNonEmptyString(note) ? note : null),
+])}
+${heading('What happens next?')}
+<p style="margin:0;font-size:13px;color:#475569;">Our team will review your request and notify you by email once it has been approved or rejected.</p>`;
 
-We have received your reservation request for EDU Hotel.
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${fullName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">EDU Hotel'i tercih ettiğiniz için teşekkür ederiz. Rezervasyon talebiniz alınmış olup yönetim ekibimiz tarafından incelenmektedir.</p>
+${badge('Talep Alındı', 'blue')}
+${heading('Rezervasyon Bilgileri')}
+${detailTable([
+    row('Rezervasyon No',  `#${reservation.id}`),
+    row('Giriş',           `${checkInStr}, ${checkInTime}`),
+    row('Çıkış',           checkOutStr),
+    row('Misafir sayısı',  guestsInt),
+    row('Konaklama türü',  accommTR),
+    row('Fatura türü',     invoiceTR),
+    row('Etkinlik türü',   eventType || null),
+    row('Etkinlik kodu',   isNonEmptyString(eventCode) ? eventCode : null),
+    row('Not',             isNonEmptyString(note) ? note : null),
+])}
+${heading('Sırada ne var?')}
+<p style="margin:0;font-size:13px;color:#475569;">Ekibimiz talebinizi inceleyecek ve onaylandığında ya da reddedildiğinde e-posta ile bilgilendirileceksiniz.</p>`;
 
-Check-in:  ${checkInStr} ${checkInTime}
-Check-out: ${checkOutStr}
-Guests:    ${guestsInt}
-Accommodation: ${accommodationType}
-Invoice: ${invoiceType}
-Event type: ${eventType || "-"}
-Event code: ${eventCode || "-"}
+                const text = `EDU Hotel – Reservation request #${reservation.id} received.\nCheck-in: ${checkInStr} at ${checkInTime}\nCheck-out: ${checkOutStr}\nGuests: ${guestsInt}\n\nYou will be notified by email once your request is reviewed.\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyon talebiniz alındı.\nGiriş: ${checkInStr}, ${checkInTime}\nÇıkış: ${checkOutStr}\nMisafir: ${guestsInt}\n\nTalebiniz incelendikten sonra e-posta ile bilgilendirileceksiniz.`;
 
-Our administration team will review your request. You will be notified by email once it is approved or rejected.
-
----
-
-Sayın ${guestName} ${lastName.trim()},
-
-EDU Hotel için rezervasyon talebiniz alınmıştır.
-
-Giriş:     ${checkInStr} ${checkInTime}
-Çıkış:     ${checkOutStr}
-Misafir:   ${guestsInt}
-Konaklama: ${accommodationType}
-Fatura:    ${invoiceType}
-Etkinlik:  ${eventType || "-"}
-Kod:       ${eventCode || "-"}
-
-Yönetim ekibimiz talebinizi inceleyecektir. Onaylandığında veya reddedildiğinde e-posta ile bilgilendirileceksiniz.
-
-EDU Hotel
-`;
-
-                const html = `
-<p>Dear <strong>${guestName} ${lastName.trim()}</strong>,</p>
-<p>We have received your reservation request for EDU Hotel.</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr} ${checkInTime}<br/>
-<strong>Check-out:</strong> ${checkOutStr}<br/>
-<strong>Guests:</strong> ${guestsInt}<br/>
-<strong>Accommodation:</strong> ${accommodationType}<br/>
-<strong>Invoice:</strong> ${invoiceType}<br/>
-<strong>Event type:</strong> ${eventType || "-"}<br/>
-<strong>Event code:</strong> ${eventCode || "-"}
-</p>
-<p>You will be notified once it is reviewed by the administration.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName} ${lastName.trim()}</strong>,</p>
-<p>EDU Hotel için rezervasyon talebiniz alınmıştır.</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr} ${checkInTime}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}<br/>
-<strong>Misafir:</strong> ${guestsInt}<br/>
-<strong>Konaklama:</strong> ${accommodationType}<br/>
-<strong>Fatura:</strong> ${invoiceType}<br/>
-<strong>Etkinlik:</strong> ${eventType || "-"}<br/>
-<strong>Kod:</strong> ${eventCode || "-"}
-</p>
-<p>Yönetim ekibimiz talebinizi inceleyecektir.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+                const html = emailTemplate(bodyEN, bodyTR);
                 await sendMail({ to: user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -320,66 +300,45 @@ router.patch("/admin/:id/approve", async (req, res) => {
         // ✉️ EMAIL — Reservation Approved (EN + TR)
         try {
             if (reservation.user?.email) {
-                const guestName = reservation.firstName || reservation.user.name || "Guest";
-                const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
+                const guestName   = reservation.firstName || reservation.user.name || "Guest";
+                const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
-                const priceInfo = reservation.price != null ? `Price: ${reservation.price} TL` : "";
-                const priceInfoTR = reservation.price != null ? `Ücret: ${reservation.price} TL` : "";
 
-                const subject = "EDU Hotel – Reservation approved / Rezervasyon onaylandı";
+                const subject = `EDU Hotel – Reservation approved #${reservation.id} / Rezervasyon onaylandı #${reservation.id}`;
 
-                const text = `
-Dear ${guestName},
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Great news! Your reservation request has been reviewed and approved by our administration team.</p>
+${badge('Reservation Approved ✓', 'green')}
+${heading('Reservation Details')}
+${detailTable([
+    row('Reservation ID', `#${reservation.id}`),
+    row('Check-in',       `${checkInStr}${reservation.checkInTime ? ' at ' + reservation.checkInTime : ''}`),
+    row('Check-out',      checkOutStr),
+    row('Guests',         reservation.guests),
+    row('Price',          reservation.price != null ? `${reservation.price} TL` : null),
+])}
+${heading('Next Step')}
+<p style="margin:0;font-size:13px;color:#475569;">Please log in to your EDU Hotel account and upload your payment receipt to complete the reservation. Your room will be assigned upon payment confirmation.</p>`;
 
-Your reservation request #${reservation.id} has been APPROVED.
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Harika haber! Rezervasyon talebiniz yönetim ekibimiz tarafından incelenmiş ve onaylanmıştır.</p>
+${badge('Rezervasyon Onaylandı ✓', 'green')}
+${heading('Rezervasyon Bilgileri')}
+${detailTable([
+    row('Rezervasyon No', `#${reservation.id}`),
+    row('Giriş',          `${checkInStr}${reservation.checkInTime ? ', ' + reservation.checkInTime : ''}`),
+    row('Çıkış',          checkOutStr),
+    row('Misafir sayısı', reservation.guests),
+    row('Ücret',          reservation.price != null ? `${reservation.price} TL` : null),
+])}
+${heading('Sıradaki Adım')}
+<p style="margin:0;font-size:13px;color:#475569;">Lütfen EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin. Oda ataması ödeme onayının ardından gerçekleştirilecektir.</p>`;
 
-Check-in:  ${checkInStr} ${reservation.checkInTime || ""}
-Check-out: ${checkOutStr}
-Guests:    ${reservation.guests}
-${priceInfo ? priceInfo + "\n" : ""}
-Please proceed with payment. We look forward to welcoming you.
+                const text = `EDU Hotel – Your reservation #${reservation.id} has been APPROVED.\nCheck-in: ${checkInStr}${reservation.checkInTime ? ' at ' + reservation.checkInTime : ''}\nCheck-out: ${checkOutStr}\nGuests: ${reservation.guests}${reservation.price != null ? '\nPrice: ' + reservation.price + ' TL' : ''}\n\nPlease log in and upload your payment receipt to complete the reservation.\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyonunuz ONAYLANDI.\nLütfen ödeme dekontunuzu sisteme yükleyin.`;
 
----
-
-Sayın ${guestName},
-
-#${reservation.id} numaralı rezervasyon talebiniz ONAYLANDI.
-
-Giriş:     ${checkInStr} ${reservation.checkInTime || ""}
-Çıkış:     ${checkOutStr}
-Misafir:   ${reservation.guests}
-${priceInfoTR ? priceInfoTR + "\n" : ""}
-Lütfen ödeme işlemini gerçekleştirin. Sizi ağırlamayı dört gözle bekliyoruz.
-
-EDU Hotel
-`;
-
-                const html = `
-<p>Dear <strong>${guestName}</strong>,</p>
-<p>Your reservation <strong>#${reservation.id}</strong> has been <strong style="color: green;">APPROVED</strong>.</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
-<strong>Check-out:</strong> ${checkOutStr}<br/>
-<strong>Guests:</strong> ${reservation.guests}<br/>
-${reservation.price != null ? `<strong>Price:</strong> ${reservation.price} TL<br/>` : ""}
-</p>
-<p>Please proceed with payment.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName}</strong>,</p>
-<p><strong>#${reservation.id}</strong> numaralı rezervasyonunuz <strong style="color: green;">ONAYLANDI</strong>.</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}<br/>
-<strong>Misafir:</strong> ${reservation.guests}<br/>
-${reservation.price != null ? `<strong>Ücret:</strong> ${reservation.price} TL<br/>` : ""}
-</p>
-<p>Lütfen ödeme işlemini gerçekleştirin.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+                const html = emailTemplate(bodyEN, bodyTR);
                 await sendMail({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -410,66 +369,43 @@ router.patch("/admin/:id/reject", async (req, res) => {
         // ✉️ EMAIL — Reservation Rejected (EN + TR)
         try {
             if (reservation.user?.email) {
-                const guestName = reservation.firstName || reservation.user.name || "Guest";
-                const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
+                const guestName   = reservation.firstName || reservation.user.name || "Guest";
+                const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
-                const reasonEN = note ? `Reason: ${note}` : "Your reservation request could not be approved at this time.";
-                const reasonTR = note ? `Neden: ${note}` : "Rezervasyon talebiniz şu anda onaylanamamıştır.";
+                const reasonEN    = note || null;
+                const reasonTR    = note || null;
 
-                const subject = "EDU Hotel – Reservation rejected / Rezervasyon reddedildi";
+                const subject = `EDU Hotel – Reservation not approved #${reservation.id} / Rezervasyon reddedildi #${reservation.id}`;
 
-                const text = `
-Dear ${guestName},
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">We regret to inform you that your reservation request could not be approved at this time.</p>
+${badge('Reservation Not Approved', 'red')}
+${heading('Reservation Details')}
+${detailTable([
+    row('Reservation ID', `#${reservation.id}`),
+    row('Check-in',       checkInStr),
+    row('Check-out',      checkOutStr),
+    row('Reason',         reasonEN),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">You are welcome to submit a new reservation request or contact us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> if you have any questions.</p>`;
 
-Unfortunately, your reservation request #${reservation.id} has been rejected.
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Üzülerek bildiririz ki rezervasyon talebiniz bu aşamada onaylanamamıştır.</p>
+${badge('Rezervasyon Onaylanmadı', 'red')}
+${heading('Rezervasyon Bilgileri')}
+${detailTable([
+    row('Rezervasyon No', `#${reservation.id}`),
+    row('Giriş',          checkInStr),
+    row('Çıkış',          checkOutStr),
+    row('Neden',          reasonTR),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">Yeni bir rezervasyon talebi oluşturabilir veya sorularınız için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bizimle iletişime geçebilirsiniz.</p>`;
 
-${reasonEN}
+                const text = `EDU Hotel – Your reservation request #${reservation.id} was not approved.${reasonEN ? '\nReason: ' + reasonEN : ''}\nCheck-in: ${checkInStr} | Check-out: ${checkOutStr}\n\nPlease contact hotel@sabanciuniv.edu for more information.\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyon talebiniz reddedildi.${reasonTR ? '\nNeden: ' + reasonTR : ''}\nSorularınız için hotel@sabanciuniv.edu ile iletişime geçin.`;
 
-Check-in:  ${checkInStr}
-Check-out: ${checkOutStr}
-
-If you have questions, please contact the hotel administration.
-
----
-
-Sayın ${guestName},
-
-Maalesef, #${reservation.id} numaralı rezervasyon talebiniz reddedilmiştir.
-
-${reasonTR}
-
-Giriş:  ${checkInStr}
-Çıkış:  ${checkOutStr}
-
-Sorularınız için lütfen otel yönetimiyle iletişime geçin.
-
-EDU Hotel
-`;
-
-                const html = `
-<p>Dear <strong>${guestName}</strong>,</p>
-<p>Your reservation <strong>#${reservation.id}</strong> has been <strong style="color: red;">rejected</strong>.</p>
-<p>${reasonEN}</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr}<br/>
-<strong>Check-out:</strong> ${checkOutStr}
-</p>
-<p>If you have questions, please contact the hotel administration.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName}</strong>,</p>
-<p><strong>#${reservation.id}</strong> numaralı rezervasyonunuz <strong style="color: red;">reddedilmiştir</strong>.</p>
-<p>${reasonTR}</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}
-</p>
-<p>Sorularınız için lütfen otel yönetimiyle iletişime geçin.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+                const html = emailTemplate(bodyEN, bodyTR);
                 await sendMail({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -539,64 +475,41 @@ router.patch("/:id/cancel", async (req, res) => {
         // ✉️ EMAIL — Reservation Cancelled (EN + TR)
         try {
             if (updated.user?.email) {
-                const guestName = updated.firstName || updated.user.name || "Guest";
-                const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
+                const guestName   = updated.firstName || updated.user.name || "Guest";
+                const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
-                const reasonEN = reason ? `Reason: ${reason}` : "";
-                const reasonTR = reason ? `Neden: ${reason}` : "";
 
-                const subject = "EDU Hotel – Reservation cancelled / Rezervasyon iptal edildi";
+                const subject = `EDU Hotel – Reservation cancelled #${id} / Rezervasyon iptal edildi #${id}`;
 
-                const text = `
-Dear ${guestName},
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Your cancellation request has been processed. Your reservation has been successfully cancelled.</p>
+${badge('Reservation Cancelled', 'orange')}
+${heading('Cancelled Reservation Details')}
+${detailTable([
+    row('Reservation ID', `#${id}`),
+    row('Check-in',       checkInStr),
+    row('Check-out',      checkOutStr),
+    row('Reason',         reason || null),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">If this was unintentional, you are welcome to submit a new reservation request. For assistance, contact us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a>.</p>`;
 
-Your reservation #${id} has been cancelled as requested.
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">İptal talebiniz işleme alındı. Rezervasyonunuz başarıyla iptal edilmiştir.</p>
+${badge('Rezervasyon İptal Edildi', 'orange')}
+${heading('İptal Edilen Rezervasyon Bilgileri')}
+${detailTable([
+    row('Rezervasyon No', `#${id}`),
+    row('Giriş',          checkInStr),
+    row('Çıkış',          checkOutStr),
+    row('Neden',          reason || null),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">Bu bir hata ise yeni bir rezervasyon talebi oluşturabilirsiniz. Yardım için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-Check-in:  ${checkInStr}
-Check-out: ${checkOutStr}
-${reasonEN}
+                const text = `EDU Hotel – Your reservation #${id} has been cancelled.${reason ? '\nReason: ' + reason : ''}\nCheck-in: ${checkInStr} | Check-out: ${checkOutStr}\n\nIf this was unintentional, please submit a new reservation request.\n\n---\n\nEDU Hotel – #${id} numaralı rezervasyonunuz iptal edildi.${reason ? '\nNeden: ' + reason : ''}`;
 
-If this was a mistake, please create a new reservation or contact the hotel administration.
-
----
-
-Sayın ${guestName},
-
-#${id} numaralı rezervasyonunuz talebiniz üzerine iptal edilmiştir.
-
-Giriş:  ${checkInStr}
-Çıkış:  ${checkOutStr}
-${reasonTR}
-
-Bu bir hata ise lütfen yeni bir rezervasyon oluşturun veya otel yönetimiyle iletişime geçin.
-
-EDU Hotel
-`;
-
-                const html = `
-<p>Dear <strong>${guestName}</strong>,</p>
-<p>Your reservation <strong>#${id}</strong> has been <strong style="color: red;">cancelled</strong> as requested.</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr}<br/>
-<strong>Check-out:</strong> ${checkOutStr}<br/>
-${reasonEN ? `<strong>${reasonEN}</strong>` : ""}
-</p>
-<p>If this was a mistake, please create a new reservation.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName}</strong>,</p>
-<p><strong>#${id}</strong> numaralı rezervasyonunuz talebiniz üzerine <strong style="color: red;">iptal edilmiştir</strong>.</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}<br/>
-${reasonTR ? `<strong>${reasonTR}</strong>` : ""}
-</p>
-<p>Bu bir hata ise lütfen yeni bir rezervasyon oluşturun.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+                const html = emailTemplate(bodyEN, bodyTR);
                 await sendMail({ to: updated.user.email, subject, text, html });
             }
         } catch (mailErr) {

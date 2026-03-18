@@ -1,6 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { sendMail } = require("../services/mail");
+const { emailTemplate, badge, row, detailTable, heading } = require("../services/mailTemplate");
 const path = require("path");
 const fs = require("fs");
 
@@ -141,78 +142,45 @@ router.post("/approve-payment/:id", async (req, res) => {
         // ✉️ EMAIL — Payment Approved
         try {
             if (reservation.user?.email) {
-                const guestName = reservation.firstName || reservation.user.name || "Guest";
-                const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
+                const guestName   = reservation.firstName || reservation.user.name || "Guest";
+                const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
-                const roomInfo = reservation.room
-                    ? `Room: ${reservation.room.name}`
-                    : "Room will be communicated at check-in.";
-                const roomInfoTR = reservation.room
-                    ? `Oda: ${reservation.room.name}`
-                    : "Oda bilgisi giriş sırasında iletilecektir.";
+                const roomEN      = reservation.room ? reservation.room.name : null;
+                const roomTR      = reservation.room ? reservation.room.name : null;
 
-                const subject = "EDU Hotel – Payment confirmed / Ödeme onaylandı";
+                const subject = `EDU Hotel – Booking confirmed ✓ #${reservation.id} / Rezervasyonunuz kesinleşti ✓ #${reservation.id}`;
 
-                const text = `
-Dear ${guestName},
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Your payment has been verified. Your stay at EDU Hotel is now fully confirmed — we look forward to welcoming you!</p>
+${badge('Booking Confirmed ✓', 'green')}
+${heading('Your Stay')}
+${detailTable([
+    row('Reservation ID', `#${reservation.id}`),
+    row('Check-in',       `${checkInStr}${reservation.checkInTime ? ' at ' + reservation.checkInTime : ''}`),
+    row('Check-out',      checkOutStr),
+    row('Guests',         reservation.guests),
+    row('Room',           roomEN || 'To be communicated at check-in'),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">Please present a valid ID upon arrival. If you have any questions before your stay, don't hesitate to reach us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a>.</p>`;
 
-Your payment for reservation #${reservation.id} has been verified and confirmed.
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Ödemeniz doğrulandı. EDU Hotel'deki konaklamanız kesinleşmiştir — sizi ağırlamaktan mutluluk duyacağız!</p>
+${badge('Rezervasyon Kesinleşti ✓', 'green')}
+${heading('Konaklamanız')}
+${detailTable([
+    row('Rezervasyon No', `#${reservation.id}`),
+    row('Giriş',          `${checkInStr}${reservation.checkInTime ? ', ' + reservation.checkInTime : ''}`),
+    row('Çıkış',          checkOutStr),
+    row('Misafir sayısı', reservation.guests),
+    row('Oda',            roomTR || 'Giriş sırasında bildirilecektir'),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">Lütfen giriş sırasında geçerli bir kimlik belgesi ibraz ediniz. Konaklamanız öncesinde herhangi bir sorunuz için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-Your reservation is now fully confirmed. Here are the details:
+                const text = `EDU Hotel – Your booking #${reservation.id} is CONFIRMED.\nCheck-in: ${checkInStr}${reservation.checkInTime ? ' at ' + reservation.checkInTime : ''}\nCheck-out: ${checkOutStr}\nGuests: ${reservation.guests}\n${reservation.room ? 'Room: ' + reservation.room.name : 'Room: To be communicated at check-in'}\n\nWe look forward to welcoming you!\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyonunuz KESİNLEŞTİ.\nSizi ağırlamaktan mutluluk duyacağız!`;
 
-Check-in:  ${checkInStr} ${reservation.checkInTime || ""}
-Check-out: ${checkOutStr}
-Guests:    ${reservation.guests}
-${roomInfo}
-
-We look forward to welcoming you to EDU Hotel.
-
----
-
-Sayın ${guestName},
-
-#${reservation.id} numaralı rezervasyonunuz için ödemeniz doğrulanmış ve onaylanmıştır.
-
-Rezervasyonunuz artık kesinleşmiştir. Detaylar:
-
-Giriş:     ${checkInStr} ${reservation.checkInTime || ""}
-Çıkış:     ${checkOutStr}
-Misafir:   ${reservation.guests}
-${roomInfoTR}
-
-EDU Hotel'de sizi ağırlamayı dört gözle bekliyoruz.
-
-EDU Hotel
-`;
-
-                const html = `
-<p>Dear <strong>${guestName}</strong>,</p>
-<p>Your payment for reservation <strong>#${reservation.id}</strong> has been <strong style="color: green;">verified and confirmed</strong>.</p>
-<p>Your reservation is now <strong>fully confirmed</strong>.</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
-<strong>Check-out:</strong> ${checkOutStr}<br/>
-<strong>Guests:</strong> ${reservation.guests}<br/>
-${roomInfo}
-</p>
-<p>We look forward to welcoming you to EDU Hotel.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName}</strong>,</p>
-<p><strong>#${reservation.id}</strong> numaralı rezervasyonunuz için ödemeniz <strong style="color: green;">doğrulanmış ve onaylanmıştır</strong>.</p>
-<p>Rezervasyonunuz artık <strong>kesinleşmiştir</strong>.</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr} ${reservation.checkInTime || ""}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}<br/>
-<strong>Misafir:</strong> ${reservation.guests}<br/>
-${roomInfoTR}
-</p>
-<p>EDU Hotel'de sizi ağırlamayı dört gözle bekliyoruz.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+                const html = emailTemplate(bodyEN, bodyTR);
                 await sendMail({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -244,73 +212,43 @@ router.post("/reject-payment/:id", async (req, res) => {
         // ✉️ EMAIL — Payment Rejected
         try {
             if (reservation.user?.email) {
-                const guestName = reservation.firstName || reservation.user.name || "Guest";
-                const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
+                const guestName   = reservation.firstName || reservation.user.name || "Guest";
+                const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
 
-                const reasonEN = reason
-                    ? `Reason: ${reason}`
-                    : "The uploaded receipt could not be verified.";
-                const reasonTR = reason
-                    ? `Neden: ${reason}`
-                    : "Yüklenen dekont doğrulanamamıştır.";
+                const subject = `EDU Hotel – Payment receipt not accepted #${reservation.id} / Ödeme dekontu kabul edilmedi #${reservation.id}`;
 
-                const subject = "EDU Hotel – Payment rejected / Ödeme reddedildi";
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Unfortunately, we were unable to verify your payment receipt for the reservation below. Please re-upload a clear, valid receipt to keep your reservation active.</p>
+${badge('Receipt Not Accepted', 'red')}
+${heading('Reservation Details')}
+${detailTable([
+    row('Reservation ID', `#${reservation.id}`),
+    row('Check-in',       checkInStr),
+    row('Check-out',      checkOutStr),
+    row('Reason',         reason || 'The uploaded receipt could not be verified.'),
+])}
+${heading('What to do next')}
+<p style="margin:0;font-size:13px;color:#475569;">Please log in to your EDU Hotel account and upload a new, clear payment receipt (PDF, JPG or PNG, max 5 MB). If you need assistance, contact us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a>.</p>`;
 
-                const text = `
-Dear ${guestName},
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Maalesef aşağıdaki rezervasyon için yüklenen ödeme dekontunu doğrulayamadık. Rezervasyonunuzu aktif tutmak için lütfen net ve geçerli bir dekont yükleyin.</p>
+${badge('Dekont Kabul Edilmedi', 'red')}
+${heading('Rezervasyon Bilgileri')}
+${detailTable([
+    row('Rezervasyon No', `#${reservation.id}`),
+    row('Giriş',          checkInStr),
+    row('Çıkış',          checkOutStr),
+    row('Neden',          reason || 'Yüklenen dekont doğrulanamamıştır.'),
+])}
+${heading('Yapmanız Gerekenler')}
+<p style="margin:0;font-size:13px;color:#475569;">EDU Hotel hesabınıza giriş yaparak yeni, net bir ödeme dekontu yükleyin (PDF, JPG veya PNG, maks. 5 MB). Yardım için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-Unfortunately, your payment for reservation #${reservation.id} has been rejected.
+                const text = `EDU Hotel – Your payment receipt for reservation #${reservation.id} was not accepted.\nReason: ${reason || 'The uploaded receipt could not be verified.'}\nCheck-in: ${checkInStr} | Check-out: ${checkOutStr}\n\nPlease log in and upload a new receipt.\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyonunuz için ödeme dekontu kabul edilmedi.\nLütfen yeni bir dekont yükleyin.`;
 
-${reasonEN}
-
-Reservation Details:
-Check-in:  ${checkInStr}
-Check-out: ${checkOutStr}
-
-Please upload a new payment receipt or contact the hotel administration for assistance.
-
----
-
-Sayın ${guestName},
-
-Maalesef, #${reservation.id} numaralı rezervasyonunuz için ödemeniz reddedilmiştir.
-
-${reasonTR}
-
-Rezervasyon Bilgileri:
-Giriş:  ${checkInStr}
-Çıkış:  ${checkOutStr}
-
-Lütfen yeni bir ödeme dekontu yükleyin veya yardım için otel yönetimiyle iletişime geçin.
-
-EDU Hotel
-`;
-
-                const html = `
-<p>Dear <strong>${guestName}</strong>,</p>
-<p>Your payment for reservation <strong>#${reservation.id}</strong> has been <strong style="color: red;">rejected</strong>.</p>
-<p>${reasonEN}</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr}<br/>
-<strong>Check-out:</strong> ${checkOutStr}
-</p>
-<p>Please upload a new payment receipt or contact the hotel administration.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName}</strong>,</p>
-<p><strong>#${reservation.id}</strong> numaralı rezervasyonunuz için ödemeniz <strong style="color: red;">reddedilmiştir</strong>.</p>
-<p>${reasonTR}</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}
-</p>
-<p>Lütfen yeni bir ödeme dekontu yükleyin veya otel yönetimiyle iletişime geçin.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+                const html = emailTemplate(bodyEN, bodyTR);
                 await sendMail({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {

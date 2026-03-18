@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
 const { sendMail } = require("../services/mail");
+const { emailTemplate, badge, row, detailTable, heading } = require("../services/mailTemplate");
 
 const prisma = new PrismaClient();
 
@@ -66,60 +67,39 @@ router.post(
       // ✉️ EMAIL — Payment Receipt Uploaded
       try {
         if (reservation.user?.email) {
-          const checkInStr = reservation.checkIn.toISOString().slice(0, 10);
+          const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
           const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
-          const guestName = reservation.firstName || reservation.user.name || "Guest";
+          const guestName   = reservation.firstName || reservation.user.name || "Guest";
 
-          const subject = "EDU Hotel – Payment receipt received / Ödeme dekontu alındı";
+          const subject = `EDU Hotel – Payment receipt received #${reservation.id} / Ödeme dekontu alındı #${reservation.id}`;
 
-          const text = `
-Dear ${guestName},
+          const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">We have received your payment receipt and it is now awaiting verification by our administration team. You will be notified by email once it is reviewed.</p>
+${badge('Awaiting Verification', 'orange')}
+${heading('Reservation Details')}
+${detailTable([
+    row('Reservation ID', `#${reservation.id}`),
+    row('Check-in',       checkInStr),
+    row('Check-out',      checkOutStr),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">Verification is typically completed within 1 business day. If you have any questions, contact us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a>.</p>`;
 
-Your payment receipt for reservation #${reservation.id} has been uploaded successfully and is now awaiting verification by our administration team.
+          const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Ödeme dekontunuz alınmış olup yönetim ekibimiz tarafından incelenmektedir. İnceleme tamamlandığında e-posta ile bilgilendirileceksiniz.</p>
+${badge('Doğrulama Bekleniyor', 'orange')}
+${heading('Rezervasyon Bilgileri')}
+${detailTable([
+    row('Rezervasyon No', `#${reservation.id}`),
+    row('Giriş',          checkInStr),
+    row('Çıkış',          checkOutStr),
+])}
+<p style="margin:0;font-size:13px;color:#475569;">Doğrulama genellikle 1 iş günü içinde tamamlanır. Sorularınız için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-Reservation Details:
-Check-in:  ${checkInStr}
-Check-out: ${checkOutStr}
+          const text = `EDU Hotel – Payment receipt for reservation #${reservation.id} received and awaiting verification.\nCheck-in: ${checkInStr} | Check-out: ${checkOutStr}\n\nYou will be notified once it is verified.\n\n---\n\nEDU Hotel – #${reservation.id} numaralı rezervasyonunuz için ödeme dekontunuz alındı ve doğrulama bekleniyor.`;
 
-You will be notified once the payment is verified.
-
----
-
-Sayın ${guestName},
-
-#${reservation.id} numaralı rezervasyonunuz için ödeme dekontunuz başarıyla yüklenmiştir ve yönetim ekibimiz tarafından doğrulama beklemektedir.
-
-Rezervasyon Bilgileri:
-Giriş:  ${checkInStr}
-Çıkış:  ${checkOutStr}
-
-Ödeme doğrulandığında size bildirim gönderilecektir.
-
-EDU Hotel
-`;
-
-          const html = `
-<p>Dear <strong>${guestName}</strong>,</p>
-<p>Your payment receipt for reservation <strong>#${reservation.id}</strong> has been uploaded successfully and is now <strong>awaiting verification</strong>.</p>
-<p>
-<strong>Check-in:</strong> ${checkInStr}<br/>
-<strong>Check-out:</strong> ${checkOutStr}
-</p>
-<p>You will be notified once the payment is verified.</p>
-
-<hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-
-<p>Sayın <strong>${guestName}</strong>,</p>
-<p><strong>#${reservation.id}</strong> numaralı rezervasyonunuz için ödeme dekontunuz başarıyla yüklenmiştir ve <strong>doğrulama beklemektedir</strong>.</p>
-<p>
-<strong>Giriş:</strong> ${checkInStr}<br/>
-<strong>Çıkış:</strong> ${checkOutStr}
-</p>
-<p>Ödeme doğrulandığında size bildirim gönderilecektir.</p>
-
-<p style="color: #888; font-size: 12px; margin-top: 24px;">EDU Hotel – Sabancı Üniversitesi</p>
-`;
-
+          const html = emailTemplate(bodyEN, bodyTR);
           await sendMail({ to: reservation.user.email, subject, text, html });
         }
       } catch (mailErr) {
