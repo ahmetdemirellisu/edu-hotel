@@ -2,13 +2,23 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 const prisma = require("../prismaClient");
 
 const router = express.Router();
 
+// 10 attempts per 15 minutes per IP
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many attempts. Please try again in 15 minutes." },
+});
+
 // POST /auth/register
 // POST /auth/register
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
     try {
         // 🆕 also read userType from body (optional)
         const { email, password, name, userType: rawUserType } = req.body;
@@ -61,7 +71,7 @@ router.post("/register", async (req, res) => {
 });
 
 // POST /auth/login
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -112,7 +122,7 @@ router.post("/login", async (req, res) => {
 });
 
 // POST /auth/admin-login
-router.post("/admin-login", async (req, res) => {
+router.post("/admin-login", authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {
