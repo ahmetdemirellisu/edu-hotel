@@ -56,6 +56,8 @@
   "signup": {
     "fullNameLabel": "Ad Soyad",
     "fullNamePlaceholder": "Adınızı ve soyadınızı girin",
+    "firstNamePlaceholder": "Ad",
+    "lastNamePlaceholder": "Soyad",
     "signupWith": "Kayıt yöntemi",
     "email": "E-posta",
     "phone": "Telefon Numarası",
@@ -614,6 +616,129 @@
     "showing": "Gösterilen",
     "of": "/",
     "reservations": "rezervasyon"
+  },
+
+  "bookRoom": {
+    "checkIn": "Giriş Tarihi",
+    "checkOut": "Çıkış Tarihi",
+    "checkInTime": "Beklenen Giriş Saati",
+    "night": "gece",
+    "nights": "gece",
+    "numberOfGuests": "Misafir Sayısı",
+    "guestInfo": "Ana Misafir",
+    "additionalGuests": "Ek Misafirler",
+    "additionalGuestFirstName": "Misafir {{n}} — Ad",
+    "additionalGuestLastName": "Soyad",
+    "eventCode": "Etkinlik / Eğitim Kodu",
+    "eventType": "Konaklama Amacı",
+    "eventTypePlaceholder": "Amaç seçin...",
+    "priceType": "Fiyat Türü",
+    "priceTypePlaceholder": "Fiyat türü seçin...",
+    "notes": "Notlar / Açıklama",
+    "notesPlaceholder": "Konaklama amacınız, özel istekleriniz...",
+    "billingType": "Fatura Türü",
+    "tcId": "T.C. Kimlik",
+    "passport": "Pasaport",
+    "passportNo": "Pasaport Numarası",
+    "taxNumber": "Vergi Numarası",
+    "billingTitle": "Şirket / Kurum Adı",
+    "billingAddress": "Fatura Adresi",
+    "consent": "Sağladığım tüm bilgilerin doğru olduğunu onaylıyor ve rezervasyon şartlarını ile otel politikalarını kabul ediyorum.",
+    "back": "Geri",
+    "next": "İleri",
+    "submitting": "Gönderiliyor...",
+    "submitBtn": "Rezervasyonu Onayla",
+    "successMessage": "Rezervasyonunuz gönderildi! Resepsiyon talebinizi inceleyerek size oda atayacaktır.",
+    "errorMessage": "Rezervasyon başarısız",
+    "successTitle": "Rezervasyon Gönderildi",
+    "viewReservations": "Rezervasyonları Görüntüle",
+    "bookAnother": "Yeni Rezervasyon",
+    "validation": {
+      "datesRequired": "Lütfen giriş ve çıkış tarihlerini seçin.",
+      "checkoutAfterCheckin": "Çıkış tarihi girişten sonra olmalıdır.",
+      "noSundayCheckin": "Pazar günleri giriş yapılamaz.",
+      "noSatSunStay": "Cumartesi girişi ile Pazar çıkışı izin verilmemektedir.",
+      "tooFarAhead": "Rezervasyon en fazla 30 gün ilerisine yapılabilir.",
+      "timeRequired": "Lütfen giriş saatini seçin.",
+      "accommodationRequired": "Lütfen konaklama türünü seçin.",
+      "guestInfoRequired": "Lütfen tüm misafir bilgilerini doldurun.",
+      "guestCount": "Misafir sayısı 1 ile 10 arasında olmalıdır.",
+      "guestListIncomplete": "Lütfen tüm misafir isimlerini doldurun.",
+      "personalMaxNights": "Bireysel konaklamalar 5 ardışık geceyi geçemez.",
+      "eventCodeRequired": "Bu konaklama türü için etkinlik kodu zorunludur.",
+      "notesRequired": "Eğitim amaçlı konaklamalar için lütfen açıklama girin.",
+      "eventTypeRequired": "Lütfen konaklama amacını seçin.",
+      "billingRequired": "Lütfen fatura türünü seçin.",
+      "idRequired": "T.C. Kimlik veya Pasaport numarası zorunludur.",
+      "taxRequired": "Vergi numarası zorunludur.",
+      "billingTitleRequired": "Şirket adı zorunludur.",
+      "billingAddressRequired": "Fatura adresi zorunludur.",
+      "consent": "Lütfen şartlar ve koşulları kabul edin.",
+      "notLoggedIn": "Giriş yapmanız gerekmektedir."
+    },
+    "step1": {
+      "label": "Konaklama Tarihleri",
+      "title": "Tarihlerinizi Seçin"
+    },
+    "step2": {
+      "label": "Misafir & Amaç",
+      "title": "Misafir & Amaç"
+    },
+    "step3": {
+      "label": "Fatura & Onay",
+      "title": "Fatura & Onay"
+    },
+    "wizard": {
+      "title": "Oda Rezervasyonu",
+      "step": "Adım",
+      "of": "/"
+    },
+    "accommodationType": {
+      "label": "Konaklama Türü",
+      "personal": "Bireysel",
+      "personalDesc": "Kişisel konaklama",
+      "corporate": "Kurumsal",
+      "corporateDesc": "İş & etkinlikler",
+      "education": "Akademik",
+      "educationDesc": "Seminer & atölye"
+    },
+    "rules": {
+      "emailNotif": "İnceleme sonrası e-posta bildirimleri otomatik gönderilir.",
+      "approvalTitle": "Tüm ön rezervasyonlar manuel onay gerektirir",
+      "approvalDesc": "EDU ekibi tarafından. İncelemeden sonra onay alacaksınız.",
+      "notifDesc": "Gönderimden sonra talebiniz incelenecektir. İnceleme sonrası e-posta veya bildirim alacaksınız.",
+      "paymentNote": "Ödeme (varsa) yalnızca onaydan sonra istenecektir."
+    },
+    "boardingPass": {
+      "reservation": "Rezervasyon",
+      "guest": "Misafir",
+      "type": "Tür"
+    },
+    "billing": {
+      "individual": "Bireysel",
+      "corporate": "Kurumsal"
+    },
+    "freeAccommodation": {
+      "label": "Ücretsiz Konaklama Talebi",
+      "desc": "Resepsiyon onayına tabidir"
+    },
+    "eventTypes": {
+      "conference": "Konferans",
+      "seminar": "Seminer",
+      "workshop": "Atölye",
+      "training": "Eğitim",
+      "meeting": "Toplantı",
+      "personal": "Kişisel",
+      "other": "Diğer"
+    },
+    "priceTypes": {
+      "standard": "Standart",
+      "corporate": "Kurumsal",
+      "discounted": "İndirimli"
+    },
+    "timePicker": {
+      "label": "Saat Seç veya Yaz"
+    }
   },
 
   "contact": {

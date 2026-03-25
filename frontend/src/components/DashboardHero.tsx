@@ -68,7 +68,7 @@ export function DashboardHero({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatLog, setChatLog] = useState<{ from: "user" | "atlas"; text: string }[]>([
-    { from: "atlas", text: "Hello! I'm Atlas, your EDU Concierge. How can I help you today?" },
+    { from: "atlas", text: "Hello! I'm Atlas, your EDU Hotel Concierge. How can I help you today?" },
   ]);
 
   const getGreeting = () => {
@@ -82,7 +82,7 @@ export function DashboardHero({
     ? `You have ${pendingApprovals} pending approval${pendingApprovals > 1 ? "s" : ""} today. Click me for quick actions!`
     : upcomingStays > 0
     ? `Welcome back! You have ${upcomingStays} upcoming stay${upcomingStays > 1 ? "s" : ""}. Need anything?`
-    : "Welcome back! I'm Atlas, your EDU Concierge. Click me for quick actions!";
+    : "Welcome back! I'm Atlas, your EDU Hotel Concierge. Click me for quick actions!";
 
   const stats = [
     { label: t("dashboard.stats.totalReservations", { defaultValue: "Total" }),  value: totalReservations, color: "#4da6ff" },
@@ -300,7 +300,7 @@ export function DashboardHero({
             <div
               className="pointer-events-auto w-full h-full cursor-pointer group"
               onClick={() => setDrawerOpen(true)}
-              title="Chat with Atlas"
+              title="Chat with Atlas - EDU Hotel Concierge"
             >
               {/* Hover ring hint */}
               <div
@@ -344,10 +344,10 @@ export function DashboardHero({
                 </div>
                 <div>
                   <SheetTitle className="text-white text-base font-semibold leading-tight">
-                    Atlas – EDU Concierge
+                    Atlas – EDU Hotel Concierge
                   </SheetTitle>
-                  <p className="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                  <p className="text-[11px] text-[#c9a84c] flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] inline-block" />
                     Online · Ready to help
                   </p>
                 </div>

@@ -56,6 +56,8 @@
   "signup": {
     "fullNameLabel": "Full Name",
     "fullNamePlaceholder": "Enter your full name",
+    "firstNamePlaceholder": "First Name",
+    "lastNamePlaceholder": "Last Name",
     "signupWith": "Sign up with",
     "email": "Email",
     "phone": "Phone Number",
@@ -614,6 +616,129 @@
     "showing": "Showing",
     "of": "of",
     "reservations": "reservations"
+  },
+
+  "bookRoom": {
+    "checkIn": "Check-In Date",
+    "checkOut": "Check-Out Date",
+    "checkInTime": "Expected Check-In Time",
+    "night": "night",
+    "nights": "nights",
+    "numberOfGuests": "Number of Guests",
+    "guestInfo": "Primary Guest",
+    "additionalGuests": "Additional Guests",
+    "additionalGuestFirstName": "Guest {{n}} — First Name",
+    "additionalGuestLastName": "Last Name",
+    "eventCode": "Event / Education Code",
+    "eventType": "Purpose of Stay",
+    "eventTypePlaceholder": "Select purpose...",
+    "priceType": "Price Type",
+    "priceTypePlaceholder": "Select price type...",
+    "notes": "Notes / Explanation",
+    "notesPlaceholder": "Purpose of your stay, special requirements...",
+    "billingType": "Billing Type",
+    "tcId": "T.C. Kimlik",
+    "passport": "Passport",
+    "passportNo": "Passport Number",
+    "taxNumber": "Tax Number",
+    "billingTitle": "Company / Institution Name",
+    "billingAddress": "Billing Address",
+    "consent": "I confirm that all provided information is accurate and I agree to the reservation terms and hotel policies.",
+    "back": "Back",
+    "next": "Next",
+    "submitting": "Submitting...",
+    "submitBtn": "Confirm Reservation",
+    "successMessage": "Your reservation has been submitted! The reception will review your request and assign you a room.",
+    "errorMessage": "Reservation failed",
+    "successTitle": "Reservation Submitted",
+    "viewReservations": "View Reservations",
+    "bookAnother": "Book Another",
+    "validation": {
+      "datesRequired": "Please select check-in and check-out dates.",
+      "checkoutAfterCheckin": "Check-out must be after check-in.",
+      "noSundayCheckin": "Check-in on Sundays is not available.",
+      "noSatSunStay": "Saturday check-in with Sunday check-out is not allowed.",
+      "tooFarAhead": "Reservations can only be made up to 30 days in advance.",
+      "timeRequired": "Please select a check-in time.",
+      "accommodationRequired": "Please select an accommodation type.",
+      "guestInfoRequired": "Please fill all guest information fields.",
+      "guestCount": "Number of guests must be between 1 and 10.",
+      "guestListIncomplete": "Please fill all guest names.",
+      "personalMaxNights": "Personal stays cannot exceed 5 consecutive nights.",
+      "eventCodeRequired": "Event code is required for this accommodation type.",
+      "notesRequired": "Please provide an explanation for educational stays.",
+      "eventTypeRequired": "Please select a purpose of stay.",
+      "billingRequired": "Please select a billing type.",
+      "idRequired": "National ID or Passport number is required.",
+      "taxRequired": "Tax number is required.",
+      "billingTitleRequired": "Company name is required.",
+      "billingAddressRequired": "Billing address is required.",
+      "consent": "Please accept the terms and conditions.",
+      "notLoggedIn": "You must be logged in."
+    },
+    "step1": {
+      "label": "Stay Dates",
+      "title": "Select Your Dates"
+    },
+    "step2": {
+      "label": "Guest & Purpose",
+      "title": "Guest & Purpose"
+    },
+    "step3": {
+      "label": "Billing & Confirm",
+      "title": "Billing & Confirm"
+    },
+    "wizard": {
+      "title": "Room Reservation",
+      "step": "Step",
+      "of": "of"
+    },
+    "accommodationType": {
+      "label": "Accommodation Type",
+      "personal": "Personal",
+      "personalDesc": "Individual stay",
+      "corporate": "Corporate",
+      "corporateDesc": "Business & events",
+      "education": "Academic",
+      "educationDesc": "Seminars & workshops"
+    },
+    "rules": {
+      "emailNotif": "Email notifications sent automatically after review.",
+      "approvalTitle": "All pre-reservations require manual approval",
+      "approvalDesc": "by the EDU team. You will receive confirmation after review.",
+      "notifDesc": "After submission, your request will be reviewed. You will receive an email or push notification after review.",
+      "paymentNote": "Payment will be requested only after approval if applicable."
+    },
+    "boardingPass": {
+      "reservation": "Reservation",
+      "guest": "Guest",
+      "type": "Type"
+    },
+    "billing": {
+      "individual": "Individual",
+      "corporate": "Corporate"
+    },
+    "freeAccommodation": {
+      "label": "Request Free Accommodation",
+      "desc": "Subject to approval by reception"
+    },
+    "eventTypes": {
+      "conference": "Conference",
+      "seminar": "Seminar",
+      "workshop": "Workshop",
+      "training": "Training",
+      "meeting": "Meeting",
+      "personal": "Personal",
+      "other": "Other"
+    },
+    "priceTypes": {
+      "standard": "Standard",
+      "corporate": "Corporate",
+      "discounted": "Discounted"
+    },
+    "timePicker": {
+      "label": "Select or Type Time"
+    }
   },
 
   "contact": {

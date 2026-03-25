@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { format, parseISO } from "date-fns";
 
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
@@ -14,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Calendar } from "./ui/calendar";
 import { SlideTransition } from "./ui/slide-transition";
 import campusBg from "@/assets/campus.png";
 
@@ -71,17 +74,42 @@ if (!document.getElementById("book-wizard-anim")) {
       box-shadow: 0 0 0 2.5px #c9a84c, 0 8px 30px rgba(201,168,76,0.25);
     }
     .wiz-input {
-      background: rgba(255,255,255,0.04);
-      border: 1.5px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.18);
       color: white;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
       outline: none;
     }
-    .wiz-input::placeholder { color: rgba(255,255,255,0.25); }
+    .wiz-input::placeholder { color: rgba(255,255,255,0.35); }
+    .wiz-input:hover { background: rgba(255,255,255,0.10); }
     .wiz-input:focus {
-      border-color: rgba(201,168,76,0.55) !important;
-      box-shadow: 0 0 0 3px rgba(201,168,76,0.1) !important;
-      background: rgba(255,255,255,0.07) !important;
+      border-color: rgba(201,168,76,0.65) !important;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12) !important;
+      background: rgba(255,255,255,0.11) !important;
+    }
+    .date-picker-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; height: 56px;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      padding: 0 16px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      text-align: left;
+    }
+    .date-picker-btn:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.28);
+    }
+    .date-picker-btn[data-state=open],
+    .date-picker-btn:focus {
+      border-color: rgba(201,168,76,0.65) !important;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12) !important;
+      background: rgba(255,255,255,0.11) !important;
+      outline: none;
     }
     .bp-dash {
       background-image: repeating-linear-gradient(
@@ -110,6 +138,205 @@ function daysBetween(a: string, b: string): number {
 }
 function todayISO() {
   return new Date().toISOString().split("T")[0];
+}
+
+/* ══════════════════════════════════════════════════════════
+   Premium DatePicker
+   ══════════════════════════════════════════════════════════ */
+function DatePickerField({
+  value,
+  onChange,
+  placeholder,
+  minDate,
+}: {
+  value: string;
+  onChange: (iso: string) => void;
+  placeholder: string;
+  minDate?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = value ? parseISO(value) : undefined;
+  const minDateObj = minDate ? parseISO(minDate) : undefined;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="date-picker-btn" data-state={open ? "open" : "closed"}>
+          <CalendarIcon className="h-4 w-4 flex-shrink-0" style={{ color: "#c9a84c" }} />
+          <span style={{ color: selected ? "white" : "rgba(255,255,255,0.35)", fontWeight: selected ? 400 : 300 }}>
+            {selected ? format(selected, "dd/MM/yyyy") : placeholder}
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="p-0 border-0 shadow-2xl"
+        style={{
+          background: "linear-gradient(135deg, #001428 0%, #002244 100%)",
+          border: "1px solid rgba(201,168,76,0.25)",
+          borderRadius: "16px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)",
+          width: "auto",
+        }}
+      >
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={(date) => {
+            onChange(date ? format(date, "yyyy-MM-dd") : "");
+            setOpen(false);
+          }}
+          disabled={(date) => {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            if (date < today) return true;
+            if (minDateObj && date < minDateObj) return true;
+            return false;
+          }}
+          initialFocus
+          classNames={{
+            months: "flex flex-col",
+            month: "flex flex-col gap-3 p-4",
+            caption: "flex justify-center items-center relative",
+            caption_label: "text-sm font-semibold text-white tracking-wide",
+            nav: "flex items-center gap-1",
+            nav_button: "h-7 w-7 bg-white/5 hover:bg-white/15 border border-white/15 rounded-lg flex items-center justify-center transition-colors",
+            nav_button_previous: "absolute left-0",
+            nav_button_next: "absolute right-0",
+            table: "w-full border-collapse",
+            head_row: "flex",
+            head_cell: "text-[#c9a84c]/60 rounded-md w-9 font-medium text-[0.75rem] text-center",
+            row: "flex w-full mt-1",
+            cell: "relative p-0 text-center",
+            day: "h-9 w-9 p-0 font-normal text-sm text-white/75 hover:bg-white/10 hover:text-white rounded-lg transition-colors",
+            day_selected: "bg-[#c9a84c] text-black font-bold hover:bg-[#d4b45a] hover:text-black rounded-lg",
+            day_today: "text-[#c9a84c] font-semibold underline decoration-dotted",
+            day_outside: "text-white/20",
+            day_disabled: "text-white/20 cursor-not-allowed hover:bg-transparent",
+            day_hidden: "invisible",
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   Premium TimePicker
+   ══════════════════════════════════════════════════════════ */
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const MINUTES = ["00", "15", "30", "45"];
+
+function TimePickerField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (hhmm: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState(value || "14:00");
+  const [hh, mm] = (typed.match(/^(\d{2}):(\d{2})$/) ? typed : (value || "14:00")).split(":");
+
+  // Sync typed input when external value changes (e.g. reset)
+  React.useEffect(() => { if (value) setTyped(value); }, [value]);
+
+  const selectGrid = (newHh: string, newMm: string) => {
+    const t = `${newHh}:${newMm}`;
+    setTyped(t);
+    onChange(t);
+    setOpen(false);
+  };
+
+  const handleTyped = (raw: string) => {
+    setTyped(raw);
+    // Auto-insert colon after 2 digits
+    const cleaned = raw.replace(/[^0-9:]/g, "");
+    if (/^(\d{2}):(\d{2})$/.test(cleaned)) {
+      const [h, m] = cleaned.split(":").map(Number);
+      if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+        onChange(cleaned);
+      }
+    }
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="date-picker-btn" data-state={open ? "open" : "closed"}>
+          <Clock className="h-4 w-4 flex-shrink-0" style={{ color: "#c9a84c" }} />
+          <span style={{ color: value ? "white" : "rgba(255,255,255,0.35)", fontWeight: value ? 400 : 300 }}>
+            {value || "HH:MM"}
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="p-0 border-0 shadow-2xl"
+        style={{
+          background: "linear-gradient(135deg, #001428 0%, #002244 100%)",
+          border: "1px solid rgba(201,168,76,0.25)",
+          borderRadius: "16px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)",
+          width: "260px",
+        }}
+      >
+        <div className="p-4">
+          <p className="text-[10px] font-bold text-[#c9a84c]/60 uppercase tracking-[3px] mb-3">{t("bookRoom.timePicker.label", "Select or Type Time")}</p>
+          {/* Manual input */}
+          <div className="relative mb-3">
+            <input
+              type="text"
+              value={typed}
+              onChange={e => handleTyped(e.target.value)}
+              placeholder="14:00"
+              maxLength={5}
+              className="wiz-input w-full h-10 rounded-xl text-sm text-center font-mono tracking-widest"
+              style={{ letterSpacing: "0.2em" }}
+            />
+          </div>
+          {/* Hour grid */}
+          <div className="grid grid-cols-6 gap-1 mb-3">
+            {HOURS.map(h => (
+              <button
+                key={h}
+                type="button"
+                onClick={() => selectGrid(h, mm || "00")}
+                className="h-8 rounded-lg text-xs font-semibold transition-colors"
+                style={{
+                  background: hh === h ? "#c9a84c" : "rgba(255,255,255,0.05)",
+                  color: hh === h ? "#000" : "rgba(255,255,255,0.6)",
+                  border: hh === h ? "none" : "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                {h}
+              </button>
+            ))}
+          </div>
+          {/* Divider */}
+          <div className="h-px bg-white/10 mb-3" />
+          {/* Minute row */}
+          <div className="flex gap-2">
+            {MINUTES.map(m => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => selectGrid(hh || "14", m)}
+                className="flex-1 h-9 rounded-lg text-sm font-bold transition-colors"
+                style={{
+                  background: mm === m ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.05)",
+                  color: mm === m ? "#c9a84c" : "rgba(255,255,255,0.55)",
+                  border: mm === m ? "1.5px solid rgba(201,168,76,0.5)" : "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                :{m}
+              </button>
+            ))}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -328,9 +555,9 @@ export function BookRoomPage() {
   ];
 
   const stepLabels = [
-    t("bookRoom.step1.label", "When?"),
-    t("bookRoom.step2.label", "Who & Why?"),
-    t("bookRoom.step3.label", "Confirm"),
+    t("bookRoom.step1.label", "Stay Dates"),
+    t("bookRoom.step2.label", "Guest & Purpose"),
+    t("bookRoom.step3.label", "Billing & Confirm"),
   ];
 
   // ── Common input class ─────────────────────────────────
@@ -475,14 +702,14 @@ export function BookRoomPage() {
                         <div
                           className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black transition-all duration-300 flex-shrink-0"
                           style={{
-                            background: isDone ? "#10b981" : isActive ? "#c9a84c" : "rgba(255,255,255,0.1)",
-                            color: isDone || isActive ? "#000" : "rgba(255,255,255,0.35)",
+                            background: isDone ? "#10b981" : isActive ? "#c9a84c" : "rgba(255,255,255,0.22)",
+                            color: isDone || isActive ? "#000" : "rgba(255,255,255,0.85)",
                             boxShadow: isActive ? "0 0 14px rgba(201,168,76,0.4)" : isDone ? "0 0 10px rgba(16,185,129,0.3)" : "none",
                           }}
                         >
                           {isDone ? <Check className="h-3.5 w-3.5" /> : s}
                         </div>
-                        <span className={`text-xs font-semibold transition-colors ${isActive ? "text-[#c9a84c]" : isDone ? "text-emerald-400" : "text-white/30"}`}>
+                        <span className={`text-xs font-bold transition-colors ${isActive ? "text-[#c9a84c]" : isDone ? "text-emerald-400" : "text-white/80"}`}>
                           {label}
                         </span>
                       </div>
@@ -512,11 +739,11 @@ export function BookRoomPage() {
             <div
               className="rounded-3xl overflow-hidden"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                backdropFilter: "blur(32px)",
-                WebkitBackdropFilter: "blur(32px)",
-                border: "1px solid rgba(255,255,255,0.11)",
-                boxShadow: "0 24px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.09), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                background: "linear-gradient(160deg, rgba(0,30,65,0.82) 0%, rgba(0,20,45,0.88) 100%)",
+                backdropFilter: "blur(48px)",
+                WebkitBackdropFilter: "blur(48px)",
+                border: "1px solid rgba(201,168,76,0.22)",
+                boxShadow: "0 32px 96px rgba(0,0,0,0.65), 0 0 0 1px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.25)",
               }}
             >
               {/* Card header */}
@@ -562,19 +789,12 @@ export function BookRoomPage() {
                           <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
                             {t("bookRoom.checkIn", "Check-In Date")}
                           </Label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
-                              <CalendarIcon className="h-4 w-4 text-[#c9a84c]/55" />
-                            </div>
-                            <input
-                              type="date"
-                              value={checkInDate}
-                              onChange={e => setCheckInDate(e.target.value)}
-                              min={todayISO()}
-                              className={`${wi} h-14 pl-11 pr-4`}
-                              style={{ colorScheme: "dark" }}
-                            />
-                          </div>
+                          <DatePickerField
+                            value={checkInDate}
+                            onChange={setCheckInDate}
+                            placeholder="DD/MM/YYYY"
+                            minDate={todayISO()}
+                          />
                         </div>
 
                         {/* Check-out date */}
@@ -582,19 +802,12 @@ export function BookRoomPage() {
                           <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
                             {t("bookRoom.checkOut", "Check-Out Date")}
                           </Label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
-                              <CalendarIcon className="h-4 w-4 text-[#c9a84c]/55" />
-                            </div>
-                            <input
-                              type="date"
-                              value={checkOutDate}
-                              onChange={e => setCheckOutDate(e.target.value)}
-                              min={checkInDate || todayISO()}
-                              className={`${wi} h-14 pl-11 pr-4`}
-                              style={{ colorScheme: "dark" }}
-                            />
-                          </div>
+                          <DatePickerField
+                            value={checkOutDate}
+                            onChange={setCheckOutDate}
+                            placeholder="DD/MM/YYYY"
+                            minDate={checkInDate || todayISO()}
+                          />
                         </div>
                       </div>
 
@@ -603,18 +816,7 @@ export function BookRoomPage() {
                         <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
                           {t("bookRoom.checkInTime", "Expected Check-In Time")}
                         </Label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
-                            <Clock className="h-4 w-4 text-[#c9a84c]/55" />
-                          </div>
-                          <input
-                            type="time"
-                            value={checkInTime}
-                            onChange={e => setCheckInTime(e.target.value)}
-                            className={`${wi} h-14 pl-11 pr-4`}
-                            style={{ colorScheme: "dark" }}
-                          />
-                        </div>
+                        <TimePickerField value={checkInTime} onChange={setCheckInTime} />
                       </div>
 
                       {/* Nights summary */}
@@ -816,13 +1018,13 @@ export function BookRoomPage() {
                               <input
                                 value={g.firstName}
                                 onChange={e => setGuestList(prev => prev.map((x, j) => j === i ? { ...x, firstName: e.target.value } : x))}
-                                placeholder={`Guest ${i + 2} — First Name`}
+                                placeholder={t("bookRoom.additionalGuestFirstName", "Guest {{n}} — First Name", { n: i + 2 })}
                                 className={`${wi} h-11 px-4`}
                               />
                               <input
                                 value={g.lastName}
                                 onChange={e => setGuestList(prev => prev.map((x, j) => j === i ? { ...x, lastName: e.target.value } : x))}
-                                placeholder="Last Name"
+                                placeholder={t("bookRoom.additionalGuestLastName", "Last Name")}
                                 className={`${wi} h-11 px-4`}
                               />
                             </div>
