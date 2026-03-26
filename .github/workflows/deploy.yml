@@ -43,8 +43,6 @@ jobs:
     #needs: build-and-push
     # Belirlediğimiz runner etiketini kullanıyoruz
     runs-on: [self-hosted, production]
-    env:
-      SERVICE_NAME: ehp-app
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -83,14 +81,17 @@ jobs:
           EOF
 
           
+
+
+
+
+
+
+
+
+        
           
-          
-          
-          
-          
-          
-          
-          ## DONT CHANGE BELOW and SERVICE_NAME env variable###-----------------------------
+          ## !!! DONT CHANGE BELOW !!! ###-----------------------------
           export XDG_RUNTIME_DIR=/run/user/$(id -u)
           export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
           export SYSTEMD_DIR="$HOME/.config/systemd/user"
@@ -101,20 +102,20 @@ jobs:
 
           podman-compose pull 
 
-          systemctl --user disable --now "${{ env.SERVICE_NAME }}" || true
+          systemctl --user disable --now "${USER}-app.service" || true
           cp $GITHUB_WORKSPACE/docker-compose-server.yml "$DEPLOY_DIR/"
 
           # GENERATE & START SYSTEMD SERVICE ---
-          cat <<EOF > "$SYSTEMD_DIR/${{ env.SERVICE_NAME }}.service"
+          cat <<EOF > "$SYSTEMD_DIR/${USER}-app.service"
           [Unit]
-          Description=$SERVICE_NAME
+          Description=${USER} app service
           After=network.target
 
           [Service]
           WorkingDirectory=$DEPLOY_DIR
           Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus"
           Environment="XDG_RUNTIME_DIR=/run/user/$(id -u)"
-          ExecStart=/usr/bin/podman-compose -f docker-compose-server.yml up -d --remove-orphans --force-recreate
+          ExecStart=/usr/bin/podman-compose -f docker-compose-server.yml up --remove-orphans --force-recreate
           ExecStop=/usr/bin/podman-compose -f docker-compose-server.yml down
           
           [Install]
@@ -125,6 +126,6 @@ jobs:
           systemctl --user reset-failed
 
           
-          systemctl --user enable  --now "${{ env.SERVICE_NAME }}"
+          systemctl --user enable --now "${USER}-app.service"
           
-          -----------------------------------------------------------
+          ##!!-----------------------------------------------------------
