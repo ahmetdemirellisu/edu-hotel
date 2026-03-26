@@ -76,17 +76,6 @@ jobs:
           ADMIN_USER=${{ secrets.ADMIN_USER }}
           ADMIN_PASS=${{ secrets.ADMIN_PASS }}
           EOF
-
-          
-
-
-
-
-
-
-
-
-        
           
           ## !!! DONT CHANGE BELOW !!! ###----------------------------
           
