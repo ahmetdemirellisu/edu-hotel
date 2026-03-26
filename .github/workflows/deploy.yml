@@ -1,4 +1,4 @@
-name: Deploy Edu Hotel Project
+name: Deploy Project
 
 on:
   push:
