@@ -1,12 +1,6 @@
 name: Deploy Project
 
 on:
-  workflow_dispatch:
-    inputs:
-      skip_build:
-        required: true
-        type: boolean
-        default: false
   push:
     branches: ["main"]
 
@@ -17,7 +11,7 @@ env:
 
 jobs:
   build-and-push:
-    if: ${{ inputs.skip_build == false }}
+    if: ${{ github.event_name != 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -59,15 +53,11 @@ jobs:
         run: |
           DEPLOY_DIR="$HOME/app"
           mkdir -p "$DEPLOY_DIR/postgres_data"
-          export USER_ID=$(id -u)
-          export XDG_RUNTIME_DIR=/run/user/$USER_ID
-          export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
           
           # Imaj isimleri için repo adını tekrar küçük harfe çeviriyoruz
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           
           # Docker compose dosyasını taşı
-          cp docker-compose-server.yml "$DEPLOY_DIR/"
 
           # .env dosyasını oluştur (GITHUB_REPOSITORY artık küçük harf)
           cat <<EOF > "$DEPLOY_DIR/.env"
@@ -101,20 +91,23 @@ jobs:
           
           
           ## DONT CHANGE BELOW and SERVICE_NAME env variable###-----------------------------
+          export XDG_RUNTIME_DIR=/run/user/$(id -u)
+          export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+          export SYSTEMD_DIR="$HOME/.config/systemd/user"
+          
           cd "$DEPLOY_DIR"
           # Podman login
           echo "${{ secrets.DEPLOY_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
 
-          podman-compose -f docker-compose-server.yml down
-          podman-compose pull
+          podman-compose pull 
 
-          systemctl --user disable --now "${{ env.SERVICE_NAME }}"
-          cp docker-compose.yml "$TARGET_DIR/"
+          systemctl --user disable --now "${{ env.SERVICE_NAME }}" || true
+          cp docker-compose-server.yml "$DEPLOY_DIR/"
 
-          # --- 5. GENERATE & RESTART SYSTEMD SERVICE ---
+          # GENERATE & START SYSTEMD SERVICE ---
           cat <<EOF > "$SYSTEMD_DIR/${{ env.SERVICE_NAME }}.service"
           [Unit]
-          Description=Drupal App
+          Description=$SERVICE_NAME
           After=network.target
 
           [Service]
@@ -130,8 +123,8 @@ jobs:
 
           systemctl --user daemon-reload
           systemctl --user reset-failed
-          systemctl --user enable "${{ env.SERVICE_NAME }}"
-          echo "Restarting Service..."
-          systemctl --user restart "${{ env.SERVICE_NAME }}"
+
+          
+          systemctl --user enable  --now "${{ env.SERVICE_NAME }}"
           
           -----------------------------------------------------------
