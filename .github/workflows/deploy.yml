@@ -40,7 +40,7 @@ jobs:
           docker push ghcr.io/$REPO_LOWER/frontend:latest
 
   deploy:
-    needs: build-and-push
+    #needs: build-and-push
     # Belirlediğimiz runner etiketini kullanıyoruz
     runs-on: [self-hosted, production]
     env:
