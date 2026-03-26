@@ -1,15 +1,23 @@
 name: Deploy Project
 
 on:
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        required: true
+        type: boolean
+        default: false
   push:
     branches: ["main"]
 
 env:
   REGISTRY: ghcr.io
   TARGET_RUNNER: eduhotel-runner 
+  skip_build: true
 
 jobs:
   build-and-push:
+    if: ${{ inputs.skip_build == false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -100,7 +108,7 @@ jobs:
           podman-compose -f docker-compose-server.yml down
           podman-compose pull
 
-          systemctl –user disable —-now "${{ env.SERVICE_NAME }}"
+          systemctl --user disable --now "${{ env.SERVICE_NAME }}"
           cp docker-compose.yml "$TARGET_DIR/"
 
           # --- 5. GENERATE & RESTART SYSTEMD SERVICE ---
