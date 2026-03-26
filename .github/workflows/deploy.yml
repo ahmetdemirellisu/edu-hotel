@@ -88,6 +88,6 @@ jobs:
           
           # Podman login
           echo "${{ secrets.DEPLOY_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml down
-          XDG_RUNTIME_DIR=/run/user/1009 podman-compose pull
-          XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml up -d --remove-orphans --force-recreate
+          DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml down
+          DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus XDG_RUNTIME_DIR=/run/user/1009 podman-compose pull
+          DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml up -d --remove-orphans --force-recreate
