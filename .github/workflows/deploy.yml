@@ -51,6 +51,9 @@ jobs:
           mkdir -p "$DEPLOY_DIR/postgres_data"
           export USER_ID=$(id -u)
           export XDG_RUNTIME_DIR=/run/user/$USER_ID
+          export _CONTAINERS_USER_NS_CONFIG=slirp4netns
+          export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+          export XDG_RUNTIME_DIR=/run/user/$USER_ID
           echo "--------------------"
           echo $XDG_RUNTIME_DIR
           echo "--------------------"
@@ -88,6 +91,15 @@ jobs:
           
           # Podman login
           echo "${{ secrets.DEPLOY_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          _CONTAINERS_USER_NS_CONFIG=slirp4netns DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml down
-          _CONTAINERS_USER_NS_CONFIG=slirp4netns DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus XDG_RUNTIME_DIR=/run/user/1009 podman-compose pull
-          _CONTAINERS_USER_NS_CONFIG=slirp4netns DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml up -d --remove-orphans --force-recreate
+
+          echo "--- DEBUG INFO ---"
+          id
+          env | grep -E "XDG|DBUS|PODMAN"
+          ls -ld $XDG_RUNTIME_DIR
+          systemctl --user is-active podman.socket
+          podman info | grep -A 5 "network"
+          echo "--- END DEBUG ---"
+          
+          XDG_RUNTIME_DIR=/run/user/1009 podman-compose -f docker-compose-server.yml down
+          podman-compose pull
+          podman-compose -f docker-compose-server.yml up -d --remove-orphans --force-recreate
