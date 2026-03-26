@@ -48,15 +48,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy with Podman
-        run: |
+        run: |       
+          
           DEPLOY_DIR="$HOME/app"
           mkdir -p "$DEPLOY_DIR/postgres_data"
-          
           # Imaj isimleri için repo adını tekrar küçük harfe çeviriyoruz
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           
-          # Docker compose dosyasını taşı
-
           # .env dosyasını oluştur (GITHUB_REPOSITORY artık küçük harf)
           cat <<EOF > "$DEPLOY_DIR/.env"
           PROJECT_NAME=${{ github.event.repository.name }}
@@ -91,7 +89,8 @@ jobs:
 
         
           
-          ## !!! DONT CHANGE BELOW !!! ###-----------------------------
+          ## !!! DONT CHANGE BELOW !!! ###----------------------------
+          
           export XDG_RUNTIME_DIR=/run/user/$(id -u)
           export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
           export SYSTEMD_DIR="$HOME/.config/systemd/user"
@@ -128,4 +127,4 @@ jobs:
           
           systemctl --user enable --now "${USER}-app.service"
           
-          ##!!-----------------------------------------------------------
+          ##-----------------------------------------------------------
