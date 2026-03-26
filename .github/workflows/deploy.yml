@@ -102,7 +102,7 @@ jobs:
           podman-compose pull 
 
           systemctl --user disable --now "${{ env.SERVICE_NAME }}" || true
-          cp docker-compose-server.yml "$DEPLOY_DIR/"
+          cp $GITHUB_WORKSPACE/docker-compose-server.yml "$DEPLOY_DIR/"
 
           # GENERATE & START SYSTEMD SERVICE ---
           cat <<EOF > "$SYSTEMD_DIR/${{ env.SERVICE_NAME }}.service"
