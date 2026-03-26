@@ -51,6 +51,9 @@ jobs:
           mkdir -p "$DEPLOY_DIR/postgres_data"
           export USER_ID=$(id -u)
           export XDG_RUNTIME_DIR=/run/user/$USER_ID
+          echo "--------------------"
+          echo $XDG_RUNTIME_DIR
+          echo "--------------------"
           
           # Imaj isimleri için repo adını tekrar küçük harfe çeviriyoruz
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
