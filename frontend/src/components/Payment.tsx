@@ -168,8 +168,10 @@ export function Payment() {
     formData.append("dekont", uploadedFile);
 
     try {
+      const token = localStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/payment/upload-dekont/${reservation.id}`, {
         method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
 

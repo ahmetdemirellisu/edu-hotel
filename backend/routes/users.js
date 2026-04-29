@@ -176,4 +176,33 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
+/**
+ * --------------------------------------------------------------------------
+ * PATCH /users/admin/:id/max-stay
+ * Admin sets maxStayOverride for a user (null to reset to default 30 days)
+ * --------------------------------------------------------------------------
+ */
+router.patch("/admin/:id/max-stay", requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) return res.status(400).json({ error: "Invalid user ID." });
+
+    const { maxStayOverride } = req.body;
+    if (maxStayOverride !== null && (typeof maxStayOverride !== "number" || maxStayOverride < 1)) {
+      return res.status(400).json({ error: "maxStayOverride must be a positive number or null." });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { maxStayOverride: maxStayOverride || null },
+      select: { id: true, maxStayOverride: true },
+    });
+
+    res.json(user);
+  } catch (err) {
+    console.error("Set max stay override error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 module.exports = router;

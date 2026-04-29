@@ -674,36 +674,41 @@ export function Dashboard() {
                     {t("dashboard.activeReservation.createNew", { defaultValue: "Create New Reservation" })}
                   </motion.a>
 
-                  <motion.button
-                    whileHover={
-                      activeReservation?.status === "APPROVED" &&
-                      !["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "")
-                        ? { scale: 1.02, y: -1, boxShadow: "0 10px 28px rgba(0,51,102,0.3)" }
-                        : {}
-                    }
-                    whileTap={{ scale: 0.97 }}
-                    disabled={
+                  {(() => {
+                    const payDisabled =
                       activeReservation?.status !== "APPROVED" ||
                       (activeReservation as any)?.price == null ||
-                      ["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "")
-                    }
-                    onClick={() => navigate("/payment")}
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-sm transition-all duration-300 ${
-                      activeReservation?.status === "APPROVED" &&
-                      (activeReservation as any)?.price != null &&
-                      !["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "")
-                        ? "bg-[#003366] text-white cursor-pointer"
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    }`}
-                  >
-                    {(activeReservation as any)?.paymentStatus === "APPROVED"
-                      ? t("dashboard.activeReservation.paymentConfirmed", { defaultValue: "Payment Confirmed" })
-                      : (activeReservation as any)?.paymentStatus === "PENDING_VERIFICATION"
-                      ? t("dashboard.activeReservation.paymentSent", { defaultValue: "Payment Sent" })
-                      : (activeReservation as any)?.price == null && activeReservation?.status === "APPROVED"
-                      ? t("dashboard.activeReservation.awaitingPrice", { defaultValue: "Awaiting Price" })
-                      : t("dashboard.activeReservation.proceedPayment", { defaultValue: "Proceed to Payment" })}
-                  </motion.button>
+                      ["PENDING_VERIFICATION", "APPROVED"].includes((activeReservation as any)?.paymentStatus || "");
+                    return (
+                      <motion.a
+                        href="/payment"
+                        whileHover={
+                          !payDisabled
+                            ? { scale: 1.02, y: -1, boxShadow: "0 10px 28px rgba(0,51,102,0.3)" }
+                            : {}
+                        }
+                        whileTap={{ scale: 0.97 }}
+                        onClick={(e: React.MouseEvent) => {
+                          if (payDisabled) { e.preventDefault(); return; }
+                          e.preventDefault();
+                          navigate("/payment");
+                        }}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-sm transition-all duration-300 ${
+                          !payDisabled
+                            ? "bg-[#003366] text-white cursor-pointer"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
+                        }`}
+                      >
+                        {(activeReservation as any)?.paymentStatus === "APPROVED"
+                          ? t("dashboard.activeReservation.paymentConfirmed", { defaultValue: "Payment Confirmed" })
+                          : (activeReservation as any)?.paymentStatus === "PENDING_VERIFICATION"
+                          ? t("dashboard.activeReservation.paymentSent", { defaultValue: "Payment Sent" })
+                          : (activeReservation as any)?.price == null && activeReservation?.status === "APPROVED"
+                          ? t("dashboard.activeReservation.awaitingPrice", { defaultValue: "Awaiting Price" })
+                          : t("dashboard.activeReservation.proceedPayment", { defaultValue: "Proceed to Payment" })}
+                      </motion.a>
+                    );
+                  })()}
                 </div>
               </div>
             </motion.div>

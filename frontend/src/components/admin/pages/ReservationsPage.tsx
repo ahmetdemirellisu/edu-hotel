@@ -25,9 +25,11 @@ import {
   getAdminReservations,
   approveReservation,
   rejectReservation,
+  assignRoom,
   type Reservation,
   type ReservationStatus,
 } from "../../../api/reservations";
+import { getRooms, type Room } from "../../../api/rooms";
 
 type AdminReservation = Reservation & {
   user?: { id: number; email: string; name?: string | null };
@@ -55,6 +57,11 @@ export function ReservationsPage() {
   // Approve modal with price
   const [approveModalId, setApproveModalId] = useState<number | null>(null);
   const [priceInput, setPriceInput] = useState<string>("");
+
+  // Room assignment modal
+  const [assignModalId, setAssignModalId] = useState<number | null>(null);
+  const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
+  const [roomsLoading, setRoomsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -126,6 +133,30 @@ export function ReservationsPage() {
     } catch (err: any) {
       toast.error(err.message || "Failed to reject.");
       setError(err.message || "Failed to reject.");
+    } finally { setActionLoadingId(null); }
+  };
+
+  const handleAssignClick = async (id: number) => {
+    setAssignModalId(id);
+    setRoomsLoading(true);
+    try {
+      const all = await getRooms();
+      // Filter to rooms that aren't in maintenance
+      setAvailableRooms(all.filter(r => r.status !== "MAINTENANCE"));
+    } catch { setAvailableRooms([]); }
+    finally { setRoomsLoading(false); }
+  };
+
+  const handleAssignConfirm = async (roomId: number) => {
+    if (!assignModalId) return;
+    try {
+      setActionLoadingId(assignModalId);
+      const updated = await assignRoom(assignModalId, roomId);
+      setReservations(prev => prev.map(r => r.id === assignModalId ? { ...r, ...updated } as AdminReservation : r));
+      setAssignModalId(null);
+      toast.success(t("reservations.toasts.roomAssigned", { id: `#${assignModalId}`, defaultValue: `Room assigned to #${assignModalId}` }));
+    } catch (err: any) {
+      toast.error(err.message || "Failed to assign room.");
     } finally { setActionLoadingId(null); }
   };
 
@@ -430,6 +461,17 @@ export function ReservationsPage() {
                               </button>
                             </>
                           )}
+                          {res.status === "APPROVED" && !res.roomId && (
+                            <button
+                              className="h-7 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 flex items-center gap-1 text-blue-700 text-[10px] font-bold transition-all disabled:opacity-40"
+                              title={t("reservations.assignRoom", "Assign Room")}
+                              onClick={() => handleAssignClick(res.id)}
+                              disabled={actionLoadingId === res.id}
+                            >
+                              <Bed className="h-3 w-3" />
+                              {t("reservations.assignRoom", "Assign Room")}
+                            </button>
+                          )}
                           <button
                             className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 transition-colors"
                             title={t("commonTable.view")}
@@ -625,6 +667,51 @@ export function ReservationsPage() {
               >
                 {t("common.close")}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Room Assignment Modal ──────────────── */}
+      {assignModalId !== null && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          onClick={() => setAssignModalId(null)}
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50">
+              <h3 className="text-lg font-bold text-gray-900">{t("reservations.assignRoom", "Assign Room")}</h3>
+              <button onClick={() => setAssignModalId(null)} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center">
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {roomsLoading ? (
+                <p className="text-sm text-gray-500 text-center py-8">{t("common.loading", "Loading...")}</p>
+              ) : availableRooms.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-8">{t("reservations.noAvailableRooms", "No available rooms found.")}</p>
+              ) : (
+                <div className="space-y-2">
+                  {availableRooms.map(room => (
+                    <button
+                      key={room.id}
+                      onClick={() => handleAssignConfirm(room.id)}
+                      disabled={actionLoadingId === assignModalId}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-left disabled:opacity-40"
+                    >
+                      <Bed className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800">{room.name}</p>
+                        <p className="text-[11px] text-gray-400">{room.type} · {t("reservations.capacity", "Capacity")}: {room.capacity}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

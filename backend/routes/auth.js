@@ -40,7 +40,7 @@ router.post("/register", authLimiter, async (req, res) => {
         const hashed = await bcrypt.hash(password, 10);
 
         // 🆕 validate / normalize userType
-        const allowedUserTypes = ["STUDENT", "STAFF", "SPECIAL_GUEST", "OTHER"];
+        const allowedUserTypes = ["STUDENT", "STAFF", "SPECIAL_GUEST", "PARENT", "OTHER"];
         const finalUserType = allowedUserTypes.includes(rawUserType)
             ? rawUserType
             : "OTHER"; // default for now

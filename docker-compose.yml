@@ -33,6 +33,8 @@ services:
       SMTP_USER: ${EMAIL_USER:-}
       SMTP_PASS: ${EMAIL_PASS:-}
       SMTP_FROM: "EDU HOTEL <${EMAIL_USER:-}>"
+      ADMIN_USER: ${ADMIN_USER:-}
+      ADMIN_PASS: ${ADMIN_PASS:-}
     depends_on:
       db:
         condition: service_healthy

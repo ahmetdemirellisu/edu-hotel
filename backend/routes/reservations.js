@@ -1,7 +1,10 @@
 // backend/routes/reservations.js
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
-const { sendMail } = require("../services/mail");
+const { sendMailAsync } = require("../services/mail");
 const { emailTemplate, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS } = require("../services/mailTemplate");
 
 const router = express.Router();
@@ -110,10 +113,11 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
             return res.status(400).json({ error: "Personal bookings cannot exceed 5 consecutive nights." });
         }
 
+        const maxAdvanceDays = user.maxStayOverride || 30;
         const maxDate = new Date();
-        maxDate.setDate(maxDate.getDate() + 30);
+        maxDate.setDate(maxDate.getDate() + maxAdvanceDays);
         if (checkInDate > maxDate) {
-            return res.status(400).json({ error: "Reservations can only be made up to 30 days in advance." });
+            return res.status(400).json({ error: `Reservations can only be made up to ${maxAdvanceDays} days in advance.` });
         }
 
         if (checkInDate.getDay() === 0) return res.status(400).json({ error: "Sunday check-in is not allowed." });
@@ -232,7 +236,7 @@ ${heading('Sırada ne var?')}
                 ].filter(l => l !== null).join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
-                await sendMail({ to: user.email, subject, text, html });
+                sendMailAsync({ to: user.email, subject, text, html });
             }
         } catch (mailErr) {
             console.error("Failed to send request email:", mailErr);
@@ -416,7 +420,7 @@ ${heading('Sıradaki Adım')}
                 ].filter(l => l !== null).join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
-                await sendMail({ to: reservation.user.email, subject, text, html });
+                sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
             console.error("Failed to send approval email:", mailErr);
@@ -426,6 +430,84 @@ ${heading('Sıradaki Adım')}
     } catch (err) {
         console.error("Error approving reservation:", err);
         return res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+/**
+ * PATCH /reservations/admin/:id/assign-room
+ * Admin assigns a room to an approved reservation.
+ */
+router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const { roomId } = req.body;
+        if (!roomId) return res.status(400).json({ error: "Room ID is required." });
+
+        const reservation = await prisma.reservation.findUnique({ where: { id } });
+        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
+        if (reservation.status !== "APPROVED") return res.status(400).json({ error: "Room can only be assigned to approved reservations." });
+
+        // Check if room is available for the reservation's date range
+        const conflicting = await prisma.reservation.findFirst({
+            where: {
+                roomId: parseInt(roomId, 10),
+                status: "APPROVED",
+                id: { not: id },
+                checkIn: { lt: reservation.checkOut },
+                checkOut: { gt: reservation.checkIn },
+            },
+        });
+        if (conflicting) return res.status(400).json({ error: "Room is already booked for these dates." });
+
+        const updated = await prisma.reservation.update({
+            where: { id },
+            data: { roomId: parseInt(roomId, 10) },
+            include: { user: true, room: true },
+        });
+
+        // Send room assignment notification email
+        try {
+            if (updated.user?.email) {
+                const guestName = updated.firstName || updated.user.name || "Guest";
+                const roomName = updated.room?.name || `Room #${roomId}`;
+                const checkInStr = updated.checkIn.toISOString().slice(0, 10);
+                const checkOutStr = updated.checkOut.toISOString().slice(0, 10);
+
+                const subject = `EDU Hotel – Room assigned #${updated.id} / Oda atandı #${updated.id}`;
+                const bodyEN = `
+<p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">A room has been assigned to your reservation.</p>
+${badge('Room Assigned', 'green')}
+${heading('Details')}
+${detailTable([
+    row('Reservation ID', `#${updated.id}`),
+    row('Room', roomName),
+    row('Check-in', checkInStr),
+    row('Check-out', checkOutStr),
+])}`;
+                const bodyTR = `
+<p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
+<p style="margin:0 0 20px;color:#475569;">Rezervasyonunuza bir oda atanmıştır.</p>
+${badge('Oda Atandı', 'green')}
+${heading('Bilgiler')}
+${detailTable([
+    row('Rezervasyon No', `#${updated.id}`),
+    row('Oda', roomName),
+    row('Giriş', checkInStr),
+    row('Çıkış', checkOutStr),
+])}`;
+                const text = `Dear ${guestName}, Room ${roomName} has been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.\n---\nSayın ${guestName}, ${roomName} odası #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.`;
+                const html = emailTemplate(bodyEN, bodyTR);
+                sendMailAsync({ to: updated.user.email, subject, text, html });
+            }
+        } catch (mailErr) {
+            console.error("Room assignment email error:", mailErr);
+        }
+
+        res.json(updated);
+    } catch (err) {
+        console.error("Room assignment error:", err);
+        res.status(500).json({ error: "Internal server error." });
     }
 });
 
@@ -505,7 +587,7 @@ ${detailTable([
                 ].filter(l => l !== null).join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
-                await sendMail({ to: reservation.user.email, subject, text, html });
+                sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
             console.error("Failed to send rejection email:", mailErr);
@@ -629,7 +711,7 @@ ${detailTable([
                 ].filter(l => l !== null).join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
-                await sendMail({ to: updated.user.email, subject, text, html });
+                sendMailAsync({ to: updated.user.email, subject, text, html });
             }
         } catch (mailErr) {
             console.error("Failed to send cancellation email:", mailErr);
@@ -639,6 +721,50 @@ ${detailTable([
     } catch (err) {
         console.error("Error cancelling reservation:", err);
         return res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+// ── Identity Document Upload ────────────────────────────────────────────
+const idDocsDir = path.join(__dirname, "../../identityDocs");
+if (!fs.existsSync(idDocsDir)) fs.mkdirSync(idDocsDir, { recursive: true });
+
+const idStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, idDocsDir),
+    filename: (req, file, cb) => {
+        const extMap = { "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png" };
+        const ext = extMap[file.mimetype] || ".bin";
+        cb(null, `${req.params.reservationId}_id${ext}`);
+    },
+});
+
+const idUpload = multer({
+    storage: idStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const allowed = ["application/pdf", "image/jpeg", "image/png"];
+        if (!allowed.includes(file.mimetype)) return cb(new Error("Only PDF, JPG, PNG files are allowed."));
+        cb(null, true);
+    },
+});
+
+router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("identityDoc"), async (req, res) => {
+    try {
+        const reservationId = parseInt(req.params.reservationId, 10);
+        if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+
+        const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
+        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
+        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
+
+        await prisma.reservation.update({
+            where: { id: reservationId },
+            data: { identityDoc: req.file.filename },
+        });
+
+        res.json({ message: "Identity document uploaded successfully.", filename: req.file.filename });
+    } catch (err) {
+        console.error("Identity doc upload error:", err);
+        res.status(400).json({ error: err.message || "Upload failed." });
     }
 });
 

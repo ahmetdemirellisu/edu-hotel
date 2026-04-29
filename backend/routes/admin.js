@@ -1,6 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
-const { sendMail } = require("../services/mail");
+const { sendMailAsync } = require("../services/mail");
 const { emailTemplate, badge, row, detailTable, heading } = require("../services/mailTemplate");
 const path = require("path");
 const fs = require("fs");
@@ -94,6 +94,35 @@ router.get("/pending-payments", async (req, res) => {
     } catch (err) {
         console.error("Error fetching pending payments:", err);
         res.status(500).json({ error: "Failed to fetch pending payments" });
+    }
+});
+
+// --- Pending Room Assignment (payment approved, no room yet) ---
+router.get("/pending-assignments", async (req, res) => {
+    try {
+        const pending = await prisma.reservation.findMany({
+            where: {
+                paymentStatus: "APPROVED",
+                roomId: null,
+                status: "APPROVED",
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: "desc" },
+        });
+        res.json(pending || []);
+    } catch (err) {
+        console.error("Error fetching pending assignments:", err);
+        res.status(500).json({ error: "Failed to fetch pending assignments" });
     }
 });
 
@@ -211,7 +240,7 @@ ${detailTable([
                 ].join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
-                await sendMail({ to: reservation.user.email, subject, text, html });
+                sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
             console.error("Failed to send payment approval email:", mailErr);
@@ -303,7 +332,7 @@ ${heading('Yapmanız Gerekenler')}
                 ].join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
-                await sendMail({ to: reservation.user.email, subject, text, html });
+                sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
             console.error("Failed to send payment rejection email:", mailErr);

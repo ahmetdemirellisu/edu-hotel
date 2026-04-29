@@ -4,7 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
-const { sendMail } = require("../services/mail");
+const { sendMailAsync } = require("../services/mail");
 const { emailTemplate, badge, row, detailTable, heading } = require("../services/mailTemplate");
 
 const prisma = new PrismaClient();
@@ -134,7 +134,7 @@ ${detailTable([
           ].join('\n');
 
           const html = emailTemplate(bodyEN, bodyTR);
-          await sendMail({ to: reservation.user.email, subject, text, html });
+          sendMailAsync({ to: reservation.user.email, subject, text, html });
         }
       } catch (mailErr) {
         console.error("Failed to send receipt upload email:", mailErr);
@@ -150,5 +150,19 @@ ${detailTable([
     }
   }
 );
+
+// Multer error handler — catches file size and type errors
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ error: "File too large. Maximum allowed size is 5 MB." });
+    }
+    return res.status(400).json({ error: err.message });
+  }
+  if (err) {
+    return res.status(400).json({ error: err.message || "Upload failed." });
+  }
+  next();
+});
 
 module.exports = router;

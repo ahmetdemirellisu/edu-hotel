@@ -1,5 +1,7 @@
 // src/api/users.ts
-export type UserType = "STUDENT" | "STAFF" | "SPECIAL_GUEST" | "OTHER";
+import { adminFetch } from "./adminFetch";
+
+export type UserType = "STUDENT" | "STAFF" | "SPECIAL_GUEST" | "PARENT" | "OTHER";
 export type UserRole = "USER" | "ADMIN" | "HOTEL_STAFF";
 
 export interface BlacklistInfo {
@@ -24,6 +26,7 @@ export interface AdminGuest {
   userType: UserType;
   role: UserRole;
   createdAt: string;
+  maxStayOverride: number | null;
   blacklist: BlacklistInfo | null;
   reservations: GuestReservation[];
 }
@@ -92,4 +95,19 @@ export async function unblacklistUser(userId: number) {
     throw new Error(data.error || "Failed to remove from blacklist.");
   }
   return true;
+}
+
+/**
+ * Admin sets the max advance-booking override for a user (null resets to default 30 days).
+ */
+export async function setMaxStayOverride(userId: number, maxStayOverride: number | null) {
+  const res = await adminFetch(`/ehp/api/users/admin/${userId}/max-stay`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ maxStayOverride }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to update max stay override.");
+  return data;
 }
