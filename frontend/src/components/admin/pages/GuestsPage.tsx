@@ -1,8 +1,8 @@
 // src/components/admin/pages/GuestsPage.tsx
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, Eye, ShieldX, ShieldCheck, Users, X, AlertCircle, UserCheck } from "lucide-react";
-import { getAdminGuests, blacklistUser, unblacklistUser, type AdminGuest, type UserType } from "../../../api/users";
+import { Search, Eye, ShieldX, ShieldCheck, Users, X, AlertCircle, UserCheck, CalendarClock } from "lucide-react";
+import { getAdminGuests, blacklistUser, unblacklistUser, setMaxStayOverride, type AdminGuest, type UserType } from "../../../api/users";
 
 type BlacklistFilter = "all" | "blacklisted" | "active";
 
@@ -16,6 +16,8 @@ export function GuestsPage() {
   const [blacklistFilter, setBlacklistFilter] = useState<BlacklistFilter>("all");
   const [selectedGuest, setSelectedGuest] = useState<AdminGuest | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [overrideInput, setOverrideInput] = useState("");
+  const [overrideSaving, setOverrideSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,6 +35,7 @@ export function GuestsPage() {
       STUDENT:       { label: t("guests.types.student", "Student"),       bg: "bg-sky-50",    text: "text-sky-700",    gradient: "from-sky-400 to-sky-600" },
       STAFF:         { label: t("guests.types.staff", "Staff"),           bg: "bg-violet-50", text: "text-violet-700", gradient: "from-violet-400 to-violet-600" },
       SPECIAL_GUEST: { label: t("guests.types.specialGuest", "Special"),  bg: "bg-amber-50",  text: "text-amber-700",  gradient: "from-amber-400 to-orange-500" },
+      PARENT:        { label: t("guests.types.parent", "Parent"),        bg: "bg-rose-50",   text: "text-rose-700",   gradient: "from-rose-400 to-rose-600" },
       OTHER:         { label: t("guests.types.other", "Other"),           bg: "bg-gray-50",   text: "text-gray-600",   gradient: "from-gray-400 to-gray-500" },
     };
     return map[ut] || map.OTHER;
@@ -51,6 +54,18 @@ export function GuestsPage() {
     catch (err: any) { alert(err.message || "Failed."); } finally { setActionLoadingId(null); }
   };
 
+  const handleSaveOverride = async (guest: AdminGuest) => {
+    const val = overrideInput.trim() === "" ? null : parseInt(overrideInput, 10);
+    if (val !== null && (isNaN(val) || val < 1)) { alert("Please enter a valid number of days (or leave empty to reset)."); return; }
+    try {
+      setOverrideSaving(true);
+      await setMaxStayOverride(guest.id, val);
+      setGuests(prev => prev.map(g => g.id === guest.id ? { ...g, maxStayOverride: val } : g));
+      setSelectedGuest(prev => prev && prev.id === guest.id ? { ...prev, maxStayOverride: val } : prev);
+    } catch (err: any) { alert(err.message || "Failed."); }
+    finally { setOverrideSaving(false); }
+  };
+
   const totalCount = guests.length;
   const blacklistedCount = guests.filter(g => g.blacklist).length;
 
@@ -67,6 +82,7 @@ export function GuestsPage() {
     { key: "STUDENT",       label: t("guests.filterStudent", "Student") },
     { key: "STAFF",         label: t("guests.filterStaff", "Staff") },
     { key: "SPECIAL_GUEST", label: t("guests.filterSpecialGuest", "Special Guest") },
+    { key: "PARENT",        label: t("guests.filterParent", "Parent / Guardian") },
   ];
 
   const AVATAR_GRADIENTS = [
@@ -318,7 +334,7 @@ export function GuestsPage() {
                   {/* Action buttons */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setSelectedGuest(g)}
+                      onClick={() => { setSelectedGuest(g); setOverrideInput(g.maxStayOverride?.toString() ?? ""); }}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-600 text-xs font-semibold transition-all duration-150"
                     >
                       <Eye className="h-3.5 w-3.5" />
@@ -394,6 +410,44 @@ export function GuestsPage() {
                   <p className="text-sm text-red-600 mt-1">{selectedGuest.blacklist.reason}</p>
                 </div>
               )}
+
+              {/* Max Stay Override */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarClock className="h-4 w-4 text-blue-600" />
+                  <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">
+                    {t("guests.maxStayOverride", "Max Advance Booking (days)")}
+                  </p>
+                </div>
+                <p className="text-[11px] text-blue-600 mb-2">
+                  {t("guests.maxStayOverrideDesc", "Override the default 30-day advance booking limit for this user. Leave empty to use the default.")}
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    placeholder="30"
+                    value={overrideInput}
+                    onChange={e => setOverrideInput(e.target.value)}
+                    className="w-24 px-3 py-1.5 text-sm rounded-lg border border-blue-200 bg-white focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
+                  />
+                  <button
+                    onClick={() => handleSaveOverride(selectedGuest)}
+                    disabled={overrideSaving}
+                    className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {overrideSaving ? t("guests.saving", "Saving...") : t("guests.saveOverride", "Save")}
+                  </button>
+                  {overrideInput && (
+                    <button
+                      onClick={() => { setOverrideInput(""); handleSaveOverride({ ...selectedGuest, maxStayOverride: null } as AdminGuest); }}
+                      className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-500 hover:bg-gray-100 transition-colors"
+                    >
+                      {t("guests.resetDefault", "Reset to 30")}
+                    </button>
+                  )}
+                </div>
+              </div>
 
               <div>
                 <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">

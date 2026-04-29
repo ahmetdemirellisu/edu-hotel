@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
@@ -362,11 +362,25 @@ export function BookRoomPage() {
         lastName: u.lastName || u.surname || u.name?.split(" ").slice(1).join(" ") || "",
         email: u.email || localStorage.getItem("userEmail") || "",
         phone: u.phone || "",
+        userType: u.userType || "OTHER",
       };
     } catch {
-      return { id: null, firstName: "", lastName: "", email: "", phone: "" };
+      return { id: null, firstName: "", lastName: "", email: "", phone: "", userType: "OTHER" };
     }
   }, []);
+
+  // ── Max advance booking days (user-specific override) ──
+  const [maxAdvanceDays, setMaxAdvanceDays] = useState(30);
+  useEffect(() => {
+    if (!storedUser.id) return;
+    const token = localStorage.getItem("authToken");
+    fetch(`/ehp/api/users/${storedUser.id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.maxStayOverride) setMaxAdvanceDays(data.maxStayOverride); })
+      .catch(() => {});
+  }, [storedUser.id]);
 
   // ── Step 1 state ───────────────────────────────────────
   const [checkInDate, setCheckInDate] = useState("");
@@ -409,6 +423,7 @@ export function BookRoomPage() {
   const [billingAddress, setBillingAddress] = useState("");
   const [requestFreeAccommodation, setRequestFreeAccommodation] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [identityFile, setIdentityFile] = useState<File | null>(null);
 
   // ���─ Submit state ───────────────────────────────────────
   const [loading, setLoading] = useState(false);
@@ -426,8 +441,8 @@ export function BookRoomPage() {
       return t("bookRoom.validation.noSundayCheckin", "Check-in on Sundays is not available.");
     if (dow === 6 && new Date(checkOutDate).getDay() === 0)
       return t("bookRoom.validation.noSatSunStay", "Saturday check-in with Sunday check-out is not allowed.");
-    if (daysBetween(todayISO(), checkInDate) > 30)
-      return t("bookRoom.validation.tooFarAhead", "Reservations can only be made up to 30 days in advance.");
+    if (daysBetween(todayISO(), checkInDate) > maxAdvanceDays)
+      return t("bookRoom.validation.tooFarAhead", "Reservations can only be made up to {{days}} days in advance.", { days: maxAdvanceDays });
     if (!checkInTime.trim())
       return t("bookRoom.validation.timeRequired", "Please select a check-in time.");
     return null;
@@ -504,7 +519,7 @@ export function BookRoomPage() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      await createReservation({
+      const created = await createReservation({
         checkIn: checkInDate,
         checkOut: checkOutDate,
         checkInTime: checkInTime.trim(),
@@ -526,6 +541,17 @@ export function BookRoomPage() {
         billingAddress: billingAddress?.trim() || undefined,
         note: notes?.trim() || undefined,
       });
+      // Upload identity document if provided (fire-and-forget)
+      if (identityFile && created?.id) {
+        const fd = new FormData();
+        fd.append("identityDoc", identityFile);
+        const token = localStorage.getItem("authToken");
+        fetch(`/ehp/api/reservations/upload-identity/${created.id}`, {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: fd,
+        }).catch(err => console.error("Identity doc upload failed:", err));
+      }
       setSuccessMessage(t("bookRoom.successMessage", "Your reservation has been submitted! The reception will review your request and assign you a room."));
       // Reset
       setStep(1); setDirection(1);
@@ -535,7 +561,7 @@ export function BookRoomPage() {
       setPhone(storedUser.phone); setEmail(storedUser.email);
       setEventCode(""); setEventType(""); setPriceType(""); setNotes("");
       setBillingTypeUI(""); setTcKimlikNo(""); setTaxNumber(""); setBillingTitle(""); setBillingAddress("");
-      setRequestFreeAccommodation(false); setConsentChecked(false);
+      setRequestFreeAccommodation(false); setConsentChecked(false); setIdentityFile(null);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
@@ -1041,9 +1067,12 @@ export function BookRoomPage() {
                           <input
                             value={eventCode}
                             onChange={e => setEventCode(e.target.value)}
-                            placeholder="e.g. CONF-2026-001"
+                            placeholder={t("bookRoom.eventCodePlaceholder", "e.g. CONF-2026-001")}
                             className={`${wi} h-12 px-4`}
                           />
+                          <p className="text-[10px] text-white/35 leading-relaxed">
+                            {t("bookRoom.eventCodeHelp", "Enter the code provided by your department or event organizer. Required for corporate and academic bookings.")}
+                          </p>
                         </div>
                       )}
 
@@ -1102,6 +1131,18 @@ export function BookRoomPage() {
                           placeholder={t("bookRoom.notesPlaceholder", "Purpose of your stay, special requirements...")}
                           className={`${wi} px-4 py-3 resize-none`}
                         />
+                        {["STUDENT", "STAFF"].includes(storedUser.userType) && (
+                          <p className="text-[11px] text-amber-300/80 leading-relaxed flex items-start gap-1.5">
+                            <span className="text-amber-400 mt-px">⚠</span>
+                            {t("bookRoom.sicilNote", "SU personnel, students, and academics must include their sicil (registry) number in the notes field.")}
+                          </p>
+                        )}
+                        {storedUser.userType === "PARENT" && (
+                          <p className="text-[11px] text-amber-300/80 leading-relaxed flex items-start gap-1.5">
+                            <span className="text-amber-400 mt-px">⚠</span>
+                            {t("bookRoom.sicilNoteVeli", "Parents/guardians must include the sicil (registry) number of the SU student they are the guardian of.")}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1259,20 +1300,48 @@ export function BookRoomPage() {
                         </div>
                       )}
 
-                      {/* Free accommodation checkbox */}
-                      <label className="flex items-start gap-3 cursor-pointer group">
+                      {/* Free accommodation checkbox — kept subtle */}
+                      <label className="flex items-center gap-2.5 cursor-pointer group">
                         <Checkbox
                           checked={requestFreeAccommodation}
                           onCheckedChange={(v: boolean | "indeterminate") => setRequestFreeAccommodation(v === true)}
-                          className="mt-0.5 border-white/25 data-[state=checked]:bg-[#c9a84c] data-[state=checked]:border-[#c9a84c]"
+                          className="h-3.5 w-3.5 border-white/20 data-[state=checked]:bg-white/30 data-[state=checked]:border-white/30"
                         />
-                        <div>
-                          <p className="text-sm text-white/65 font-medium group-hover:text-white/85 transition-colors">
-                            {t("bookRoom.freeAccommodation.label", "Request Free Accommodation")}
-                          </p>
-                          <p className="text-xs text-white/28 mt-0.5">{t("bookRoom.freeAccommodation.desc", "Subject to approval by reception")}</p>
-                        </div>
+                        <span className="text-xs text-white/40 group-hover:text-white/55 transition-colors">
+                          {t("bookRoom.freeAccommodation.label", "Request Free Accommodation")}
+                          <span className="text-white/20 ml-1">— {t("bookRoom.freeAccommodation.desc", "Subject to approval by reception")}</span>
+                        </span>
                       </label>
+
+                      {/* Identity Document Upload */}
+                      <div className="space-y-2 pt-4 border-t border-white/[0.07]">
+                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                          {t("bookRoom.identityDoc", "ID / Passport Upload")}
+                        </Label>
+                        <p className="text-[10px] text-white/35 leading-relaxed">
+                          {t("bookRoom.identityDocHelp", "Upload a copy of your Turkish ID (Kimlik) or Passport. Accepted formats: PDF, JPG, PNG (max 5 MB).")}
+                        </p>
+                        <label
+                          className="flex items-center justify-center gap-2 w-full h-12 rounded-xl border border-dashed border-white/15 hover:border-[#c9a84c]/50 cursor-pointer transition-all duration-200"
+                          style={{ background: identityFile ? "rgba(201,168,76,0.08)" : "rgba(255,255,255,0.03)" }}
+                        >
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            className="hidden"
+                            onChange={e => {
+                              const f = e.target.files?.[0];
+                              if (f && f.size > 5 * 1024 * 1024) { alert(t("bookRoom.identityDocTooLarge", "File exceeds 5 MB limit.")); return; }
+                              setIdentityFile(f || null);
+                            }}
+                          />
+                          {identityFile ? (
+                            <span className="text-sm text-[#c9a84c] font-medium truncate px-4">{identityFile.name}</span>
+                          ) : (
+                            <span className="text-sm text-white/35">{t("bookRoom.identityDocPlaceholder", "Choose file...")}</span>
+                          )}
+                        </label>
+                      </div>
 
                       {/* Consent */}
                       <label className="flex items-start gap-3 cursor-pointer group pt-4 border-t border-white/[0.07]">

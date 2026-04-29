@@ -316,7 +316,7 @@ export function RoomsPage() {
                   <span className="text-gray-300">•</span> 
                   {t("rooms.grid.guest", { count: room.capacity, defaultValue: room.capacity > 1 ? `${room.capacity} guests` : `${room.capacity} guest` })}
                 </p>
-                <p className="text-gray-500 font-semibold pl-5">₺{room.price}<span className="text-gray-400 font-normal">{t("rooms.grid.perNight", "/night")}</span></p>
+                {/* price removed per feedback */}
               </div>
               {room.reservation && (
                 <div className="mt-3 bg-red-50 border border-red-100 rounded-xl p-3 text-[11px]">
@@ -501,10 +501,9 @@ function Drawer({ room, date, onClose }: { room: RoomData; date: string; onClose
           {[
             { icon: <BedDouble className="h-4 w-4" />, l: t("rooms.drawer.type", "Type"), v: room.type === "DOUBLE" ? t("rooms.drawer.doubleRoom", "Double Room") : t("rooms.drawer.singleRoom", "Single Room") },
             { icon: <Users className="h-4 w-4" />, l: t("rooms.capacity", "Capacity"), v: t("rooms.drawer.guest", { count: room.capacity, defaultValue: room.capacity > 1 ? `${room.capacity} guests` : `${room.capacity} guest` }) },
-            { icon: <span className="text-sm font-extrabold">₺</span>, l: t("rooms.price", "Price"), v: <span className="text-slate-900 font-bold">₺{room.price}<span className="text-slate-400 font-medium text-[10px] ml-1">{t("rooms.drawer.perNight", "/night")}</span></span> },
             { icon: <Wifi className="h-4 w-4" />, l: t("rooms.amenities", "Amenities"), v: room.amenities || "—" },
-          ].map(({ icon, l, v }, i) => (
-            <div key={l} className={`flex items-center justify-between px-4 py-3 ${i !== 3 ? 'border-b border-slate-100' : ''}`}>
+          ].map(({ icon, l, v }, i, arr) => (
+            <div key={l} className={`flex items-center justify-between px-4 py-3 ${i !== arr.length - 1 ? 'border-b border-slate-100' : ''}`}>
               <div className="flex items-center gap-2.5 text-slate-500 text-xs font-bold">{icon}{l}</div>
               <span className="text-xs font-semibold text-slate-700 text-right">{v}</span>
             </div>

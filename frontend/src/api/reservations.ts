@@ -202,6 +202,23 @@ export async function rejectReservation(
   return res.json();
 }
 
+export async function assignRoom(
+  reservationId: number,
+  roomId: number
+): Promise<Reservation> {
+  const res = await adminFetch(`${API_BASE_URL}/reservations/admin/${reservationId}/assign-room`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ roomId }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await parseError(res, "Failed to assign room"));
+  }
+
+  return res.json();
+}
+
 /**
  * GET /reservations/my/latest
  * Fetch latest reservation for dashboard

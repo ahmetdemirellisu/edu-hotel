@@ -18,9 +18,10 @@ model User {
   userType     UserType      @default(OTHER)
   firstName    String?
   lastName     String?
-  phone        String?
-  blacklist    Blacklist?
-  reservations Reservation[]
+  phone           String?
+  maxStayOverride Int?
+  blacklist       Blacklist?
+  reservations    Reservation[]
 }
 
 model Room {
@@ -66,6 +67,7 @@ model Reservation {
   price             Float?
   billingTitle      String?
   billingAddress    String?
+  identityDoc       String?
   room              Room?             @relation(fields: [roomId], references: [id])
   user              User              @relation(fields: [userId], references: [id])
 }
@@ -117,6 +119,7 @@ enum UserType {
   STUDENT
   STAFF
   SPECIAL_GUEST
+  PARENT
   OTHER
 }
 

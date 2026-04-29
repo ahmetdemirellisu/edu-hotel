@@ -14,6 +14,9 @@ const transporter = nodemailer.createTransport({
         user,
         pass,
     },
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 50,
 });
 
 async function sendMail({ to, subject, text, html }) {
@@ -33,8 +36,17 @@ async function sendMail({ to, subject, text, html }) {
         html,
     };
 
+    const start = Date.now();
     const info = await transporter.sendMail(mailOptions);
-    console.log('📧 Email sent:', info.messageId, 'to', to);
+    console.log(`📧 Email sent: ${info.messageId} to ${to} (${Date.now() - start}ms)`);
 }
 
-module.exports = { sendMail };
+/**
+ * Fire-and-forget email — does not block the caller.
+ * Errors are logged but never thrown.
+ */
+function sendMailAsync(opts) {
+    sendMail(opts).catch(err => console.error('📧 Background email failed:', err.message));
+}
+
+module.exports = { sendMail, sendMailAsync };
