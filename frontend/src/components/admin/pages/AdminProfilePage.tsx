@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const ADMIN_PASS = "EduH0tel@2026";
-const SESSION_KEY = "adminSession";
+const SESSION_KEY = "adminToken";
 
 export function AdminProfilePage() {
   const navigate = useNavigate();

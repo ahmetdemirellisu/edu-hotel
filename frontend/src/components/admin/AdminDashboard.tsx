@@ -359,7 +359,7 @@ export function AdminDashboard() {
                   </div>
                   <div className="border-t border-gray-100 py-1.5">
                     <button
-                      onClick={() => { sessionStorage.removeItem("adminSession"); navigate("/admin-login", { replace: true }); }}
+                      onClick={() => { sessionStorage.removeItem("adminToken"); navigate("/admin-login", { replace: true }); }}
                       className="w-full text-left px-4 py-2 hover:bg-red-50 text-[13px] text-red-600 flex items-center gap-2 transition-colors"
                     >
                       <LogOut className="h-3.5 w-3.5" />
