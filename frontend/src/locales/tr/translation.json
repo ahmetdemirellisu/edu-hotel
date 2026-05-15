@@ -98,7 +98,9 @@
     "dashboard": "Ana Sayfa",
     "notifications": "Bildirimler",
     "profile": "Profilim",
-    "logout": "Çıkış"
+    "logout": "Çıkış",
+    "myReservations": "Rezervasyonlarım",
+    "contact": "İletişim Desteği"
   },
 
   "common": {

@@ -95,10 +95,12 @@
   },
 
   "nav": {
-    "dashboard": "Main Page",
+    "dashboard": "Dashboard",
     "notifications": "Notifications",
     "profile": "My Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "myReservations": "My Reservations",
+    "contact": "Contact Support"
   },
 
   "common": {
