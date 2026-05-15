@@ -62,3 +62,17 @@ docker-compose.override.yml
 *.db
 backend/prisma.config.bak.ts
 postgres_data/
+
+# -----------------------------
+# Runtime upload directories (host-mounted volumes)
+# -----------------------------
+paymentRecieptsPending/
+paymentRecieptsAprooved/
+
+# -----------------------------
+# Root-level artifacts (created by tooling, not part of the repo)
+# -----------------------------
+/node_modules/
+/package.json
+/package-lock.json
+FINAL_REPORT_DRAFT.md

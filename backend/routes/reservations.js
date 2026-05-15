@@ -74,8 +74,8 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         if (!isNonEmptyString(checkInTime)) {
             return res.status(400).json({ error: "Check-in time is required." });
         }
-        if ((accommodationType === "CORPORATE" || accommodationType === "EDUCATION") && !isNonEmptyString(eventCode)) {
-            return res.status(400).json({ error: "Event / Education code is required." });
+        if (accommodationType === "CORPORATE" && !isNonEmptyString(eventCode)) {
+            return res.status(400).json({ error: "Program code is required." });
         }
         if (invoiceType === "INDIVIDUAL" && !isNonEmptyString(nationalId)) {
             return res.status(400).json({ error: "National ID is required for individual billing." });
@@ -174,7 +174,7 @@ ${detailTable([
     row('Accommodation',  accommEN),
     row('Invoice type',   invoiceEN),
     row('Event type',     eventType || null),
-    row('Event code',     isNonEmptyString(eventCode) ? eventCode : null),
+    row('Program code',   isNonEmptyString(eventCode) ? eventCode : null),
     row('Note',           isNonEmptyString(note) ? note : null),
 ])}
 ${heading('What happens next?')}
@@ -193,7 +193,7 @@ ${detailTable([
     row('Konaklama türü',  accommTR),
     row('Fatura türü',     invoiceTR),
     row('Etkinlik türü',   eventType || null),
-    row('Etkinlik kodu',   isNonEmptyString(eventCode) ? eventCode : null),
+    row('Program kodu',    isNonEmptyString(eventCode) ? eventCode : null),
     row('Not',             isNonEmptyString(note) ? note : null),
 ])}
 ${heading('Sırada ne var?')}
@@ -211,7 +211,7 @@ ${heading('Sırada ne var?')}
                     `Accommodation:  ${accommEN}`,
                     `Invoice type:   ${invoiceEN}`,
                     eventType          ? `Event type:     ${eventType}`  : null,
-                    isNonEmptyString(eventCode) ? `Event code:     ${eventCode}` : null,
+                    isNonEmptyString(eventCode) ? `Program code:   ${eventCode}` : null,
                     isNonEmptyString(note)      ? `Note:           ${note}`      : null,
                     ``,
                     `Our team will notify you once your request has been approved or rejected.`,
@@ -229,7 +229,7 @@ ${heading('Sırada ne var?')}
                     `Konaklama türü: ${accommTR}`,
                     `Fatura türü:    ${invoiceTR}`,
                     eventType          ? `Etkinlik türü:  ${eventType}`  : null,
-                    isNonEmptyString(eventCode) ? `Etkinlik kodu:  ${eventCode}` : null,
+                    isNonEmptyString(eventCode) ? `Program kodu:   ${eventCode}` : null,
                     isNonEmptyString(note)      ? `Not:            ${note}`      : null,
                     ``,
                     `Ekibimiz talebinizi inceleyecek ve sonuç e-posta ile bildirilecektir.`,
@@ -374,7 +374,9 @@ ${detailTable([
     row('Price',          reservation.price != null ? `${reservation.price} TL` : null),
 ])}
 ${heading('Next Step')}
-<p style="margin:0;font-size:13px;color:#475569;">Please log in to your EDU Hotel account and upload your payment receipt to complete the reservation. Your room will be assigned upon payment confirmation.</p>`;
+<p style="margin:0 0 16px;font-size:13px;color:#475569;">Please log in to your EDU Hotel account and upload your payment receipt to complete the reservation. Your room will be assigned upon payment confirmation.</p>
+${heading('Key Pickup Instructions')}
+<p style="margin:0;font-size:13px;color:#475569;">For check-ins before 16:30, you may collect your room key card from the reception desk in person against signature. For check-ins after 16:30, your key card will be left in a sealed envelope at the main security gate.</p>`;
 
                 const bodyTR = `
 <p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
@@ -389,7 +391,9 @@ ${detailTable([
     row('Ücret',          reservation.price != null ? `${reservation.price} TL` : null),
 ])}
 ${heading('Sıradaki Adım')}
-<p style="margin:0;font-size:13px;color:#475569;">Lütfen EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin. Oda ataması ödeme onayının ardından gerçekleştirilecektir.</p>`;
+<p style="margin:0 0 16px;font-size:13px;color:#475569;">Lütfen EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin. Oda ataması ödeme onayının ardından gerçekleştirilecektir.</p>
+${heading('Oda Kartı Teslim Bilgileri')}
+<p style="margin:0;font-size:13px;color:#475569;">16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.</p>`;
 
                 const text = [
                     `Dear ${guestName},`,
@@ -404,6 +408,8 @@ ${heading('Sıradaki Adım')}
                     ``,
                     `Next step: Log in to your EDU Hotel account and upload your payment receipt to complete the reservation.`,
                     ``,
+                    `Key pickup: For check-ins before 16:30, collect your room key from the reception desk against signature. After 16:30, the key card will be left in a sealed envelope at the main security gate.`,
+                    ``,
                     `---`,
                     ``,
                     `Sayın ${guestName},`,
@@ -417,6 +423,8 @@ ${heading('Sıradaki Adım')}
                     reservation.price != null ? `Ücret:          ${reservation.price} TL` : null,
                     ``,
                     `Sıradaki adım: EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin.`,
+                    ``,
+                    `Oda kartı teslimi: 16:30'a kadar olan girişlerinizde oda kartınızı imza karşılığı resepsiyondan alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`,
                 ].filter(l => l !== null).join('\n');
 
                 const html = emailTemplate(bodyEN, bodyTR);
@@ -440,28 +448,53 @@ ${heading('Sıradaki Adım')}
 router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const { roomId } = req.body;
-        if (!roomId) return res.status(400).json({ error: "Room ID is required." });
+        const { roomId, roomIds } = req.body;
+
+        // Normalize input: accept either single roomId (back-compat) or roomIds[]
+        let roomIdList = [];
+        if (Array.isArray(roomIds) && roomIds.length > 0) {
+            roomIdList = roomIds.map((r) => parseInt(r, 10)).filter((n) => Number.isInteger(n));
+        } else if (roomId !== undefined && roomId !== null) {
+            const parsed = parseInt(roomId, 10);
+            if (Number.isInteger(parsed)) roomIdList = [parsed];
+        }
+        if (roomIdList.length === 0) return res.status(400).json({ error: "At least one room ID is required." });
+        // Deduplicate
+        roomIdList = [...new Set(roomIdList)];
 
         const reservation = await prisma.reservation.findUnique({ where: { id } });
         if (!reservation) return res.status(404).json({ error: "Reservation not found." });
-        if (reservation.status !== "APPROVED") return res.status(400).json({ error: "Room can only be assigned to approved reservations." });
+        if (reservation.status !== "APPROVED") return res.status(400).json({ error: "Rooms can only be assigned to approved reservations." });
 
-        // Check if room is available for the reservation's date range
+        // Validate room count matches reservation's guest count (admin can assign fewer for shared rooms)
+        if (roomIdList.length > reservation.guests) {
+            return res.status(400).json({ error: `Cannot assign more rooms (${roomIdList.length}) than guests (${reservation.guests}).` });
+        }
+
+        // Check each room is available for the reservation's date range
         const conflicting = await prisma.reservation.findFirst({
             where: {
-                roomId: parseInt(roomId, 10),
                 status: "APPROVED",
                 id: { not: id },
                 checkIn: { lt: reservation.checkOut },
                 checkOut: { gt: reservation.checkIn },
+                OR: [
+                    { roomId: { in: roomIdList } },
+                ],
             },
+            include: { room: true },
         });
-        if (conflicting) return res.status(400).json({ error: "Room is already booked for these dates." });
+        if (conflicting) {
+            const name = conflicting.room?.name || `#${conflicting.roomId}`;
+            return res.status(400).json({ error: `Room ${name} is already booked for these dates.` });
+        }
 
         const updated = await prisma.reservation.update({
             where: { id },
-            data: { roomId: parseInt(roomId, 10) },
+            data: {
+                roomId: roomIdList[0],
+                roomIds: roomIdList,
+            },
             include: { user: true, room: true },
         });
 
@@ -469,34 +502,41 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
         try {
             if (updated.user?.email) {
                 const guestName = updated.firstName || updated.user.name || "Guest";
-                const roomName = updated.room?.name || `Room #${roomId}`;
+                const allRooms = roomIdList.length > 1
+                    ? await prisma.room.findMany({ where: { id: { in: roomIdList } }, select: { id: true, name: true } })
+                    : [];
+                const roomNames = roomIdList.length > 1
+                    ? allRooms.map((r) => r.name).join(", ")
+                    : (updated.room?.name || `Room #${roomIdList[0]}`);
+                const roomLabelEN = roomIdList.length > 1 ? "Rooms" : "Room";
+                const roomLabelTR = roomIdList.length > 1 ? "Odalar" : "Oda";
                 const checkInStr = updated.checkIn.toISOString().slice(0, 10);
                 const checkOutStr = updated.checkOut.toISOString().slice(0, 10);
 
-                const subject = `EDU Hotel – Room assigned #${updated.id} / Oda atandı #${updated.id}`;
+                const subject = `EDU Hotel – ${roomLabelEN} assigned #${updated.id} / ${roomLabelTR} atandı #${updated.id}`;
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
-<p style="margin:0 0 20px;color:#475569;">A room has been assigned to your reservation.</p>
-${badge('Room Assigned', 'green')}
+<p style="margin:0 0 20px;color:#475569;">${roomIdList.length > 1 ? 'Rooms have' : 'A room has'} been assigned to your reservation.</p>
+${badge(`${roomLabelEN} Assigned`, 'green')}
 ${heading('Details')}
 ${detailTable([
     row('Reservation ID', `#${updated.id}`),
-    row('Room', roomName),
+    row(roomLabelEN, roomNames),
     row('Check-in', checkInStr),
     row('Check-out', checkOutStr),
 ])}`;
                 const bodyTR = `
 <p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
-<p style="margin:0 0 20px;color:#475569;">Rezervasyonunuza bir oda atanmıştır.</p>
-${badge('Oda Atandı', 'green')}
+<p style="margin:0 0 20px;color:#475569;">Rezervasyonunuza ${roomIdList.length > 1 ? 'odalar' : 'bir oda'} atanmıştır.</p>
+${badge(`${roomLabelTR} Atandı`, 'green')}
 ${heading('Bilgiler')}
 ${detailTable([
     row('Rezervasyon No', `#${updated.id}`),
-    row('Oda', roomName),
+    row(roomLabelTR, roomNames),
     row('Giriş', checkInStr),
     row('Çıkış', checkOutStr),
 ])}`;
-                const text = `Dear ${guestName}, Room ${roomName} has been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.\n---\nSayın ${guestName}, ${roomName} odası #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.`;
+                const text = `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.\n---\nSayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.`;
                 const html = emailTemplate(bodyEN, bodyTR);
                 sendMailAsync({ to: updated.user.email, subject, text, html });
             }

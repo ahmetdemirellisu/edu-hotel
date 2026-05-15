@@ -86,15 +86,17 @@ export function GuestsPage() {
   ];
 
   const AVATAR_GRADIENTS = [
-    "from-blue-500 to-blue-700",
-    "from-violet-500 to-violet-700",
-    "from-emerald-500 to-emerald-700",
-    "from-amber-500 to-orange-600",
-    "from-rose-500 to-rose-700",
-    "from-teal-500 to-teal-700",
-    "from-sky-500 to-sky-700",
-    "from-indigo-500 to-indigo-700",
+    "linear-gradient(to bottom right, #3b82f6, #1d4ed8)",
+    "linear-gradient(to bottom right, #8b5cf6, #6d28d9)",
+    "linear-gradient(to bottom right, #10b981, #047857)",
+    "linear-gradient(to bottom right, #f59e0b, #ea580c)",
+    "linear-gradient(to bottom right, #f43f5e, #be123c)",
+    "linear-gradient(to bottom right, #14b8a6, #0f766e)",
+    "linear-gradient(to bottom right, #0ea5e9, #0369a1)",
+    "linear-gradient(to bottom right, #6366f1, #4338ca)",
   ];
+  const BLACKLIST_GRADIENT = "linear-gradient(to bottom right, #f87171, #dc2626)";
+  const BLACKLIST_STRIPE = "linear-gradient(to right, #f87171, #dc2626)";
 
   return (
     <div className="space-y-6">
@@ -113,7 +115,10 @@ export function GuestsPage() {
       {/* ── Page Header ───────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ animation: "guestIn 0.3s ease-out" }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-lg">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+          >
             <Users className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -277,16 +282,18 @@ export function GuestsPage() {
                 }}
               >
                 {/* Top accent bar */}
-                {isBlacklisted ? (
-                  <div className="h-1 bg-gradient-to-r from-red-400 to-red-600" />
-                ) : (
-                  <div className={`h-1 bg-gradient-to-r ${avatarGradient}`} />
-                )}
+                <div
+                  className="h-1"
+                  style={{ background: isBlacklisted ? BLACKLIST_STRIPE : avatarGradient }}
+                />
 
                 <div className="p-5">
                   {/* Avatar + Name */}
                   <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${isBlacklisted ? "from-red-400 to-red-600" : avatarGradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md"
+                      style={{ background: isBlacklisted ? BLACKLIST_GRADIENT : avatarGradient }}
+                    >
                       <span className="text-sm font-bold text-white">{initials}</span>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -381,7 +388,10 @@ export function GuestsPage() {
           >
             {/* Modal header */}
             <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50">
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${AVATAR_GRADIENTS[0]} flex items-center justify-center shadow-md flex-shrink-0`}>
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md flex-shrink-0"
+                style={{ background: AVATAR_GRADIENTS[0] }}
+              >
                 <span className="text-sm font-bold text-white">{getInitials(selectedGuest.name || "")}</span>
               </div>
               <div className="flex-1">

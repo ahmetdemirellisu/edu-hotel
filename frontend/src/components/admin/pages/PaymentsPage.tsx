@@ -28,8 +28,11 @@ export function PaymentsPage() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [assignLoading, setAssignLoading] = useState(true);
   const [assignModalId, setAssignModalId] = useState<number | null>(null);
+  const [assignModalGuests, setAssignModalGuests] = useState<number>(1);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(false);
+  const [selectedRoomIds, setSelectedRoomIds] = useState<number[]>([]);
+  const [assigning, setAssigning] = useState(false);
 
   const fetchAssignments = async () => {
     setAssignLoading(true);
@@ -45,6 +48,8 @@ export function PaymentsPage() {
 
   const handleAssignClick = async (reservation: any) => {
     setAssignModalId(reservation.id);
+    setAssignModalGuests(reservation.guests || 1);
+    setSelectedRoomIds([]);
     setRoomsLoading(true);
     try {
       const allRooms = await getRooms();
@@ -53,14 +58,28 @@ export function PaymentsPage() {
     setRoomsLoading(false);
   };
 
-  const handleAssignConfirm = async (roomId: number) => {
-    if (!assignModalId) return;
+  const toggleRoomSelection = (roomId: number) => {
+    setSelectedRoomIds((prev) =>
+      prev.includes(roomId)
+        ? prev.filter((r) => r !== roomId)
+        : prev.length < assignModalGuests
+          ? [...prev, roomId]
+          : prev
+    );
+  };
+
+  const handleAssignConfirm = async () => {
+    if (!assignModalId || selectedRoomIds.length === 0) return;
+    setAssigning(true);
     try {
-      await assignRoom(assignModalId, roomId);
+      await assignRoom(assignModalId, selectedRoomIds);
       setAssignments((prev) => prev.filter((a) => a.id !== assignModalId));
       setAssignModalId(null);
+      setSelectedRoomIds([]);
     } catch (err: any) {
-      alert(err.message || "Failed to assign room.");
+      alert(err.message || "Failed to assign rooms.");
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -156,12 +175,12 @@ export function PaymentsPage() {
   };
 
   const AVATAR_GRADIENTS = [
-    "from-blue-500 to-blue-700",
-    "from-violet-500 to-violet-700",
-    "from-emerald-500 to-emerald-700",
-    "from-amber-500 to-orange-600",
-    "from-rose-500 to-rose-700",
-    "from-teal-500 to-teal-700",
+    "linear-gradient(to bottom right, #3b82f6, #1d4ed8)",
+    "linear-gradient(to bottom right, #8b5cf6, #6d28d9)",
+    "linear-gradient(to bottom right, #10b981, #047857)",
+    "linear-gradient(to bottom right, #f59e0b, #ea580c)",
+    "linear-gradient(to bottom right, #f43f5e, #be123c)",
+    "linear-gradient(to bottom right, #14b8a6, #0f766e)",
   ];
 
   /* ── Skeleton Card ─────────────────────────── */
@@ -206,7 +225,10 @@ export function PaymentsPage() {
         style={{ animation: "payIn 0.3s ease-out" }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+            style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+          >
             <CreditCard className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -239,7 +261,7 @@ export function PaymentsPage() {
             label: t("payments.pendingVerification", "Pending Verification"),
             value: loading ? "—" : payments.length,
             icon: Clock,
-            gradient: "from-amber-400 to-orange-500",
+            gradient: "linear-gradient(to right, #fbbf24, #f97316)",
             iconBg: "bg-amber-50",
             iconColor: "text-amber-600",
           },
@@ -247,7 +269,7 @@ export function PaymentsPage() {
             label: t("payments.approvedToday", "Approved Today"),
             value: "—",
             icon: CheckCircle,
-            gradient: "from-emerald-400 to-green-500",
+            gradient: "linear-gradient(to right, #34d399, #22c55e)",
             iconBg: "bg-emerald-50",
             iconColor: "text-emerald-600",
           },
@@ -255,7 +277,7 @@ export function PaymentsPage() {
             label: t("payments.rejectedToday", "Rejected Today"),
             value: "—",
             icon: XCircle,
-            gradient: "from-red-400 to-red-600",
+            gradient: "linear-gradient(to right, #f87171, #dc2626)",
             iconBg: "bg-red-50",
             iconColor: "text-red-600",
           },
@@ -267,7 +289,10 @@ export function PaymentsPage() {
               className="pay-card bg-white rounded-2xl border border-gray-100 overflow-hidden relative"
               style={{ animationDelay: `${idx * 0.07}s`, boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,51,102,0.04)" }}
             >
-              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} rounded-t-2xl`} />
+              <div
+                className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
+                style={{ background: card.gradient }}
+              />
               <div className="flex items-center gap-4 p-5 mt-1">
                 <div className={`w-11 h-11 rounded-2xl ${card.iconBg} flex items-center justify-center shadow-sm`}>
                   <Icon className={`h-5 w-5 ${card.iconColor}`} />
@@ -335,7 +360,10 @@ export function PaymentsPage() {
                 <div className="p-5">
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${avatarGradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md"
+                      style={{ background: avatarGradient }}
+                    >
                       <span className="text-sm font-bold text-white">{initials}</span>
                     </div>
 
@@ -411,7 +439,10 @@ export function PaymentsPage() {
       {/* ── Pending Room Assignment Section ──────── */}
       <div className="mt-8 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+            style={{ background: "linear-gradient(to bottom right, #8b5cf6, #9333ea)" }}
+          >
             <DoorOpen className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -469,7 +500,10 @@ export function PaymentsPage() {
                   <div className="h-1 bg-gradient-to-r from-violet-300 via-purple-400 to-violet-300" />
                   <div className="p-5">
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${avatarGradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md"
+                        style={{ background: avatarGradient }}
+                      >
                         <span className="text-sm font-bold text-white">{initials}</span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -512,35 +546,83 @@ export function PaymentsPage() {
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}
         >
           <div
-            className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
+            style={{ maxHeight: "85vh" }}
           >
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <span className="text-sm font-bold text-gray-700">{t("payments.selectRoom", "Select Room")}</span>
+              <div>
+                <p className="text-sm font-bold text-gray-700">{t("payments.selectRooms", "Select Rooms")}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  {t("payments.selectedCount", "{{selected}} of {{required}} selected", {
+                    selected: selectedRoomIds.length,
+                    required: assignModalGuests,
+                  })}
+                </p>
+              </div>
               <button onClick={() => setAssignModalId(null)} className="w-8 h-8 rounded-lg hover:bg-gray-200 flex items-center justify-center transition-colors text-gray-500">✕</button>
             </div>
-            <div className="p-4 max-h-[60vh] overflow-auto space-y-2">
+            <div className="p-4 overflow-auto space-y-2 flex-1">
               {roomsLoading ? (
                 <div className="text-center py-8 text-gray-400 text-sm">{t("common.loading", "Loading…")}</div>
               ) : availableRooms.length === 0 ? (
                 <div className="text-center py-8 text-gray-400 text-sm">{t("payments.noAvailableRooms", "No available rooms.")}</div>
               ) : (
-                availableRooms.map((room) => (
-                  <button
-                    key={room.id}
-                    onClick={() => handleAssignConfirm(room.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all text-left"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-                      <DoorOpen className="h-5 w-5 text-violet-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-800">{room.name}</p>
-                      <p className="text-xs text-gray-500">{room.type} · {t("payments.capacity", "Capacity")}: {room.capacity}</p>
-                    </div>
-                  </button>
-                ))
+                availableRooms.map((room) => {
+                  const selected = selectedRoomIds.includes(room.id);
+                  const atLimit = !selected && selectedRoomIds.length >= assignModalGuests;
+                  return (
+                    <button
+                      key={room.id}
+                      type="button"
+                      onClick={() => toggleRoomSelection(room.id)}
+                      disabled={atLimit}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        borderColor: selected ? "#8b5cf6" : "#e5e7eb",
+                        background: selected ? "rgba(139,92,246,0.08)" : "white",
+                      }}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                        <DoorOpen className="h-5 w-5 text-violet-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-gray-800">{room.name}</p>
+                        <p className="text-xs text-gray-500">{room.type} · {t("payments.capacity", "Capacity")}: {room.capacity}</p>
+                      </div>
+                      <div
+                        className="w-5 h-5 rounded-md flex items-center justify-center transition-all flex-shrink-0"
+                        style={{
+                          background: selected ? "#8b5cf6" : "transparent",
+                          border: selected ? "1px solid #8b5cf6" : "1.5px solid #d1d5db",
+                        }}
+                      >
+                        {selected && <CheckCircle className="h-3.5 w-3.5 text-white" />}
+                      </div>
+                    </button>
+                  );
+                })
               )}
+            </div>
+            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setAssignModalId(null)}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                {t("common.cancel", "Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleAssignConfirm}
+                disabled={selectedRoomIds.length === 0 || assigning}
+                className="px-5 py-2 rounded-lg text-sm font-bold text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                style={{ background: "linear-gradient(to right, #8b5cf6, #7c3aed)" }}
+              >
+                {assigning
+                  ? t("common.loading", "Loading…")
+                  : t("payments.assignRoomsAction", "Assign {{count}} Room(s)", { count: selectedRoomIds.length })}
+              </button>
             </div>
           </div>
         </div>

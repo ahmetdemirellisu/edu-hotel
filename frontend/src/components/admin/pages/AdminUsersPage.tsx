@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Shield, AlertCircle, Crown, UserCog, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { adminFetch } from "../../../api/adminFetch";
 
 type AdminUser = {
   id: number;
@@ -21,7 +22,7 @@ export function AdminUsersPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/ehp/api/users/search?query=&role=ADMIN,HOTEL_STAFF");
+        const res = await adminFetch("/ehp/api/users/search?query=&role=ADMIN,HOTEL_STAFF");
         if (res.ok) {
           const data = await res.json();
           setUsers(data);
@@ -35,10 +36,10 @@ export function AdminUsersPage() {
   }, []);
 
   const getRoleConfig = (role: string) => {
-    const map: Record<string, { label: string; gradient: string; pillBg: string; pillText: string; pillBorder: string; icon: typeof Crown }> = {
-      ADMIN:       { label: t("adminUsers.roleSuperAdmin", "Super Admin"), gradient: "from-violet-500 to-purple-700", pillBg: "bg-violet-50", pillText: "text-violet-700", pillBorder: "border-violet-200", icon: Crown },
-      HOTEL_STAFF: { label: t("adminUsers.roleHotelStaff", "Hotel Staff"), gradient: "from-blue-500 to-blue-700",   pillBg: "bg-blue-50",   pillText: "text-blue-700",   pillBorder: "border-blue-200",   icon: UserCog },
-      USER:        { label: t("adminUsers.roleUser", "User"),              gradient: "from-gray-400 to-gray-600",   pillBg: "bg-gray-50",   pillText: "text-gray-600",   pillBorder: "border-gray-200",   icon: Shield },
+    const map: Record<string, { label: string; gradient: string; stripe: string; pillBg: string; pillText: string; pillBorder: string; icon: typeof Crown }> = {
+      ADMIN:       { label: t("adminUsers.roleSuperAdmin", "Super Admin"), gradient: "linear-gradient(to bottom right, #8b5cf6, #7e22ce)", stripe: "linear-gradient(to right, #8b5cf6, #7e22ce)", pillBg: "bg-violet-50", pillText: "text-violet-700", pillBorder: "border-violet-200", icon: Crown },
+      HOTEL_STAFF: { label: t("adminUsers.roleHotelStaff", "Hotel Staff"), gradient: "linear-gradient(to bottom right, #3b82f6, #1d4ed8)", stripe: "linear-gradient(to right, #3b82f6, #1d4ed8)", pillBg: "bg-blue-50",   pillText: "text-blue-700",   pillBorder: "border-blue-200",   icon: UserCog },
+      USER:        { label: t("adminUsers.roleUser", "User"),              gradient: "linear-gradient(to bottom right, #9ca3af, #4b5563)", stripe: "linear-gradient(to right, #9ca3af, #4b5563)", pillBg: "bg-gray-50",   pillText: "text-gray-600",   pillBorder: "border-gray-200",   icon: Shield },
     };
     return map[role] || map.USER;
   };
@@ -74,7 +75,10 @@ export function AdminUsersPage() {
         style={{ animation: "auIn 0.3s ease-out" }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+            style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+          >
             <Shield className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -169,13 +173,16 @@ export function AdminUsersPage() {
                 }}
               >
                 {/* Gradient accent bar */}
-                <div className={`h-1 bg-gradient-to-r ${roleCfg.gradient}`} />
+                <div className="h-1" style={{ background: roleCfg.stripe }} />
 
                 <div className="p-6">
                   {/* Avatar + online indicator */}
                   <div className="flex items-start gap-4 mb-4">
                     <div className="relative">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${roleCfg.gradient} flex items-center justify-center shadow-lg`}>
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+                        style={{ background: roleCfg.gradient }}
+                      >
                         <span className="text-lg font-extrabold text-white">{initials}</span>
                       </div>
                       {/* Online dot */}

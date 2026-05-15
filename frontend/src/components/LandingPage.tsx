@@ -3,6 +3,7 @@ import {
   motion, useMotionValue, useSpring, useTransform, AnimatePresence,
 } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { TextReveal } from "./ui/text-reveal";
 import campusBg from "@/assets/campus.png";
 import {
@@ -82,73 +83,23 @@ function TiltCard({ children, className, style }: {
   );
 }
 
-/* ─── Feature card data ──────────────────────────────────── */
-const FEATURES = [
-  {
-    icon: BedDouble,
-    title: "Modern Odalar",
-    desc: "Geniş, klimalı ve yüksek hızlı Wi-Fi ile donatılmış konforlu odalarımızda kendinizi evinizde hissedeceksiniz.",
-    accent: "#c9a84c",
-    bg: "rgba(201,168,76,0.06)",
-    border: "rgba(201,168,76,0.15)",
-  },
-  {
-    icon: BookOpen,
-    title: "Akademik Konfor",
-    desc: "Kampüs içi konumunuz sayesinde kütüphane, konferans salonları ve akademik birimlere yürüme mesafesinde erişim.",
-    accent: "#60a5fa",
-    bg: "rgba(96,165,250,0.06)",
-    border: "rgba(96,165,250,0.15)",
-  },
-  {
-    icon: Building2,
-    title: "Kampüs Yaşamı",
-    desc: "Sabancı'nın eşsiz yeşil kampüsünün tam kalbinde konaklayın. Doğa ile akademinin buluştuğu nokta.",
-    accent: "#34d399",
-    bg: "rgba(52,211,153,0.06)",
-    border: "rgba(52,211,153,0.15)",
-  },
-  {
-    icon: Wifi,
-    title: "Premium Wi-Fi",
-    desc: "Üniversite fiber altyapısına bağlı yüksek hızlı internet bağlantısı — konferans, araştırma ve video görüşmeleri için ideal.",
-    accent: "#a78bfa",
-    bg: "rgba(167,139,250,0.06)",
-    border: "rgba(167,139,250,0.15)",
-  },
-  {
-    icon: Coffee,
-    title: "Şık Ortak Alanlar",
-    desc: "Kahve köşeleri, çalışma odaları ve sosyal alanlar ile günün her saati enerji dolu bir konaklama deneyimi.",
-    accent: "#f97316",
-    bg: "rgba(249,115,22,0.06)",
-    border: "rgba(249,115,22,0.15)",
-  },
-  {
-    icon: MapPin,
-    title: "Merkezi Konum",
-    desc: "İstanbul'un Anadolu yakasında, doğayla iç içe ama şehre yakın. Tuzla kampüsünün eşsiz coğrafyasında.",
-    accent: "#f43f5e",
-    bg: "rgba(244,63,94,0.06)",
-    border: "rgba(244,63,94,0.15)",
-  },
-];
-
-const MARQUEE_ITEMS = [
-  "Sabancı University",
-  "Est. 1994",
-  "5 Yıldızlı Akademik Değerlendirme",
-  "Modern Konaklama",
-  "Tuzla · İstanbul",
-  "Premium Konfor",
-  "Akademik Mükemmellik",
-  "Uluslararası Standartlar",
-];
+/* ─── Feature card visual config (text comes from i18n) ──── */
+const FEATURE_VISUALS = [
+  { key: "modernRooms",      icon: BedDouble,  accent: "#c9a84c", bg: "rgba(201,168,76,0.06)", border: "rgba(201,168,76,0.15)" },
+  { key: "academicComfort",  icon: BookOpen,   accent: "#60a5fa", bg: "rgba(96,165,250,0.06)", border: "rgba(96,165,250,0.15)" },
+  { key: "campusLife",       icon: Building2,  accent: "#34d399", bg: "rgba(52,211,153,0.06)", border: "rgba(52,211,153,0.15)" },
+  { key: "premiumWifi",      icon: Wifi,       accent: "#a78bfa", bg: "rgba(167,139,250,0.06)", border: "rgba(167,139,250,0.15)" },
+  { key: "commonAreas",      icon: Coffee,     accent: "#f97316", bg: "rgba(249,115,22,0.06)", border: "rgba(249,115,22,0.15)" },
+  { key: "location",         icon: MapPin,     accent: "#f43f5e", bg: "rgba(244,63,94,0.06)", border: "rgba(244,63,94,0.15)" },
+] as const;
 
 /* ══════════════════════════════════════════════════════════
    Landing Page
    ══════════════════════════════════════════════════════════ */
 export function LandingPage() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
+  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -159,10 +110,27 @@ export function LandingPage() {
   }, []);
 
   const navLinks = [
-    { label: "Odalar", href: "#odalar" },
-    { label: "Özellikler", href: "#ozellikler" },
-    { label: "Hakkımızda", href: "#hakkimizda" },
-    { label: "İletişim", href: "#iletisim" },
+    { label: t("landing.nav.rooms"), href: "#odalar" },
+    { label: t("landing.nav.features"), href: "#ozellikler" },
+    { label: t("landing.nav.about"), href: "#hakkimizda" },
+    { label: t("landing.nav.contact"), href: "#iletisim" },
+  ];
+
+  const FEATURES = FEATURE_VISUALS.map(f => ({
+    ...f,
+    title: t(`landing.features.${f.key}.title`),
+    desc: t(`landing.features.${f.key}.desc`),
+  }));
+
+  const MARQUEE_ITEMS = [
+    "Sabancı University",
+    t("landing.marquee.established"),
+    t("landing.marquee.fiveStar"),
+    t("landing.marquee.modernStay"),
+    t("landing.marquee.tuzla"),
+    t("landing.marquee.premiumComfort"),
+    t("landing.marquee.academicExcellence"),
+    t("landing.marquee.internationalStandards"),
   ];
 
   return (
@@ -218,7 +186,7 @@ export function LandingPage() {
                 style={{ borderColor: "rgba(201,168,76,0.5)", background: "rgba(201,168,76,0.07)" }}
               >
                 <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
+                <div className="text-[10px] text-[#c9a84c]/70 leading-tight">{t("landing.logo.universityLine")}</div>
               </div>
               <div className="hidden sm:block w-px h-8" style={{ background: "rgba(255,255,255,0.15)" }} />
               <span
@@ -249,6 +217,29 @@ export function LandingPage() {
 
             {/* CTA + Mobile toggle */}
             <div className="flex items-center gap-3">
+              {/* Language toggle */}
+              <div
+                className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-lg"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                {["EN", "TR"].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => switchLanguage(lang)}
+                    className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider transition-all duration-200"
+                    style={{
+                      background: currentLang === lang ? "linear-gradient(135deg, #f0d080, #c9a84c)" : "transparent",
+                      color: currentLang === lang ? "#001428" : "rgba(255,255,255,0.55)",
+                    }}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+
               <Link
                 to="/login"
                 className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:-translate-y-0.5"
@@ -258,7 +249,7 @@ export function LandingPage() {
                   boxShadow: "0 4px 16px rgba(201,168,76,0.3)",
                 }}
               >
-                Giriş Yap
+                {t("landing.nav.login")}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <button
@@ -293,12 +284,35 @@ export function LandingPage() {
                       {link.label}
                     </a>
                   ))}
+                  {/* Mobile language toggle */}
+                  <div
+                    className="flex items-center justify-center gap-1 p-1 rounded-lg mt-2"
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    {["EN", "TR"].map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => { switchLanguage(lang); setMobileMenuOpen(false); }}
+                        className="flex-1 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all"
+                        style={{
+                          background: currentLang === lang ? "linear-gradient(135deg, #f0d080, #c9a84c)" : "transparent",
+                          color: currentLang === lang ? "#001428" : "rgba(255,255,255,0.6)",
+                        }}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                  </div>
+
                   <Link
                     to="/login"
                     className="block text-center mt-2 px-5 py-3 rounded-xl text-sm font-bold"
                     style={{ background: "linear-gradient(135deg, #f0d080, #c9a84c)", color: "#001428" }}
                   >
-                    Giriş Yap
+                    {t("landing.nav.login")}
                   </Link>
                 </div>
               </motion.div>
@@ -323,7 +337,7 @@ export function LandingPage() {
               className="text-[11px] font-bold tracking-[4px] uppercase"
               style={{ color: "#c9a84c" }}
             >
-              Sabancı Üniversitesi
+              {t("landing.hero.eyebrow")}
             </span>
             <div className="w-8 h-px" style={{ background: "#c9a84c" }} />
           </motion.div>
@@ -331,7 +345,7 @@ export function LandingPage() {
           {/* Main heading via TextReveal */}
           <div className="max-w-4xl mx-auto mb-6">
             <TextReveal
-              text="EDU Hotel: Sabancı Üniversitesi'nin Kalbinde Lüks Bir Konaklama."
+              text={t("landing.hero.title")}
               className="justify-center text-4xl sm:text-5xl lg:text-6xl font-light leading-tight"
               /* @ts-ignore – className forwarded via framer wrapper */
             />
@@ -346,7 +360,7 @@ export function LandingPage() {
             className="text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed"
             style={{ color: "rgba(255,255,255,0.55)", fontWeight: 300 }}
           >
-            Akademik dünya ile konfor bir arada. Araştırmacılar, konuklar ve eğitimciler için 5 yıldızlı bir konaklama deneyimi.
+            {t("landing.hero.subtitle")}
           </motion.p>
 
           {/* CTA buttons */}
@@ -364,7 +378,7 @@ export function LandingPage() {
                 color: "#001428",
               }}
             >
-              Hemen Rezervasyon Yap
+              {t("landing.hero.ctaPrimary")}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a
@@ -381,7 +395,7 @@ export function LandingPage() {
                 document.querySelector("#ozellikler")?.scrollIntoView({ behavior: "smooth" });
               }}
             >
-              Daha Fazla Keşfet
+              {t("landing.hero.ctaSecondary")}
             </a>
           </motion.div>
 
@@ -396,7 +410,7 @@ export function LandingPage() {
               <Star key={i} className="h-4 w-4 fill-current" style={{ color: "#c9a84c" }} />
             ))}
             <span className="text-xs ml-1 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
-              Akademik Konaklama Standardı
+              {t("landing.hero.starStrip")}
             </span>
           </motion.div>
 
@@ -405,7 +419,7 @@ export function LandingPage() {
             className="landing-scroll-indicator absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 cursor-pointer"
             onClick={() => document.querySelector("#ozellikler")?.scrollIntoView({ behavior: "smooth" })}
           >
-            <span className="text-[10px] tracking-[3px] uppercase font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>Kaydır</span>
+            <span className="text-[10px] tracking-[3px] uppercase font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>{t("landing.hero.scroll")}</span>
             <ChevronDown className="h-4 w-4" style={{ color: "rgba(255,255,255,0.3)" }} />
           </div>
         </section>
@@ -435,7 +449,7 @@ export function LandingPage() {
                 >
                   <div className="h-px w-10" style={{ background: "rgba(201,168,76,0.5)" }} />
                   <span className="text-[10px] font-bold tracking-[4px] uppercase" style={{ color: "#c9a84c" }}>
-                    Neden EDU Hotel?
+                    {t("landing.features.eyebrow")}
                   </span>
                   <div className="h-px w-10" style={{ background: "rgba(201,168,76,0.5)" }} />
                 </motion.div>
@@ -446,7 +460,7 @@ export function LandingPage() {
                   viewport={{ once: true }}
                 >
                   <TextReveal
-                    text="Her Detayda Mükemmellik."
+                    text={t("landing.features.title")}
                     className="justify-center text-3xl sm:text-4xl font-light text-white"
                   />
                 </motion.div>
@@ -458,7 +472,7 @@ export function LandingPage() {
                   className="text-sm mt-4 max-w-md mx-auto leading-relaxed"
                   style={{ color: "rgba(255,255,255,0.4)" }}
                 >
-                  Akademik bir ortamda lüks konforun ayrıcalığını yaşayın.
+                  {t("landing.features.subtitle")}
                 </motion.p>
               </div>
 
@@ -573,24 +587,24 @@ export function LandingPage() {
             >
               <div className="flex items-center gap-2 mb-5">
                 <div className="h-px w-8" style={{ background: "#c9a84c" }} />
-                <span className="text-[10px] font-bold tracking-[4px] uppercase" style={{ color: "#c9a84c" }}>Hakkımızda</span>
+                <span className="text-[10px] font-bold tracking-[4px] uppercase" style={{ color: "#c9a84c" }}>{t("landing.about.eyebrow")}</span>
               </div>
               <TextReveal
-                text="Sabancı Kampüsünde Benzersiz Bir Deneyim."
+                text={t("landing.about.title")}
                 className="text-2xl sm:text-3xl font-light text-white mb-6"
               />
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-                EDU Hotel, Sabancı Üniversitesi'nin 1994'te kuruluşundan bu yana akademisyenlere, araştırmacılara ve kurumsal misafirlere ev sahipliği yapmaktadır.
+                {t("landing.about.p1")}
               </p>
               <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Modern mimarisi ve yeşil kampüs dokusunun içindeki konumuyla, iş ve akademiyi konforla birleştiren eşsiz bir konaklama deneyimi sunuyoruz.
+                {t("landing.about.p2")}
               </p>
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 mt-8 text-sm font-bold transition-all duration-200 hover:gap-3"
                 style={{ color: "#c9a84c" }}
               >
-                Rezervasyon Yap
+                {t("landing.about.cta")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </motion.div>
@@ -604,10 +618,10 @@ export function LandingPage() {
               className="grid grid-cols-2 gap-4"
             >
               {[
-                { val: "30+", label: "Yıllık Deneyim" },
-                { val: "5★",  label: "Akademik Puan" },
-                { val: "200+", label: "Misafir Odası" },
-                { val: "%98", label: "Memnuniyet" },
+                { val: "30+", label: t("landing.about.stats.experience") },
+                { val: "5★",  label: t("landing.about.stats.rating") },
+                { val: "49",  label: t("landing.about.stats.rooms") },
+                { val: "%98", label: t("landing.about.stats.satisfaction") },
               ].map((s, i) => (
                 <motion.div
                   key={s.label}
@@ -643,11 +657,11 @@ export function LandingPage() {
               viewport={{ once: true }}
             >
               <TextReveal
-                text="Bir Sonraki Konaklamanızı Planlayın."
+                text={t("landing.contact.title")}
                 className="justify-center text-3xl sm:text-4xl font-light text-white mb-5"
               />
               <p className="text-sm mb-10 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                Rezervasyonunuzu hemen yapın veya daha fazla bilgi için bizimle iletişime geçin.
+                {t("landing.contact.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
@@ -658,7 +672,7 @@ export function LandingPage() {
                     color: "#001428",
                   }}
                 >
-                  Rezervasyon Yap
+                  {t("landing.contact.cta")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -668,43 +682,84 @@ export function LandingPage() {
 
         {/* ══ FOOTER ══════════════════════════════════════════ */}
         <footer
-          className="px-6 py-10"
+          className="px-6 py-14"
           style={{
             background: "rgba(0,5,15,0.98)",
             borderTop: "1px solid rgba(255,255,255,0.05)",
           }}
         >
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div
-                className="border px-3 py-1.5 rounded-lg"
-                style={{ borderColor: "rgba(201,168,76,0.4)", background: "rgba(201,168,76,0.06)" }}
-              >
-                <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                <div className="text-[10px] text-[#c9a84c]/60 leading-tight">Üniversitesi</div>
-              </div>
-              <span
-                className="text-white font-light tracking-[5px] uppercase text-sm"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-              >
-                EDU HOTEL
-              </span>
-            </div>
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>
-              © {new Date().getFullYear()} Sabancı Üniversitesi EDU Hotel. Tüm hakları saklıdır.
-            </p>
-            <div className="flex items-center gap-5">
-              {navLinks.map(link => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-[11px] transition-colors hover:text-[#c9a84c]"
-                  style={{ color: "rgba(255,255,255,0.3)" }}
+          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-10">
+            {/* Column 1 — Brand */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="border px-3 py-1.5 rounded-lg"
+                  style={{ borderColor: "rgba(201,168,76,0.4)", background: "rgba(201,168,76,0.06)" }}
                 >
-                  {link.label}
-                </a>
-              ))}
+                  <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
+                  <div className="text-[10px] text-[#c9a84c]/60 leading-tight">{t("landing.logo.universityLine")}</div>
+                </div>
+                <span
+                  className="text-white font-light tracking-[5px] uppercase text-sm"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  EDU HOTEL
+                </span>
+              </div>
+              <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
+                {t("landing.hero.subtitle")}
+              </p>
             </div>
+
+            {/* Column 2 — Quick Links */}
+            <div>
+              <h4 className="text-[10px] font-bold tracking-[3px] uppercase mb-4" style={{ color: "#c9a84c" }}>
+                {t("landing.footer.quickLinks", "Quick Links")}
+              </h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <Link to="/login" className="text-[12px] transition-colors hover:text-[#c9a84c]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    {t("landing.footer.bookStay", "Book a Stay")}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="text-[12px] transition-colors hover:text-[#c9a84c]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    {t("landing.nav.login")}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/signup" className="text-[12px] transition-colors hover:text-[#c9a84c]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    {t("landing.footer.signUp", "Sign Up")}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3 — Contact */}
+            <div>
+              <h4 className="text-[10px] font-bold tracking-[3px] uppercase mb-4" style={{ color: "#c9a84c" }}>
+                {t("landing.footer.contact", "Contact")}
+              </h4>
+              <ul className="space-y-2.5 text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <li>
+                  <a href="mailto:hotel@sabanciuniv.edu" className="transition-colors hover:text-[#c9a84c]">
+                    hotel@sabanciuniv.edu
+                  </a>
+                </li>
+                <li>Sabancı Üniversitesi, Orta Mahalle</li>
+                <li>Tuzla 34956, İstanbul</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom strip */}
+          <div
+            className="max-w-6xl mx-auto mt-10 pt-6 text-center"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+              © {new Date().getFullYear()} {t("landing.footer.rights")}
+            </p>
           </div>
         </footer>
 

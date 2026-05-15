@@ -159,7 +159,10 @@ export function CalendarPage() {
 
       {/* ── Header ───────────────────────────────── */}
       <div className="flex items-center gap-3" style={{ animation: "calIn 0.3s ease-out" }}>
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+          style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+        >
           <Calendar className="h-5 w-5 text-white" />
         </div>
         <div>
@@ -212,7 +215,8 @@ export function CalendarPage() {
             </button>
             <button
               onClick={goToday}
-              className="px-4 h-9 rounded-xl bg-gradient-to-r from-[#003366] to-[#0055aa] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-150"
+              className="px-4 h-9 rounded-xl text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-150"
+              style={{ background: "linear-gradient(to right, #003366, #0055aa)" }}
             >
               {t("pages.calendar.today", "Today")}
             </button>

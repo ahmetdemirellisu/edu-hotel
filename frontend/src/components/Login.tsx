@@ -243,10 +243,10 @@ export function Login() {
                 letterSpacing: "-0.5px",
               }}
             >
-              Welcome back
+              {t("login.welcomeTitle", "Welcome back")}
             </h1>
             <p style={{ fontSize: 14, color: "#9ca3af", margin: "0 0 20px" }}>
-              Sign in to your EDU Hotel account
+              {t("login.welcomeSubtitle", "Sign in to your EDU Hotel account")}
             </p>
           </div>
 
@@ -443,7 +443,7 @@ export function Login() {
             {/* Link to Signup */}
             <div style={{ textAlign: "center", marginTop: 4, ...stagger(8) }}>
               <span style={{ fontSize: 13, color: "#9ca3af" }}>
-                First time user?{" "}
+                {t("login.firstTimePrompt", "First time user?")}{" "}
               </span>
               <Link
                 to="/signup"
@@ -457,7 +457,7 @@ export function Login() {
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#0066cc")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#003366")}
               >
-                {t("login.firstTime", "Create account")}
+                {t("login.signupLink", "Create account")}
               </Link>
             </div>
           </form>

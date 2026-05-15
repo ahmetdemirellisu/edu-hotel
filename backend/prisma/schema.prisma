@@ -42,6 +42,7 @@ model Reservation {
   id                Int               @id @default(autoincrement())
   userId            Int
   roomId            Int?
+  roomIds           Json?
   checkIn           DateTime
   checkOut          DateTime
   guests            Int

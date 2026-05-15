@@ -30,7 +30,7 @@ export function ReportsPage() {
       nameKey: "reports.daily",
       descriptionKey: "reports.dailyDesc",
       icon: FileText,
-      gradient: "from-blue-500 to-blue-700",
+      gradient: "linear-gradient(to right, #3b82f6, #1d4ed8)",
       accentBg: "bg-blue-50",
       accentText: "text-blue-600",
       tag: "Daily",
@@ -39,7 +39,7 @@ export function ReportsPage() {
       nameKey: "reports.monthly",
       descriptionKey: "reports.monthlyDesc",
       icon: CalendarIcon,
-      gradient: "from-violet-500 to-violet-700",
+      gradient: "linear-gradient(to right, #8b5cf6, #6d28d9)",
       accentBg: "bg-violet-50",
       accentText: "text-violet-600",
       tag: "Monthly",
@@ -48,7 +48,7 @@ export function ReportsPage() {
       nameKey: "reports.roomOccupancy",
       descriptionKey: "reports.roomOccupancyDesc",
       icon: Bed,
-      gradient: "from-emerald-500 to-emerald-700",
+      gradient: "linear-gradient(to right, #10b981, #047857)",
       accentBg: "bg-emerald-50",
       accentText: "text-emerald-600",
       tag: "Occupancy",
@@ -57,7 +57,7 @@ export function ReportsPage() {
       nameKey: "reports.revenue",
       descriptionKey: "reports.revenueDesc",
       icon: DollarSign,
-      gradient: "from-amber-500 to-orange-600",
+      gradient: "linear-gradient(to right, #f59e0b, #ea580c)",
       accentBg: "bg-amber-50",
       accentText: "text-amber-600",
       tag: "Revenue",
@@ -74,7 +74,10 @@ export function ReportsPage() {
       {/* ── Header ─────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ animation: "rpIn 0.3s ease-out" }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+            style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+          >
             <BarChart3 className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -100,7 +103,7 @@ export function ReportsPage() {
               }}
               onClick={() => setSelectedReport(isSelected ? null : idx)}
             >
-              <div className={`h-1 bg-gradient-to-r ${report.gradient}`} />
+              <div className="h-1" style={{ background: report.gradient }} />
               <div className="p-5">
                 <div className="flex items-start gap-4">
                   <div className={`w-11 h-11 rounded-xl ${report.accentBg} ${report.accentText} flex items-center justify-center flex-shrink-0`}>

@@ -1,4 +1,89 @@
 {
+  "landing": {
+    "nav": {
+      "rooms": "Rooms",
+      "features": "Features",
+      "about": "About",
+      "contact": "Contact",
+      "login": "Log In"
+    },
+    "hero": {
+      "eyebrow": "Sabancı University",
+      "title": "EDU Hotel: A Luxurious Stay in the Heart of Sabancı University.",
+      "subtitle": "Academic life meets comfort. A five-star accommodation experience for researchers, guests, and educators.",
+      "ctaPrimary": "Book Now",
+      "ctaSecondary": "Discover More",
+      "starStrip": "Academic Hospitality Standard",
+      "scroll": "Scroll"
+    },
+    "features": {
+      "eyebrow": "Why EDU Hotel?",
+      "title": "Excellence in Every Detail.",
+      "subtitle": "Experience the privilege of luxury comfort in an academic setting.",
+      "modernRooms": {
+        "title": "Modern Rooms",
+        "desc": "Feel at home in our spacious, air-conditioned rooms equipped with high-speed Wi-Fi."
+      },
+      "academicComfort": {
+        "title": "Academic Comfort",
+        "desc": "Thanks to your on-campus location, the library, conference halls and academic units are within walking distance."
+      },
+      "campusLife": {
+        "title": "Campus Life",
+        "desc": "Stay in the very heart of Sabancı's unique green campus, where nature meets academia."
+      },
+      "premiumWifi": {
+        "title": "Premium Wi-Fi",
+        "desc": "High-speed internet connected to the university's fiber infrastructure — perfect for conferences, research, and video calls."
+      },
+      "commonAreas": {
+        "title": "Elegant Common Areas",
+        "desc": "Coffee corners, study rooms, and social spaces for an energized stay at any time of day."
+      },
+      "location": {
+        "title": "Central Location",
+        "desc": "On the Anatolian side of Istanbul, intertwined with nature yet close to the city. Set in the unique geography of the Tuzla campus."
+      }
+    },
+    "marquee": {
+      "established": "Est. 1994",
+      "fiveStar": "Five-Star Academic Rating",
+      "modernStay": "Modern Accommodation",
+      "tuzla": "Tuzla · Istanbul",
+      "premiumComfort": "Premium Comfort",
+      "academicExcellence": "Academic Excellence",
+      "internationalStandards": "International Standards"
+    },
+    "about": {
+      "eyebrow": "About Us",
+      "title": "A Unique Experience on the Sabancı Campus.",
+      "p1": "EDU Hotel has been hosting academics, researchers, and corporate guests since the founding of Sabancı University in 1994.",
+      "p2": "With its modern architecture and location within a lush green campus, we offer a unique accommodation experience that combines work and academia with comfort.",
+      "cta": "Make a Reservation",
+      "stats": {
+        "experience": "Years of Experience",
+        "rating": "Academic Rating",
+        "rooms": "Guest Rooms",
+        "satisfaction": "Satisfaction"
+      }
+    },
+    "contact": {
+      "title": "Plan Your Next Stay.",
+      "subtitle": "Make your reservation now or contact us for more information.",
+      "cta": "Make a Reservation"
+    },
+    "footer": {
+      "rights": "Sabancı University EDU Hotel. All rights reserved.",
+      "quickLinks": "Quick Links",
+      "bookStay": "Book a Stay",
+      "signUp": "Sign Up",
+      "contact": "Contact"
+    },
+    "logo": {
+      "universityLine": "University"
+    }
+  },
+
   "header": {
     "mySU": "My SU",
     "language": "TR",
@@ -34,6 +119,8 @@
   },
 
   "login": {
+    "welcomeTitle": "Welcome back",
+    "welcomeSubtitle": "Sign in to your EDU Hotel account",
     "loginWith": "Login with",
     "email": "Email",
     "phone": "Phone Number",
@@ -46,6 +133,8 @@
     "loggingIn": "Logging in...",
     "loginButton": "Login to your account",
     "forgotPassword": "Forgot your password?",
+    "firstTimePrompt": "First time user?",
+    "signupLink": "Create account",
     "firstTime": "First time user? Create account",
     "errors": {
       "loginFailed": "Login failed",
@@ -54,6 +143,10 @@
   },
 
   "signup": {
+    "createTitle": "Create an account",
+    "createSubtitle": "Sign up to get started with EDU Hotel",
+    "haveAccountPrompt": "Already have an account?",
+    "loginLink": "Log in",
     "fullNameLabel": "Full Name",
     "fullNamePlaceholder": "Enter your full name",
     "firstNamePlaceholder": "First Name",
@@ -295,8 +388,8 @@
         "education": "Education"
       },
       "invoiceType": "Billing Type",
-      "eventCode": "Event / Education Code",
-      "eventCodePlaceholder": "Enter SAT-KAF or Education Code",
+      "eventCode": "Program Code",
+      "eventCodePlaceholder": "Enter the program code provided to you",
       "explanation": "Explanation / Reason",
       "explanationPlaceholder": "Please briefly explain the purpose of your stay (required for education-related reservations).",
       "submitButton": "Submit Pre-Reservation",
@@ -337,7 +430,7 @@
       "noSatInSunOut": "Saturday check-in and Sunday check-out combinations are not allowed.",
       "max30Days": "Reservations are only allowed up to 30 days in advance.",
       "max5Nights": "Personal bookings cannot exceed 5 consecutive nights.",
-      "codeRequired": "Event / Education code is required for Corporate or Education stays.",
+      "codeRequired": "Program code is required for Corporate stays.",
       "explanationRequired": "Please provide an explanation for education-related reservations.",
       "tcRequired": "T.C. Identity Number is required for individual billing.",
       "taxRequired": "Tax Number is required for corporate billing.",
@@ -619,6 +712,9 @@
   },
 
   "bookRoom": {
+    "keyPickupTitle": "Key Pickup Instructions",
+    "keyPickup": "For check-ins before 16:30, you may collect your room key card from the reception desk in person against signature. For check-ins after 16:30, your key card will be left in a sealed envelope at the main security gate.",
+    "identityDocRemove": "Remove",
     "checkIn": "Check-In Date",
     "checkOut": "Check-Out Date",
     "checkInTime": "Expected Check-In Time",
@@ -629,9 +725,9 @@
     "additionalGuests": "Additional Guests",
     "additionalGuestFirstName": "Guest {{n}} — First Name",
     "additionalGuestLastName": "Last Name",
-    "eventCode": "Event / Education Code",
-    "eventCodePlaceholder": "e.g. CONF-2026-001",
-    "eventCodeHelp": "Enter the code provided by your department or event organizer. Required for corporate and academic bookings.",
+    "eventCode": "Program Code",
+    "eventCodePlaceholder": "e.g. PROG-2026-001",
+    "eventCodeHelp": "Enter the program code provided by your department or organizer. Required for corporate bookings.",
     "eventType": "Purpose of Stay",
     "eventTypePlaceholder": "Select purpose...",
     "priceType": "Price Type",
@@ -673,7 +769,7 @@
       "guestCount": "Number of guests must be between 1 and 10.",
       "guestListIncomplete": "Please fill all guest names.",
       "personalMaxNights": "Personal stays cannot exceed 5 consecutive nights.",
-      "eventCodeRequired": "Event code is required for this accommodation type.",
+      "eventCodeRequired": "Program code is required for this accommodation type.",
       "notesRequired": "Please provide an explanation for educational stays.",
       "eventTypeRequired": "Please select a purpose of stay.",
       "billingRequired": "Please select a billing type.",
@@ -681,6 +777,7 @@
       "taxRequired": "Tax number is required.",
       "billingTitleRequired": "Company name is required.",
       "billingAddressRequired": "Billing address is required.",
+      "identityDocRequired": "Please upload a copy of your ID or passport.",
       "consent": "Please accept the terms and conditions.",
       "notLoggedIn": "You must be logged in."
     },
