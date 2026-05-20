@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 /* ── Inject keyframes once ─────────────────────────────── */
 const _footerStyle = document.getElementById("footer-anim") ?? (() => {
@@ -18,9 +19,8 @@ const _footerStyle = document.getElementById("footer-anim") ?? (() => {
       50%       { transform: rotate(45deg) scale(1.2); }
     }
     .footer-link-item {
-      position: relative;
-      cursor: pointer;
       transition: color 0.2s ease, padding-left 0.2s ease;
+      position: relative;
     }
     .footer-link-item::before {
       content: '';
@@ -103,12 +103,8 @@ export function Footer() {
             animation: "footerGlow 4s ease-in-out infinite",
           }}
         />
-        {/* Diamond center */}
         <div className="mx-4 flex items-center gap-3">
-          <div
-            className="w-1 h-1 rounded-full"
-            style={{ background: "rgba(201,168,76,0.5)" }}
-          />
+          <div className="w-1 h-1 rounded-full" style={{ background: "rgba(201,168,76,0.5)" }} />
           <div
             className="w-2.5 h-2.5"
             style={{
@@ -118,10 +114,7 @@ export function Footer() {
               boxShadow: "0 0 8px rgba(201,168,76,0.5)",
             }}
           />
-          <div
-            className="w-1 h-1 rounded-full"
-            style={{ background: "rgba(201,168,76,0.5)" }}
-          />
+          <div className="w-1 h-1 rounded-full" style={{ background: "rgba(201,168,76,0.5)" }} />
         </div>
         <div
           className="flex-1 h-px max-w-xs"
@@ -132,17 +125,17 @@ export function Footer() {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="grid md:grid-cols-4 gap-8 mb-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
 
-          {/* Logo and Address */}
+          {/* Brand + Address */}
           <div>
             <div
               className="border border-[#c9a84c]/50 px-3 py-1.5 inline-block mb-5 rounded transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_14px_rgba(201,168,76,0.2)]"
               style={{ background: "rgba(201,168,76,0.06)" }}
             >
               <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-              <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">Üniversitesi</div>
+              <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">{t("landing.logo.universityLine", "University")}</div>
             </div>
             <p className="text-sm text-white/50 leading-relaxed footer-contact-item">
               {t("footer.address.line1")}
@@ -157,37 +150,30 @@ export function Footer() {
               className="mb-5 text-[10px] font-bold uppercase tracking-[3px] flex items-center gap-2"
               style={{ color: "#c9a84c" }}
             >
-              <span
-                className="w-3 h-px inline-block"
-                style={{ background: "#c9a84c" }}
-              />
+              <span className="w-3 h-px inline-block" style={{ background: "#c9a84c" }} />
               {t("footer.quickLinks")}
             </h3>
-            <ul className="space-y-2.5 text-sm text-white/50">
-              <li className="footer-link-item">{t("footer.about")}</li>
-              <li className="footer-link-item">{t("footer.academic")}</li>
-              <li className="footer-link-item">{t("footer.research")}</li>
-              <li className="footer-link-item">{t("footer.campusLife")}</li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h3
-              className="mb-5 text-[10px] font-bold uppercase tracking-[3px] flex items-center gap-2"
-              style={{ color: "#c9a84c" }}
-            >
-              <span
-                className="w-3 h-px inline-block"
-                style={{ background: "#c9a84c" }}
-              />
-              {t("footer.resources")}
-            </h3>
-            <ul className="space-y-2.5 text-sm text-white/50">
-              <li className="footer-link-item">{t("footer.library")}</li>
-              <li className="footer-link-item">{t("footer.sucourse")}</li>
-              <li className="footer-link-item">{t("footer.email")}</li>
-              <li className="footer-link-item">{t("footer.support")}</li>
+            <ul className="space-y-2.5 text-sm text-white/55">
+              <li>
+                <Link to="/book-room" className="footer-link-item block">
+                  {t("landing.footer.bookStay", "Book a Stay")}
+                </Link>
+              </li>
+              <li>
+                <Link to="/main" className="footer-link-item block">
+                  {t("nav.dashboard", "Dashboard")}
+                </Link>
+              </li>
+              <li>
+                <Link to="/reservations" className="footer-link-item block">
+                  {t("nav.myReservations", "My Reservations")}
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="footer-link-item block">
+                  {t("nav.contact", "Contact Support")}
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -197,15 +183,20 @@ export function Footer() {
               className="mb-5 text-[10px] font-bold uppercase tracking-[3px] flex items-center gap-2"
               style={{ color: "#c9a84c" }}
             >
-              <span
-                className="w-3 h-px inline-block"
-                style={{ background: "#c9a84c" }}
-              />
+              <span className="w-3 h-px inline-block" style={{ background: "#c9a84c" }} />
               {t("footer.contactTitle")}
             </h3>
-            <ul className="space-y-2.5 text-sm text-white/50">
-              <li className="footer-contact-item">{t("footer.phone")}</li>
-              <li className="footer-contact-item">{t("footer.emailAddress")}</li>
+            <ul className="space-y-2.5 text-sm text-white/55">
+              <li>
+                <a href="tel:+902164839000" className="footer-contact-item">
+                  {t("footer.phone")}
+                </a>
+              </li>
+              <li>
+                <a href="mailto:hotel@sabanciuniv.edu" className="footer-contact-item">
+                  {t("footer.emailAddress")}
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -226,7 +217,6 @@ export function Footer() {
             EDU HOTEL
           </h2>
 
-          {/* Bottom bar */}
           <p className="text-[11px] text-white/30 font-medium tracking-wider text-center">
             &copy; {currentYear} &nbsp; {t("footer.rights")}
           </p>

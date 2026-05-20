@@ -1,4 +1,89 @@
 {
+  "landing": {
+    "nav": {
+      "rooms": "Odalar",
+      "features": "Özellikler",
+      "about": "Hakkımızda",
+      "contact": "İletişim",
+      "login": "Giriş Yap"
+    },
+    "hero": {
+      "eyebrow": "Sabancı Üniversitesi",
+      "title": "EDU Hotel: Sabancı Üniversitesi'nin Kalbinde Lüks Bir Konaklama.",
+      "subtitle": "Akademik dünya ile konfor bir arada. Araştırmacılar, konuklar ve eğitimciler için 5 yıldızlı bir konaklama deneyimi.",
+      "ctaPrimary": "Hemen Rezervasyon Yap",
+      "ctaSecondary": "Daha Fazla Keşfet",
+      "starStrip": "Akademik Konaklama Standardı",
+      "scroll": "Kaydır"
+    },
+    "features": {
+      "eyebrow": "Neden EDU Hotel?",
+      "title": "Her Detayda Mükemmellik.",
+      "subtitle": "Akademik bir ortamda lüks konforun ayrıcalığını yaşayın.",
+      "modernRooms": {
+        "title": "Modern Odalar",
+        "desc": "Geniş, klimalı ve yüksek hızlı Wi-Fi ile donatılmış konforlu odalarımızda kendinizi evinizde hissedeceksiniz."
+      },
+      "academicComfort": {
+        "title": "Akademik Konfor",
+        "desc": "Kampüs içi konumunuz sayesinde kütüphane, konferans salonları ve akademik birimlere yürüme mesafesinde erişim."
+      },
+      "campusLife": {
+        "title": "Kampüs Yaşamı",
+        "desc": "Sabancı'nın eşsiz yeşil kampüsünün tam kalbinde konaklayın. Doğa ile akademinin buluştuğu nokta."
+      },
+      "premiumWifi": {
+        "title": "Premium Wi-Fi",
+        "desc": "Üniversite fiber altyapısına bağlı yüksek hızlı internet bağlantısı — konferans, araştırma ve video görüşmeleri için ideal."
+      },
+      "commonAreas": {
+        "title": "Şık Ortak Alanlar",
+        "desc": "Kahve köşeleri, çalışma odaları ve sosyal alanlar ile günün her saati enerji dolu bir konaklama deneyimi."
+      },
+      "location": {
+        "title": "Merkezi Konum",
+        "desc": "İstanbul'un Anadolu yakasında, doğayla iç içe ama şehre yakın. Tuzla kampüsünün eşsiz coğrafyasında."
+      }
+    },
+    "marquee": {
+      "established": "Est. 1994",
+      "fiveStar": "5 Yıldızlı Akademik Değerlendirme",
+      "modernStay": "Modern Konaklama",
+      "tuzla": "Tuzla · İstanbul",
+      "premiumComfort": "Premium Konfor",
+      "academicExcellence": "Akademik Mükemmellik",
+      "internationalStandards": "Uluslararası Standartlar"
+    },
+    "about": {
+      "eyebrow": "Hakkımızda",
+      "title": "Sabancı Kampüsünde Benzersiz Bir Deneyim.",
+      "p1": "EDU Hotel, Sabancı Üniversitesi'nin 1994'te kuruluşundan bu yana akademisyenlere, araştırmacılara ve kurumsal misafirlere ev sahipliği yapmaktadır.",
+      "p2": "Modern mimarisi ve yeşil kampüs dokusunun içindeki konumuyla, iş ve akademiyi konforla birleştiren eşsiz bir konaklama deneyimi sunuyoruz.",
+      "cta": "Rezervasyon Yap",
+      "stats": {
+        "experience": "Yıllık Deneyim",
+        "rating": "Akademik Puan",
+        "rooms": "Misafir Odası",
+        "satisfaction": "Memnuniyet"
+      }
+    },
+    "contact": {
+      "title": "Bir Sonraki Konaklamanızı Planlayın.",
+      "subtitle": "Rezervasyonunuzu hemen yapın veya daha fazla bilgi için bizimle iletişime geçin.",
+      "cta": "Rezervasyon Yap"
+    },
+    "footer": {
+      "rights": "Sabancı Üniversitesi EDU Hotel. Tüm hakları saklıdır.",
+      "quickLinks": "Hızlı Bağlantılar",
+      "bookStay": "Rezervasyon Yap",
+      "signUp": "Kayıt Ol",
+      "contact": "İletişim"
+    },
+    "logo": {
+      "universityLine": "Üniversitesi"
+    }
+  },
+
   "header": {
     "mySU": "My SU",
     "language": "TR",
@@ -13,7 +98,9 @@
     "dashboard": "Ana Sayfa",
     "notifications": "Bildirimler",
     "profile": "Profilim",
-    "logout": "Çıkış"
+    "logout": "Çıkış",
+    "myReservations": "Rezervasyonlarım",
+    "contact": "İletişim Desteği"
   },
 
   "common": {
@@ -34,6 +121,8 @@
   },
 
   "login": {
+    "welcomeTitle": "Tekrar hoş geldiniz",
+    "welcomeSubtitle": "EDU Hotel hesabınıza giriş yapın",
     "loginWith": "Giriş yöntemi",
     "email": "E-posta",
     "phone": "Telefon Numarası",
@@ -46,6 +135,8 @@
     "loggingIn": "Giriş yapılıyor...",
     "loginButton": "Hesabınıza giriş yapın",
     "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "firstTimePrompt": "İlk defa mı kullanıyorsunuz?",
+    "signupLink": "Kayıt olun",
     "firstTime": "İlk defa mı kullanıyorsunuz? Kayıt olun",
     "errors": {
       "loginFailed": "Giriş başarısız.",
@@ -54,6 +145,10 @@
   },
 
   "signup": {
+    "createTitle": "Hesap oluşturun",
+    "createSubtitle": "EDU Hotel ile başlamak için kayıt olun",
+    "haveAccountPrompt": "Zaten hesabınız var mı?",
+    "loginLink": "Giriş yapın",
     "fullNameLabel": "Ad Soyad",
     "fullNamePlaceholder": "Adınızı ve soyadınızı girin",
     "firstNamePlaceholder": "Ad",
@@ -295,8 +390,8 @@
         "education": "Eğitim"
       },
       "invoiceType": "Fatura Türü",
-      "eventCode": "Etkinlik / Eğitim Kodu",
-      "eventCodePlaceholder": "SAT-KAF veya Eğitim Kodu girin",
+      "eventCode": "Program Kodu",
+      "eventCodePlaceholder": "Size verilen program kodunu girin",
       "explanation": "Açıklama / Gerekçe",
       "explanationPlaceholder": "Özellikle eğitim amaçlı konaklamalar için kalış amacınızı kısaca açıklayınız.",
       "submitButton": "Ön Rezervasyon Talebi Gönder",
@@ -337,7 +432,7 @@
       "noSatInSunOut": "Cumartesi giriş - Pazar çıkış kombinasyonları kabul edilmez.",
       "max30Days": "Rezervasyon en fazla 30 gün ileri tarihli olabilir.",
       "max5Nights": "Kişisel rezervasyonlar 5 ardışık geceyi geçemez.",
-      "codeRequired": "Kurumsal ve Eğitim konaklamaları için etkinlik / eğitim kodu zorunludur.",
+      "codeRequired": "Kurumsal konaklamalar için program kodu zorunludur.",
       "explanationRequired": "Eğitim amaçlı konaklamalar için lütfen bir açıklama giriniz.",
       "tcRequired": "Bireysel faturalama için T.C. Kimlik No zorunludur.",
       "taxRequired": "Kurumsal faturalama için vergi numarası zorunludur.",
@@ -619,6 +714,9 @@
   },
 
   "bookRoom": {
+    "keyPickupTitle": "Oda Kartı Teslim Bilgileri",
+    "keyPickup": "16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.",
+    "identityDocRemove": "Kaldır",
     "checkIn": "Giriş Tarihi",
     "checkOut": "Çıkış Tarihi",
     "checkInTime": "Beklenen Giriş Saati",
@@ -629,9 +727,9 @@
     "additionalGuests": "Ek Misafirler",
     "additionalGuestFirstName": "Misafir {{n}} — Ad",
     "additionalGuestLastName": "Soyad",
-    "eventCode": "Etkinlik / Eğitim Kodu",
-    "eventCodePlaceholder": "ör. CONF-2026-001",
-    "eventCodeHelp": "Bölümünüz veya etkinlik organizatörünüz tarafından verilen kodu girin. Kurumsal ve akademik konaklamalar için zorunludur.",
+    "eventCode": "Program Kodu",
+    "eventCodePlaceholder": "ör. PROG-2026-001",
+    "eventCodeHelp": "Bölümünüz veya organizatörünüz tarafından verilen program kodunu girin. Kurumsal konaklamalar için zorunludur.",
     "eventType": "Konaklama Amacı",
     "eventTypePlaceholder": "Amaç seçin...",
     "priceType": "Fiyat Türü",
@@ -673,7 +771,7 @@
       "guestCount": "Misafir sayısı 1 ile 10 arasında olmalıdır.",
       "guestListIncomplete": "Lütfen tüm misafir isimlerini doldurun.",
       "personalMaxNights": "Bireysel konaklamalar 5 ardışık geceyi geçemez.",
-      "eventCodeRequired": "Bu konaklama türü için etkinlik kodu zorunludur.",
+      "eventCodeRequired": "Bu konaklama türü için program kodu zorunludur.",
       "notesRequired": "Eğitim amaçlı konaklamalar için lütfen açıklama girin.",
       "eventTypeRequired": "Lütfen konaklama amacını seçin.",
       "billingRequired": "Lütfen fatura türünü seçin.",
@@ -681,6 +779,7 @@
       "taxRequired": "Vergi numarası zorunludur.",
       "billingTitleRequired": "Şirket adı zorunludur.",
       "billingAddressRequired": "Fatura adresi zorunludur.",
+      "identityDocRequired": "Lütfen kimlik veya pasaport kopyanızı yükleyin.",
       "consent": "Lütfen şartlar ve koşulları kabul edin.",
       "notLoggedIn": "Giriş yapmanız gerekmektedir."
     },

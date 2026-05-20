@@ -144,40 +144,10 @@ export function Signup() {
         return;
       }
 
-      // Auto-login
-      try {
-        const loginRes = await fetch(`${API_URL}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: contact, password }),
-        });
-
-        const loginData = await loginRes.json();
-
-        if (loginRes.ok) {
-          localStorage.setItem("authToken", loginData.token);
-          if (loginData.user) {
-            localStorage.setItem("user", JSON.stringify(loginData.user));
-            localStorage.setItem("userId", loginData.user.id.toString());
-            localStorage.setItem("userEmail", loginData.user.email ?? "");
-            localStorage.setItem("userName", loginData.user.name ?? "");
-          }
-          setLoading(false);
-          navigate("/main");
-          return;
-        } else {
-          setSuccess(t("signup.success.accountCreated"));
-          setError(loginData.error || null);
-        }
-      } catch (loginErr) {
-        console.error("Auto-login after signup failed:", loginErr);
-        setSuccess(t("signup.success.accountCreated"));
-        setError(t("signup.errors.network"));
-      }
-
       setLoading(false);
       setPassword("");
       setConfirmPassword("");
+      navigate("/login");
     } catch {
       setError(t("signup.errors.network"));
       setLoading(false);
@@ -517,10 +487,10 @@ export function Signup() {
                 letterSpacing: "-0.5px",
               }}
             >
-              Create an account
+              {t("signup.createTitle", "Create an account")}
             </h1>
             <p style={{ fontSize: 14, color: "#9ca3af", margin: "0 0 20px" }}>
-              Sign up to get started with EDU Hotel
+              {t("signup.createSubtitle", "Sign up to get started with EDU Hotel")}
             </p>
           </div>
 
@@ -802,10 +772,10 @@ export function Signup() {
             {/* Link to login */}
             <div style={{ textAlign: "center", marginTop: 4, ...stagger(11) }}>
               <span style={{ fontSize: 13, color: "#9ca3af" }}>
-                Already have an account?{" "}
+                {t("signup.haveAccountPrompt", "Already have an account?")}{" "}
               </span>
               <Link
-                to="/"
+                to="/login"
                 style={{
                   fontSize: 13,
                   color: "#003366",

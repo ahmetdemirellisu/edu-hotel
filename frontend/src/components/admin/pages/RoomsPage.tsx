@@ -340,7 +340,10 @@ export function RoomsPage() {
 
       {/* Title */}
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+          style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+        >
           <MapIcon className="h-5 w-5 text-white" />
         </div>
         <div>
@@ -374,7 +377,8 @@ export function RoomsPage() {
             {!isToday && (
               <button
                 onClick={() => setDate(new Date().toISOString().slice(0, 10))}
-                className="ml-1 px-4 h-10 rounded-xl bg-gradient-to-r from-[#003366] to-[#0055aa] text-white text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                className="ml-1 px-4 h-10 rounded-xl text-white text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                style={{ background: "linear-gradient(to right, #003366, #0055aa)" }}
               >
                 {t("rooms.today", "Today")}
               </button>

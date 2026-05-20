@@ -143,7 +143,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       label: t("pages.dashboard.pendingReservations", "Pending Requests"),
       value: stats?.pendingReservations,
       icon: Clock,
-      gradient: "from-amber-400 to-orange-500",
+      gradient: "linear-gradient(to right, #fbbf24, #f97316)",
       iconBg: "bg-amber-50",
       iconText: "text-amber-600",
       borderColor: "#f59e0b",
@@ -155,7 +155,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       label: t("pages.dashboard.approvedReservations", "Approved"),
       value: stats?.approvedReservations,
       icon: CheckCircle,
-      gradient: "from-emerald-400 to-green-500",
+      gradient: "linear-gradient(to right, #34d399, #22c55e)",
       iconBg: "bg-emerald-50",
       iconText: "text-emerald-600",
       borderColor: "#22c55e",
@@ -167,7 +167,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       label: t("pages.dashboard.guestsStaying", "Guests Staying"),
       value: stats?.guestsStaying,
       icon: Users,
-      gradient: "from-blue-400 to-blue-600",
+      gradient: "linear-gradient(to right, #60a5fa, #2563eb)",
       iconBg: "bg-blue-50",
       iconText: "text-blue-600",
       borderColor: "#3b82f6",
@@ -179,7 +179,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       label: t("pages.dashboard.availableRooms", "Available Rooms"),
       value: stats?.availableRooms,
       icon: Bed,
-      gradient: "from-violet-400 to-violet-600",
+      gradient: "linear-gradient(to right, #a78bfa, #7c3aed)",
       iconBg: "bg-violet-50",
       iconText: "text-violet-600",
       borderColor: "#8b5cf6",
@@ -206,7 +206,10 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       {/* ── Welcome Header ─────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ animation: "dashIn 0.3s ease-out" }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-lg">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+          >
             <LayoutDashboard className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -221,7 +224,8 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         <div className="flex gap-2">
           <button
             onClick={() => onNavigate("reservations")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#003366] to-[#0055aa] text-white text-sm font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150"
+            style={{ background: "linear-gradient(to right, #003366, #0055aa)" }}
           >
             <Plus className="h-4 w-4" />
             {t("pages.dashboard.actions.createReservation", "New Reservation")}
@@ -241,7 +245,10 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               onClick={card.action}
             >
               {/* Gradient accent bar */}
-              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} rounded-t-2xl`} />
+              <div
+                className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
+                style={{ background: card.gradient }}
+              />
 
               <div className="flex items-start justify-between mt-1">
                 <div className="flex-1">

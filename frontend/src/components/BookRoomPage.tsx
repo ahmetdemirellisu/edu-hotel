@@ -38,6 +38,7 @@ import {
   Mail,
   ShieldCheck,
   BanIcon,
+  X,
 } from "lucide-react";
 
 import {
@@ -398,11 +399,9 @@ export function BookRoomPage() {
   const [guestList, setGuestList] = useState<{ firstName: string; lastName: string }[]>([]);
   const [eventCode, setEventCode] = useState("");
   const [eventType, setEventType] = useState("");
-  const [priceType, setPriceType] = useState("");
   const [notes, setNotes] = useState("");
 
-  const showCorporateCode = accommodationTypeUI === "corporate" || accommodationTypeUI === "education";
-  const showPriceType = accommodationTypeUI === "corporate" || accommodationTypeUI === "education";
+  const showCorporateCode = accommodationTypeUI === "corporate";
   const numGuests = parseInt(numberOfGuests) || 1;
 
   const syncGuestList = (n: number) => {
@@ -464,7 +463,7 @@ export function BookRoomPage() {
     if (accommodationTypeUI === "personal" && nights > 5)
       return t("bookRoom.validation.personalMaxNights", "Personal stays cannot exceed 5 consecutive nights.");
     if (showCorporateCode && !eventCode.trim())
-      return t("bookRoom.validation.eventCodeRequired", "Event code is required for this accommodation type.");
+      return t("bookRoom.validation.eventCodeRequired", "Program code is required for this accommodation type.");
     if (accommodationTypeUI === "education" && !notes.trim())
       return t("bookRoom.validation.notesRequired", "Please provide an explanation for educational stays.");
     if (!eventType.trim())
@@ -482,6 +481,8 @@ export function BookRoomPage() {
       if (!billingTitle.trim()) return t("bookRoom.validation.billingTitleRequired", "Company name is required.");
       if (!billingAddress.trim()) return t("bookRoom.validation.billingAddressRequired", "Billing address is required.");
     }
+    if (!identityFile)
+      return t("bookRoom.validation.identityDocRequired", "Please upload a copy of your ID or passport.");
     if (!consentChecked)
       return t("bookRoom.validation.consent", "Please accept the terms and conditions.");
     return null;
@@ -532,7 +533,6 @@ export function BookRoomPage() {
         phone: phone.trim(),
         contactEmail: email.trim(),
         eventType: eventType.trim(),
-        priceType: priceType?.trim() || undefined,
         freeAccommodation: requestFreeAccommodation,
         guestList,
         nationalId: tcKimlikNo?.trim() || undefined,
@@ -559,7 +559,7 @@ export function BookRoomPage() {
       setAccommodationTypeUI(""); setNumberOfGuests("1"); setGuestList([]);
       setFirstName(storedUser.firstName); setLastName(storedUser.lastName);
       setPhone(storedUser.phone); setEmail(storedUser.email);
-      setEventCode(""); setEventType(""); setPriceType(""); setNotes("");
+      setEventCode(""); setEventType(""); setNotes("");
       setBillingTypeUI(""); setTcKimlikNo(""); setTaxNumber(""); setBillingTitle(""); setBillingAddress("");
       setRequestFreeAccommodation(false); setConsentChecked(false); setIdentityFile(null);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1062,16 +1062,16 @@ export function BookRoomPage() {
                       {showCorporateCode && (
                         <div className="space-y-2">
                           <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
-                            {t("bookRoom.eventCode", "Event / Education Code")} <span className="text-red-400 ml-1">*</span>
+                            {t("bookRoom.eventCode", "Program Code")} <span className="text-red-400 ml-1">*</span>
                           </Label>
                           <input
                             value={eventCode}
                             onChange={e => setEventCode(e.target.value)}
-                            placeholder={t("bookRoom.eventCodePlaceholder", "e.g. CONF-2026-001")}
+                            placeholder={t("bookRoom.eventCodePlaceholder", "e.g. PROG-2026-001")}
                             className={`${wi} h-12 px-4`}
                           />
                           <p className="text-[10px] text-white/35 leading-relaxed">
-                            {t("bookRoom.eventCodeHelp", "Enter the code provided by your department or event organizer. Required for corporate and academic bookings.")}
+                            {t("bookRoom.eventCodeHelp", "Enter the program code provided by your department or organizer. Required for corporate bookings.")}
                           </p>
                         </div>
                       )}
@@ -1095,28 +1095,6 @@ export function BookRoomPage() {
                           </SelectContent>
                         </Select>
                       </div>
-
-                      {/* Price type */}
-                      {showPriceType && (
-                        <div className="space-y-2">
-                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
-                            {t("bookRoom.priceType", "Price Type")}
-                          </Label>
-                          <Select value={priceType} onValueChange={setPriceType}>
-                            <SelectTrigger className="h-12 rounded-xl border-white/[0.14] text-white text-sm focus:ring-0 focus:ring-offset-0"
-                              style={{ background: "rgba(255,255,255,0.04)" }}>
-                              <SelectValue placeholder={t("bookRoom.priceTypePlaceholder", "Select price type...")} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["standard", "corporate", "discounted"].map(v => (
-                                <SelectItem key={v} value={v}>
-                                  {t(`bookRoom.priceTypes.${v}`, v.charAt(0).toUpperCase() + v.slice(1))}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
 
                       {/* Notes */}
                       <div className="space-y-2">
@@ -1316,31 +1294,61 @@ export function BookRoomPage() {
                       {/* Identity Document Upload */}
                       <div className="space-y-2 pt-4 border-t border-white/[0.07]">
                         <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
-                          {t("bookRoom.identityDoc", "ID / Passport Upload")}
+                          {t("bookRoom.identityDoc", "ID / Passport Upload")} <span className="text-red-400 ml-1">*</span>
                         </Label>
                         <p className="text-[10px] text-white/35 leading-relaxed">
                           {t("bookRoom.identityDocHelp", "Upload a copy of your Turkish ID (Kimlik) or Passport. Accepted formats: PDF, JPG, PNG (max 5 MB).")}
                         </p>
-                        <label
-                          className="flex items-center justify-center gap-2 w-full h-12 rounded-xl border border-dashed border-white/15 hover:border-[#c9a84c]/50 cursor-pointer transition-all duration-200"
-                          style={{ background: identityFile ? "rgba(201,168,76,0.08)" : "rgba(255,255,255,0.03)" }}
-                        >
-                          <input
-                            type="file"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            className="hidden"
-                            onChange={e => {
-                              const f = e.target.files?.[0];
-                              if (f && f.size > 5 * 1024 * 1024) { alert(t("bookRoom.identityDocTooLarge", "File exceeds 5 MB limit.")); return; }
-                              setIdentityFile(f || null);
-                            }}
-                          />
-                          {identityFile ? (
-                            <span className="text-sm text-[#c9a84c] font-medium truncate px-4">{identityFile.name}</span>
-                          ) : (
+                        {identityFile ? (
+                          <div
+                            className="flex items-center justify-between gap-3 w-full h-12 rounded-xl border border-[#c9a84c]/40 px-4"
+                            style={{ background: "rgba(201,168,76,0.08)" }}
+                          >
+                            <span className="text-sm text-[#c9a84c] font-medium truncate">{identityFile.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => setIdentityFile(null)}
+                              className="text-xs font-bold text-white/55 hover:text-red-400 transition-colors flex items-center gap-1 flex-shrink-0"
+                              aria-label={t("bookRoom.identityDocRemove", "Remove uploaded file")}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              {t("bookRoom.identityDocRemove", "Remove")}
+                            </button>
+                          </div>
+                        ) : (
+                          <label
+                            className="flex items-center justify-center gap-2 w-full h-12 rounded-xl border border-dashed border-white/15 hover:border-[#c9a84c]/50 cursor-pointer transition-all duration-200"
+                            style={{ background: "rgba(255,255,255,0.03)" }}
+                          >
+                            <input
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              className="hidden"
+                              onChange={e => {
+                                const f = e.target.files?.[0];
+                                if (f && f.size > 5 * 1024 * 1024) { alert(t("bookRoom.identityDocTooLarge", "File exceeds 5 MB limit.")); return; }
+                                setIdentityFile(f || null);
+                              }}
+                            />
                             <span className="text-sm text-white/35">{t("bookRoom.identityDocPlaceholder", "Choose file...")}</span>
-                          )}
-                        </label>
+                          </label>
+                        )}
+                      </div>
+
+                      {/* Key pickup instructions */}
+                      <div
+                        className="rounded-2xl p-4 mt-4"
+                        style={{
+                          background: "rgba(201,168,76,0.07)",
+                          border: "1px solid rgba(201,168,76,0.22)",
+                        }}
+                      >
+                        <p className="text-[11px] font-bold text-[#c9a84c] uppercase tracking-[2px] mb-2">
+                          {t("bookRoom.keyPickupTitle", "Key Pickup Instructions")}
+                        </p>
+                        <p className="text-xs text-white/65 leading-relaxed">
+                          {t("bookRoom.keyPickup")}
+                        </p>
                       </div>
 
                       {/* Consent */}

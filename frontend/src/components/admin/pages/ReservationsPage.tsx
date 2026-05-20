@@ -274,7 +274,10 @@ export function ReservationsPage() {
       {/* ── Header ───────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-md">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+            style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+          >
             <CalendarDays className="h-5 w-5 text-white" />
           </div>
           <div>

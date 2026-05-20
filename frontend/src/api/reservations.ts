@@ -204,12 +204,13 @@ export async function rejectReservation(
 
 export async function assignRoom(
   reservationId: number,
-  roomId: number
+  rooms: number | number[]
 ): Promise<Reservation> {
+  const body = Array.isArray(rooms) ? { roomIds: rooms } : { roomId: rooms };
   const res = await adminFetch(`${API_BASE_URL}/reservations/admin/${reservationId}/assign-room`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ roomId }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {

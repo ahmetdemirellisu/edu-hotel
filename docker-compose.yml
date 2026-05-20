@@ -35,6 +35,9 @@ services:
       SMTP_FROM: "EDU HOTEL <${EMAIL_USER:-}>"
       ADMIN_USER: ${ADMIN_USER:-}
       ADMIN_PASS: ${ADMIN_PASS:-}
+    volumes:
+      - ./paymentRecieptsPending:/paymentRecieptsPending
+      - ./paymentRecieptsAprooved:/paymentRecieptsAprooved
     depends_on:
       db:
         condition: service_healthy

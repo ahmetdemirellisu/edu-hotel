@@ -151,7 +151,9 @@ router.post("/approve-payment/:id", async (req, res) => {
             const oldPath = path.join(pendingDir, fileName);
             if (fs.existsSync(oldPath)) {
                 const newPath = path.join(approvedDir, fileName);
-                fs.renameSync(oldPath, newPath);
+                // copy + delete instead of rename — works across mounted volumes
+                fs.copyFileSync(oldPath, newPath);
+                fs.unlinkSync(oldPath);
                 movedFilename = fileName;
                 break;
             }

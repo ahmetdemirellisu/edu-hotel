@@ -67,10 +67,13 @@ export function SettingsPage() {
   const SectionCard = ({ icon: Icon, title, gradient, children }: { icon: any; title: string; gradient: string; children: React.ReactNode }) => (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Gradient bar */}
-      <div className={`h-1 bg-gradient-to-r ${gradient}`} />
+      <div className="h-1" style={{ background: gradient }} />
       <div className="p-6">
         <div className="flex items-center gap-2.5 mb-5">
-          <div className={`w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-r ${gradient}`}>
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{ background: gradient }}
+          >
             <Icon className="h-4 w-4 text-white" />
           </div>
           <h3 className="text-[15px] font-bold text-gray-900">{title}</h3>
@@ -92,7 +95,10 @@ export function SettingsPage() {
 
       {/* ── Page Header ───────────────────────────── */}
       <div className="flex items-center gap-3 sett-card">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center shadow-lg">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+          style={{ background: "linear-gradient(to bottom right, #003366, #0055aa)" }}
+        >
           <Sliders className="h-5 w-5 text-white" />
         </div>
         <div>
@@ -103,7 +109,7 @@ export function SettingsPage() {
 
       {/* ── General Settings ─────────────────────── */}
       <div className="sett-card" style={{ animationDelay: "0.07s" }}>
-        <SectionCard icon={Building} title={t("settings.generalSettings", "General Settings")} gradient="from-blue-500 to-blue-600">
+        <SectionCard icon={Building} title={t("settings.generalSettings", "General Settings")} gradient="linear-gradient(to right, #3b82f6, #2563eb)">
           <div className="space-y-4">
             <InputField
               label={t("settings.hotelName", "Hotel name")}
@@ -134,7 +140,7 @@ export function SettingsPage() {
 
       {/* ── Booking Settings ─────────────────────── */}
       <div className="sett-card" style={{ animationDelay: "0.14s" }}>
-        <SectionCard icon={Calendar} title={t("settings.bookingSettings", "Booking Settings")} gradient="from-violet-500 to-purple-600">
+        <SectionCard icon={Calendar} title={t("settings.bookingSettings", "Booking Settings")} gradient="linear-gradient(to right, #8b5cf6, #9333ea)">
           <div className="mb-2">
             <Toggle
               checked={autoApprove}
@@ -176,11 +182,12 @@ export function SettingsPage() {
       <div className="sett-card flex items-center gap-3" style={{ animationDelay: "0.21s" }}>
         <button
           onClick={handleSave}
-          className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-md hover:shadow-lg transition-all duration-150 hover:-translate-y-0.5 ${
-            saved
-              ? "bg-gradient-to-r from-emerald-500 to-green-600"
-              : "bg-gradient-to-r from-[#003366] to-[#0055aa]"
-          }`}
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-bold shadow-md hover:shadow-lg transition-all duration-150 hover:-translate-y-0.5"
+          style={{
+            background: saved
+              ? "linear-gradient(to right, #10b981, #16a34a)"
+              : "linear-gradient(to right, #003366, #0055aa)",
+          }}
         >
           {saved ? (
             <>

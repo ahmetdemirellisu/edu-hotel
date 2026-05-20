@@ -5,6 +5,7 @@ import { NotificationBell } from "./NotificationBell";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
+import { BANK } from "../config/bank";
 import {
   Select,
   SelectContent,
@@ -190,7 +191,7 @@ export function Payment() {
   };
 
   const copyIban = () => {
-    navigator.clipboard.writeText("TR33 0004 6004 8888 8000 0123 45").then(() => {
+    navigator.clipboard.writeText(BANK.iban).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -579,11 +580,11 @@ export function Payment() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5">{t("payment.bankName")}</p>
-                    <p className="text-slate-800 font-bold text-sm">Akbank T.A.Ş.</p>
+                    <p className="text-slate-800 font-bold text-sm">{BANK.bankName}</p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5">{t("payment.accountHolder")}</p>
-                    <p className="text-slate-800 font-bold text-sm leading-tight">Sabancı University EDU Hotel</p>
+                    <p className="text-slate-800 font-bold text-sm leading-tight">{BANK.accountName}</p>
                   </div>
                 </div>
 
@@ -592,7 +593,7 @@ export function Payment() {
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">{t("payment.iban")}</p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 font-mono text-[14px] font-bold text-[#003366] tracking-wider">
-                      TR33 0004 6004 8888 8000 0123 45
+                      {BANK.iban}
                     </code>
                     <button
                       type="button"
