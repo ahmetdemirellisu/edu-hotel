@@ -197,6 +197,8 @@ ${detailTable([
     row('Guests',         reservation.guests),
     row('Room',           roomEN || 'To be communicated at check-in'),
 ])}
+${heading('Key Pickup Instructions')}
+<p style="margin:0 0 16px;font-size:13px;color:#475569;">For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.</p>
 <p style="margin:0;font-size:13px;color:#475569;">Please present a valid ID upon arrival. If you have any questions before your stay, don't hesitate to reach us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a>.</p>`;
 
                 const bodyTR = `
@@ -211,6 +213,8 @@ ${detailTable([
     row('Misafir sayısı', reservation.guests),
     row('Oda',            roomTR || 'Giriş sırasında bildirilecektir'),
 ])}
+${heading('Oda Kartı Teslim Bilgileri')}
+<p style="margin:0 0 16px;font-size:13px;color:#475569;">16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.</p>
 <p style="margin:0;font-size:13px;color:#475569;">Lütfen giriş sırasında geçerli bir kimlik belgesi ibraz ediniz. Konaklamanız öncesinde herhangi bir sorunuz için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
                 const text = [
@@ -223,6 +227,8 @@ ${detailTable([
                     `Check-out: ${checkOutStr}`,
                     `Guests:    ${reservation.guests}`,
                     `Room:      ${reservation.room ? reservation.room.name : 'To be communicated at check-in'}`,
+                    ``,
+                    `Key pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.`,
                     ``,
                     `Please present a valid ID upon arrival. We look forward to welcoming you!`,
                     ``,
@@ -237,6 +243,8 @@ ${detailTable([
                     `Çıkış:          ${checkOutStr}`,
                     `Misafir sayısı: ${reservation.guests}`,
                     `Oda:            ${reservation.room ? reservation.room.name : 'Giriş sırasında bildirilecektir'}`,
+                    ``,
+                    `Oda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`,
                     ``,
                     `Lütfen giriş sırasında geçerli bir kimlik belgesi ibraz ediniz. Sizi ağırlamaktan mutluluk duyacağız!`,
                 ].join('\n');

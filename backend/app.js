@@ -56,6 +56,7 @@ function serveReceipt(dir) {
 
 app.use('/view-pending',  serveReceipt('paymentRecieptsPending'));
 app.use('/view-approved', serveReceipt('paymentRecieptsAprooved'));
+app.use('/view-identity', serveReceipt('identityDocs'));
 
 // Serving the public folder (CSS, images, etc.) inside the backend folder
 app.use(express.static(path.join(__dirname, 'public')));

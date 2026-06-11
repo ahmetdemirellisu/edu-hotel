@@ -71,6 +71,20 @@ model Reservation {
   identityDoc       String?
   room              Room?             @relation(fields: [roomId], references: [id])
   user              User              @relation(fields: [userId], references: [id])
+  identityDocuments IdentityDocument[]
+}
+
+model IdentityDocument {
+  id            Int         @id @default(autoincrement())
+  reservationId Int
+  guestIndex    Int
+  fileName      String
+  mimeType      String
+  sizeBytes     Int
+  uploadedAt    DateTime    @default(now())
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@unique([reservationId, guestIndex])
 }
 
 model Blacklist {

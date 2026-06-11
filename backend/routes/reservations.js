@@ -310,7 +310,11 @@ router.get("/admin", requireAdmin, async (req, res) => {
         const reservations = await prisma.reservation.findMany({
             where,
             orderBy: { createdAt: "desc" },
-            include: { user: true, room: true },
+            include: {
+                user: true,
+                room: true,
+                identityDocuments: { orderBy: { guestIndex: "asc" } },
+            },
         });
 
         return res.json(reservations);
@@ -471,22 +475,33 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
             return res.status(400).json({ error: `Cannot assign more rooms (${roomIdList.length}) than guests (${reservation.guests}).` });
         }
 
-        // Check each room is available for the reservation's date range
-        const conflicting = await prisma.reservation.findFirst({
+        // Check each room is available for the reservation's date range.
+        // Look at both the singular `roomId` column AND inside other reservations' `roomIds` JSON arrays.
+        const overlapping = await prisma.reservation.findMany({
             where: {
                 status: "APPROVED",
                 id: { not: id },
                 checkIn: { lt: reservation.checkOut },
                 checkOut: { gt: reservation.checkIn },
-                OR: [
-                    { roomId: { in: roomIdList } },
-                ],
             },
-            include: { room: true },
+            select: { id: true, roomId: true, roomIds: true, room: { select: { name: true } } },
         });
-        if (conflicting) {
-            const name = conflicting.room?.name || `#${conflicting.roomId}`;
-            return res.status(400).json({ error: `Room ${name} is already booked for these dates.` });
+        const requested = new Set(roomIdList);
+        for (const other of overlapping) {
+            const otherRoomIds = new Set();
+            if (Number.isInteger(other.roomId)) otherRoomIds.add(other.roomId);
+            if (Array.isArray(other.roomIds)) {
+                for (const r of other.roomIds) {
+                    const n = parseInt(r, 10);
+                    if (Number.isInteger(n)) otherRoomIds.add(n);
+                }
+            }
+            for (const rid of requested) {
+                if (otherRoomIds.has(rid)) {
+                    const name = (other.roomId === rid && other.room?.name) ? other.room.name : `#${rid}`;
+                    return res.status(400).json({ error: `Room ${name} is already booked for these dates.` });
+                }
+            }
         }
 
         const updated = await prisma.reservation.update({
@@ -524,7 +539,9 @@ ${detailTable([
     row(roomLabelEN, roomNames),
     row('Check-in', checkInStr),
     row('Check-out', checkOutStr),
-])}`;
+])}
+${heading('Key Pickup Instructions')}
+<p style="margin:0;font-size:13px;color:#475569;">For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.</p>`;
                 const bodyTR = `
 <p style="margin:0 0 4px;">Sayın <strong>${guestName}</strong>,</p>
 <p style="margin:0 0 20px;color:#475569;">Rezervasyonunuza ${roomIdList.length > 1 ? 'odalar' : 'bir oda'} atanmıştır.</p>
@@ -535,8 +552,10 @@ ${detailTable([
     row(roomLabelTR, roomNames),
     row('Giriş', checkInStr),
     row('Çıkış', checkOutStr),
-])}`;
-                const text = `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.\n---\nSayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.`;
+])}
+${heading('Oda Kartı Teslim Bilgileri')}
+<p style="margin:0;font-size:13px;color:#475569;">16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.</p>`;
+                const text = `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.\n\nKey pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.\n---\nSayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.\n\nOda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`;
                 const html = emailTemplate(bodyEN, bodyTR);
                 sendMailAsync({ to: updated.user.email, subject, text, html });
             }
@@ -768,25 +787,41 @@ ${detailTable([
 const idDocsDir = path.join(__dirname, "../../identityDocs");
 if (!fs.existsSync(idDocsDir)) fs.mkdirSync(idDocsDir, { recursive: true });
 
-const idStorage = multer.diskStorage({
+const EXT_MAP = { "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png" };
+const ID_ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/png"];
+
+function parseGuestIndex(req) {
+    const raw = req.body?.guestIndex ?? req.query?.guestIndex;
+    const n = parseInt(raw, 10);
+    return Number.isInteger(n) && n >= 0 ? n : null;
+}
+
+// Per-guest upload: file lives at `${reservationId}_guest${guestIndex+1}_id.${ext}`
+// (1-indexed in the filename to match the UI labels — DB stores guestIndex 0-indexed.)
+const perGuestStorage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, idDocsDir),
     filename: (req, file, cb) => {
-        const extMap = { "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png" };
-        const ext = extMap[file.mimetype] || ".bin";
-        cb(null, `${req.params.reservationId}_id${ext}`);
+        const ext = EXT_MAP[file.mimetype] || ".bin";
+        const guestIndex = parseGuestIndex(req);
+        const suffix = guestIndex === null ? "id" : `guest${guestIndex + 1}_id`;
+        cb(null, `${req.params.reservationId}_${suffix}${ext}`);
     },
 });
 
 const idUpload = multer({
-    storage: idStorage,
+    storage: perGuestStorage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        const allowed = ["application/pdf", "image/jpeg", "image/png"];
-        if (!allowed.includes(file.mimetype)) return cb(new Error("Only PDF, JPG, PNG files are allowed."));
+        if (!ID_ALLOWED_MIME.includes(file.mimetype)) return cb(new Error("Only PDF, JPG, PNG files are allowed."));
         cb(null, true);
     },
 });
 
+// POST /reservations/upload-identity/:reservationId
+// Body (multipart): file field `identityDoc`, plus `guestIndex` (0-based) in form data or query.
+// Upserts an IdentityDocument row for that (reservation, guestIndex).
+// Back-compat: if guestIndex is omitted, behaves like the legacy single-doc upload and writes
+// to Reservation.identityDoc (no new IdentityDocument row).
 router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("identityDoc"), async (req, res) => {
     try {
         const reservationId = parseInt(req.params.reservationId, 10);
@@ -796,15 +831,105 @@ router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("ide
         if (!reservation) return res.status(404).json({ error: "Reservation not found." });
         if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
 
-        await prisma.reservation.update({
-            where: { id: reservationId },
-            data: { identityDoc: req.file.filename },
+        const guestIndex = parseGuestIndex(req);
+
+        if (guestIndex === null) {
+            // Legacy single-doc path
+            await prisma.reservation.update({
+                where: { id: reservationId },
+                data: { identityDoc: req.file.filename },
+            });
+            return res.json({ message: "Identity document uploaded.", filename: req.file.filename, legacy: true });
+        }
+
+        if (guestIndex >= reservation.guests) {
+            return res.status(400).json({ error: `guestIndex ${guestIndex} exceeds reservation guest count (${reservation.guests}).` });
+        }
+
+        // Upsert by (reservationId, guestIndex)
+        const doc = await prisma.identityDocument.upsert({
+            where: {
+                reservationId_guestIndex: { reservationId, guestIndex },
+            },
+            create: {
+                reservationId,
+                guestIndex,
+                fileName: req.file.filename,
+                mimeType: req.file.mimetype,
+                sizeBytes: req.file.size,
+            },
+            update: {
+                fileName: req.file.filename,
+                mimeType: req.file.mimetype,
+                sizeBytes: req.file.size,
+                uploadedAt: new Date(),
+            },
         });
 
-        res.json({ message: "Identity document uploaded successfully.", filename: req.file.filename });
+        res.json({ message: "Identity document uploaded.", document: doc });
     } catch (err) {
         console.error("Identity doc upload error:", err);
         res.status(400).json({ error: err.message || "Upload failed." });
+    }
+});
+
+// DELETE /reservations/upload-identity/:reservationId/:guestIndex
+// Removes a single per-guest document (DB row + file on disk).
+router.delete("/upload-identity/:reservationId/:guestIndex", requireAuth, async (req, res) => {
+    try {
+        const reservationId = parseInt(req.params.reservationId, 10);
+        const guestIndex = parseInt(req.params.guestIndex, 10);
+        if (!Number.isInteger(reservationId) || !Number.isInteger(guestIndex) || guestIndex < 0) {
+            return res.status(400).json({ error: "Invalid reservationId or guestIndex." });
+        }
+
+        const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
+        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
+        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
+
+        const existing = await prisma.identityDocument.findUnique({
+            where: { reservationId_guestIndex: { reservationId, guestIndex } },
+        });
+        if (!existing) return res.status(404).json({ error: "Document not found." });
+
+        // Remove the file on disk (best-effort; orphaned files are harmless)
+        try {
+            const filepath = path.join(idDocsDir, existing.fileName);
+            if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
+        } catch (e) {
+            console.warn("Failed to unlink identity doc file:", e.message);
+        }
+
+        await prisma.identityDocument.delete({
+            where: { reservationId_guestIndex: { reservationId, guestIndex } },
+        });
+
+        res.json({ message: "Document deleted." });
+    } catch (err) {
+        console.error("Identity doc delete error:", err);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+// GET /reservations/:reservationId/identity-documents
+// Lists per-guest documents. Allowed for the reservation owner or admin (via separate /admin/... route below).
+router.get("/:reservationId/identity-documents", requireAuth, async (req, res) => {
+    try {
+        const reservationId = parseInt(req.params.reservationId, 10);
+        if (!Number.isInteger(reservationId)) return res.status(400).json({ error: "Invalid reservationId." });
+
+        const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
+        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
+        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
+
+        const docs = await prisma.identityDocument.findMany({
+            where: { reservationId },
+            orderBy: { guestIndex: "asc" },
+        });
+        res.json({ documents: docs, legacyIdentityDoc: reservation.identityDoc || null });
+    } catch (err) {
+        console.error("Identity doc list error:", err);
+        res.status(500).json({ error: "Internal server error." });
     }
 });
 

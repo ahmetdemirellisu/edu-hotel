@@ -75,9 +75,22 @@ export interface ReservationPayload {
  * Reservation object returned from backend.
  * Keep it aligned with schema.prisma fields.
  */
+export interface IdentityDocumentRow {
+  id: number;
+  reservationId: number;
+  guestIndex: number;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedAt: string;
+}
+
 export interface Reservation extends ReservationPayload {
   id: number;
   roomId: number | null;
+  roomIds?: number[] | null;
+  identityDoc?: string | null;          // legacy single-doc field (pre-Round 3 reservations)
+  identityDocuments?: IdentityDocumentRow[];
   status: ReservationStatus;
   paymentStatus: PaymentStatus;
   price?: number | null;

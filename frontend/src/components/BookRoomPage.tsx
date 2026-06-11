@@ -422,7 +422,48 @@ export function BookRoomPage() {
   const [billingAddress, setBillingAddress] = useState("");
   const [requestFreeAccommodation, setRequestFreeAccommodation] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [identityFile, setIdentityFile] = useState<File | null>(null);
+  const [identityFiles, setIdentityFiles] = useState<(File | null)[]>([null]);
+
+  // Keep identityFiles array aligned with numGuests. If reducing AND files would be dropped,
+  // require confirmation; if declined, restore the previous guest count.
+  const syncIdentityFiles = (newCount: number, prevCount: number): boolean => {
+    if (newCount >= prevCount) {
+      setIdentityFiles(prev => {
+        const next = [...prev];
+        while (next.length < newCount) next.push(null);
+        return next.slice(0, newCount);
+      });
+      return true;
+    }
+    // Reducing — check if any files past the new boundary would be dropped
+    const dropped = identityFiles.slice(newCount).filter(Boolean) as File[];
+    if (dropped.length > 0) {
+      const indices = identityFiles
+        .map((f, i) => (f && i >= newCount ? i + 1 : null))
+        .filter((n): n is number => n !== null)
+        .join(", ");
+      const ok = window.confirm(
+        t(
+          "bookRoom.identityDoc.discardConfirm",
+          "Reducing to {{n}} guest(s) will discard the uploaded document(s) for Guest {{indices}}. Continue?",
+          { n: newCount, indices }
+        )
+      );
+      if (!ok) return false;
+    }
+    setIdentityFiles(prev => prev.slice(0, newCount));
+    return true;
+  };
+
+  const setGuestCount = (n: number) => {
+    const clamped = Math.max(1, Math.min(10, n));
+    const prev = numGuests;
+    if (clamped === prev) return;
+    const ok = syncIdentityFiles(clamped, prev);
+    if (!ok) return;
+    setNumberOfGuests(String(clamped));
+    syncGuestList(clamped);
+  };
 
   // ���─ Submit state ───────────────────────────────────────
   const [loading, setLoading] = useState(false);
@@ -481,8 +522,15 @@ export function BookRoomPage() {
       if (!billingTitle.trim()) return t("bookRoom.validation.billingTitleRequired", "Company name is required.");
       if (!billingAddress.trim()) return t("bookRoom.validation.billingAddressRequired", "Billing address is required.");
     }
-    if (!identityFile)
-      return t("bookRoom.validation.identityDocRequired", "Please upload a copy of your ID or passport.");
+    for (let i = 0; i < numGuests; i++) {
+      if (!identityFiles[i]) {
+        return t(
+          "bookRoom.validation.identityDocRequiredFor",
+          "Please upload an ID or passport for Guest {{n}}.",
+          { n: i + 1 }
+        );
+      }
+    }
     if (!consentChecked)
       return t("bookRoom.validation.consent", "Please accept the terms and conditions.");
     return null;
@@ -541,16 +589,29 @@ export function BookRoomPage() {
         billingAddress: billingAddress?.trim() || undefined,
         note: notes?.trim() || undefined,
       });
-      // Upload identity document if provided (fire-and-forget)
-      if (identityFile && created?.id) {
-        const fd = new FormData();
-        fd.append("identityDoc", identityFile);
+      // Upload per-guest identity documents (sequential to keep order deterministic)
+      if (created?.id) {
         const token = localStorage.getItem("authToken");
-        fetch(`/ehp/api/reservations/upload-identity/${created.id}`, {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: fd,
-        }).catch(err => console.error("Identity doc upload failed:", err));
+        for (let i = 0; i < identityFiles.length; i++) {
+          const file = identityFiles[i];
+          if (!file) continue;
+          const fd = new FormData();
+          fd.append("identityDoc", file);
+          fd.append("guestIndex", String(i));
+          try {
+            const res = await fetch(`/ehp/api/reservations/upload-identity/${created.id}`, {
+              method: "POST",
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              body: fd,
+            });
+            if (!res.ok) {
+              const errBody = await res.json().catch(() => ({}));
+              console.error(`Identity doc upload failed for guest ${i + 1}:`, errBody?.error || res.statusText);
+            }
+          } catch (uploadErr) {
+            console.error(`Identity doc upload failed for guest ${i + 1}:`, uploadErr);
+          }
+        }
       }
       setSuccessMessage(t("bookRoom.successMessage", "Your reservation has been submitted! The reception will review your request and assign you a room."));
       // Reset
@@ -561,7 +622,7 @@ export function BookRoomPage() {
       setPhone(storedUser.phone); setEmail(storedUser.email);
       setEventCode(""); setEventType(""); setNotes("");
       setBillingTypeUI(""); setTcKimlikNo(""); setTaxNumber(""); setBillingTitle(""); setBillingAddress("");
-      setRequestFreeAccommodation(false); setConsentChecked(false); setIdentityFile(null);
+      setRequestFreeAccommodation(false); setConsentChecked(false); setIdentityFiles([null]);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
@@ -976,7 +1037,7 @@ export function BookRoomPage() {
                             <button
                               key={n}
                               type="button"
-                              onClick={() => { setNumberOfGuests(String(n)); syncGuestList(n); }}
+                              onClick={() => setGuestCount(n)}
                               className="w-11 h-11 rounded-xl text-sm font-bold transition-all duration-200"
                               style={{
                                 background: numGuests === n ? "rgba(201,168,76,0.13)" : "rgba(255,255,255,0.05)",
@@ -992,7 +1053,7 @@ export function BookRoomPage() {
                           {numGuests <= 6 ? (
                             <button
                               type="button"
-                              onClick={() => { setNumberOfGuests("7"); syncGuestList(7); }}
+                              onClick={() => setGuestCount(7)}
                               className="px-3 h-11 rounded-xl text-xs font-bold transition-all duration-200"
                               style={{
                                 background: "rgba(255,255,255,0.05)",
@@ -1005,7 +1066,7 @@ export function BookRoomPage() {
                               type="number"
                               min="7" max="10"
                               value={numberOfGuests}
-                              onChange={e => { setNumberOfGuests(e.target.value); syncGuestList(parseInt(e.target.value) || 7); }}
+                              onChange={e => setGuestCount(parseInt(e.target.value) || 7)}
                               className="wiz-input w-16 h-11 rounded-xl text-sm text-center"
                             />
                           )}
@@ -1291,48 +1352,84 @@ export function BookRoomPage() {
                         </span>
                       </label>
 
-                      {/* Identity Document Upload */}
-                      <div className="space-y-2 pt-4 border-t border-white/[0.07]">
+                      {/* Identity Document Upload (per guest) */}
+                      <div className="space-y-3 pt-4 border-t border-white/[0.07]">
                         <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
                           {t("bookRoom.identityDoc", "ID / Passport Upload")} <span className="text-red-400 ml-1">*</span>
                         </Label>
                         <p className="text-[10px] text-white/35 leading-relaxed">
-                          {t("bookRoom.identityDocHelp", "Upload a copy of your Turkish ID (Kimlik) or Passport. Accepted formats: PDF, JPG, PNG (max 5 MB).")}
+                          {t(
+                            "bookRoom.identityDocHelpPerGuest",
+                            "Upload a copy of each guest's Turkish ID (Kimlik) or Passport. Accepted formats: PDF, JPG, PNG (max 5 MB)."
+                          )}
                         </p>
-                        {identityFile ? (
-                          <div
-                            className="flex items-center justify-between gap-3 w-full h-12 rounded-xl border border-[#c9a84c]/40 px-4"
-                            style={{ background: "rgba(201,168,76,0.08)" }}
-                          >
-                            <span className="text-sm text-[#c9a84c] font-medium truncate">{identityFile.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => setIdentityFile(null)}
-                              className="text-xs font-bold text-white/55 hover:text-red-400 transition-colors flex items-center gap-1 flex-shrink-0"
-                              aria-label={t("bookRoom.identityDocRemove", "Remove uploaded file")}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                              {t("bookRoom.identityDocRemove", "Remove")}
-                            </button>
-                          </div>
-                        ) : (
-                          <label
-                            className="flex items-center justify-center gap-2 w-full h-12 rounded-xl border border-dashed border-white/15 hover:border-[#c9a84c]/50 cursor-pointer transition-all duration-200"
-                            style={{ background: "rgba(255,255,255,0.03)" }}
-                          >
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={e => {
-                                const f = e.target.files?.[0];
-                                if (f && f.size > 5 * 1024 * 1024) { alert(t("bookRoom.identityDocTooLarge", "File exceeds 5 MB limit.")); return; }
-                                setIdentityFile(f || null);
-                              }}
-                            />
-                            <span className="text-sm text-white/35">{t("bookRoom.identityDocPlaceholder", "Choose file...")}</span>
-                          </label>
-                        )}
+
+                        {Array.from({ length: numGuests }).map((_, i) => {
+                          const file = identityFiles[i] || null;
+                          // Resolve label: Guest 1 = primary; 2..N from guestList[i-1] if present
+                          const personFirst = i === 0
+                            ? firstName.trim()
+                            : (guestList[i - 1]?.firstName || "").trim();
+                          const personLast = i === 0
+                            ? lastName.trim()
+                            : (guestList[i - 1]?.lastName || "").trim();
+                          const personName = `${personFirst} ${personLast}`.trim();
+                          const slotLabel = currentLang === "TR"
+                            ? `${i + 1}. ${t("bookRoom.identityDoc.guestLabel", { defaultValue: "Misafir" })}`
+                            : `${t("bookRoom.identityDoc.guestLabel", { defaultValue: "Guest" })} ${i + 1}`;
+                          const fullLabel = personName
+                            ? `${slotLabel} — ${personName}`
+                            : slotLabel;
+
+                          return (
+                            <div key={i} className="space-y-1.5">
+                              <p className="text-[10px] font-bold text-white/55 uppercase tracking-[1.5px]">
+                                {fullLabel}
+                              </p>
+                              {file ? (
+                                <div
+                                  className="flex items-center justify-between gap-3 w-full h-12 rounded-xl border border-[#c9a84c]/40 px-4"
+                                  style={{ background: "rgba(201,168,76,0.08)" }}
+                                >
+                                  <span className="text-sm text-[#c9a84c] font-medium truncate">{file.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setIdentityFiles(prev => prev.map((f, j) => (j === i ? null : f)))
+                                    }
+                                    className="text-xs font-bold text-white/55 hover:text-red-400 transition-colors flex items-center gap-1 flex-shrink-0"
+                                    aria-label={t("bookRoom.identityDocRemove", "Remove uploaded file")}
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                    {t("bookRoom.identityDocRemove", "Remove")}
+                                  </button>
+                                </div>
+                              ) : (
+                                <label
+                                  className="flex items-center justify-center gap-2 w-full h-12 rounded-xl border border-dashed border-white/15 hover:border-[#c9a84c]/50 cursor-pointer transition-all duration-200"
+                                  style={{ background: "rgba(255,255,255,0.03)" }}
+                                >
+                                  <input
+                                    type="file"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    className="hidden"
+                                    onChange={e => {
+                                      const f = e.target.files?.[0];
+                                      if (f && f.size > 5 * 1024 * 1024) {
+                                        alert(t("bookRoom.identityDocTooLarge", "File exceeds 5 MB limit."));
+                                        return;
+                                      }
+                                      setIdentityFiles(prev => prev.map((cur, j) => (j === i ? (f || null) : cur)));
+                                    }}
+                                  />
+                                  <span className="text-sm text-white/35">
+                                    {t("bookRoom.identityDocPlaceholder", "Choose file...")}
+                                  </span>
+                                </label>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
 
                       {/* Key pickup instructions */}
