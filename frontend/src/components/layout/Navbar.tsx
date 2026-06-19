@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { SabanciLogo } from "../SabanciLogo";
 import { useState, useEffect, useRef } from "react";
 import {
   Globe,
@@ -131,13 +132,7 @@ export function Navbar() {
 
           {/* Left: Sabancı Logo Branding */}
           <div className="flex items-center gap-4">
-            <div
-              className="border border-[#c9a84c]/60 px-3 py-1.5 rounded cursor-pointer transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_12px_rgba(201,168,76,0.25)]"
-              style={{ background: "rgba(201,168,76,0.06)" }}
-            >
-              <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-              <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">Üniversitesi</div>
-            </div>
+            <SabanciLogo size="sm" />
           </div>
 
           {/* Center: Main Title (Absolute Centered) */}

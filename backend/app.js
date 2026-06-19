@@ -38,6 +38,8 @@ app.use("/blacklist", require("./routes/blacklist"));
 app.use("/users", usersRouter);
 app.use("/rooms", roomsRouter);
 app.use("/notifications", require("./routes/notifications"));
+app.use("/concierge", require("./routes/concierge"));
+app.use("/settings", require("./routes/settings"));
 
 // --- 3. STATIC FILE SERVING ---
 const rootDir = path.join(__dirname, '..');

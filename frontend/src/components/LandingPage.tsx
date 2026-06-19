@@ -5,6 +5,7 @@ import {
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TextReveal } from "./ui/text-reveal";
+import { SabanciLogo } from "./SabanciLogo";
 import campusBg from "@/assets/campus.png";
 import {
   Star, Wifi, Coffee, BookOpen, Building2, MapPin,
@@ -181,13 +182,7 @@ export function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div
-                className="border px-3 py-1.5 rounded-lg transition-all duration-300 group-hover:border-[#c9a84c] group-hover:shadow-[0_0_14px_rgba(201,168,76,0.25)]"
-                style={{ borderColor: "rgba(201,168,76,0.5)", background: "rgba(201,168,76,0.07)" }}
-              >
-                <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                <div className="text-[10px] text-[#c9a84c]/70 leading-tight">{t("landing.logo.universityLine")}</div>
-              </div>
+              <SabanciLogo size="sm" />
               <div className="hidden sm:block w-px h-8" style={{ background: "rgba(255,255,255,0.15)" }} />
               <span
                 className="hidden sm:block text-white font-light tracking-[6px] uppercase text-base"
@@ -692,13 +687,7 @@ export function LandingPage() {
             {/* Column 1 — Brand */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="border px-3 py-1.5 rounded-lg"
-                  style={{ borderColor: "rgba(201,168,76,0.4)", background: "rgba(201,168,76,0.06)" }}
-                >
-                  <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                  <div className="text-[10px] text-[#c9a84c]/60 leading-tight">{t("landing.logo.universityLine")}</div>
-                </div>
+                <SabanciLogo size="sm" />
                 <span
                   className="text-white font-light tracking-[5px] uppercase text-sm"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}

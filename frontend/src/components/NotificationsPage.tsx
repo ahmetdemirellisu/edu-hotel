@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { userFetch } from "../api/userFetch";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -10,12 +10,14 @@ import {
   User,
   LayoutGrid,
   CheckCircle2,
+  CheckCheck,
   AlertCircle,
   XCircle,
   Calendar,
   Info,
   ChevronRight,
 } from "lucide-react";
+import { loadSeenIds, markSeen, markManySeen, subscribeSeenChanges } from "../lib/notificationsSeen";
 import {
   Select as UISelect,
   SelectContent,
@@ -24,6 +26,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { NotificationBell } from "./NotificationBell";
+import { SabanciLogo } from "./SabanciLogo";
 
 /* ─── Inject animation styles ───────────────────────── */
 if (!document.getElementById("notif-anim")) {
@@ -101,10 +104,17 @@ export function NotificationsPage() {
   const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
   const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
+
+  useEffect(() => {
+    if (!userId || isNaN(userId)) return;
+    setSeenIds(loadSeenIds(userId));
+    const unsub = subscribeSeenChanges(userId, () => setSeenIds(loadSeenIds(userId)));
+    return unsub;
+  }, [userId]);
 
   useEffect(() => {
     (async () => {
@@ -114,7 +124,6 @@ export function NotificationsPage() {
         if (res.ok) {
           const data = await res.json();
           setNotifications(data.notifications || []);
-          setUnreadCount(data.unreadCount || 0);
         }
       } catch (err) {
         console.error("Failed to load notifications:", err);
@@ -124,7 +133,14 @@ export function NotificationsPage() {
     })();
   }, [userId]);
 
-  const filtered = notifications.filter(n => {
+  // Apply local seen overrides; everything downstream uses `effectiveRead`.
+  const effective = useMemo(
+    () => notifications.map(n => ({ ...n, read: n.read || seenIds.has(n.id) })),
+    [notifications, seenIds]
+  );
+  const unreadCount = useMemo(() => effective.filter(n => !n.read).length, [effective]);
+
+  const filtered = effective.filter(n => {
     const typeMatch = filterType === "all" || n.type === filterType;
     const readMatch =
       readFilter === "all"
@@ -134,6 +150,17 @@ export function NotificationsPage() {
         : n.read;
     return typeMatch && readMatch;
   });
+
+  const handleNotificationClick = (n: Notification) => {
+    if (!userId || isNaN(userId)) return;
+    if (!seenIds.has(n.id)) markSeen(userId, n.id);
+  };
+
+  const handleMarkAllRead = () => {
+    if (!userId || isNaN(userId)) return;
+    const unreadIds = notifications.filter(n => !n.read && !seenIds.has(n.id)).map(n => n.id);
+    if (unreadIds.length > 0) markManySeen(userId, unreadIds);
+  };
 
   const filterTabs = [
     { key: "all",      label: t("notifications.filter.all",      "All") },
@@ -172,13 +199,7 @@ export function NotificationsPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <div
-                  className="border border-[#c9a84c]/55 px-3 py-1.5 rounded transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_14px_rgba(201,168,76,0.2)]"
-                  style={{ background: "rgba(201,168,76,0.07)" }}
-                >
-                  <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                  <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
-                </div>
+                <SabanciLogo size="sm" />
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
@@ -228,8 +249,8 @@ export function NotificationsPage() {
       {/* ═══ MAIN ═════════════════════════════════════════ */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 
-        {/* Read/Unread filter tabs */}
-        <div className="mb-4">
+        {/* Read/Unread filter tabs + Mark all as read */}
+        <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
           <div
             className="inline-flex items-center gap-1 bg-white rounded-2xl border border-slate-100 p-1.5 shadow-sm"
             style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
@@ -260,6 +281,18 @@ export function NotificationsPage() {
               </button>
             ))}
           </div>
+
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:shadow-md"
+              style={{ background: "linear-gradient(135deg, #003366 0%, #0052a3 100%)" }}
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              {t("notifications.markAllRead", "Mark all as read")}
+            </button>
+          )}
         </div>
 
         {/* Type filter tabs */}
@@ -364,6 +397,7 @@ export function NotificationsPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -24 }}
                     transition={{ duration: 0.3, delay: idx * 0.04, ease: "easeOut" }}
+                    onClick={() => handleNotificationClick(n)}
                     className="group relative bg-white rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg hover:translate-x-0.5"
                     style={{
                       boxShadow: n.read

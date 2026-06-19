@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Calendar,
+  CalendarPlus,
   Bed,
   Users,
   CreditCard,
@@ -23,6 +24,7 @@ import { useTranslation } from "react-i18next";
 
 import { DashboardPage } from "./pages/DashboardPage";
 import { ReservationsPage } from "./pages/ReservationsPage";
+import { CreateReservationPage } from "./pages/CreateReservationPage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { RoomsPage } from "./pages/RoomsPage";
 import { GuestsPage } from "./pages/GuestsPage";
@@ -51,6 +53,7 @@ const _style = document.getElementById("admin-anim") ?? (() => {
 type PageType =
   | "dashboard"
   | "reservations"
+  | "create-reservation"
   | "calendar"
   | "rooms"
   | "guests"
@@ -91,6 +94,7 @@ export function AdminDashboard() {
       items: [
         { id: "dashboard" as PageType, label: t("menu.dashboard"), icon: LayoutDashboard },
         { id: "reservations" as PageType, label: t("menu.reservations"), icon: Calendar, badge: null },
+        { id: "create-reservation" as PageType, label: t("menu.createReservation", { defaultValue: "New Reservation" }), icon: CalendarPlus },
         { id: "calendar" as PageType, label: t("menu.calendar"), icon: Calendar },
       ],
     },
@@ -116,6 +120,7 @@ export function AdminDashboard() {
   const pageTitles: Record<PageType, string> = {
     dashboard: t("pages.dashboard.title"),
     reservations: t("pages.reservations.title", "Reservations"),
+    "create-reservation": t("pages.createReservation.title", { defaultValue: "Create Reservation" }),
     calendar: t("pages.calendar.title", "Calendar"),
     rooms: t("pages.rooms.title", "Rooms"),
     guests: t("pages.guests.title", "Guests"),
@@ -130,6 +135,7 @@ export function AdminDashboard() {
   const pageDescriptions: Record<PageType, string> = {
     dashboard: t("pageDescriptions.dashboard", "Overview of hotel operations and key metrics"),
     reservations: t("pageDescriptions.reservations", "Manage reservation requests, approvals, and assignments"),
+    "create-reservation": t("pageDescriptions.createReservation", { defaultValue: "Add a reservation for yourself or for a special guest." }),
     calendar: t("pageDescriptions.calendar", "Monthly room occupancy and booking timeline"),
     rooms: t("pageDescriptions.rooms", "Room inventory, status, and floor plan management"),
     guests: t("pageDescriptions.guests", "Guest profiles, history, and blacklist management"),
@@ -377,6 +383,7 @@ export function AdminDashboard() {
           <div className="p-4 sm:p-6 lg:p-8" style={{ animation: "adminFadeIn 0.3s ease-out" }} key={activePage}>
             {activePage === "dashboard" && <DashboardPage onNavigate={(page) => setActivePage(page as PageType)} />}
             {activePage === "reservations" && <ReservationsPage />}
+            {activePage === "create-reservation" && <CreateReservationPage />}
             {activePage === "calendar" && <CalendarPage />}
             {activePage === "rooms" && <RoomsPage />}
             {activePage === "guests" && <GuestsPage />}

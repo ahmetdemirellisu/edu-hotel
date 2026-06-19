@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { SabanciLogo } from "./SabanciLogo";
+import { PhoneInput } from "./ui/PhoneInput";
+import { fetchPublicSettings } from "../api/settings";
 import { format, parseISO } from "date-fns";
 
 import { Footer } from "./layout/Footer";
@@ -386,6 +389,12 @@ export function BookRoomPage() {
   // ── Step 1 state ───────────────────────────────────────
   const [checkInDate, setCheckInDate] = useState("");
   const [checkInTime, setCheckInTime] = useState("14:00");
+  // Update the default check-in time from admin settings once loaded.
+  useEffect(() => {
+    fetchPublicSettings()
+      .then((s) => setCheckInTime((cur) => (cur === "14:00" ? s.checkInTime : cur)))
+      .catch(() => {});
+  }, []);
   const [checkOutDate, setCheckOutDate] = useState("");
   const nights = useMemo(() => daysBetween(checkInDate, checkOutDate), [checkInDate, checkOutDate]);
 
@@ -686,13 +695,7 @@ export function BookRoomPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <div
-                  className="border border-[#c9a84c]/55 px-3 py-1.5 rounded transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_14px_rgba(201,168,76,0.2)]"
-                  style={{ background: "rgba(201,168,76,0.07)" }}
-                >
-                  <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                  <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
-                </div>
+                <SabanciLogo size="sm" />
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
@@ -1088,9 +1091,14 @@ export function BookRoomPage() {
                           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                             placeholder={t("login.email", "Email")}
                             className={`${wi} h-12 px-4`} />
-                          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                          <PhoneInput
+                            value={phone}
+                            onChange={setPhone}
                             placeholder={t("account.profile.phone", "Phone")}
-                            className={`${wi} h-12 px-4`} />
+                            className="w-full"
+                            triggerClassName={`wiz-input flex items-center gap-2 h-12 px-3 rounded-l-xl rounded-r-none text-sm`}
+                            inputClassName={`${wi} h-12 px-4 rounded-l-none border-l-0`}
+                          />
                         </div>
                       </div>
 

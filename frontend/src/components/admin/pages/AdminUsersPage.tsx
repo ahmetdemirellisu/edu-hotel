@@ -5,12 +5,26 @@ import { useTranslation } from "react-i18next";
 import { adminFetch } from "../../../api/adminFetch";
 
 type AdminUser = {
-  id: number;
+  id: number | string;
   name: string | null;
   email: string;
   role: string;
   createdAt: string;
   userType: string;
+  isSystem?: boolean; // synthetic env-based super admin row
+};
+
+// The primary admin account is configured via backend env vars (ADMIN_USER /
+// ADMIN_PASS), so it has no row in the User table. We render it as a synthetic
+// pinned row at the top so the page always shows the live super admin.
+const SYSTEM_ADMIN: AdminUser = {
+  id: "system",
+  name: "Super Admin",
+  email: "system account",
+  role: "ADMIN",
+  createdAt: "",
+  userType: "SYSTEM",
+  isSystem: true,
 };
 
 export function AdminUsersPage() {
@@ -22,15 +36,12 @@ export function AdminUsersPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await adminFetch("/ehp/api/users/search?query=&role=ADMIN,HOTEL_STAFF");
-        if (res.ok) {
-          const data = await res.json();
-          setUsers(data);
-        } else {
-          setUsers([]);
-        }
+        const res = await adminFetch("/ehp/api/users/search?role=ADMIN,HOTEL_STAFF");
+        const dbUsers: AdminUser[] = res.ok ? await res.json() : [];
+        // Pin the env-based super admin at the top, then DB users.
+        setUsers([SYSTEM_ADMIN, ...dbUsers]);
       } catch {
-        setUsers([]);
+        setUsers([SYSTEM_ADMIN]);
       } finally { setLoading(false); }
     })();
   }, []);
@@ -94,11 +105,11 @@ export function AdminUsersPage() {
             <>
               <div className="flex items-center gap-1.5 bg-white border border-violet-100 shadow-sm rounded-xl px-3.5 py-2">
                 <Crown className="h-3.5 w-3.5 text-violet-500" />
-                <span className="text-xs font-semibold text-gray-600">{adminCount} admin{adminCount !== 1 ? "s" : ""}</span>
+                <span className="text-xs font-semibold text-gray-600">{t("adminUsers.adminCount", { count: adminCount, defaultValue: "{{count}} admin" })}</span>
               </div>
               <div className="flex items-center gap-1.5 bg-white border border-blue-100 shadow-sm rounded-xl px-3.5 py-2">
                 <UserCog className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-xs font-semibold text-gray-600">{staffCount} staff</span>
+                <span className="text-xs font-semibold text-gray-600">{staffCount} {t("adminUsers.staffBadge", "staff")}</span>
               </div>
             </>
           )}
@@ -200,17 +211,25 @@ export function AdminUsersPage() {
                       <RoleIcon className="h-3 w-3" />
                       {roleCfg.label}
                     </span>
-                    <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
-                      {user.userType}
-                    </span>
+                    {user.isSystem ? (
+                      <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        {t("adminUsers.systemBadge", "System")}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
+                        {user.userType}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Member since */}
+                  {/* Member since / system marker */}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
                     <span className="text-[11px] text-gray-400 font-medium">
-                      Member since {formatDate(user.createdAt)}
+                      {user.isSystem
+                        ? t("adminUsers.envBased", "Configured in backend .env")
+                        : t("adminUsers.memberSince", "Member since {{date}}", { date: formatDate(user.createdAt) })}
                     </span>
-                    <span className="text-[10px] font-mono text-gray-400">#{user.id}</span>
+                    <span className="text-[10px] font-mono text-gray-400">{user.isSystem ? "—" : `#${user.id}`}</span>
                   </div>
                 </div>
               </div>
@@ -235,16 +254,16 @@ export function AdminUsersPage() {
           <div className="text-center sm:text-left relative">
             <div className="flex items-center gap-2 mb-1">
               <Users className="h-4 w-4 text-blue-300" />
-              <h3 className="text-base font-bold text-white">Need to add a new team member?</h3>
+              <h3 className="text-base font-bold text-white">{t("adminUsers.inviteHeading", "Need to add a new team member?")}</h3>
             </div>
-            <p className="text-sm text-blue-200">Invite admins and staff via the invitation system (coming soon)</p>
+            <p className="text-sm text-blue-200">{t("adminUsers.inviteSubtitle", "Invite admins and staff via the invitation system (coming soon)")}</p>
           </div>
           <button
             disabled
             className="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 text-white text-sm font-bold cursor-not-allowed border border-white/25 backdrop-blur-sm"
           >
             <Plus className="h-4 w-4" />
-            Send Invite
+            {t("adminUsers.sendInvite", "Send Invite")}
           </button>
         </div>
       )}

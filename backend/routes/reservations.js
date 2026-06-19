@@ -3,8 +3,11 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 const { sendMailAsync } = require("../services/mail");
+const settingsService = require("../services/settings");
 const { emailTemplate, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS } = require("../services/mailTemplate");
 
 const router = express.Router();
@@ -109,11 +112,16 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
 
         const stayLength = diffInDays(checkInDate, checkOutDate);
 
-        if (accommodationType === "PERSONAL" && stayLength > 5) {
-            return res.status(400).json({ error: "Personal bookings cannot exceed 5 consecutive nights." });
+        // Load admin settings so the booking limits are configurable, not hardcoded.
+        const settings = await settingsService.getSettings();
+        const maxStayNights = settings.maxStayNights || 5;
+        if (accommodationType === "PERSONAL" && stayLength > maxStayNights) {
+            return res.status(400).json({ error: `Personal bookings cannot exceed ${maxStayNights} consecutive nights.` });
         }
 
-        const maxAdvanceDays = user.maxStayOverride || 30;
+        // Per-user override (set from the Guests admin page) wins; otherwise use
+        // the system-wide setting.
+        const maxAdvanceDays = user.maxStayOverride || settings.maxAdvanceDays || 30;
         const maxDate = new Date();
         maxDate.setDate(maxDate.getDate() + maxAdvanceDays);
         if (checkInDate > maxDate) {
@@ -126,6 +134,11 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         }
 
         const normalizedGuestList = normalizeGuestList(guestList);
+
+        // When the "Auto-approve reservations" setting is on, skip the PENDING
+        // queue and create the reservation as APPROVED directly. Default
+        // PENDING is what the schema gives us when we don't pass `status`.
+        const autoApproveStatus = settings.autoApprove ? "APPROVED" : undefined;
 
         const reservation = await prisma.reservation.create({
             data: {
@@ -145,6 +158,7 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
                 guestList: normalizedGuestList ? normalizedGuestList : null,
                 note: isNonEmptyString(note) ? note.trim() : null,
                 guestType: user.userType || "OTHER",
+                ...(autoApproveStatus ? { status: autoApproveStatus } : {}),
             },
         });
 
@@ -330,7 +344,7 @@ router.get("/admin", requireAdmin, async (req, res) => {
 router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const { price } = req.body;
+        const { price, adminNote } = req.body;
 
         // Re-validate date rules before approving
         const existing = await prisma.reservation.findUnique({ where: { id } });
@@ -349,6 +363,7 @@ router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
 
         const data = { status: "APPROVED" };
         if (parsedPrice !== null && !isNaN(parsedPrice)) data.price = parsedPrice;
+        if (isNonEmptyString(adminNote)) data.adminNote = adminNote.trim();
 
         const reservation = await prisma.reservation.update({
             where: { id },
@@ -376,6 +391,8 @@ ${detailTable([
     row('Check-out',      checkOutStr),
     row('Guests',         reservation.guests),
     row('Price',          reservation.price != null ? `${reservation.price} TL` : null),
+    row('Your note',      isNonEmptyString(reservation.note) ? reservation.note : null),
+    row('Admin note',     isNonEmptyString(reservation.adminNote) ? reservation.adminNote : null),
 ])}
 ${heading('Next Step')}
 <p style="margin:0 0 16px;font-size:13px;color:#475569;">Please log in to your EDU Hotel account and upload your payment receipt to complete the reservation. Your room will be assigned upon payment confirmation.</p>
@@ -393,6 +410,8 @@ ${detailTable([
     row('Çıkış',          checkOutStr),
     row('Misafir sayısı', reservation.guests),
     row('Ücret',          reservation.price != null ? `${reservation.price} TL` : null),
+    row('Notunuz',        isNonEmptyString(reservation.note) ? reservation.note : null),
+    row('Yönetici notu',  isNonEmptyString(reservation.adminNote) ? reservation.adminNote : null),
 ])}
 ${heading('Sıradaki Adım')}
 <p style="margin:0 0 16px;font-size:13px;color:#475569;">Lütfen EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin. Oda ataması ödeme onayının ardından gerçekleştirilecektir.</p>
@@ -409,6 +428,8 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                     `Check-out: ${checkOutStr}`,
                     `Guests:    ${reservation.guests}`,
                     reservation.price != null ? `Price:     ${reservation.price} TL` : null,
+                    isNonEmptyString(reservation.note)      ? `Your note:  ${reservation.note}`      : null,
+                    isNonEmptyString(reservation.adminNote) ? `Admin note: ${reservation.adminNote}` : null,
                     ``,
                     `Next step: Log in to your EDU Hotel account and upload your payment receipt to complete the reservation.`,
                     ``,
@@ -425,6 +446,8 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                     `Çıkış:          ${checkOutStr}`,
                     `Misafir sayısı: ${reservation.guests}`,
                     reservation.price != null ? `Ücret:          ${reservation.price} TL` : null,
+                    isNonEmptyString(reservation.note)      ? `Notunuz:        ${reservation.note}`      : null,
+                    isNonEmptyString(reservation.adminNote) ? `Yönetici notu:  ${reservation.adminNote}` : null,
                     ``,
                     `Sıradaki adım: EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin.`,
                     ``,
@@ -452,7 +475,7 @@ ${heading('Oda Kartı Teslim Bilgileri')}
 router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const { roomId, roomIds } = req.body;
+        const { roomId, roomIds, adminNote } = req.body;
 
         // Normalize input: accept either single roomId (back-compat) or roomIds[]
         let roomIdList = [];
@@ -504,12 +527,15 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
             }
         }
 
+        const assignData = {
+            roomId: roomIdList[0],
+            roomIds: roomIdList,
+        };
+        if (isNonEmptyString(adminNote)) assignData.adminNote = adminNote.trim();
+
         const updated = await prisma.reservation.update({
             where: { id },
-            data: {
-                roomId: roomIdList[0],
-                roomIds: roomIdList,
-            },
+            data: assignData,
             include: { user: true, room: true },
         });
 
@@ -539,6 +565,8 @@ ${detailTable([
     row(roomLabelEN, roomNames),
     row('Check-in', checkInStr),
     row('Check-out', checkOutStr),
+    row('Your note',  isNonEmptyString(updated.note) ? updated.note : null),
+    row('Admin note', isNonEmptyString(updated.adminNote) ? updated.adminNote : null),
 ])}
 ${heading('Key Pickup Instructions')}
 <p style="margin:0;font-size:13px;color:#475569;">For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.</p>`;
@@ -552,10 +580,16 @@ ${detailTable([
     row(roomLabelTR, roomNames),
     row('Giriş', checkInStr),
     row('Çıkış', checkOutStr),
+    row('Notunuz',       isNonEmptyString(updated.note) ? updated.note : null),
+    row('Yönetici notu', isNonEmptyString(updated.adminNote) ? updated.adminNote : null),
 ])}
 ${heading('Oda Kartı Teslim Bilgileri')}
 <p style="margin:0;font-size:13px;color:#475569;">16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.</p>`;
-                const text = `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.\n\nKey pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.\n---\nSayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.\n\nOda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`;
+                const noteLineEN  = isNonEmptyString(updated.note)      ? `\nYour note:  ${updated.note}`      : "";
+                const adminLineEN = isNonEmptyString(updated.adminNote) ? `\nAdmin note: ${updated.adminNote}` : "";
+                const noteLineTR  = isNonEmptyString(updated.note)      ? `\nNotunuz:        ${updated.note}`      : "";
+                const adminLineTR = isNonEmptyString(updated.adminNote) ? `\nYönetici notu:  ${updated.adminNote}` : "";
+                const text = `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.${noteLineEN}${adminLineEN}\n\nKey pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.\n---\nSayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.${noteLineTR}${adminLineTR}\n\nOda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`;
                 const html = emailTemplate(bodyEN, bodyTR);
                 sendMailAsync({ to: updated.user.email, subject, text, html });
             }
@@ -930,6 +964,116 @@ router.get("/:reservationId/identity-documents", requireAuth, async (req, res) =
     } catch (err) {
         console.error("Identity doc list error:", err);
         res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+/**
+ * POST /reservations/admin/create
+ * Admin-side reservation creation (for the admin themselves or for a special guest).
+ * Every field is optional except the bare schema essentials (dates, guests, an email
+ * to anchor the user record). The endpoint find-or-creates a User by email so the
+ * reservation always appears in the regular admin reservation listings.
+ *
+ * Status defaults: status=APPROVED, paymentStatus=NONE — admin can update via the
+ * existing approve/payment flows afterward.
+ */
+router.post("/admin/create", requireAdmin, async (req, res) => {
+    try {
+        const {
+            forSelf = false,
+            firstName, lastName, phone, contactEmail, email,
+            checkIn, checkOut, checkInTime,
+            guests,
+            eventCode, eventType, note,
+            nationalId, taxNumber, billingTitle, billingAddress,
+            priceType, freeAccommodation, guestList,
+            price,
+            invoiceType,
+            guestType,
+            adminNote,
+        } = req.body;
+
+        if (!checkIn || !checkOut) {
+            return res.status(400).json({ error: "Check-in and check-out dates are required." });
+        }
+        const checkInDate = parseDate(checkIn);
+        const checkOutDate = parseDate(checkOut);
+        if (!checkInDate || !checkOutDate) return res.status(400).json({ error: "Invalid date format." });
+        if (checkOutDate <= checkInDate) return res.status(400).json({ error: "Check-out must be after check-in." });
+
+        const guestsInt = parseInt(guests, 10);
+        if (!Number.isInteger(guestsInt) || guestsInt <= 0) {
+            return res.status(400).json({ error: "Guests must be at least 1." });
+        }
+
+        const resolvedEmail = String(contactEmail || email || "").trim().toLowerCase();
+        if (!resolvedEmail) {
+            return res.status(400).json({ error: "Guest email is required so the reservation can be linked to a user." });
+        }
+
+        // Find or create the underlying user record. We don't overwrite existing
+        // user fields (firstName/lastName/phone) so as not to clobber data the
+        // user may have set themselves.
+        let user = await prisma.user.findUnique({ where: { email: resolvedEmail } });
+        if (!user) {
+            const placeholderPassword = await bcrypt.hash(crypto.randomBytes(24).toString("hex"), 10);
+            const fullName = [firstName, lastName].filter(Boolean).map((s) => String(s).trim()).filter(Boolean).join(" ") || null;
+            user = await prisma.user.create({
+                data: {
+                    email: resolvedEmail,
+                    password: placeholderPassword,
+                    name: fullName,
+                    firstName: isNonEmptyString(firstName) ? firstName.trim() : null,
+                    lastName: isNonEmptyString(lastName) ? lastName.trim() : null,
+                    phone: isNonEmptyString(phone) ? phone.trim() : null,
+                    userType: forSelf ? "STAFF" : "SPECIAL_GUEST",
+                },
+            });
+        }
+
+        const parsedPrice = price !== undefined && price !== null && price !== ""
+            ? parseFloat(price)
+            : null;
+
+        const reservation = await prisma.reservation.create({
+            data: {
+                userId: user.id,
+                checkIn: checkInDate,
+                checkOut: checkOutDate,
+                checkInTime: isNonEmptyString(checkInTime) ? checkInTime.trim() : null,
+                guests: guestsInt,
+                // Schema requires these two — accommodation type is hidden from the admin
+                // form per spec; default to PERSONAL. Invoice type defaults to INDIVIDUAL.
+                accommodationType: "PERSONAL",
+                invoiceType: invoiceType === "CORPORATE" ? "CORPORATE" : "INDIVIDUAL",
+                eventCode: isNonEmptyString(eventCode) ? eventCode.trim() : null,
+                firstName: isNonEmptyString(firstName) ? firstName.trim() : null,
+                lastName: isNonEmptyString(lastName) ? lastName.trim() : null,
+                phone: isNonEmptyString(phone) ? phone.trim() : null,
+                contactEmail: resolvedEmail,
+                nationalId: isNonEmptyString(nationalId) ? nationalId.trim() : null,
+                taxNumber: isNonEmptyString(taxNumber) ? taxNumber.trim() : null,
+                billingTitle: isNonEmptyString(billingTitle) ? billingTitle.trim() : null,
+                billingAddress: isNonEmptyString(billingAddress) ? billingAddress.trim() : null,
+                eventType: isNonEmptyString(eventType) ? eventType.trim() : null,
+                priceType: isNonEmptyString(priceType) ? priceType.trim() : null,
+                freeAccommodation: !!freeAccommodation,
+                guestList: normalizeGuestList(guestList),
+                note: isNonEmptyString(note) ? note.trim() : null,
+                adminNote: isNonEmptyString(adminNote) ? adminNote.trim() : null,
+                guestType: guestType || (forSelf ? "STAFF" : "SPECIAL_GUEST"),
+                price: parsedPrice !== null && !isNaN(parsedPrice) ? parsedPrice : null,
+                // Admin-created bookings skip the PENDING → APPROVED flow.
+                status: "APPROVED",
+                paymentStatus: "NONE",
+            },
+            include: { user: true },
+        });
+
+        return res.status(201).json(reservation);
+    } catch (err) {
+        console.error("Admin create reservation error:", err);
+        return res.status(500).json({ error: "Internal server error." });
     }
 });
 

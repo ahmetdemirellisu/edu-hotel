@@ -1,6 +1,7 @@
 // src/components/admin/AdminLogin.tsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Shield, Lock, User, AlertCircle, ChevronRight } from "lucide-react";
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
@@ -31,6 +32,7 @@ const _s = document.getElementById("admin-login-styles") ?? (() => {
 
 export function AdminLogin() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [username, setUsername]   = useState("");
   const [password, setPassword]   = useState("");
   const [showPass, setShowPass]   = useState(false);
@@ -92,13 +94,13 @@ export function AdminLogin() {
         if (newAttempts >= 5) {
           setLocked(true);
           setLockTimer(30);
-          setError("Too many failed attempts. Locked for 30 seconds.");
+          setError(t("adminLogin.errors.tooManyAttempts"));
         } else {
-          setError(`Invalid credentials. ${5 - newAttempts} attempt${5 - newAttempts !== 1 ? "s" : ""} remaining.`);
+          setError(t("adminLogin.errors.invalidCredentials", { count: 5 - newAttempts }));
         }
       }
     } catch {
-      setError("Could not reach the server. Please try again.");
+      setError(t("adminLogin.errors.networkError"));
     }
     setLoading(false);
   };
@@ -205,8 +207,8 @@ export function AdminLogin() {
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <p style={{ color:"#22c55e", fontSize:18, fontWeight:600, margin:"0 0 8px" }}>Access Granted</p>
-              <p style={{ color:"rgba(148,163,184,0.8)", fontSize:14 }}>Redirecting to admin panel…</p>
+              <p style={{ color:"#22c55e", fontSize:18, fontWeight:600, margin:"0 0 8px" }}>{t("adminLogin.accessGranted")}</p>
+              <p style={{ color:"rgba(148,163,184,0.8)", fontSize:14 }}>{t("adminLogin.redirecting")}</p>
             </div>
           ) : (
             /* ── Login form ── */
@@ -240,10 +242,10 @@ export function AdminLogin() {
                 </div>
 
                 <h1 style={{ margin:"0 0 6px", color:"#f1f5f9", fontSize:22, fontWeight:700, letterSpacing:"-0.3px" }}>
-                  Admin Portal
+                  {t("adminLogin.title")}
                 </h1>
                 <p style={{ margin:0, color:"rgba(148,163,184,0.7)", fontSize:13, letterSpacing:"0.3px" }}>
-                  EDU Hotel Management System
+                  {t("adminLogin.subtitle")}
                 </p>
 
                 {/* Divider */}
@@ -270,7 +272,7 @@ export function AdminLogin() {
                   animation:"al-pulse 2s ease-in-out infinite",
                 }} />
                 <span style={{ color:"rgba(148,163,184,0.8)", fontSize:11, fontWeight:500, letterSpacing:"0.5px", textTransform:"uppercase" }}>
-                  Secured Connection
+                  {t("adminLogin.secured")}
                 </span>
                 <Lock size={10} color="rgba(148,163,184,0.6)" />
               </div>
@@ -280,7 +282,7 @@ export function AdminLogin() {
                 {/* Username */}
                 <div style={{ marginBottom:16 }}>
                   <label style={{ display:"block", color:"rgba(148,163,184,0.8)", fontSize:12, fontWeight:500, letterSpacing:"0.4px", textTransform:"uppercase", marginBottom:8 }}>
-                    Username
+                    {t("adminLogin.username")}
                   </label>
                   <div style={{
                     display:"flex", alignItems:"center", gap:10,
@@ -297,7 +299,7 @@ export function AdminLogin() {
                       onChange={e => { setUsername(e.target.value); setError(""); }}
                       onFocus={() => setUserFocus(true)}
                       onBlur={() => setUserFocus(false)}
-                      placeholder="Enter your username"
+                      placeholder={t("adminLogin.usernamePlaceholder")}
                       autoComplete="username"
                       disabled={locked || loading}
                       style={{
@@ -312,7 +314,7 @@ export function AdminLogin() {
                 {/* Password */}
                 <div style={{ marginBottom:24 }}>
                   <label style={{ display:"block", color:"rgba(148,163,184,0.8)", fontSize:12, fontWeight:500, letterSpacing:"0.4px", textTransform:"uppercase", marginBottom:8 }}>
-                    Password
+                    {t("adminLogin.password")}
                   </label>
                   <div style={{
                     display:"flex", alignItems:"center", gap:10,
@@ -329,7 +331,7 @@ export function AdminLogin() {
                       onChange={e => { setPassword(e.target.value); setError(""); }}
                       onFocus={() => setPassFocus(true)}
                       onBlur={() => setPassFocus(false)}
-                      placeholder="Enter your password"
+                      placeholder={t("adminLogin.passwordPlaceholder")}
                       autoComplete="current-password"
                       disabled={locked || loading}
                       style={{
@@ -404,16 +406,16 @@ export function AdminLogin() {
                         borderTopColor:"white", borderRadius:"50%",
                         animation:"al-spin .7s linear infinite",
                       }} />
-                      Verifying…
+                      {t("adminLogin.verifying")}
                     </>
                   ) : locked ? (
                     <>
                       <Lock size={14} />
-                      Locked — {lockTimer}s
+                      {t("adminLogin.lockedFor", { seconds: lockTimer })}
                     </>
                   ) : (
                     <>
-                      Sign in to Admin
+                      {t("adminLogin.signIn")}
                       <ChevronRight size={16} />
                     </>
                   )}
@@ -428,7 +430,7 @@ export function AdminLogin() {
                 textAlign:"center",
               }}>
                 <p style={{ margin:0, color:"rgba(100,116,139,0.5)", fontSize:11, letterSpacing:"0.3px" }}>
-                  EDU Hotel © 2026 · Restricted Access · All activity is logged
+                  {t("adminLogin.footer")}
                 </p>
               </div>
             </div>
@@ -444,7 +446,7 @@ export function AdminLogin() {
             onMouseEnter={e => (e.currentTarget.style.color = "rgba(148,163,184,0.8)")}
             onMouseLeave={e => (e.currentTarget.style.color = "rgba(100,116,139,0.5)")}
           >
-            ← Back to main site
+            {t("adminLogin.backToSite")}
           </a>
         </div>
       </div>

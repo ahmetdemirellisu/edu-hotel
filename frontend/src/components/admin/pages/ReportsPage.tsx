@@ -11,58 +11,111 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { adminFetch } from "../../../api/adminFetch";
+
+const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
+
+type ReportApiType = "daily" | "monthly" | "occupancy" | "revenue";
 
 export function ReportsPage() {
   const { t } = useTranslation("admin");
   const [selectedReport, setSelectedReport] = useState<number | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [format, setFormat] = useState<"pdf" | "xlsx" | "docx">("pdf");
   const [generating, setGenerating] = useState(false);
 
-  const handleGenerate = () => {
-    setGenerating(true);
-    setTimeout(() => setGenerating(false), 1500);
-  };
-
-  const reportTypes = [
+  const reportTypes: Array<{
+    apiType: ReportApiType;
+    nameKey: string;
+    descriptionKey: string;
+    icon: typeof FileText;
+    gradient: string;
+    accentBg: string;
+    accentText: string;
+    tagKey: string;
+  }> = [
     {
+      apiType: "daily",
       nameKey: "reports.daily",
       descriptionKey: "reports.dailyDesc",
       icon: FileText,
       gradient: "linear-gradient(to right, #3b82f6, #1d4ed8)",
       accentBg: "bg-blue-50",
       accentText: "text-blue-600",
-      tag: "Daily",
+      tagKey: "reports.tags.daily",
     },
     {
+      apiType: "monthly",
       nameKey: "reports.monthly",
       descriptionKey: "reports.monthlyDesc",
       icon: CalendarIcon,
       gradient: "linear-gradient(to right, #8b5cf6, #6d28d9)",
       accentBg: "bg-violet-50",
       accentText: "text-violet-600",
-      tag: "Monthly",
+      tagKey: "reports.tags.monthly",
     },
     {
+      apiType: "occupancy",
       nameKey: "reports.roomOccupancy",
       descriptionKey: "reports.roomOccupancyDesc",
       icon: Bed,
       gradient: "linear-gradient(to right, #10b981, #047857)",
       accentBg: "bg-emerald-50",
       accentText: "text-emerald-600",
-      tag: "Occupancy",
+      tagKey: "reports.tags.occupancy",
     },
     {
+      apiType: "revenue",
       nameKey: "reports.revenue",
       descriptionKey: "reports.revenueDesc",
       icon: DollarSign,
       gradient: "linear-gradient(to right, #f59e0b, #ea580c)",
       accentBg: "bg-amber-50",
       accentText: "text-amber-600",
-      tag: "Revenue",
+      tagKey: "reports.tags.revenue",
     },
   ];
+
+  const handleGenerate = async () => {
+    if (selectedReport === null) {
+      toast.error(t("reports.selectFirst", "Please select a report type above."));
+      return;
+    }
+    setGenerating(true);
+    try {
+      const report = reportTypes[selectedReport];
+      const params = new URLSearchParams();
+      if (dateFrom) params.set("from", dateFrom);
+      if (dateTo) params.set("to", dateTo);
+      const qs = params.toString();
+      const url = `${API_BASE}/admin/reports/${report.apiType}${qs ? "?" + qs : ""}`;
+      const res = await adminFetch(url);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error || `Server error ${res.status}`);
+      }
+      const blob = await res.blob();
+      // Try to read the server-suggested filename from Content-Disposition; fall back to a default.
+      const dispo = res.headers.get("Content-Disposition") || "";
+      const match = dispo.match(/filename="?([^"]+)"?/i);
+      const filename = match ? match[1] : `${report.apiType}-report.csv`;
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast.success(t("reports.downloaded", "Report downloaded: {{name}}", { name: filename }));
+    } catch (err: any) {
+      console.error("Report generation failed:", err);
+      toast.error(err?.message || t("reports.generateFailed", "Failed to generate report."));
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -112,7 +165,7 @@ export function ReportsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-[15px] font-bold text-gray-900">{t(report.nameKey)}</h4>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${report.accentBg} ${report.accentText}`}>{report.tag}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${report.accentBg} ${report.accentText}`}>{t(report.tagKey)}</span>
                     </div>
                     <p className="text-[13px] text-gray-500 leading-relaxed">{t(report.descriptionKey)}</p>
                   </div>
@@ -142,12 +195,12 @@ export function ReportsPage() {
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">{t("reports.dateRange", "Date Range")}</label>
               <div className="space-y-2">
                 <div className="flex items-center h-10 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-300 transition-all">
-                  <span className="px-3 text-[11px] text-gray-400 font-medium flex-shrink-0">From</span>
+                  <span className="px-3 text-[11px] text-gray-400 font-medium flex-shrink-0">{t("reports.from", "From")}</span>
                   <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
                     className="flex-1 h-full bg-transparent text-sm text-gray-700 outline-none pr-3" />
                 </div>
                 <div className="flex items-center h-10 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-300 transition-all">
-                  <span className="px-3 text-[11px] text-gray-400 font-medium flex-shrink-0">To</span>
+                  <span className="px-3 text-[11px] text-gray-400 font-medium flex-shrink-0">{t("reports.to", "To")}</span>
                   <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
                     className="flex-1 h-full bg-transparent text-sm text-gray-700 outline-none pr-3" />
                 </div>
@@ -157,24 +210,15 @@ export function ReportsPage() {
             {/* Format */}
             <div className="md:col-span-1 space-y-3">
               <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">{t("reports.format", "Output Format")}</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["pdf", "xlsx", "docx"] as const).map(fmt => (
-                  <button
-                    key={fmt}
-                    onClick={() => setFormat(fmt)}
-                    className="h-10 rounded-xl border text-xs font-bold transition-all"
-                    style={{
-                      background: format === fmt ? "#003366" : "#f8fafc",
-                      borderColor: format === fmt ? "#003366" : "#e2e8f0",
-                      color: format === fmt ? "white" : "#64748b",
-                    }}
-                  >
-                    {fmt.toUpperCase()}
-                  </button>
-                ))}
+              <div className="flex items-center h-10 bg-gray-50 border border-gray-200 rounded-xl px-3.5 gap-2">
+                <FileText className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-gray-800 leading-tight">CSV</p>
+                  <p className="text-[10px] text-gray-400 leading-tight">{t("reports.formatHint.csv", "Excel-friendly, UTF-8")}</p>
+                </div>
               </div>
               <p className="text-[11px] text-gray-400">
-                {format === "pdf" ? "PDF document, ready to print" : format === "xlsx" ? "Excel spreadsheet" : "Word document"}
+                {t("reports.formatNote", "Reports are downloaded as CSV files compatible with Excel and Google Sheets.")}
               </p>
             </div>
 
@@ -190,7 +234,7 @@ export function ReportsPage() {
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 <span className="relative flex items-center gap-2">
                   {generating ? (
-                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</>
+                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t("reports.generating", "Generating...")}</>
                   ) : (
                     <><Download className="h-4 w-4" />{t("reports.downloadReport", "Generate Report")}<ArrowRight className="h-3.5 w-3.5" /></>
                   )}
@@ -198,8 +242,8 @@ export function ReportsPage() {
               </button>
               <p className="text-[11px] text-gray-400 text-center">
                 {selectedReport !== null
-                  ? `${reportTypes[selectedReport].tag} report selected`
-                  : "Select a report type above"}
+                  ? t("reports.selectedHint", "{{tag}} report selected", { tag: t(reportTypes[selectedReport].tagKey) })
+                  : t("reports.selectPrompt", "Select a report type above")}
               </p>
             </div>
           </div>

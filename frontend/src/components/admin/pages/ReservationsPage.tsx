@@ -18,6 +18,7 @@ import {
   User,
   Bed,
   CalendarDays,
+  Shield,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -54,9 +55,13 @@ export function ReservationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AdminReservation | null>(null);
 
-  // Approve modal with price
+  // Approve modal with price + admin note
   const [approveModalId, setApproveModalId] = useState<number | null>(null);
   const [priceInput, setPriceInput] = useState<string>("");
+  const [approveAdminNote, setApproveAdminNote] = useState<string>("");
+
+  // Admin note input for the assignment modal
+  const [assignAdminNote, setAssignAdminNote] = useState<string>("");
 
   // Room assignment modal (multi-select)
   const [assignModalId, setAssignModalId] = useState<number | null>(null);
@@ -130,6 +135,7 @@ export function ReservationsPage() {
   const handleApproveClick = (id: number) => {
     setApproveModalId(id);
     setPriceInput("");
+    setApproveAdminNote("");
   };
 
   const handleApproveConfirm = async () => {
@@ -142,7 +148,7 @@ export function ReservationsPage() {
     try {
       setActionLoadingId(approveModalId);
       setError(null);
-      const updated = await approveReservation(approveModalId, parsedPrice);
+      const updated = await approveReservation(approveModalId, parsedPrice, approveAdminNote);
       setReservations(prev => prev.map(r => r.id === approveModalId ? { ...r, ...updated } as AdminReservation : r));
       setApproveModalId(null);
       toast.success(t("reservations.toasts.approved", { id: `#${approveModalId}` }));
@@ -169,6 +175,7 @@ export function ReservationsPage() {
   const handleAssignClick = async (id: number) => {
     setAssignModalId(id);
     setSelectedRoomIds([]);
+    setAssignAdminNote("");
     setRoomsLoading(true);
     try {
       const all = await getRooms();
@@ -187,13 +194,14 @@ export function ReservationsPage() {
   const closeAssignModal = () => {
     setAssignModalId(null);
     setSelectedRoomIds([]);
+    setAssignAdminNote("");
   };
 
   const handleAssignConfirm = async () => {
     if (!assignModalId || selectedRoomIds.length === 0) return;
     try {
       setActionLoadingId(assignModalId);
-      const updated = await assignRoom(assignModalId, selectedRoomIds);
+      const updated = await assignRoom(assignModalId, selectedRoomIds, assignAdminNote);
       setReservations(prev => prev.map(r => r.id === assignModalId ? { ...r, ...updated } as AdminReservation : r));
       const assignedId = assignModalId;
       closeAssignModal();
@@ -570,23 +578,40 @@ export function ReservationsPage() {
                 </div>
               </div>
             </div>
-            <div className="px-6 py-5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">{t("reservations.approveModal.priceLabel")}</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder={t("reservations.approveModal.pricePlaceholder")}
-                value={priceInput}
-                onChange={e => setPriceInput(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all"
-              />
-              <p className="text-[10px] text-gray-400 mt-2">{t("reservations.approveModal.priceHint")}</p>
-              {priceInput.trim() && (isNaN(parseFloat(priceInput)) || parseFloat(priceInput) <= 0) && (
-                <p className="text-[11px] text-red-500 font-semibold mt-1">
-                  {t("reservations.approveModal.priceRequired", { defaultValue: "Enter a valid price greater than 0." })}
-                </p>
-              )}
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">{t("reservations.approveModal.priceLabel")}</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder={t("reservations.approveModal.pricePlaceholder")}
+                  value={priceInput}
+                  onChange={e => setPriceInput(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all"
+                />
+                <p className="text-[10px] text-gray-400 mt-2">{t("reservations.approveModal.priceHint")}</p>
+                {priceInput.trim() && (isNaN(parseFloat(priceInput)) || parseFloat(priceInput) <= 0) && (
+                  <p className="text-[11px] text-red-500 font-semibold mt-1">
+                    {t("reservations.approveModal.priceRequired", { defaultValue: "Enter a valid price greater than 0." })}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                  {t("reservations.approveModal.adminNoteLabel", { defaultValue: "Admin note (optional)" })}
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder={t("reservations.approveModal.adminNotePlaceholder", { defaultValue: "Visible to the guest in the approval and confirmation emails." })}
+                  value={approveAdminNote}
+                  onChange={e => setApproveAdminNote(e.target.value)}
+                  maxLength={500}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all resize-none"
+                />
+                <p className="text-[10px] text-gray-400 mt-1 text-right">{approveAdminNote.length} / 500</p>
+              </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2">
               <button onClick={() => setApproveModalId(null)} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-white transition-colors">
@@ -788,11 +813,26 @@ export function ReservationsPage() {
                 );
               })()}
 
-              {/* Note */}
+              {/* Guest note */}
               {(selected as any).note && (
                 <div className="mt-5 pt-4 border-t border-gray-100">
-                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t("reservations.detail.note")}</h4>
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                    {t("reservations.detail.guestNote", { defaultValue: "Guest's note" })}
+                  </h4>
                   <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">{(selected as any).note}</p>
+                </div>
+              )}
+
+              {/* Admin note */}
+              {(selected as any).adminNote && (
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <h4 className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Shield className="h-3 w-3" />
+                    {t("reservations.detail.adminNote", { defaultValue: "Admin note" })}
+                  </h4>
+                  <p className="text-sm text-gray-700 bg-blue-50/60 border border-blue-100 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
+                    {(selected as any).adminNote}
+                  </p>
                 </div>
               )}
 
@@ -916,6 +956,24 @@ export function ReservationsPage() {
                 </div>
               )}
             </div>
+
+            {/* Admin note input */}
+            {!roomsLoading && availableRooms.length > 0 && (
+              <div className="px-6 pb-4 flex-shrink-0">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                  {t("reservations.assignModal.adminNoteLabel", { defaultValue: "Admin note (optional)" })}
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder={t("reservations.assignModal.adminNotePlaceholder", { defaultValue: "Optional note for the guest, sent with the assignment email." })}
+                  value={assignAdminNote}
+                  onChange={e => setAssignAdminNote(e.target.value)}
+                  maxLength={500}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 bg-gray-50 transition-all resize-none"
+                />
+                <p className="text-[10px] text-gray-400 mt-1 text-right">{assignAdminNote.length} / 500</p>
+              </div>
+            )}
 
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2 flex-shrink-0">
               <button

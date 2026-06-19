@@ -180,7 +180,7 @@ export function AdminProfilePage() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
               <h2 style={{ margin: 0, color: "white", fontSize: 22, fontWeight: 700 }}>
-                EDU Hotel Admin
+                {t("adminProfile.brand", "EDU Hotel Admin")}
               </h2>
               <div style={{
                 display: "flex", alignItems: "center", gap: 5,

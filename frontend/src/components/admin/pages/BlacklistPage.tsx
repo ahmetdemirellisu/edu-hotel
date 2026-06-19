@@ -158,7 +158,7 @@ export function BlacklistPage() {
             <CheckCircle className="h-8 w-8 text-emerald-400" />
           </div>
           <p className="text-base font-semibold text-gray-600">{t("blacklist.empty", "No blocked users")}</p>
-          <p className="text-sm text-gray-400 mt-1">The blacklist is currently empty.</p>
+          <p className="text-sm text-gray-400 mt-1">{t("blacklist.emptyHint", "The blacklist is currently empty.")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -185,7 +185,7 @@ export function BlacklistPage() {
                       <h3 className="text-[14px] font-bold text-gray-900">{entry.user?.name || t("blacklist.unknown", "Unknown")}</h3>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
                         <AlertTriangle className="h-2.5 w-2.5" />
-                        Blocked
+                        {t("blacklist.blocked", "Blocked")}
                       </span>
                       {!entry.expiresAt && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
@@ -197,7 +197,7 @@ export function BlacklistPage() {
 
                     {/* Reason */}
                     <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-2 mb-2">
-                      <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-0.5">Reason</p>
+                      <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-0.5">{t("blacklist.reason", "Reason")}</p>
                       <p className="text-xs text-red-700 leading-relaxed">{entry.reason}</p>
                     </div>
 
@@ -254,7 +254,7 @@ export function BlacklistPage() {
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-white">{t("blacklist.addToBlacklist", "Add to Blacklist")}</h3>
-                    <p className="text-xs text-red-200 mt-0.5">Block a user from making reservations</p>
+                    <p className="text-xs text-red-200 mt-0.5">{t("blacklist.modalSubtitle", "Block a user from making reservations")}</p>
                   </div>
                 </div>
                 <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
@@ -316,14 +316,14 @@ export function BlacklistPage() {
                     <input type="radio" checked={isPermanent} onChange={() => setIsPermanent(true)} className="accent-red-600" />
                     <div>
                       <p className="text-xs font-bold text-gray-800">{t("blacklist.permanent", "Permanent")}</p>
-                      <p className="text-[10px] text-gray-500">No expiry date</p>
+                      <p className="text-[10px] text-gray-500">{t("blacklist.noExpiry", "No expiry date")}</p>
                     </div>
                   </label>
                   <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all duration-150 ${!isPermanent ? "border-amber-300 bg-amber-50" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}>
                     <input type="radio" checked={!isPermanent} onChange={() => setIsPermanent(false)} className="accent-red-600" />
                     <div>
                       <p className="text-xs font-bold text-gray-800">{t("blacklist.temporary", "Temporary")}</p>
-                      <p className="text-[10px] text-gray-500">Until a date</p>
+                      <p className="text-[10px] text-gray-500">{t("blacklist.untilDate", "Until a date")}</p>
                     </div>
                   </label>
                 </div>

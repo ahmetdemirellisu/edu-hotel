@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { userFetch } from "../api/userFetch";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Bell,
@@ -11,7 +11,9 @@ import {
   Calendar,
   Info,
   ChevronRight,
+  CheckCheck,
 } from "lucide-react";
+import { loadSeenIds, markSeen, markManySeen, subscribeSeenChanges } from "../lib/notificationsSeen";
 
 type Notification = {
   id: string;
@@ -33,25 +35,33 @@ const TYPE_ICONS: Record<string, { icon: typeof Bell; dot: string }> = {
   reminder: { icon: Calendar,     dot: "#8b5cf6" },
 };
 
-function timeAgo(timestamp: string): string {
+function timeAgo(timestamp: string, t: any): string {
   const diff = Date.now() - new Date(timestamp).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m`;
+  if (mins < 1) return t("notifications.timeAgo.justNow");
+  if (mins < 60) return t("notifications.timeAgo.minutesAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
+  if (hours < 24) return t("notifications.timeAgo.hoursAgo", { count: hours });
+  return t("notifications.timeAgo.daysAgo", { count: Math.floor(hours / 24) });
 }
 
 export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const ref = useRef<HTMLDivElement>(null);
   const isTR = lang === "TR" || i18n.language?.toLowerCase().startsWith("tr");
 
   const userId = Number(localStorage.getItem("userId"));
+
+  useEffect(() => {
+    if (!userId || isNaN(userId)) return;
+    setSeenIds(loadSeenIds(userId));
+    const unsub = subscribeSeenChanges(userId, () => setSeenIds(loadSeenIds(userId)));
+    return unsub;
+  }, [userId]);
 
   useEffect(() => {
     if (!userId || isNaN(userId)) return;
@@ -61,11 +71,29 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
         if (res.ok) {
           const data = await res.json();
           setNotifications((data.notifications || []).slice(0, 8));
-          setUnreadCount(data.unreadCount || 0);
         }
       } catch {}
     })();
   }, [userId]);
+
+  // Compute unread count using locally persisted seen set as an override.
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read && !seenIds.has(n.id)).length,
+    [notifications, seenIds]
+  );
+
+  const handleNotificationClick = (n: Notification) => {
+    if (!userId || isNaN(userId)) return;
+    if (!seenIds.has(n.id)) markSeen(userId, n.id);
+    setOpen(false);
+    navigate("/reservations");
+  };
+
+  const handleMarkAllRead = () => {
+    if (!userId || isNaN(userId)) return;
+    const unreadIds = notifications.filter((n) => !n.read && !seenIds.has(n.id)).map((n) => n.id);
+    if (unreadIds.length > 0) markManySeen(userId, unreadIds);
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -120,12 +148,15 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
               notifications.map((n) => {
                 const cfg = TYPE_ICONS[n.type] || TYPE_ICONS.info;
                 const title = isTR ? n.titleTR : n.title;
+                const isUnread = !n.read && !seenIds.has(n.id);
 
                 return (
-                  <div
+                  <button
                     key={n.id}
-                    className={`px-4 py-3 border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors ${
-                      !n.read ? "bg-blue-50/30" : ""
+                    type="button"
+                    onClick={() => handleNotificationClick(n)}
+                    className={`w-full text-left px-4 py-3 border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors ${
+                      isUnread ? "bg-blue-50/30" : ""
                     }`}
                   >
                     <div className="flex items-start gap-2.5">
@@ -135,11 +166,11 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className={`text-[12px] font-semibold truncate ${!n.read ? "text-gray-900" : "text-gray-700"}`}>
+                          <p className={`text-[12px] font-semibold truncate ${isUnread ? "text-gray-900" : "text-gray-700"}`}>
                             {title}
                           </p>
                           <span className="text-[10px] text-gray-400 flex-shrink-0">
-                            {timeAgo(n.timestamp)}
+                            {timeAgo(n.timestamp, t)}
                           </span>
                         </div>
                         <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2">
@@ -147,18 +178,28 @@ export function NotificationBell({ lang = "EN" }: { lang?: "EN" | "TR" }) {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })
             )}
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50">
+          <div className="px-3 py-2 border-t border-gray-100 bg-gray-50/50 flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="flex items-center justify-center gap-1 text-[11px] font-semibold text-gray-600 hover:text-[#003366] transition-colors px-2.5 py-1.5 rounded-md hover:bg-white"
+              >
+                <CheckCheck className="h-3 w-3" />
+                {t("notificationBell.markAllRead", "Mark all as read")}
+              </button>
+            )}
             <Link
               to="/notifications"
               onClick={() => setOpen(false)}
-              className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-[#003366] hover:text-[#004d99] transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#003366] hover:text-[#004d99] transition-colors"
             >
               {t("notificationBell.viewAll", "View All Notifications")}
               <ChevronRight className="h-3 w-3" />
