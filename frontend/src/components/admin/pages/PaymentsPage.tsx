@@ -77,7 +77,7 @@ export function PaymentsPage() {
       setAssignModalId(null);
       setSelectedRoomIds([]);
     } catch (err: any) {
-      alert(err.message || "Failed to assign rooms.");
+      alert(err.message || t("payments.assignFailed", "Failed to assign rooms."));
     } finally {
       setAssigning(false);
     }
@@ -107,7 +107,7 @@ export function PaymentsPage() {
     try {
       const res = await adminFetch(`/ehp/api/admin/approve-payment/${id}`, { method: "POST" });
       if (res.ok) setPayments(prev => prev.filter(p => p.id !== id));
-      else { const d = await res.json().catch(() => ({})); alert(d.error || "Failed to approve."); }
+      else { const d = await res.json().catch(() => ({})); alert(d.error || t("payments.approveFailed", "Failed to approve.")); }
     } catch (err) { console.error("Approval error:", err); }
   };
 
@@ -250,7 +250,7 @@ export function PaymentsPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 text-sm font-semibold shadow-sm transition-all duration-150"
         >
           <RefreshCw className="h-4 w-4" />
-          Refresh
+          {t("payments.refresh", "Refresh")}
         </button>
       </div>
 
@@ -337,7 +337,7 @@ export function PaymentsPage() {
           <p className="text-sm text-gray-500 max-w-xs mx-auto">{t("payments.noReceiptsDesc", "All payment receipts have been processed. Check back later for new submissions.")}</p>
           <div className="mt-6 inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-sm font-semibold border border-emerald-100">
             <CheckCircle className="h-4 w-4" />
-            Up to date
+            {t("payments.upToDate", "Up to date")}
           </div>
         </div>
       ) : (
@@ -379,7 +379,7 @@ export function PaymentsPage() {
                       <p className="text-xs text-gray-500 mt-0.5">{payment.user?.email || "—"}</p>
                       <p className="text-[11px] text-gray-400 mt-0.5">
                         {t("payments.colReservation", "Reservation")} <span className="font-mono font-semibold text-gray-600">#{payment.id}</span>
-                        {payment.user?.id && <span className="ml-2">· User ID: {payment.user.id}</span>}
+                        {payment.user?.id && <span className="ml-2">· {t("payments.userId", "User ID")}: {payment.user.id}</span>}
                       </p>
                     </div>
 
@@ -486,7 +486,7 @@ export function PaymentsPage() {
         ) : (
           <div className="space-y-3">
             {assignments.map((res, idx) => {
-              const guestName = res.user?.name || `${res.user?.firstName ?? ""} ${res.user?.lastName ?? ""}`.trim() || "Unknown guest";
+              const guestName = res.user?.name || `${res.user?.firstName ?? ""} ${res.user?.lastName ?? ""}`.trim() || t("payments.unknownGuest", "Unknown guest");
               const initials = getInitials(guestName);
               const avatarGradient = AVATAR_GRADIENTS[idx % AVATAR_GRADIENTS.length];
               const checkIn = res.checkIn?.slice(0, 10) ?? "—";

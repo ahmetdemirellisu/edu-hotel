@@ -257,7 +257,7 @@ export function RoomsPage() {
                 {dbl && (
                   <text x={x+1+rw/2} y={y+rh-6} textAnchor="middle"
                     fontSize={6.5} fill={cfg.text} fontWeight={800} letterSpacing={1} opacity={0.6}
-                    style={{ pointerEvents: "none" }}>DOUBLE</text>
+                    style={{ pointerEvents: "none" }}>{t("rooms.doubleLabel", "DOUBLE")}</text>
                 )}
                 {room.reservation && act && (
                   <foreignObject x={x-40} y={y+rh+6} width={rw+80} height={40} style={{ pointerEvents: "none", zIndex: 10 }}>
@@ -267,7 +267,7 @@ export function RoomsPage() {
                       whiteSpace: "nowrap", fontWeight: 600, backdropFilter: "blur(8px)",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.1)"
                     }}>
-                      <span className="block text-[#94a3b8] text-[8px] uppercase tracking-wider mb-0.5">Guest</span>
+                      <span className="block text-[#94a3b8] text-[8px] uppercase tracking-wider mb-0.5">{t("rooms.guestLabel", "Guest")}</span>
                       {room.reservation.guestName}
                     </div>
                   </foreignObject>
@@ -304,7 +304,7 @@ export function RoomsPage() {
             <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${cfg.gradientFrom}, ${cfg.gradientTo})` }} />
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-base font-extrabold text-gray-900">Room {room.name}</h4>
+                <h4 className="text-base font-extrabold text-gray-900">{t("rooms.roomHeading", "Room {{name}}", { name: room.name })}</h4>
                 <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border ${cfg.pillBg} ${cfg.pillText} ${cfg.pillBorder}`}>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: cfg.dot }} />{statusLabel(st)}
                 </span>
@@ -428,7 +428,7 @@ export function RoomsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center h-80 bg-white rounded-3xl border border-gray-100 shadow-sm">
           <div className="w-10 h-10 border-4 border-slate-200 border-t-[#003366] rounded-full animate-spin mb-4" />
-          <p className="text-sm text-slate-500 font-bold tracking-wide">LOADING ARCHITECTURE...</p>
+          <p className="text-sm text-slate-500 font-bold tracking-wide">{t("rooms.loadingArch", "LOADING ARCHITECTURE...")}</p>
         </div>
       ) : rooms.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-80 bg-white rounded-3xl border border-gray-100 shadow-sm">

@@ -45,13 +45,13 @@ export function GuestsPage() {
     const reason = window.prompt(t("guests.blacklistReasonPrompt", "Please enter a reason for blacklisting:")) || "";
     if (!reason.trim()) return;
     try { setActionLoadingId(guest.id); const info = await blacklistUser(guest.id, reason.trim()); setGuests(prev => prev.map(g => g.id === guest.id ? { ...g, blacklist: info } : g)); }
-    catch (err: any) { alert(err.message || "Failed."); } finally { setActionLoadingId(null); }
+    catch (err: any) { alert(err.message || t("guests.failed", "Failed.")); } finally { setActionLoadingId(null); }
   };
 
   const handleUnblacklist = async (guest: AdminGuest) => {
     if (!window.confirm(t("guests.confirmUnblacklist", "Remove this user from the blacklist?"))) return;
     try { setActionLoadingId(guest.id); await unblacklistUser(guest.id); setGuests(prev => prev.map(g => g.id === guest.id ? { ...g, blacklist: null } : g)); }
-    catch (err: any) { alert(err.message || "Failed."); } finally { setActionLoadingId(null); }
+    catch (err: any) { alert(err.message || t("guests.failed", "Failed.")); } finally { setActionLoadingId(null); }
   };
 
   const handleSaveOverride = async (guest: AdminGuest) => {
@@ -62,7 +62,7 @@ export function GuestsPage() {
       await setMaxStayOverride(guest.id, val);
       setGuests(prev => prev.map(g => g.id === guest.id ? { ...g, maxStayOverride: val } : g));
       setSelectedGuest(prev => prev && prev.id === guest.id ? { ...prev, maxStayOverride: val } : prev);
-    } catch (err: any) { alert(err.message || "Failed."); }
+    } catch (err: any) { alert(err.message || t("guests.failed", "Failed.")); }
     finally { setOverrideSaving(false); }
   };
 
@@ -70,7 +70,7 @@ export function GuestsPage() {
   const blacklistedCount = guests.filter(g => g.blacklist).length;
 
   const getInitials = (name: string) => {
-    if (!name || name === "Unknown guest") return "?";
+    if (!name || name === t("guests.unknownGuest", "Unknown guest")) return "?";
     const parts = name.trim().split(" ");
     return parts.length >= 2
       ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
@@ -135,12 +135,12 @@ export function GuestsPage() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 bg-white border border-gray-100 shadow-sm rounded-xl px-3.5 py-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-xs font-semibold text-gray-600">{totalCount - blacklistedCount} active</span>
+            <span className="text-xs font-semibold text-gray-600">{totalCount - blacklistedCount} {t("guests.stats.active", "active")}</span>
           </div>
           {blacklistedCount > 0 && (
             <div className="flex items-center gap-1.5 bg-white border border-red-100 shadow-sm rounded-xl px-3.5 py-2">
               <span className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="text-xs font-semibold text-red-600">{blacklistedCount} blocked</span>
+              <span className="text-xs font-semibold text-red-600">{blacklistedCount} {t("guests.stats.blocked", "blocked")}</span>
             </div>
           )}
         </div>
@@ -262,7 +262,7 @@ export function GuestsPage() {
             <Users className="h-8 w-8 text-gray-300" />
           </div>
           <p className="text-base font-semibold text-gray-600">{t("guests.noGuests", "No guests found.")}</p>
-          <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filters.</p>
+          <p className="text-sm text-gray-400 mt-1">{t("guests.emptyHint", "Try adjusting your search or filters.")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -326,14 +326,14 @@ export function GuestsPage() {
                   <div className="flex items-center gap-1.5 mb-4">
                     <UserCheck className="h-3.5 w-3.5 text-gray-400" />
                     <span className="text-xs text-gray-500">
-                      <span className="font-semibold text-gray-700">{g.reservations.length}</span> reservation{g.reservations.length !== 1 ? "s" : ""}
+                      {t("guests.reservationCount", { count: g.reservations.length, defaultValue: "{{count}} reservation" })}
                     </span>
                   </div>
 
                   {/* Blacklist reason */}
                   {isBlacklisted && g.blacklist?.reason && (
                     <div className="mb-3 bg-red-50 border border-red-100 rounded-xl p-2.5">
-                      <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-0.5">Reason</p>
+                      <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-0.5">{t("guests.reasonLabel", "Reason")}</p>
                       <p className="text-xs text-red-600 truncate">{g.blacklist.reason}</p>
                     </div>
                   )}

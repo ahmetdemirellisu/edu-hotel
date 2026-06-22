@@ -3,6 +3,7 @@ import campusBg from "@/assets/campus.png";
 import { DashboardHero } from "./DashboardHero";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
+import { SabanciLogo } from "./SabanciLogo";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { getMyLatestReservation, getUserReservations, type Reservation } from "../api/reservations";
@@ -20,7 +21,12 @@ import {
   Sparkles,
   User,
   Building2,
+  Info,
+  XCircle,
+  CheckCheck,
 } from "lucide-react";
+import { userFetch } from "../api/userFetch";
+import { loadSeenIds, markSeen, markManySeen, subscribeSeenChanges } from "../lib/notificationsSeen";
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -232,39 +238,78 @@ export function Dashboard() {
     },
   ];
 
-  /* ── Notifications (static) ──────────────────────────────────── */
-  const notifications = [
-    {
-      type: "success",
-      title: t("dashboard.notifications.approvedTitle", { defaultValue: "Reservation Approved" }),
-      message: t("dashboard.notifications.approvedMsg", { defaultValue: "Your reservation has been approved. Please proceed to payment if required." }),
-      time: t("dashboard.notifications.time1", { defaultValue: "2 hours ago" }),
-      icon: CheckCircle2,
-      accent: "#10b981",
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-    },
-    {
-      type: "warning",
-      title: t("dashboard.notifications.pendingTitle", { defaultValue: "Pending Review" }),
-      message: t("dashboard.notifications.pendingMsg", { defaultValue: "Your reservation request is awaiting admin approval." }),
-      time: t("dashboard.notifications.time2", { defaultValue: "1 day ago" }),
-      icon: Clock,
-      accent: "#f59e0b",
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-    },
-    {
-      type: "info",
-      title: t("dashboard.notifications.reminderTitle", { defaultValue: "Check-in Reminder" }),
-      message: t("dashboard.notifications.reminderMsg", { defaultValue: "Check-in is scheduled for 14:00 on your check-in date." }),
-      time: t("dashboard.notifications.time3", { defaultValue: "3 days ago" }),
-      icon: AlertCircle,
-      accent: "#3b82f6",
-      bg: "bg-blue-50",
-      border: "border-blue-200",
-    },
-  ];
+  /* ── Notifications (live, from backend) ──────────────────────── */
+  type BackendNotification = {
+    id: string;
+    type: "info" | "success" | "error" | "warning" | "reminder";
+    title: string;
+    titleTR: string;
+    message: string;
+    messageTR: string;
+    timestamp: string;
+    reservationId: number;
+    read: boolean;
+  };
+
+  const [liveNotifs, setLiveNotifs] = useState<BackendNotification[]>([]);
+  const [notifsLoading, setNotifsLoading] = useState(true);
+  const [notifSeenIds, setNotifSeenIds] = useState<Set<string>>(new Set());
+  const isTR = currentLang === "TR";
+
+  useEffect(() => {
+    if (!userId || isNaN(userId)) return;
+    setNotifSeenIds(loadSeenIds(userId));
+    return subscribeSeenChanges(userId, () => setNotifSeenIds(loadSeenIds(userId)));
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId || isNaN(userId)) { setNotifsLoading(false); return; }
+    (async () => {
+      try {
+        const res = await userFetch(`/ehp/api/notifications/user/${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLiveNotifs(data.notifications || []);
+        }
+      } catch {}
+      finally { setNotifsLoading(false); }
+    })();
+  }, [userId]);
+
+  const NOTIF_STYLE: Record<BackendNotification["type"], { icon: typeof Bell; accent: string; bg: string; border: string }> = {
+    success:  { icon: CheckCircle2, accent: "#10b981", bg: "#ecfdf5", border: "border-emerald-200" },
+    warning:  { icon: Clock,        accent: "#f59e0b", bg: "#fffbeb", border: "border-amber-200" },
+    info:     { icon: Info,         accent: "#3b82f6", bg: "#eff6ff", border: "border-blue-200" },
+    error:    { icon: XCircle,      accent: "#ef4444", bg: "#fef2f2", border: "border-red-200" },
+    reminder: { icon: AlertCircle,  accent: "#8b5cf6", bg: "#f5f3ff", border: "border-violet-200" },
+  };
+
+  const topNotifs = liveNotifs.slice(0, 3);
+  const notifsUnreadCount = liveNotifs.filter(n => !n.read && !notifSeenIds.has(n.id)).length;
+
+  function notifTimeAgo(ts: string): string {
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t("notifications.timeAgo.justNow");
+    if (mins < 60) return t("notifications.timeAgo.minutesAgo", { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t("notifications.timeAgo.hoursAgo", { count: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 7) return t("notifications.timeAgo.daysAgo", { count: days });
+    return new Date(ts).toLocaleDateString(isTR ? "tr-TR" : "en-GB", { day: "2-digit", month: "short" });
+  }
+
+  function handleNotifClick(n: BackendNotification) {
+    if (!userId || isNaN(userId)) return;
+    if (!notifSeenIds.has(n.id)) markSeen(userId, n.id);
+    navigate("/reservations");
+  }
+
+  function handleMarkAllNotifsRead() {
+    if (!userId || isNaN(userId)) return;
+    const ids = liveNotifs.filter(n => !n.read && !notifSeenIds.has(n.id)).map(n => n.id);
+    if (ids.length > 0) markManySeen(userId, ids);
+  }
 
   /* ── Announcements ───────────────────────────────────────────── */
   const announcements = [
@@ -389,17 +434,12 @@ export function Dashboard() {
             opacity: 0.6,
           }}
         />
-        <div className="max-w-7xl mx-auto px-6 py-3.5">
+        <div className="max-w-7xl mx-auto px-6 pt-4 pb-6">
           <div className="flex justify-between items-center">
             {/* Left — logo */}
             <Link to="/main" className="flex items-center gap-4 group">
-              <motion.div
-                whileHover={{ scale: 1.04 }}
-                className="border border-[#c9a84c]/60 px-3 py-1.5 rounded transition-all duration-300 group-hover:border-[#c9a84c] group-hover:shadow-[0_0_14px_rgba(201,168,76,0.25)]"
-                style={{ background: "rgba(201,168,76,0.08)" }}
-              >
-                <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">Üniversitesi</div>
+              <motion.div whileHover={{ scale: 1.04 }} className="transition-all duration-300">
+                <SabanciLogo size="sm" />
               </motion.div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
@@ -444,7 +484,7 @@ export function Dashboard() {
         </div>
       </motion.header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-10">
 
         {/* ═══ HERO WELCOME ════════════════════════════════════════ */}
         <DashboardHero
@@ -923,46 +963,98 @@ export function Dashboard() {
                   <h2 className="text-[14px] font-semibold tracking-tight">
                     {t("dashboard.notifications.title", { defaultValue: "Notifications" })}
                   </h2>
-                  <span className="ml-auto text-[10px] bg-white/15 px-2.5 py-1 rounded-full font-bold">
-                    {notifications.length} new
-                  </span>
+                  {notifsUnreadCount > 0 && (
+                    <span className="ml-auto text-[10px] bg-white/15 px-2.5 py-1 rounded-full font-bold">
+                      {notifsUnreadCount} {t("notificationBell.new", { defaultValue: "new" })}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="p-4 space-y-2.5 bg-white">
-                <AnimatePresence>
-                  {notifications.map((n, idx) => {
-                    const Icon = n.icon;
-                    return (
-                      <motion.div
-                        key={idx}
-                        variants={slideLeft}
-                        initial="hidden"
-                        animate="visible"
-                        custom={idx}
-                        whileHover={{ x: 4, transition: { duration: 0.15 } }}
-                        className={`rounded-xl p-4 border ${n.border} cursor-default`}
-                        style={{
-                          background: `${n.bg.replace("bg-", "")}`,
-                          borderLeft: `3px solid ${n.accent}`,
-                        }}
+                {notifsLoading ? (
+                  <div className="py-6 text-center text-[12px] text-gray-400">
+                    {t("common.loading", { defaultValue: "Loading..." })}
+                  </div>
+                ) : topNotifs.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <Bell className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-[12px] text-gray-400">
+                      {t("notificationBell.empty", { defaultValue: "No notifications" })}
+                    </p>
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    {topNotifs.map((n, idx) => {
+                      const cfg = NOTIF_STYLE[n.type] || NOTIF_STYLE.info;
+                      const Icon = cfg.icon;
+                      const isUnread = !n.read && !notifSeenIds.has(n.id);
+                      const title = isTR ? n.titleTR : n.title;
+                      const message = isTR ? n.messageTR : n.message;
+                      return (
+                        <motion.button
+                          key={n.id}
+                          type="button"
+                          onClick={() => handleNotifClick(n)}
+                          variants={slideLeft}
+                          initial="hidden"
+                          animate="visible"
+                          custom={idx}
+                          whileHover={{ x: 4, transition: { duration: 0.15 } }}
+                          className={`w-full text-left rounded-xl p-4 border ${cfg.border} cursor-pointer transition-colors`}
+                          style={{
+                            background: cfg.bg,
+                            borderLeft: `3px solid ${cfg.accent}`,
+                            opacity: isUnread ? 1 : 0.75,
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                              style={{ background: `${cfg.accent}16`, color: cfg.accent }}
+                            >
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2 mb-0.5">
+                                <p className={`text-[13px] truncate ${isUnread ? "font-semibold text-gray-800" : "font-medium text-gray-600"}`}>
+                                  {title}
+                                </p>
+                                {isUnread && (
+                                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cfg.accent }} />
+                                )}
+                              </div>
+                              <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-2">{message}</p>
+                              <p className="text-[11px] text-gray-400 mt-1.5 font-medium">{notifTimeAgo(n.timestamp)}</p>
+                            </div>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </AnimatePresence>
+                )}
+
+                {/* Footer actions */}
+                {!notifsLoading && liveNotifs.length > 0 && (
+                  <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
+                    {notifsUnreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleMarkAllNotifsRead}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-600 hover:text-[#003366] transition-colors px-2 py-1.5 rounded-md hover:bg-gray-50"
                       >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                            style={{ background: `${n.accent}16`, color: n.accent }}
-                          >
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-[13px] font-semibold text-gray-800 mb-0.5">{n.title}</p>
-                            <p className="text-[12px] text-gray-500 leading-relaxed">{n.message}</p>
-                            <p className="text-[11px] text-gray-400 mt-1.5 font-medium">{n.time}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
+                        <CheckCheck className="h-3 w-3" />
+                        {t("notificationBell.markAllRead", { defaultValue: "Mark all as read" })}
+                      </button>
+                    )}
+                    <Link
+                      to="/notifications"
+                      className="ml-auto inline-flex items-center gap-1 text-[11px] font-semibold text-[#003366] hover:text-[#004d99] transition-colors"
+                    >
+                      {t("notificationBell.viewAll", { defaultValue: "View all" })}
+                      <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                )}
               </div>
             </motion.div>
 

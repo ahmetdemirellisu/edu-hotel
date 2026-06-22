@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
+import { SabanciLogo } from "./SabanciLogo";
+import { PhoneInput } from "./ui/PhoneInput";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import {
@@ -240,13 +242,7 @@ export function MyAccount() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <div
-                  className="border border-[#c9a84c]/55 px-3 py-1.5 rounded transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_14px_rgba(201,168,76,0.2)]"
-                  style={{ background: "rgba(201,168,76,0.07)" }}
-                >
-                  <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                  <div className="text-[10px] text-[#c9a84c]/70 leading-tight">Üniversitesi</div>
-                </div>
+                <SabanciLogo size="sm" />
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                   EDU HOTEL
@@ -471,18 +467,12 @@ export function MyAccount() {
                       <Label htmlFor="phone" className="text-[11px] font-bold text-gray-500 uppercase tracking-[2px]">
                         {t("account.profile.phone")}
                       </Label>
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <Smartphone className="h-5 w-5 text-gray-400 group-focus-within:text-[#003366] transition-colors" />
-                        </div>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={userData.phone}
-                          onChange={handleInputChange}
-                          className="account-input-field w-full h-12 !pl-12 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-800 text-sm"
-                        />
-                      </div>
+                      <PhoneInput
+                        value={userData.phone || ""}
+                        onChange={(next) => setUserData((prev) => ({ ...prev, phone: next }))}
+                        triggerClassName="flex items-center gap-2 h-12 px-3 rounded-l-xl border border-r-0 border-gray-200/80 bg-gray-50/80 text-sm font-semibold text-gray-800 hover:bg-gray-100/60 transition-all"
+                        inputClassName="flex-1 h-12 px-4 rounded-r-xl border border-gray-200/80 text-sm bg-gray-50/80 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all"
+                      />
                     </div>
 
                     {/* T.C. Kimlik No */}

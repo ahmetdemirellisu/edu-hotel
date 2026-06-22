@@ -10,44 +10,65 @@ const prisma = new PrismaClient();
 /**
  * --------------------------------------------------------------------------
  * GET /users/search
- * Search users by ID, email, or name
- * Used in BlacklistPage modal autocomplete
- * Example:
+ * Search users by ID, email, or name. Supports filtering by role.
+ *
+ * Used by:
+ *   - BlacklistPage modal autocomplete (requires query)
+ *   - AdminUsersPage (browses by role with empty query)
+ *
+ * Examples:
  *   /users/search?query=john
+ *   /users/search?role=ADMIN,HOTEL_STAFF                — no query, role filter only
+ *   /users/search?query=jane&role=USER
+ *
+ * Empty queries with a role filter return all users matching the roles
+ * (capped at 200 rows for safety). Empty queries with no role filter
+ * still return [] to avoid accidentally returning all users.
+ *
+ * Includes createdAt so AdminUsersPage can show "Member since".
  * --------------------------------------------------------------------------
  */
 router.get("/search", requireAdmin, async (req, res) => {
   try {
     const query = String(req.query.query || "").trim();
+    const roleParam = String(req.query.role || "").trim();
+    const validRoles = ["USER", "ADMIN", "HOTEL_STAFF"];
+    const roles = roleParam
+      ? roleParam.split(",").map((r) => r.trim().toUpperCase()).filter((r) => validRoles.includes(r))
+      : [];
 
-    if (!query || query.length < 2) {
+    // Empty query AND no role filter → return [] (don't dump the whole user table).
+    if ((!query || query.length < 2) && roles.length === 0) {
       return res.json([]);
     }
 
-    const orConditions = [];
-
-    const asNumber = Number(query);
-    if (!isNaN(asNumber)) {
-      orConditions.push({ id: asNumber });
+    const where = {};
+    if (roles.length > 0) {
+      where.role = { in: roles };
     }
-
-    orConditions.push(
+    if (query && query.length >= 2) {
+      const orConditions = [];
+      const asNumber = Number(query);
+      if (!isNaN(asNumber)) orConditions.push({ id: asNumber });
+      orConditions.push(
         { email: { contains: query, mode: "insensitive" } },
         { name: { contains: query, mode: "insensitive" } }
-    );
+      );
+      where.OR = orConditions;
+    }
 
     const users = await prisma.user.findMany({
-      where: {
-        OR: orConditions,
-      },
+      where,
       select: {
         id: true,
         name: true,
         email: true,
         userType: true,
         role: true,
+        createdAt: true,
       },
       orderBy: { id: "asc" },
+      take: 200,
     });
 
     res.json(users);

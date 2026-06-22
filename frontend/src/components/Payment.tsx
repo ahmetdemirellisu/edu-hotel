@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
+import { SabanciLogo } from "./SabanciLogo";
+import { CardNumberInput, type CardBrand } from "./ui/CardNumberInput";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
-import { BANK } from "../config/bank";
+import { fetchPublicSettings, SETTINGS_FALLBACK, type PublicSettings } from "../api/settings";
 import {
   Select,
   SelectContent,
@@ -85,6 +87,17 @@ export function Payment() {
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  // Live bank details — admin-editable in the Settings page.
+  const [hotelSettings, setHotelSettings] = useState<PublicSettings>(SETTINGS_FALLBACK);
+  const BANK = {
+    bankName: hotelSettings.bankName,
+    accountName: hotelSettings.accountHolder,
+    iban: hotelSettings.iban,
+  };
+
+  useEffect(() => {
+    fetchPublicSettings().then(setHotelSettings).catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function loadReservation() {
@@ -123,6 +136,13 @@ export function Payment() {
       year: "numeric",
     });
   };
+
+  // Card-details preview state (UI-only — no real processor wired yet)
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [, setCardBrand] = useState<CardBrand>("unknown");
 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -250,13 +270,8 @@ export function Payment() {
         <div className="max-w-7xl mx-auto px-6 py-3.5">
           <div className="flex justify-between items-center">
             <Link to="/main" className="flex items-center gap-4 group">
-              <motion.div
-                whileHover={{ scale: 1.04 }}
-                className="border border-[#c9a84c]/60 px-3 py-1.5 rounded transition-all duration-300 group-hover:border-[#c9a84c] group-hover:shadow-[0_0_14px_rgba(201,168,76,0.25)]"
-                style={{ background: "rgba(201,168,76,0.08)" }}
-              >
-                <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-                <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">Üniversitesi</div>
+              <motion.div whileHover={{ scale: 1.04 }} className="transition-all duration-300">
+                <SabanciLogo size="sm" />
               </motion.div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
@@ -617,6 +632,112 @@ export function Payment() {
                   </div>
                   <p className="text-[12px] text-[#7a5200] leading-relaxed font-medium">
                     {t("payment.paymentRef", { id: reservation.id })}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Card Details Card (UI-only preview with live brand detection) ── */}
+            <div
+              className="bg-white rounded-3xl overflow-hidden"
+              style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.04), 0 20px 50px -10px rgba(0,51,102,0.08)" }}
+            >
+              <div
+                className="px-6 py-5 flex items-center gap-3"
+                style={{ background: "linear-gradient(135deg, #001a3a 0%, #003366 100%)" }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.25)" }}>
+                  <CreditCard className="h-5 w-5 text-[#c9a84c]" />
+                </div>
+                <div>
+                  <h2 className="text-white text-[15px] font-bold">
+                    {t("payment.card.title", { defaultValue: "Pay with card" })}
+                  </h2>
+                  <p className="text-white/40 text-[11px]">
+                    {t("payment.card.subtitle", { defaultValue: "We detect Visa, Mastercard, Amex and Discover automatically." })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {/* Card number with live brand badge */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[2px]" htmlFor="card-number">
+                    {t("payment.card.number", { defaultValue: "Card number" })}
+                  </label>
+                  <CardNumberInput
+                    id="card-number"
+                    value={cardNumber}
+                    onChange={setCardNumber}
+                    onBrandChange={setCardBrand}
+                  />
+                </div>
+
+                {/* Card holder name */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[2px]" htmlFor="card-name">
+                    {t("payment.card.holder", { defaultValue: "Card holder name" })}
+                  </label>
+                  <input
+                    id="card-name"
+                    type="text"
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                    placeholder={t("payment.card.holderPlaceholder", { defaultValue: "JOHN SMITH" })}
+                    autoComplete="cc-name"
+                    className="w-full h-11 px-3 rounded-xl border border-gray-200 text-sm bg-gray-50 tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all"
+                  />
+                </div>
+
+                {/* Expiry + CVV */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[2px]" htmlFor="card-expiry">
+                      {t("payment.card.expiry", { defaultValue: "Expiry (MM/YY)" })}
+                    </label>
+                    <input
+                      id="card-expiry"
+                      type="text"
+                      value={cardExpiry}
+                      onChange={(e) => {
+                        // Auto-format MM/YY
+                        const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
+                        const formatted = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+                        setCardExpiry(formatted);
+                      }}
+                      placeholder="MM/YY"
+                      autoComplete="cc-exp"
+                      inputMode="numeric"
+                      maxLength={5}
+                      className="w-full h-11 px-3 rounded-xl border border-gray-200 text-sm bg-gray-50 font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[2px]" htmlFor="card-cvv">
+                      CVV
+                    </label>
+                    <input
+                      id="card-cvv"
+                      type="text"
+                      value={cardCvv}
+                      onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      placeholder="•••"
+                      autoComplete="cc-csc"
+                      inputMode="numeric"
+                      maxLength={4}
+                      className="w-full h-11 px-3 rounded-xl border border-gray-200 text-sm bg-gray-50 font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* UI-only notice */}
+                <div className="rounded-2xl px-4 py-3 flex items-start gap-2.5" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.22)" }}>
+                  <Shield className="h-4 w-4 text-[#7a5200] mt-0.5 flex-shrink-0" />
+                  <p className="text-[11.5px] text-[#7a5200] leading-relaxed">
+                    {t("payment.card.notice", {
+                      defaultValue:
+                        "Card form is for preview only. Complete your payment by transferring to the bank account above and uploading the receipt below.",
+                    })}
                   </p>
                 </div>
               </div>

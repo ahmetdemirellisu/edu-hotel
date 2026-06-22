@@ -35,6 +35,8 @@ services:
       SMTP_FROM: "EDU HOTEL <${EMAIL_USER:-}>"
       ADMIN_USER: ${ADMIN_USER:-}
       ADMIN_PASS: ${ADMIN_PASS:-}
+      # Used in transactional emails (e.g. password reset link). Override via env if needed.
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8004/ehp}
     volumes:
       - ./paymentRecieptsPending:/paymentRecieptsPending
       - ./paymentRecieptsAprooved:/paymentRecieptsAprooved

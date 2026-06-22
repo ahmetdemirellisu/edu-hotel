@@ -263,7 +263,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                   {card.trend && !loadingStats && (
                     <div className="flex items-center gap-1 mt-1">
                       <ArrowUpRight className="h-3 w-3 text-emerald-500" />
-                      <span className="text-[11px] text-emerald-600 font-medium">{card.trend} this week</span>
+                      <span className="text-[11px] text-emerald-600 font-medium">{card.trend} {t("pages.dashboard.thisWeek", "this week")}</span>
                     </div>
                   )}
                 </div>
@@ -274,7 +274,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
               {card.action && (
                 <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-gray-400 group-hover:text-gray-600 transition-colors">
-                  <span>View all</span>
+                  <span>{t("pages.dashboard.viewAll", "View all")}</span>
                   <ArrowRight className="h-3 w-3" />
                 </div>
               )}
@@ -326,7 +326,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 <Calendar className="h-7 w-7 text-gray-300" />
               </div>
               <p className="text-sm font-medium text-gray-500">{t("pages.dashboard.noReservationsYet")}</p>
-              <p className="text-xs text-gray-400 mt-1">No reservations have been made yet.</p>
+              <p className="text-xs text-gray-400 mt-1">{t("pages.dashboard.noReservationsYetSub", "No reservations have been made yet.")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -523,7 +523,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           {
             icon: Calendar,
             title: t("pages.dashboard.actions.viewCalendar", "Calendar"),
-            desc: "View room availability over time",
+            desc: t("pages.dashboard.actions.viewCalendarDesc", "View room availability over time"),
             gradient: "from-emerald-400 to-teal-500",
             bg: "bg-gradient-to-br from-emerald-50 to-teal-50",
             iconBg: "bg-gradient-to-br from-emerald-400 to-teal-500",
@@ -532,7 +532,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           {
             icon: CreditCard,
             title: t("pages.dashboard.actions.pendingPayments", "Payments"),
-            desc: "Verify and process receipts",
+            desc: t("pages.dashboard.actions.pendingPaymentsDesc", "Verify and process receipts"),
             gradient: "from-amber-400 to-orange-500",
             bg: "bg-gradient-to-br from-amber-50 to-orange-50",
             iconBg: "bg-gradient-to-br from-amber-400 to-orange-500",
@@ -540,8 +540,8 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           },
           {
             icon: Users,
-            title: "Guests",
-            desc: "Manage guests and access levels",
+            title: t("pages.dashboard.actions.guests", "Guests"),
+            desc: t("pages.dashboard.actions.guestsDesc", "Manage guests and access levels"),
             gradient: "from-blue-400 to-blue-600",
             bg: "bg-gradient-to-br from-blue-50 to-sky-50",
             iconBg: "bg-gradient-to-br from-blue-400 to-blue-600",
@@ -550,7 +550,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           {
             icon: BedDouble,
             title: t("pages.dashboard.actions.manageRooms", "Rooms"),
-            desc: "Floor plan and room status",
+            desc: t("pages.dashboard.actions.manageRoomsDesc", "Floor plan and room status"),
             gradient: "from-violet-400 to-purple-500",
             bg: "bg-gradient-to-br from-violet-50 to-purple-50",
             iconBg: "bg-gradient-to-br from-violet-400 to-purple-500",
@@ -570,7 +570,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               <h4 className="text-[14px] font-bold text-gray-900 mb-0.5">{nav.title}</h4>
               <p className="text-[11px] text-gray-500 leading-snug">{nav.desc}</p>
               <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-gray-400 group-hover:text-gray-600 transition-colors">
-                <span>Open</span>
+                <span>{t("pages.dashboard.open", "Open")}</span>
                 <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform duration-150" />
               </div>
             </button>

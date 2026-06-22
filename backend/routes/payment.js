@@ -87,6 +87,9 @@ router.post(
 
           const subject = `EDU Hotel – Payment receipt received #${reservation.id} / Ödeme dekontu alındı #${reservation.id}`;
 
+          const hasGuestNote = typeof reservation.note === "string" && reservation.note.trim().length > 0;
+          const hasAdminNote = typeof reservation.adminNote === "string" && reservation.adminNote.trim().length > 0;
+
           const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
 <p style="margin:0 0 20px;color:#475569;">We have received your payment receipt and it is now awaiting verification by our administration team. You will be notified by email once it is reviewed.</p>
@@ -96,6 +99,8 @@ ${detailTable([
     row('Reservation ID', `#${reservation.id}`),
     row('Check-in',       checkInStr),
     row('Check-out',      checkOutStr),
+    row('Your note',      hasGuestNote ? reservation.note : null),
+    row('Admin note',     hasAdminNote ? reservation.adminNote : null),
 ])}
 <p style="margin:0;font-size:13px;color:#475569;">Verification is typically completed within 1 business day. If you have any questions, contact us at <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a>.</p>`;
 
@@ -108,6 +113,8 @@ ${detailTable([
     row('Rezervasyon No', `#${reservation.id}`),
     row('Giriş',          checkInStr),
     row('Çıkış',          checkOutStr),
+    row('Notunuz',        hasGuestNote ? reservation.note : null),
+    row('Yönetici notu',  hasAdminNote ? reservation.adminNote : null),
 ])}
 <p style="margin:0;font-size:13px;color:#475569;">Doğrulama genellikle 1 iş günü içinde tamamlanır. Sorularınız için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
@@ -118,6 +125,8 @@ ${detailTable([
             ``,
             `Check-in:  ${checkInStr}`,
             `Check-out: ${checkOutStr}`,
+            hasGuestNote ? `Your note:  ${reservation.note}`      : null,
+            hasAdminNote ? `Admin note: ${reservation.adminNote}` : null,
             ``,
             `Verification is typically completed within 1 business day. You will be notified by email once confirmed.`,
             ``,
@@ -129,9 +138,11 @@ ${detailTable([
             ``,
             `Giriş:  ${checkInStr}`,
             `Çıkış:  ${checkOutStr}`,
+            hasGuestNote ? `Notunuz:        ${reservation.note}`      : null,
+            hasAdminNote ? `Yönetici notu:  ${reservation.adminNote}` : null,
             ``,
             `Doğrulama genellikle 1 iş günü içinde tamamlanır. Sonuç e-posta ile bildirilecektir.`,
-          ].join('\n');
+          ].filter(l => l !== null).join('\n');
 
           const html = emailTemplate(bodyEN, bodyTR);
           sendMailAsync({ to: reservation.user.email, subject, text, html });

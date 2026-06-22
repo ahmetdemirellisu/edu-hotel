@@ -22,6 +22,19 @@ model User {
   maxStayOverride Int?
   blacklist       Blacklist?
   reservations    Reservation[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Room {
@@ -69,8 +82,23 @@ model Reservation {
   billingTitle      String?
   billingAddress    String?
   identityDoc       String?
+  adminNote         String?
   room              Room?             @relation(fields: [roomId], references: [id])
   user              User              @relation(fields: [userId], references: [id])
+  identityDocuments IdentityDocument[]
+}
+
+model IdentityDocument {
+  id            Int         @id @default(autoincrement())
+  reservationId Int
+  guestIndex    Int
+  fileName      String
+  mimeType      String
+  sizeBytes     Int
+  uploadedAt    DateTime    @default(now())
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@unique([reservationId, guestIndex])
 }
 
 model Blacklist {
@@ -80,6 +108,35 @@ model Blacklist {
   addedAt   DateTime  @default(now())
   expiresAt DateTime?
   user      User      @relation(fields: [userId], references: [id])
+}
+
+// Single-row table holding all admin-configurable hotel settings.
+// Always read/write the row where id = 1.
+model Settings {
+  id                Int      @id @default(1)
+  // Hotel identity
+  hotelName         String   @default("EDU Hotel")
+  contactEmail      String   @default("hotel@sabanciuniv.edu")
+  contactPhone      String   @default("+90 (216) 483 9000")
+  // Booking rules
+  maxAdvanceDays    Int      @default(30)
+  maxStayNights     Int      @default(5)
+  autoApprove       Boolean  @default(false)
+  // Notifications
+  emailNotifications Boolean @default(true)
+  // Banking (Payment page)
+  bankName          String   @default("Akbank T.A.Ş.")
+  accountHolder     String   @default("Sabtek A.Ş.")
+  iban              String   @default("TR85 0004 6007 1388 8000 1139 89")
+  // Guest-facing info
+  checkInTime       String   @default("14:00")
+  checkOutTime      String   @default("12:00")
+  wifiSsid          String   @default("EDU-Hotel-Guest")
+  wifiPassword      String   @default("Welcome2026")
+  breakfastHours    String   @default("07:30 – 10:00")
+  receptionHours    String   @default("24/7")
+  // Bookkeeping
+  updatedAt         DateTime @updatedAt
 }
 
 enum ReservationStatus {

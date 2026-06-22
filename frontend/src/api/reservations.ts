@@ -75,9 +75,23 @@ export interface ReservationPayload {
  * Reservation object returned from backend.
  * Keep it aligned with schema.prisma fields.
  */
+export interface IdentityDocumentRow {
+  id: number;
+  reservationId: number;
+  guestIndex: number;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedAt: string;
+}
+
 export interface Reservation extends ReservationPayload {
   id: number;
   roomId: number | null;
+  roomIds?: number[] | null;
+  identityDoc?: string | null;          // legacy single-doc field (pre-Round 3 reservations)
+  identityDocuments?: IdentityDocumentRow[];
+  adminNote?: string | null;            // admin-authored note, separate from guest's `note`
   status: ReservationStatus;
   paymentStatus: PaymentStatus;
   price?: number | null;
@@ -168,14 +182,69 @@ export async function getAdminReservations(params?: {
   return res.json();
 }
 
+/**
+ * Payload for the admin-side reservation creation page.
+ * Every field is optional except dates, guests, and an email (the email anchors
+ * the find-or-create user lookup so the reservation always belongs to a user).
+ */
+export interface AdminCreateReservationPayload {
+  forSelf?: boolean;
+  guestType?: GuestType;
+  // Guest contact
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  contactEmail: string;
+  // Dates
+  checkIn: string;
+  checkOut: string;
+  checkInTime?: string;
+  // Stay
+  guests: number;
+  eventCode?: string;
+  eventType?: string;
+  priceType?: string;
+  note?: string;
+  adminNote?: string;
+  freeAccommodation?: boolean;
+  guestList?: GuestListItem[];
+  // Billing
+  invoiceType?: InvoiceType;
+  nationalId?: string;
+  taxNumber?: string;
+  billingTitle?: string;
+  billingAddress?: string;
+  // Pricing
+  price?: number;
+}
+
+export async function adminCreateReservation(
+  payload: AdminCreateReservationPayload
+): Promise<Reservation> {
+  const res = await adminFetch(`${API_BASE_URL}/reservations/admin/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(await parseError(res, "Failed to create reservation"));
+  }
+  return res.json();
+}
+
 export async function approveReservation(
   id: number,
-  price?: number
+  price?: number,
+  adminNote?: string
 ): Promise<Reservation> {
+  const body: Record<string, unknown> = {};
+  if (price !== undefined) body.price = price;
+  if (adminNote && adminNote.trim()) body.adminNote = adminNote.trim();
+
   const res = await adminFetch(`${API_BASE_URL}/reservations/admin/${id}/approve`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(price !== undefined ? { price } : {}),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -204,9 +273,14 @@ export async function rejectReservation(
 
 export async function assignRoom(
   reservationId: number,
-  rooms: number | number[]
+  rooms: number | number[],
+  adminNote?: string
 ): Promise<Reservation> {
-  const body = Array.isArray(rooms) ? { roomIds: rooms } : { roomId: rooms };
+  const body: Record<string, unknown> = Array.isArray(rooms)
+    ? { roomIds: rooms }
+    : { roomId: rooms };
+  if (adminNote && adminNote.trim()) body.adminNote = adminNote.trim();
+
   const res = await adminFetch(`${API_BASE_URL}/reservations/admin/${reservationId}/assign-room`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

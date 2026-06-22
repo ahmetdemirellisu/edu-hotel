@@ -18,6 +18,7 @@ import {
   User,
   Bed,
   CalendarDays,
+  Shield,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -54,14 +55,48 @@ export function ReservationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AdminReservation | null>(null);
 
-  // Approve modal with price
+  // Approve modal with price + admin note
   const [approveModalId, setApproveModalId] = useState<number | null>(null);
   const [priceInput, setPriceInput] = useState<string>("");
+  const [approveAdminNote, setApproveAdminNote] = useState<string>("");
 
-  // Room assignment modal
+  // Admin note input for the assignment modal
+  const [assignAdminNote, setAssignAdminNote] = useState<string>("");
+
+  // Room assignment modal (multi-select)
   const [assignModalId, setAssignModalId] = useState<number | null>(null);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(false);
+  const [selectedRoomIds, setSelectedRoomIds] = useState<number[]>([]);
+
+  // Page-level rooms list for resolving roomIds -> names in table/detail view
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
+  useEffect(() => {
+    getRooms().then(setAllRooms).catch(() => setAllRooms([]));
+  }, []);
+  const roomNameById = useMemo(() => {
+    const m = new Map<number, string>();
+    allRooms.forEach(r => m.set(r.id, r.name));
+    return m;
+  }, [allRooms]);
+  const resolveRoomNames = (res: AdminReservation): string[] => {
+    const ids = Array.isArray((res as any).roomIds) && (res as any).roomIds.length > 0
+      ? (res as any).roomIds as number[]
+      : (res.roomId ? [res.roomId] : []);
+    return ids.map(id => roomNameById.get(id) || `#${id}`);
+  };
+
+  const assignReservation = useMemo(
+    () => reservations.find((r) => r.id === assignModalId) || null,
+    [assignModalId, reservations]
+  );
+  const selectedCapacity = useMemo(
+    () =>
+      availableRooms
+        .filter((r) => selectedRoomIds.includes(r.id))
+        .reduce((sum, r) => sum + (r.capacity || 1), 0),
+    [availableRooms, selectedRoomIds]
+  );
 
   useEffect(() => {
     (async () => {
@@ -100,6 +135,7 @@ export function ReservationsPage() {
   const handleApproveClick = (id: number) => {
     setApproveModalId(id);
     setPriceInput("");
+    setApproveAdminNote("");
   };
 
   const handleApproveConfirm = async () => {
@@ -112,7 +148,7 @@ export function ReservationsPage() {
     try {
       setActionLoadingId(approveModalId);
       setError(null);
-      const updated = await approveReservation(approveModalId, parsedPrice);
+      const updated = await approveReservation(approveModalId, parsedPrice, approveAdminNote);
       setReservations(prev => prev.map(r => r.id === approveModalId ? { ...r, ...updated } as AdminReservation : r));
       setApproveModalId(null);
       toast.success(t("reservations.toasts.approved", { id: `#${approveModalId}` }));
@@ -138,6 +174,8 @@ export function ReservationsPage() {
 
   const handleAssignClick = async (id: number) => {
     setAssignModalId(id);
+    setSelectedRoomIds([]);
+    setAssignAdminNote("");
     setRoomsLoading(true);
     try {
       const all = await getRooms();
@@ -147,14 +185,27 @@ export function ReservationsPage() {
     finally { setRoomsLoading(false); }
   };
 
-  const handleAssignConfirm = async (roomId: number) => {
-    if (!assignModalId) return;
+  const toggleRoomSelection = (roomId: number) => {
+    setSelectedRoomIds(prev =>
+      prev.includes(roomId) ? prev.filter(id => id !== roomId) : [...prev, roomId]
+    );
+  };
+
+  const closeAssignModal = () => {
+    setAssignModalId(null);
+    setSelectedRoomIds([]);
+    setAssignAdminNote("");
+  };
+
+  const handleAssignConfirm = async () => {
+    if (!assignModalId || selectedRoomIds.length === 0) return;
     try {
       setActionLoadingId(assignModalId);
-      const updated = await assignRoom(assignModalId, roomId);
+      const updated = await assignRoom(assignModalId, selectedRoomIds, assignAdminNote);
       setReservations(prev => prev.map(r => r.id === assignModalId ? { ...r, ...updated } as AdminReservation : r));
-      setAssignModalId(null);
-      toast.success(t("reservations.toasts.roomAssigned", { id: `#${assignModalId}`, defaultValue: `Room assigned to #${assignModalId}` }));
+      const assignedId = assignModalId;
+      closeAssignModal();
+      toast.success(t("reservations.toasts.roomAssigned", { id: `#${assignedId}`, defaultValue: `Room(s) assigned to #${assignedId}` }));
     } catch (err: any) {
       toast.error(err.message || "Failed to assign room.");
     } finally { setActionLoadingId(null); }
@@ -431,14 +482,27 @@ export function ReservationsPage() {
                       <td className="py-3.5 px-4"><StatusBadge status={res.status} /></td>
                       <td className="py-3.5 px-4"><PaymentBadge status={ps} /></td>
                       <td className="py-3.5 px-4">
-                        {res.room ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
-                            <Bed className="h-3 w-3 text-gray-400" />
-                            {res.room.name}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-gray-400">—</span>
-                        )}
+                        {(() => {
+                          const names = resolveRoomNames(res);
+                          if (names.length === 0) return <span className="text-[10px] text-gray-400">—</span>;
+                          if (names.length === 1) {
+                            return (
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
+                                <Bed className="h-3 w-3 text-gray-400" />
+                                {names[0]}
+                              </span>
+                            );
+                          }
+                          return (
+                            <span
+                              title={names.join(", ")}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-lg"
+                            >
+                              <Bed className="h-3 w-3 text-blue-500" />
+                              {names[0]} <span className="text-blue-600">+{names.length - 1}</span>
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="py-3.5 pr-6 px-4">
                         <div className="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity duration-150">
@@ -514,23 +578,40 @@ export function ReservationsPage() {
                 </div>
               </div>
             </div>
-            <div className="px-6 py-5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">{t("reservations.approveModal.priceLabel")}</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder={t("reservations.approveModal.pricePlaceholder")}
-                value={priceInput}
-                onChange={e => setPriceInput(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all"
-              />
-              <p className="text-[10px] text-gray-400 mt-2">{t("reservations.approveModal.priceHint")}</p>
-              {priceInput.trim() && (isNaN(parseFloat(priceInput)) || parseFloat(priceInput) <= 0) && (
-                <p className="text-[11px] text-red-500 font-semibold mt-1">
-                  {t("reservations.approveModal.priceRequired", { defaultValue: "Enter a valid price greater than 0." })}
-                </p>
-              )}
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">{t("reservations.approveModal.priceLabel")}</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder={t("reservations.approveModal.pricePlaceholder")}
+                  value={priceInput}
+                  onChange={e => setPriceInput(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all"
+                />
+                <p className="text-[10px] text-gray-400 mt-2">{t("reservations.approveModal.priceHint")}</p>
+                {priceInput.trim() && (isNaN(parseFloat(priceInput)) || parseFloat(priceInput) <= 0) && (
+                  <p className="text-[11px] text-red-500 font-semibold mt-1">
+                    {t("reservations.approveModal.priceRequired", { defaultValue: "Enter a valid price greater than 0." })}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+                  {t("reservations.approveModal.adminNoteLabel", { defaultValue: "Admin note (optional)" })}
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder={t("reservations.approveModal.adminNotePlaceholder", { defaultValue: "Visible to the guest in the approval and confirmation emails." })}
+                  value={approveAdminNote}
+                  onChange={e => setApproveAdminNote(e.target.value)}
+                  maxLength={500}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-300 bg-gray-50 transition-all resize-none"
+                />
+                <p className="text-[10px] text-gray-400 mt-1 text-right">{approveAdminNote.length} / 500</p>
+              </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2">
               <button onClick={() => setApproveModalId(null)} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-white transition-colors">
@@ -599,7 +680,19 @@ export function ReservationsPage() {
                   <div className="space-y-2.5">
                     <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
                     {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.checkInLabel")}: {(selected as any).checkInTime}</div>}
-                    {selected.room && <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("tables.room")} {selected.room.name} ({selected.room.type})</div>}
+                    {(() => {
+                      const names = resolveRoomNames(selected);
+                      if (names.length === 0) return null;
+                      if (names.length === 1 && selected.room) {
+                        return <div className="flex items-center gap-2 text-sm text-gray-700"><MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("tables.room")} {selected.room.name} ({selected.room.type})</div>;
+                      }
+                      return (
+                        <div className="flex items-start gap-2 text-sm text-gray-700">
+                          <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                          <span>{t("tables.room")}: {names.join(", ")}</span>
+                        </div>
+                      );
+                    })()}
                     <div className="flex items-center gap-2 text-sm text-gray-700"><Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{getAccomLabel(selected.accommodationType)} / {selected.invoiceType === "INDIVIDUAL" ? t("reservations.invoiceTypes.individual") : t("reservations.invoiceTypes.corporate")}</div>
                   </div>
                 </div>
@@ -635,11 +728,111 @@ export function ReservationsPage() {
                 </div>
               )}
 
-              {/* Note */}
+              {/* Identity documents (per-guest) */}
+              {(() => {
+                const docs = ((selected as any).identityDocuments || []) as Array<{
+                  id: number; guestIndex: number; fileName: string; mimeType: string; sizeBytes: number; uploadedAt: string;
+                }>;
+                const legacy = (selected as any).identityDoc as string | null | undefined;
+                if (docs.length === 0 && !legacy) return null;
+
+                // Resolve guest name by index: 0 = primary; 1..N from guestList[i-1]
+                const primaryName = joinName((selected as any).firstName, (selected as any).lastName);
+                const gl: Array<{ firstName?: string; lastName?: string }> = Array.isArray((selected as any).guestList)
+                  ? (selected as any).guestList
+                  : [];
+                const labelFor = (idx: number) => {
+                  if (idx === 0) return primaryName !== "—" ? `Guest 1 — ${primaryName}` : "Guest 1";
+                  const entry = gl[idx - 1];
+                  const nm = entry ? joinName(entry.firstName, entry.lastName) : "—";
+                  return nm !== "—" ? `Guest ${idx + 1} — ${nm}` : `Guest ${idx + 1}`;
+                };
+
+                const API_BASE = (import.meta as any).env?.VITE_API_URL || "/ehp/api";
+                // /view-identity is mounted at the express root, alongside /reservations etc.
+                // VITE_API_URL points at the express root in dev/prod, so the file URL is:
+                const fileUrlFor = (fileName: string) => {
+                  const token = sessionStorage.getItem("adminToken");
+                  // The view route is admin-guarded via Authorization header. Use fetch + blob to download,
+                  // since <a href> can't send an Authorization header.
+                  return async () => {
+                    try {
+                      const res = await fetch(`${API_BASE.replace(/\/$/, "")}/view-identity/${encodeURIComponent(fileName)}`, {
+                        headers: token ? { Authorization: `Bearer ${token}` } : {},
+                      });
+                      if (!res.ok) throw new Error("Failed to fetch document");
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, "_blank", "noopener,noreferrer");
+                      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+                    } catch (e) {
+                      toast.error("Failed to open document.");
+                    }
+                  };
+                };
+
+                return (
+                  <div className="mt-5 pt-4 border-t border-gray-100">
+                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                      {t("reservations.detail.identityDocuments", { defaultValue: "Identity Documents" })}
+                    </h4>
+
+                    {docs.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {docs.map(d => (
+                          <button
+                            key={d.id}
+                            onClick={fileUrlFor(d.fileName)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-left"
+                          >
+                            <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[12px] font-semibold text-gray-800 truncate">{labelFor(d.guestIndex)}</p>
+                              <p className="text-[10px] text-gray-400 truncate">{d.fileName}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {docs.length === 0 && legacy && (
+                      <button
+                        onClick={fileUrlFor(legacy)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-all text-left w-full sm:w-1/2"
+                      >
+                        <FileText className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-semibold text-amber-800 truncate">
+                            {t("reservations.detail.legacyIdentityDoc", { defaultValue: "Legacy ID document (single)" })}
+                          </p>
+                          <p className="text-[10px] text-amber-700/80 truncate">{legacy}</p>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Guest note */}
               {(selected as any).note && (
                 <div className="mt-5 pt-4 border-t border-gray-100">
-                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t("reservations.detail.note")}</h4>
+                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                    {t("reservations.detail.guestNote", { defaultValue: "Guest's note" })}
+                  </h4>
                   <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">{(selected as any).note}</p>
+                </div>
+              )}
+
+              {/* Admin note */}
+              {(selected as any).adminNote && (
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <h4 className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Shield className="h-3 w-3" />
+                    {t("reservations.detail.adminNote", { defaultValue: "Admin note" })}
+                  </h4>
+                  <p className="text-sm text-gray-700 bg-blue-50/60 border border-blue-100 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
+                    {(selected as any).adminNote}
+                  </p>
                 </div>
               )}
 
@@ -675,46 +868,134 @@ export function ReservationsPage() {
         </div>
       )}
 
-      {/* ── Room Assignment Modal ──────────────── */}
+      {/* ── Room Assignment Modal (multi-select) ──────────────── */}
       {assignModalId !== null && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          onClick={() => setAssignModalId(null)}
+          onClick={closeAssignModal}
           style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
         >
           <div
-            className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50">
-              <h3 className="text-lg font-bold text-gray-900">{t("reservations.assignRoom", "Assign Room")}</h3>
-              <button onClick={() => setAssignModalId(null)} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/50 flex-shrink-0">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{t("reservations.assignRoom", "Assign Room(s)")}</h3>
+                {assignReservation && (
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {t("reservations.assignModal.forReservation", { defaultValue: "For reservation" })} #{assignReservation.id} · {assignReservation.guests} {t("reservations.assignModal.guests", { defaultValue: "guest(s)" })} · {formatDateOnly(assignReservation.checkIn)} → {formatDateOnly(assignReservation.checkOut)}
+                  </p>
+                )}
+              </div>
+              <button onClick={closeAssignModal} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center">
                 <X className="h-4 w-4 text-gray-500" />
               </button>
             </div>
-            <div className="p-6 max-h-[60vh] overflow-y-auto">
+
+            {/* Selection summary */}
+            {assignReservation && !roomsLoading && availableRooms.length > 0 && (
+              <div className="px-6 py-3 bg-blue-50/40 border-b border-blue-100 flex items-center justify-between flex-shrink-0">
+                <div className="text-xs">
+                  <span className="font-semibold text-gray-700">
+                    {selectedRoomIds.length} {t("reservations.assignModal.roomsSelected", { defaultValue: "room(s) selected" })}
+                  </span>
+                  <span className="text-gray-500 ml-2">
+                    · {t("reservations.assignModal.capacity", { defaultValue: "Capacity" })}: {selectedCapacity} / {assignReservation.guests}
+                  </span>
+                </div>
+                {selectedCapacity < assignReservation.guests && selectedRoomIds.length > 0 && (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                    {t("reservations.assignModal.capacityShort", { defaultValue: "Under capacity" })}
+                  </span>
+                )}
+                {selectedCapacity >= assignReservation.guests && selectedRoomIds.length > 0 && (
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                    {t("reservations.assignModal.capacityOk", { defaultValue: "OK" })}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="p-6 overflow-y-auto flex-1">
               {roomsLoading ? (
                 <p className="text-sm text-gray-500 text-center py-8">{t("common.loading", "Loading...")}</p>
               ) : availableRooms.length === 0 ? (
                 <p className="text-sm text-gray-500 text-center py-8">{t("reservations.noAvailableRooms", "No available rooms found.")}</p>
               ) : (
                 <div className="space-y-2">
-                  {availableRooms.map(room => (
-                    <button
-                      key={room.id}
-                      onClick={() => handleAssignConfirm(room.id)}
-                      disabled={actionLoadingId === assignModalId}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-left disabled:opacity-40"
-                    >
-                      <Bed className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800">{room.name}</p>
-                        <p className="text-[11px] text-gray-400">{room.type} · {t("reservations.capacity", "Capacity")}: {room.capacity}</p>
-                      </div>
-                    </button>
-                  ))}
+                  {availableRooms.map(room => {
+                    const isSelected = selectedRoomIds.includes(room.id);
+                    return (
+                      <button
+                        key={room.id}
+                        type="button"
+                        onClick={() => toggleRoomSelection(room.id)}
+                        disabled={actionLoadingId === assignModalId}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left disabled:opacity-40 ${
+                          isSelected
+                            ? "border-blue-400 bg-blue-50 shadow-sm"
+                            : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/30"
+                        }`}
+                      >
+                        <span
+                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300 bg-white"
+                          }`}
+                        >
+                          {isSelected && <CheckCircle className="h-3.5 w-3.5 text-white" />}
+                        </span>
+                        <Bed className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800">{room.name}</p>
+                          <p className="text-[11px] text-gray-400">{room.type} · {t("reservations.capacity", "Capacity")}: {room.capacity}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+            </div>
+
+            {/* Admin note input */}
+            {!roomsLoading && availableRooms.length > 0 && (
+              <div className="px-6 pb-4 flex-shrink-0">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                  {t("reservations.assignModal.adminNoteLabel", { defaultValue: "Admin note (optional)" })}
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder={t("reservations.assignModal.adminNotePlaceholder", { defaultValue: "Optional note for the guest, sent with the assignment email." })}
+                  value={assignAdminNote}
+                  onChange={e => setAssignAdminNote(e.target.value)}
+                  maxLength={500}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 bg-gray-50 transition-all resize-none"
+                />
+                <p className="text-[10px] text-gray-400 mt-1 text-right">{assignAdminNote.length} / 500</p>
+              </div>
+            )}
+
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2 flex-shrink-0">
+              <button
+                onClick={closeAssignModal}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-white transition-colors"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={handleAssignConfirm}
+                disabled={
+                  actionLoadingId === assignModalId ||
+                  selectedRoomIds.length === 0 ||
+                  (assignReservation ? selectedCapacity < assignReservation.guests : false)
+                }
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-150"
+              >
+                <Bed className="h-4 w-4" />
+                {actionLoadingId === assignModalId
+                  ? t("reservations.assignModal.assigning", { defaultValue: "Assigning..." })
+                  : t("reservations.assignModal.confirmBtn", { defaultValue: "Assign Selected" })}
+              </button>
             </div>
           </div>
         </div>

@@ -38,6 +38,8 @@ app.use("/blacklist", require("./routes/blacklist"));
 app.use("/users", usersRouter);
 app.use("/rooms", roomsRouter);
 app.use("/notifications", require("./routes/notifications"));
+app.use("/concierge", require("./routes/concierge"));
+app.use("/settings", require("./routes/settings"));
 
 // --- 3. STATIC FILE SERVING ---
 const rootDir = path.join(__dirname, '..');
@@ -56,6 +58,7 @@ function serveReceipt(dir) {
 
 app.use('/view-pending',  serveReceipt('paymentRecieptsPending'));
 app.use('/view-approved', serveReceipt('paymentRecieptsAprooved'));
+app.use('/view-identity', serveReceipt('identityDocs'));
 
 // Serving the public folder (CSS, images, etc.) inside the backend folder
 app.use(express.static(path.join(__dirname, 'public')));

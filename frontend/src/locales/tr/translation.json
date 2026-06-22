@@ -120,6 +120,90 @@
     "viewAll": "Tüm Bildirimleri Gör"
   },
 
+  "adminLogin": {
+    "title": "Yönetici Portalı",
+    "subtitle": "EDU Hotel Yönetim Sistemi",
+    "secured": "Güvenli Bağlantı",
+    "username": "Kullanıcı Adı",
+    "usernamePlaceholder": "Kullanıcı adınızı girin",
+    "password": "Şifre",
+    "passwordPlaceholder": "Şifrenizi girin",
+    "verifying": "Doğrulanıyor…",
+    "lockedFor": "Kilitli — {{seconds}}sn",
+    "signIn": "Yönetici girişi",
+    "accessGranted": "Erişim Onaylandı",
+    "redirecting": "Yönetici paneline yönlendiriliyorsunuz…",
+    "footer": "EDU Hotel © 2026 · Kısıtlı Erişim · Tüm aktiviteler kayıt altına alınır",
+    "backToSite": "← Ana siteye dön",
+    "errors": {
+      "tooManyAttempts": "Çok fazla başarısız deneme. 30 saniye boyunca kilitlendi.",
+      "invalidCredentials_one": "Geçersiz kimlik bilgileri. {{count}} deneme hakkı kaldı.",
+      "invalidCredentials_other": "Geçersiz kimlik bilgileri. {{count}} deneme hakkı kaldı.",
+      "networkError": "Sunucuya ulaşılamadı. Lütfen tekrar deneyin."
+    }
+  },
+
+  "auth": {
+    "eyebrow": "Sabancı Üniversitesi · EDU Hotel",
+    "protected": "Sabancı Üniversitesi BT Altyapısı tarafından korunmaktadır",
+    "welcomeBackTo": "Tekrar hoş geldiniz",
+    "joinCommunity": "Topluluğumuza katılın",
+    "tagline": "Sabancı Üniversitesi kampüsünün kalbinde akademik mükemmellik ve eşsiz konfor.",
+    "copyright": "© 2026 Sabancı Üniversitesi · Tüm Hakları Saklıdır",
+    "signIn": "Giriş yap",
+    "signingIn": "Giriş yapılıyor…",
+    "loginSubtitle": "Rezervasyonlarınızı, konaklamalarınızı ve hesabınızı yönetmek için giriş yapın.",
+    "registerTitle": "EDU Hotel hesabınızı oluşturun",
+    "registerSubtitle": "Konaklamalarınızı ve rezervasyonlarınızı yönetmek için kayıt olun.",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "passwordHelper": "En az 8 karakter",
+    "forgot": {
+      "title": "Şifrenizi mi unuttunuz?",
+      "subtitle": "Kayıtlı e-posta adresinizi girin, size yeni bir şifre belirlemeniz için bir bağlantı gönderelim.",
+      "submit": "Sıfırlama bağlantısı gönder",
+      "sending": "Gönderiliyor…",
+      "successTitle": "Gelen kutunuzu kontrol edin",
+      "successBody": "Bu e-postaya kayıtlı bir hesap varsa, sıfırlama bağlantısı gönderdik. Bağlantı 1 saat içinde geçerliliğini yitirecektir.",
+      "notRegistered": "Bu e-posta adresi kayıtlı değil.",
+      "backToLogin": "Girişe geri dön"
+    },
+    "reset": {
+      "title": "Yeni bir şifre belirleyin",
+      "subtitle": "EDU Hotel hesabınız için yeni bir şifre seçin.",
+      "newPasswordLabel": "Yeni şifre",
+      "newPasswordPlaceholder": "En az 8 karakter",
+      "confirmPasswordLabel": "Yeni şifreyi onaylayın",
+      "confirmPasswordPlaceholder": "Yeni şifreyi tekrarlayın",
+      "submit": "Şifreyi güncelle",
+      "submitting": "Güncelleniyor…",
+      "successTitle": "Şifreniz güncellendi",
+      "successBody": "Şifreniz değiştirildi. Yeni şifrenizle artık giriş yapabilirsiniz.",
+      "goToLogin": "Girişe git",
+      "missingToken": "Bu sıfırlama bağlantısında token bulunamadı. Lütfen Şifremi Unuttum sayfasından yeni bir bağlantı isteyin.",
+      "invalidToken": "Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş. Lütfen yeni bir bağlantı isteyin.",
+      "requestNewLink": "Yeni bağlantı iste"
+    },
+    "fillCredentials": "Lütfen e-posta ve şifrenizi girin.",
+    "invalidCredentials": "Geçersiz e-posta veya şifre.",
+    "invalidEmail": "Lütfen geçerli bir e-posta adresi girin.",
+    "notSuEmail": "Lütfen @sabanciuniv.edu uzantılı e-posta adresinizi kullanın.",
+    "fillFullName": "Lütfen tam adınızı girin.",
+    "fillEmail": "Lütfen e-posta adresinizi girin.",
+    "passwordMin": "Şifre en az 8 karakter olmalıdır.",
+    "kvkkShort": "EDU Hotel tarafından kişisel verilerimin 6698 sayılı KVKK Kanunu kapsamında işlenmesine onay veriyorum.",
+    "kvkkReadDetails": "Detayları göster",
+    "kvkkHideDetails": "Detayları gizle",
+    "kvkkDetails": "Kişisel verilerim yalnızca konaklama ve rezervasyon hizmetleri için, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında işlenecektir. Verilerim üçüncü taraflarla paylaşılmayacak ve ilgili mevzuata aykırı şekilde kullanılmayacaktır.",
+    "kvkkRequired": "Hesabınızı oluşturmak için lütfen KVKK onayını kabul edin.",
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "passwordPlaceholder": "Şifrenizi girin",
+    "passwordMinPlaceholder": "Min. 8 karakter",
+    "passwordConfirmPlaceholder": "Şifreyi tekrarlayın",
+    "namePlaceholder": "Tam adınızı girin",
+    "emailPlaceholder": "ad@sabanciuniv.edu"
+  },
+
   "login": {
     "welcomeTitle": "Tekrar hoş geldiniz",
     "welcomeSubtitle": "EDU Hotel hesabınıza giriş yapın",
@@ -308,6 +392,94 @@
       "title": "Yardıma mı ihtiyacınız var?",
       "msg": "Onaylar, ödeme makbuzları veya iptallerle ilgili sorun yaşıyorsanız destek ekibiyle iletişime geçin.",
       "cta": "Destekle İletişime Geç"
+    }
+  },
+
+  "dashboardHero": {
+    "speech": {
+      "pendingApprovals_one": "Bugün {{count}} onay bekleyen talebiniz var. Hızlı işlemler için bana tıklayın!",
+      "pendingApprovals_other": "Bugün {{count}} onay bekleyen talebiniz var. Hızlı işlemler için bana tıklayın!",
+      "upcomingStays_one": "Tekrar hoş geldiniz! {{count}} yaklaşan konaklamanız var. Bir şey ister misiniz?",
+      "upcomingStays_other": "Tekrar hoş geldiniz! {{count}} yaklaşan konaklamanız var. Bir şey ister misiniz?",
+      "welcome": "Tekrar hoş geldiniz! Ben Atlas, EDU Hotel Konsiyerjiniz. Hızlı işlemler için bana tıklayın!"
+    },
+    "atlasTitle": "Atlas – EDU Hotel Konsiyerji",
+    "atlasStatus": "Çevrimiçi · Yardıma hazır",
+    "atlasTooltip": "Atlas ile sohbet et – EDU Hotel Konsiyerji",
+    "quickActions": {
+      "heading": "Hızlı İşlemler",
+      "wifi": { "label": "Wi-Fi Şifresini Al", "desc": "Kampüs ağı bilgileri" },
+      "map":  { "label": "Kampüs Haritası",    "desc": "Binalar ve tesisler" },
+      "issue":{ "label": "Sorun Bildir",        "desc": "Bakım ve destek" },
+      "late": { "label": "Geç Çıkış Talebi",    "desc": "Konaklama süresini uzat" }
+    },
+    "chat": {
+      "heading": "Atlas ile Sohbet",
+      "greeting": "Merhaba! Ben Atlas, EDU Hotel konsiyerjiniz. Wi-Fi, kahvaltı, kampüs ya da rezervasyonunuz hakkında bana sorabilirsiniz — veya yukarıdaki hızlı eylemleri kullanabilirsiniz.",
+      "autoReply": "Bunu resepsiyon ekibine ileteceğim — kısa süre içinde size dönüş yapacaklar. Bu sırada yukarıdaki hızlı eylemleri de kullanabilirsiniz.",
+      "placeholder": "Atlas'a herhangi bir şey sorun…"
+    },
+    "wifi": {
+      "title": "Wi-Fi erişimi",
+      "network": "Ağ",
+      "password": "Şifre",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı",
+      "hint": "EDU Hotel binası ve kampüs ortak alanlarında kullanılabilir."
+    },
+    "mapModal": {
+      "title": "Sabancı Üniversitesi · Tuzla Kampüsü Haritası",
+      "hint": "Yakınlaştırmak için haritaya tıklayın — Esc veya dışarı tıklayarak kapatın."
+    },
+    "issue": {
+      "title": "Sorun bildir",
+      "subjectPlaceholder": "Kısa başlık (örn. 312'deki lamba bozuk)",
+      "messagePlaceholder": "Neyin, nerede sorun yaşadığını açıklayın."
+    },
+    "late": {
+      "title": "Geç çıkış talebi",
+      "subjectPlaceholder": "Rezervasyon No (isteğe bağlı)",
+      "messagePlaceholder": "Neden geç çıkış istiyorsunuz?"
+    },
+    "forms": {
+      "cancel": "Vazgeç",
+      "send": "Resepsiyona gönder",
+      "sending": "Gönderiliyor…",
+      "errorEmpty": "Lütfen talebinizi açıklayın.",
+      "errorSend": "Gönderilemedi. Lütfen tekrar deneyin.",
+      "successSent": "Gönderildi! Resepsiyon ekibimiz kısa süre içinde size dönüş yapacaktır."
+    },
+    "faq": {
+      "hello": "Merhaba! Ben Atlas, EDU Hotel konsiyerjiniz. Wi-Fi, kahvaltı, kampüs ya da rezervasyonunuz hakkında bana sorabilirsiniz — veya yukarıdaki hızlı eylemleri kullanabilirsiniz.",
+      "thanks": "Rica ederim! Başka bir konuda yardımcı olabilir miyim?",
+      "wifi": "Wi-Fi ağı \"EDU-Hotel-Guest\", şifresi \"Welcome2026\". Yukarıdaki Wi-Fi kısayoluna dokunarak tek tıkla kopyalayabilirsiniz.",
+      "map": "Kampüs Haritası kısayoluna dokunarak Tuzla kampüs yerleşim planını görebilirsiniz. Belirli binaları bulmak için yakınlaştırabilirsiniz.",
+      "breakfast": "Kahvaltı, Üniversite Merkezi yemekhanesinde 07:30 ile 10:00 arası servis edilir.",
+      "food": "Kampüs içi yeme-içme: Üniversite Merkezi yemekhanesi (öğle 11:30–14:00, akşam 17:30–20:00), atıştırmalık ve kahve için SU Café ve FASS binasındaki Starbucks.",
+      "checkIn": "Standart giriş saati 14:00'tür. Daha erken gelirseniz bagajınızı resepsiyonda güvenle bırakabilirsiniz.",
+      "checkOut": "Çıkış saati en geç 12:00'dir. Daha fazla zamana mı ihtiyacınız var? Yukarıdaki Geç Çıkış kısayolunu kullanın; talebinizi ileteyim.",
+      "lateCheckout": "Geç çıkışlar müsaitlik durumuna bağlıdır ve bir gece önceden talep edilmesi en iyisidir. Yukarıdaki Geç Çıkış kısayoluna dokunduğunuzda talebi resepsiyona ileteceğim.",
+      "key": "16:30'dan önce kart anahtarınızı resepsiyondan imza karşılığında alabilirsiniz. 16:30'dan sonra kart anahtarınız ana güvenlik kapısında kapalı bir zarf içinde bekler.",
+      "luggage": "Resepsiyon, giriş öncesinde veya çıkıştan sonra bagajınızı ücretsiz olarak muhafaza edebilir. Yanınızda rezervasyon kimliğinizi getirmeniz yeterlidir.",
+      "housekeeping": "Odalar her gün 10:00 ile 14:00 arasında temizlenir. Ek havlu, battaniye veya kişisel bakım malzemesi için Sorun Bildir'e dokunup ihtiyacınızı belirtmeniz yeterlidir.",
+      "laundry": "Aynı gün çamaşır yıkama hizmeti için çamaşırınızı 09:00'dan önce resepsiyona bırakabilirsiniz. Talep üzerine ütü ve ütü masası temin edilir.",
+      "smoking": "EDU Hotel tüm odalar ve ortak alanlarda sigara içilmeyen bir oteldir. Belirlenmiş açık hava sigara içme alanları avlu ve kampüs servis durağı yakınındadır.",
+      "quiet": "22:00 ile 08:00 arası sessizlik saatleri uygulanır. Komşunuz gürültü yapıyorsa Sorun Bildir'e dokunun; ilgileneceğiz.",
+      "parking": "Misafir otoparkı Ana Giriş'tedir (harita üzerinde 9 numara). Geldiğinizde güvenliğe rezervasyon numaranızı göstermeyi unutmayın.",
+      "shuttle": "Kampüs servisi (harita üzerinde SH) Tuzla metrosuna gider. Güncel saatler için resepsiyondaki ilan panosunu kontrol edin.",
+      "airport": "En yakın havalimanı Sabiha Gökçen'dir (~20 dk taksiyle). İstanbul Havalimanı için 70+ dakika hesaplayın. Resepsiyon sizin için taksi çağırabilir.",
+      "taxi": "Resepsiyon sizin için lisanslı bir taksi çağırabilir (~5 dk bekleme). BiTaksi ve Uber de kampüs çevresinde hizmet vermektedir.",
+      "atm": "Ana Giriş yakınında bir Garanti BBVA ATM, Üniversite Merkezi'nde ise bir İş Bankası ATM bulunmaktadır. Her ikisi de uluslararası kartları kabul eder.",
+      "pharmacy": "Kampüs eczanesi Sağlık Merkezi'nin (harita üzerinde 16 numara) yanındadır. Mesai dışında en yakın 24 saat açık eczane Tuzla merkezdedir.",
+      "library": "Bilgi Merkezi kütüphanesi (harita üzerinde 6 numara) akademik dönem boyunca 7/24 açıktır. Girişte rezervasyon kimliğinizi gösterin.",
+      "gym": "Spor Merkezi (harita üzerinde 19 numara) spor salonu, kapalı yüzme havuzu ve kortlara sahiptir. Otel misafirleri için günlük geçiş resepsiyondan temin edilebilir.",
+      "mosque": "Üniversite Merkezi'nin bodrumunda bir mescit bulunmaktadır. En yakın cami yaklaşık 10 dakika servis mesafesinde Tuzla merkezdedir.",
+      "reservation": "Rezervasyon durumunuzu kontrol panelinde Rezervasyonlarım altından görebilirsiniz. Değişiklikler için Sorun Bildir'e dokunarak ihtiyacınızı belirtebilirsiniz.",
+      "cancellation": "Giriş tarihinden 24 saat öncesine kadar Rezervasyonlarım üzerinden iptal edebilirsiniz. Bu süreden sonra Sorun Bildir butonuyla resepsiyonla iletişime geçin.",
+      "payment": "Ödeme banka havalesi iledir. Rezervasyonunuz onaylandığında Ödeme sayfasında IBAN ve tutarı göreceksiniz — dekontunuzu oradan yükleyin.",
+      "lost": "Otelde kaybolan eşyalar için Sorun Bildir'e dokunarak ne kaybettiğinizi yazın. Kampüsün başka bir yerinde kaybolan eşyalar için 9000 dahili numaradan kampüs güvenliğiyle iletişime geçin.",
+      "emergency": "Acil durumlarda oda telefonundan 9000 dahili numarayı arayarak kampüs güvenliğine ulaşabilirsiniz. Sağlık sorunları için: Sağlık Merkezi (harita üzerinde 16 numara).",
+      "reception": "Resepsiyon 7/24 açıktır. 16:30 sonrasında oda kartınız ana güvenlik kapısında kapalı bir zarf içinde bekletilir."
     }
   },
 

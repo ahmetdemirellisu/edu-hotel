@@ -238,7 +238,7 @@ export function CalendarPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-56">
             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-3" />
-            <p className="text-sm text-gray-500 font-medium">Loading calendar…</p>
+            <p className="text-sm text-gray-500 font-medium">{t("calendar.loading", "Loading calendar…")}</p>
           </div>
         ) : rooms.length === 0 ? (
           <div className="p-14 text-center">
@@ -362,7 +362,7 @@ export function CalendarPage() {
               <div className="w-2 h-2 rounded-full bg-amber-400" style={{ border: "1.5px dashed #ca8a04" }} />
               {t("pages.calendar.legend.pending", "Pending")}
             </div>
-            <span className="text-xs text-gray-400 ml-auto">{rooms.length} rooms · {totalBookings} active bookings</span>
+            <span className="text-xs text-gray-400 ml-auto">{t("calendar.roomsCount", "{{count}} rooms", { count: rooms.length })} · {t("calendar.bookingsCount", "{{count}} active bookings", { count: totalBookings })}</span>
           </div>
         )}
       </div>

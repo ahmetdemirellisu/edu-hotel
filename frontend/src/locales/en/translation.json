@@ -120,6 +120,90 @@
     "viewAll": "View All Notifications"
   },
 
+  "adminLogin": {
+    "title": "Admin Portal",
+    "subtitle": "EDU Hotel Management System",
+    "secured": "Secured Connection",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "verifying": "Verifying…",
+    "lockedFor": "Locked — {{seconds}}s",
+    "signIn": "Sign in to Admin",
+    "accessGranted": "Access Granted",
+    "redirecting": "Redirecting to admin panel…",
+    "footer": "EDU Hotel © 2026 · Restricted Access · All activity is logged",
+    "backToSite": "← Back to main site",
+    "errors": {
+      "tooManyAttempts": "Too many failed attempts. Locked for 30 seconds.",
+      "invalidCredentials_one": "Invalid credentials. {{count}} attempt remaining.",
+      "invalidCredentials_other": "Invalid credentials. {{count}} attempts remaining.",
+      "networkError": "Could not reach the server. Please try again."
+    }
+  },
+
+  "auth": {
+    "eyebrow": "Sabancı Üniversitesi · EDU Hotel",
+    "protected": "Protected by Sabancı University IT Infrastructure",
+    "welcomeBackTo": "Welcome back to",
+    "joinCommunity": "Join our community",
+    "tagline": "Academic excellence and unparalleled comfort, in the heart of the Sabancı University campus.",
+    "copyright": "© 2026 Sabancı University · All Rights Reserved",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "loginSubtitle": "Sign in to manage your reservations, stays and account.",
+    "registerTitle": "Create your EDU Hotel account",
+    "registerSubtitle": "Sign up to manage your stays and reservations.",
+    "forgotPassword": "Forgot password?",
+    "passwordHelper": "Min. 8 characters",
+    "forgot": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter the email you registered with and we'll send you a link to set a new password.",
+      "submit": "Send reset link",
+      "sending": "Sending…",
+      "successTitle": "Check your inbox",
+      "successBody": "If an account exists for that email, we've sent a reset link. It will expire in 1 hour.",
+      "notRegistered": "This email is not registered.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Choose a new password for your EDU Hotel account.",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Min. 8 characters",
+      "confirmPasswordLabel": "Confirm new password",
+      "confirmPasswordPlaceholder": "Repeat the new password",
+      "submit": "Update password",
+      "submitting": "Updating…",
+      "successTitle": "Password updated",
+      "successBody": "Your password has been changed. You can now sign in with your new password.",
+      "goToLogin": "Go to sign in",
+      "missingToken": "This reset link is missing its token. Please request a new link from the Forgot password page.",
+      "invalidToken": "This reset link is invalid or has expired. Please request a new one.",
+      "requestNewLink": "Request a new link"
+    },
+    "fillCredentials": "Please enter your email and password.",
+    "invalidCredentials": "Invalid email or password.",
+    "invalidEmail": "Please enter a valid email address.",
+    "notSuEmail": "Please use your @sabanciuniv.edu email address.",
+    "fillFullName": "Please enter your full name.",
+    "fillEmail": "Please enter your email address.",
+    "passwordMin": "Password must be at least 8 characters.",
+    "kvkkShort": "I consent to the processing of my personal data by EDU Hotel in accordance with KVKK Law No. 6698.",
+    "kvkkReadDetails": "Read details",
+    "kvkkHideDetails": "Hide details",
+    "kvkkDetails": "My personal data will be processed solely for accommodation and reservation services, in accordance with the Personal Data Protection Law No. 6698 (KVKK). My data will not be shared with third parties and will not be used in violation of applicable legislation.",
+    "kvkkRequired": "Please accept the KVKK consent to create your account.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordPlaceholder": "Enter your password",
+    "passwordMinPlaceholder": "Min. 8 characters",
+    "passwordConfirmPlaceholder": "Repeat password",
+    "namePlaceholder": "Enter your full name",
+    "emailPlaceholder": "name@sabanciuniv.edu"
+  },
+
   "login": {
     "welcomeTitle": "Welcome back",
     "welcomeSubtitle": "Sign in to your EDU Hotel account",
@@ -308,6 +392,94 @@
       "title": "Need Help?",
       "msg": "If you have issues with approvals, payment receipts, or cancellations, contact the support team.",
       "cta": "Contact Support"
+    }
+  },
+
+  "dashboardHero": {
+    "speech": {
+      "pendingApprovals_one": "You have {{count}} pending approval today. Click me for quick actions!",
+      "pendingApprovals_other": "You have {{count}} pending approvals today. Click me for quick actions!",
+      "upcomingStays_one": "Welcome back! You have {{count}} upcoming stay. Need anything?",
+      "upcomingStays_other": "Welcome back! You have {{count}} upcoming stays. Need anything?",
+      "welcome": "Welcome back! I'm Atlas, your EDU Hotel Concierge. Click me for quick actions!"
+    },
+    "atlasTitle": "Atlas – EDU Hotel Concierge",
+    "atlasStatus": "Online · Ready to help",
+    "atlasTooltip": "Chat with Atlas – EDU Hotel Concierge",
+    "quickActions": {
+      "heading": "Quick Actions",
+      "wifi": { "label": "Get Wi-Fi Password", "desc": "Campus network credentials" },
+      "map":  { "label": "View Campus Map",    "desc": "Buildings & facilities" },
+      "issue":{ "label": "Report an Issue",    "desc": "Maintenance & support" },
+      "late": { "label": "Request Late Check-out", "desc": "Extend your stay time" }
+    },
+    "chat": {
+      "heading": "Chat with Atlas",
+      "greeting": "Hello! I'm Atlas, your EDU Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
+      "autoReply": "I'll forward that to the reception team — they'll follow up shortly. In the meantime you can use the quick actions above.",
+      "placeholder": "Ask Atlas anything…"
+    },
+    "wifi": {
+      "title": "Wi-Fi access",
+      "network": "Network",
+      "password": "Password",
+      "copy": "Copy",
+      "copied": "Copied",
+      "hint": "Available throughout the EDU Hotel building and the campus common areas."
+    },
+    "mapModal": {
+      "title": "Sabancı University · Tuzla Campus Map",
+      "hint": "Click the map to zoom — Esc / outside click to close."
+    },
+    "issue": {
+      "title": "Report an issue",
+      "subjectPlaceholder": "Short title (e.g. Broken lamp in 312)",
+      "messagePlaceholder": "Describe what's wrong and where."
+    },
+    "late": {
+      "title": "Request late check-out",
+      "subjectPlaceholder": "Reservation ID (optional)",
+      "messagePlaceholder": "Why do you need a late check-out?"
+    },
+    "forms": {
+      "cancel": "Cancel",
+      "send": "Send to reception",
+      "sending": "Sending…",
+      "errorEmpty": "Please describe your request.",
+      "errorSend": "Failed to send. Please try again.",
+      "successSent": "Sent! Reception will follow up shortly."
+    },
+    "faq": {
+      "hello": "Hello! I'm Atlas, your EDU Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
+      "thanks": "You're very welcome! Anything else I can help with?",
+      "wifi": "The Wi-Fi network is \"EDU-Hotel-Guest\" and the password is \"Welcome2026\". You can also tap the Wi-Fi quick action above for one-tap copy.",
+      "map": "Tap the Campus Map quick action to see the Tuzla campus layout. You can zoom into the map to find specific buildings.",
+      "breakfast": "Breakfast is served at the University Center cafeteria between 07:30 and 10:00.",
+      "food": "On-campus dining: University Center cafeteria (lunch 11:30–14:00, dinner 17:30–20:00), SU Café for snacks and coffee, and Starbucks at the FASS building.",
+      "checkIn": "Standard check-in is from 14:00. For earlier arrivals please leave your luggage at reception — we'll keep it safe.",
+      "checkOut": "Check-out is by 12:00. Need more time? Use the Late Check-out quick action above and I'll forward the request.",
+      "lateCheckout": "Late check-outs depend on availability and are best requested the night before. Tap the Late Check-out quick action above — I'll forward the request to reception for you.",
+      "key": "Before 16:30, collect your room key card from reception in person. After 16:30 it's held in a sealed envelope at the main security gate.",
+      "luggage": "Reception can hold your luggage before check-in or after check-out at no charge. Just bring your reservation ID.",
+      "housekeeping": "Rooms are cleaned daily between 10:00 and 14:00. For extra towels, blankets, or amenities, tap Report an Issue and describe what you need.",
+      "laundry": "Same-day laundry can be arranged at reception if you drop it off before 09:00. An iron and ironing board are available on request.",
+      "smoking": "The EDU Hotel is non-smoking inside all rooms and common areas. Designated outdoor smoking areas are by the courtyard and near the campus shuttle stop.",
+      "quiet": "Quiet hours are observed between 22:00 and 08:00. If a neighbour is being noisy, tap Report an Issue and we'll handle it discreetly.",
+      "parking": "Guest parking is at the Main Gate (marker 9 on the campus map). Please show your reservation ID to security on arrival.",
+      "shuttle": "The campus shuttle (marker SH on the map) runs to Tuzla metro. Check the reception noticeboard for the current timetable.",
+      "airport": "Sabiha Gökçen is the closest airport (~20 min by taxi). For Istanbul Airport allow 70+ minutes. Reception can book a taxi for you.",
+      "taxi": "Reception can call a licensed taxi for you (~5 min wait). BiTaksi and Uber both serve the campus area.",
+      "atm": "There's a Garanti BBVA ATM by the Main Gate and an İş Bankası ATM at the University Center. Both accept international cards.",
+      "pharmacy": "The campus pharmacy is next to the Health Center (marker 16). After hours, the nearest 24-hour pharmacy is in Tuzla town centre.",
+      "library": "The Information Center library (marker 6) is open 24/7 during the academic term. Show your reservation ID at the entrance.",
+      "gym": "The Sports Center (marker 19) has a gym, indoor pool, and courts. Day passes for hotel guests are available at reception.",
+      "mosque": "A prayer room (mescit) is in the basement of the University Center. The nearest mosque is in Tuzla town, about 10 minutes by shuttle.",
+      "reservation": "You can see your reservation status under My Reservations in the dashboard. For changes, tap Report an Issue and describe what you need.",
+      "cancellation": "You can cancel from My Reservations up to 24 hours before check-in. After that, contact reception via the Report an Issue button.",
+      "payment": "Payment is by bank transfer. Once your reservation is approved you'll see the IBAN and amount on the Payment page — upload your receipt there for review.",
+      "lost": "For lost items in the hotel, tap Report an Issue and describe what you lost. For items lost elsewhere on campus, check with campus security at extension 9000.",
+      "emergency": "For emergencies, dial campus security at extension 9000 from any room phone. For medical care: Health Center (marker 16 on the map).",
+      "reception": "Reception is staffed 24/7. After 16:30 your room key card is held in a sealed envelope at the main security gate."
     }
   },
 

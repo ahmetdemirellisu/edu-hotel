@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { SabanciLogo } from "../SabanciLogo";
 
 /* ── Inject keyframes once ─────────────────────────────── */
 const _footerStyle = document.getElementById("footer-anim") ?? (() => {
@@ -130,13 +131,7 @@ export function Footer() {
 
           {/* Brand + Address */}
           <div>
-            <div
-              className="border border-[#c9a84c]/50 px-3 py-1.5 inline-block mb-5 rounded transition-all duration-300 hover:border-[#c9a84c] hover:shadow-[0_0_14px_rgba(201,168,76,0.2)]"
-              style={{ background: "rgba(201,168,76,0.06)" }}
-            >
-              <div className="text-[11px] font-bold text-[#c9a84c] leading-tight tracking-wider uppercase">Sabancı</div>
-              <div className="text-[9px] text-[#c9a84c]/70 leading-tight tracking-widest">{t("landing.logo.universityLine", "University")}</div>
-            </div>
+            <SabanciLogo size="sm" className="mb-5" />
             <p className="text-sm text-white/50 leading-relaxed footer-contact-item">
               {t("footer.address.line1")}
               <br />

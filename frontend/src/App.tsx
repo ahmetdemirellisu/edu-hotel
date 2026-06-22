@@ -5,6 +5,8 @@ import { Toaster } from "./components/ui/sonner";
 
 import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
+import { ForgotPassword } from "./components/ForgotPassword";
+import { ResetPassword } from "./components/ResetPassword";
 import { BookRoomPage } from "./components/BookRoomPage";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { AdminLogin } from "./components/admin/AdminLogin";
@@ -58,6 +60,8 @@ function AnimatedRoutes() {
         <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/admin-login" element={<PageTransition><AdminLogin /></PageTransition>} />
 
         <Route
