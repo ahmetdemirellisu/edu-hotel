@@ -128,7 +128,7 @@ variables:
     IMAGE_VER: latest
     BASE_IMAGES_REGISTRY: igs.sabanciuniv.edu:5050/imagebase/images
     SERVICE1: ehp
-    SERVICE2: ${SERVICE1}-backend
+    SERVICE2: "${SERVICE1}-backend"
     SERVICE_GROUP1: "$SERVICE1:$SERVICE2"
     BUILD_VOLUME_PATH: /app/vendor
     CODE_DIR: /home/${USER}/data_volume/data/html
