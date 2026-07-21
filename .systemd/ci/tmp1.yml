@@ -1,0 +1,452 @@
+workflow:
+  rules:
+    # Fix null/empty check.
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($RUN_STAGE == "" || $RUN_STAGE == "null")'
+      when: never
+
+    # Fix regex patterns - use $VAR format for regex
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($RUN_STAGE == "check_service_su-cron" || $RUN_STAGE =~ /^(build|deploy)_prod_su-cron/)'
+      variables:
+        ENVIRONMENT_NAME: "production"
+        IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+      when: always
+
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($RUN_STAGE == "debug_su-cron" || $RUN_STAGE =~ /^(build|deploy)_dev_su-cron/)'
+      variables:
+        ENVIRONMENT_NAME: "development"
+        IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+      when: always
+
+    # Use consistent variable syntax
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      variables:
+        ENVIRONMENT_NAME: "production"
+        IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "staging"'
+      variables:
+        ENVIRONMENT_NAME: "staging"
+
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"'
+      variables:
+        ENVIRONMENT_NAME: "development"
+        IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      variables:
+        ENVIRONMENT_NAME: "production"
+        IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "staging"'
+      variables:
+        ENVIRONMENT_NAME: "staging"
+
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development"'
+      variables:
+        ENVIRONMENT_NAME: "development"
+        IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+    - when: never
+
+stages:
+  - build_dev_su-cron
+  - build_prod_su-cron
+  - dev_cleanup_and_prepare
+  - deploy_dev_su-cron
+  - prod_cleanup_and_prepare
+  - deploy_prod_su-cron
+
+.stage_logic:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE == $CI_JOB_STAGE'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: never
+
+.prod_build_su-cron:
+  rules:
+    - !reference [.stage_logic, rules]
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_BUILD != "true" && $SKIP_DEPLOY != "true"'
+      changes:
+        - "**/*"
+        - "!.gitlab-ci.yml"
+
+.prod_deploy_su-cron:
+  rules:
+    - !reference [.stage_logic, rules]
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $STOP_SERVICE != "true" && $SKIP_DEPLOY != "true"'
+      changes:
+        - "**/*"
+        - "!.gitlab-ci.yml"
+
+.dev_build_su-cron:
+  rules:
+    - !reference [.stage_logic, rules]
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $SKIP_BUILD != "true"'
+
+.dev_deploy_su-cron:
+  rules:
+    - !reference [.stage_logic, rules]
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $STOP_SERVICE != "true" && $SKIP_DEPLOY != "true"'
+      changes:
+        - "**/*"
+        - "!.gitlab-ci.yml"
+
+.debug:
+  rules:
+    - !reference [.stage_logic, rules]
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $STOP_SERVICE == "true"'
+      changes:
+        - "**/*"
+        - "!.gitlab-ci.yml"
+
+.check:
+  rules:
+    - !reference [.stage_logic, rules]
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - "**/*"
+        - "!.gitlab-ci.yml"
+
+variables:
+  IMAGE_VER: latest
+  BASE_IMAGES_REGISTRY: igs.sabanciuniv.edu:5050/imagebase/images
+
+  APP_UID1: 1000
+  APP_UID2: 1000
+  APP_UID3: 1000
+  SERVICE1: su-cron
+  SERVICE2: ${SERVICE1}-web
+  BUILD_VOLUME_PATH: /app/vendor
+  CODE_DIR: /home/${USER}/data_volume/data/html
+  SCALE: 1
+  SKIP_BUILD: true
+  SKIP_DEPLOY: false
+  BASE_PORT1: 1050
+  LOG_STRING: 1a
+  SYSTEMD_REPO: "${CI_PROJECT_DIR}/.systemd"
+  CLEAN_SCRIPT: "${SYSTEMD_REPO}/clean.sh"
+  DEPLOY_SCRIPT: "${SYSTEMD_REPO}/deploy.sh"
+  STOP_SCRIPT: "${SYSTEMD_REPO}/stop.sh"
+  LOCAL_SCRIPT: "${SYSTEMD_REPO}/local.sh"
+  SCALE_SCRIPT: "${SYSTEMD_REPO}/scale.sh"
+
+  # SKIP_BUILD Logic
+  # To skip build manually, Run Pipeline > Add Variable: SKIP_BUILD = "true"
+
+# ---------------------------------------------------
+# JOB 1: BUILD & PUSH
+# Runs on: builder1 (Podman-in-Podman)
+# ---------------------------------------------------
+.build-container:
+  tags:
+    - su-cron-builder-runner # Updated to match your PinP runner
+  image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor
+  extends: .dev_build_su-cron
+
+  variables:
+    # Global Variables.
+    IMAGE_NAME: ${IMAGE_VAR}
+  resource_group: ${ENVIRONMENT_NAME}
+
+  before_script:
+    - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+    #- echo "${REGISTRY_PASSWORD}" | podman login dhi.io -u "${REGISTRY_USER}" --password-stdin
+    - echo "${IMAGE_BASE_PASSWORD}" | podman login ${BASE_IMAGES_REGISTRY} -u ${IMAGE_BASE_USER} --password-stdin
+    # Create .env file securely with variables from GitLab CI/CD Settings
+    #Clean env
+    - podman system prune -a -f
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > .env
+  environment: ${ENVIRONMENT_NAME}
+
+build_dev_su-cron:
+  stage: build_dev_su-cron
+  extends: .build-container
+  rules:
+    - !reference [.dev_build_su-cron, rules]
+  variables:
+    SERVICE_NAME: ${SERVICE1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Building image ${IMAGE_NAME} on Native Podman..."
+    - podman build -v /in_container_test/data/html/vendor:/${BUILD_VOLUME_PATH}:Z -v /in_container_test/build:/data:Z -v /cache:/var/cache/composer:Z -t $IMAGE_NAME -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+    - echo "Pushing to igs.sabanciuniv.edu Registry..."
+    - podman push ${IMAGE_NAME}
+  environment: ${ENVIRONMENT_NAME}
+
+build_prod_su-cron:
+  stage: build_prod_su-cron
+  extends: .build-container
+  rules:
+    - !reference [.prod_build_su-cron, rules]
+  variables:
+    SERVICE_NAME: ${SERVICE1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Building image ${IMAGE_NAME} on Native Podman..."
+    - podman build -v /in_container_prod/data/html/vendor:/${BUILD_VOLUME_PATH}:Z -v /in_container_prod/build:/data:Z -v /cache:/var/cache/composer:Z -t $IMAGE_NAME -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+    - echo "Pushing to igs.sabanciuniv.edu Registry..."
+    - podman push ${IMAGE_NAME}
+  environment: ${ENVIRONMENT_NAME}
+
+# ---------------------------------------------------
+# JOB 2: DEPLOY TO RED HAT (Self-Hosted)
+# ---------------------------------------------------
+.deploy-to-dev:
+  tags:
+    - su-cron-test-runner
+  resource_group: ${ENVIRONMENT_NAME}
+  variables:
+    # Global Variables
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Deploying to Self-Hosted Runner..."
+
+    # 1. SETUP ENV VARS.
+    - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+    - export TARGET_DIR="${HOME}/${APP_DIR}"
+    - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+    - export COMPOSE_BIN=$(which podman-compose)
+    - export USER=${USER}
+    - export HOME="/home/${USER}"
+    - export CODE_DIR='${CODE_DIR}'
+    - export REPO_URL='${REPO_URL}'
+    - export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+    - export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+    # Read from Exported ENV VARS, fallback to CLI arguments
+    - |
+      mkdir -p "${TARGET_DIR}"
+      cat <<EOF > "${TARGET_DIR}/.exports"
+      export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+      export APP_CPUS="100%-50%"
+      export APP_MEMS="512M-128M"
+      export SERVICES="${SERVICE1}:${SERVICE2}"
+      export APP_UID="82"
+      export APP_GID="82"
+      EOF
+
+    # 2. LOGIN TO REGISTRY (Podman)
+    - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env"
+    - export APP_PORTS="0-${BASE_PORT1}"
+    - export APP_SCALE="2"
+    - source "${TARGET_DIR}/.exports"
+    # 2. LOGIN TO REGISTRY (Podman)
+    - unset DOCKER_AUTH_CONFIG
+    - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE1}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${SERVICE1}.${ENVIRONMENT_NAME}
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE2}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${SERVICE2}.${ENVIRONMENT_NAME}
+
+    #Remove unused container data
+    - podman system prune -a -f
+
+  environment: development
+
+dev_cleanup_and_prepare:
+  stage: dev_cleanup_and_prepare
+  tags:
+    - su-cron-test-runner
+  rules:
+    - !reference [.dev_deploy_su-cron, rules]
+  variables:
+    SERVICE_NAME: resetenv
+    AUTHORIZED_PROJECTS: "${SERVICE1}:${SERVICE2}"
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  resource_group: ${ENVIRONMENT_NAME}
+
+  script:
+    # 1. SETUP ENV VARS
+    - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    - export TARGET_DIR="${HOME}/${APP_DIR}"
+    - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+    - export COMPOSE_BIN=$(which podman-compose)
+    - export USER=${USER}
+    - export HOME="/home/${USER}"
+    - export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - cd "${TARGET_DIR}"
+    - cp ${CLEAN_SCRIPT} "${TARGET_DIR}/clean.sh"
+    - bash "${TARGET_DIR}"/clean.sh
+
+deploy_dev_su-cron:
+  stage: deploy_dev_su-cron
+  extends: .deploy-to-dev
+  rules:
+    - !reference [.dev_deploy_su-cron, rules]
+
+  variables:
+    SERVICE_NAME: ${SERVICE1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - !reference [.deploy-to-dev, script]
+    - cp $SYSTEMD_REPO/docker/nginx/nginx-template.conf "$TARGET_DIR/nginx-template.conf"
+    - cp $SYSTEMD_REPO/docker/php/php.ini "$TARGET_DIR/php.ini"
+    - cp $SYSTEMD_REPO/docker/php/php-fpm.conf "$TARGET_DIR/php-fpm.conf"
+    - cp $SYSTEMD_REPO/docker/supervisor/supervisord.conf "$TARGET_DIR/supervisord.conf"
+
+    - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+    - bash "${TARGET_DIR}/pull.sh"
+
+      # --- PHASE 1: 3P OBSOLETE UNITS ---
+    - echo "Pulling latest image from igs.sabanciuniv.edu..."
+    - $COMPOSE_BIN -f $SYSTEMD_REPO/.docker-compose.$SERVICE_NAME.$ENVIRONMENT_NAME.yml pull || exit 1
+    - cd "${TARGET_DIR}"
+
+    # --- PHASE 6: RELOAD DAEMON ---
+    - systemctl --user daemon-reload
+
+    # --- PHASE 7: SEQUENTIAL DEPLOYMENT ----
+    - systemctl --user reset-failed
+    - cp ${SCALE_SCRIPT} "${TARGET_DIR}/scale.sh"
+    - cp ${DEPLOY_SCRIPT} "${TARGET_DIR}/deploy.sh"
+    - export APP_PORT='${APP_PORT}'
+    - export INSTANCE_ID='${INSTANCE_ID}'
+    - export WORKER_SVC=${SERVICE1}
+    - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+    - bash "${TARGET_DIR}/deploy.sh"
+
+# ---------------------------------------------------
+# JOB 2: DEPLOY TO RED HAT (Self-Hosted)
+# ---------------------------------------------------
+.deploy-to-prod:
+  tags:
+    - su-cron-prod-runner
+  resource_group: ${ENVIRONMENT_NAME}
+  variables:
+    # Global Variables
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Deploying to Self-Hosted Runner..."
+
+    # 1. SETUP ENV VARS.
+    - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+    - export TARGET_DIR="${HOME}/${APP_DIR}"
+    - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+    - export COMPOSE_BIN=$(which podman-compose)
+    - export USER=${USER}
+    - export HOME="/home/${USER}"
+    - export CODE_DIR='${CODE_DIR}'
+    - export REPO_URL='${REPO_URL}'
+    - export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+    - export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+    # Read from Exported ENV VARS, fallback to CLI arguments
+    - |
+      mkdir -p "${TARGET_DIR}"
+      cat <<EOF > "${TARGET_DIR}/.exports"
+      export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+      export APP_CPUS="100%-50%"
+      export APP_MEMS="1512M-128M"
+      export SERVICES="${SERVICE1}:${SERVICE2}"
+      export APP_UID="82"
+      export APP_GID="82"
+      EOF
+
+    # 2. LOGIN TO REGISTRY (Podman)
+    - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env"
+    - export APP_PORTS="0-${BASE_PORT1}"
+    - export APP_SCALE="2"
+    - source "${TARGET_DIR}/.exports"
+    # 2. LOGIN TO REGISTRY (Podman)
+    - unset DOCKER_AUTH_CONFIG
+    - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE1}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${SERVICE1}.${ENVIRONMENT_NAME}
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE2}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${SERVICE2}.${ENVIRONMENT_NAME}
+
+    #Remove unused container data
+    - podman system prune -a -f
+
+  environment: ${ENVIRONMENT_NAME}
+
+prod_cleanup_and_prepare:
+  stage: prod_cleanup_and_prepare
+  tags:
+    - su-cron-prod-runner
+  rules:
+    - !reference [.prod_deploy_su-cron, rules]
+  variables:
+    SERVICE_NAME: resetenv
+    AUTHORIZED_PROJECTS: "${SERVICE1}:${SERVICE2}"
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  resource_group: ${ENVIRONMENT_NAME}
+
+  script:
+    # 1. SETUP ENV VARS
+    - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    - export TARGET_DIR="${HOME}/${APP_DIR}"
+    - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+    - export COMPOSE_BIN=$(which podman-compose)
+    - export USER=${USER}
+    - export HOME="/home/${USER}"
+    - export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - cd "${TARGET_DIR}"
+    - cp ${CLEAN_SCRIPT} "${TARGET_DIR}/clean.sh"
+    - bash "${TARGET_DIR}"/clean.sh
+
+deploy_prod_su-cron:
+  stage: deploy_prod_su-cron
+  extends: .deploy-to-prod
+  environment: ${ENVIRONMENT_NAME}
+  rules:
+    - !reference [.prod_deploy_su-cron, rules]
+
+  variables:
+    SERVICE_NAME: ${SERVICE1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - !reference [.deploy-to-prod, script]
+    - cp $SYSTEMD_REPO/docker/nginx/nginx-template.conf "$TARGET_DIR/nginx-template.conf"
+    - cp $SYSTEMD_REPO/docker/php/php.ini "$TARGET_DIR/php.ini"
+    - cp $SYSTEMD_REPO/docker/php/php-fpm.conf "$TARGET_DIR/php-fpm.conf"
+    - cp $SYSTEMD_REPO/docker/supervisor/supervisord.conf "$TARGET_DIR/supervisord.conf"
+
+    - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+    - bash "${TARGET_DIR}/pull.sh"
+
+      # --- PHASE 1: 3P OBSOLETE UNITS ---
+    - echo "Pulling latest image from igs.sabanciuniv.edu..."
+    - $COMPOSE_BIN -f $SYSTEMD_REPO/.docker-compose.$SERVICE_NAME.$ENVIRONMENT_NAME.yml pull || exit 1
+    - cd "${TARGET_DIR}"
+
+    # --- PHASE 6: RELOAD DAEMON ---
+    - systemctl --user daemon-reload
+
+    # --- PHASE 7: SEQUENTIAL DEPLOYMENT ----
+    - systemctl --user reset-failed
+    - cp ${SCALE_SCRIPT} "${TARGET_DIR}/scale.sh"
+    - cp ${DEPLOY_SCRIPT} "${TARGET_DIR}/deploy.sh"
+    - export APP_PORT='${APP_PORT}'
+    - export INSTANCE_ID='${INSTANCE_ID}'
+    - export WORKER_SVC=${SERVICE1}
+    - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+    - bash "${TARGET_DIR}/deploy.sh"

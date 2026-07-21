@@ -1,0 +1,702 @@
+workflow:
+    rules:
+        # Fix null/empty check
+        - if: '$CI_PIPELINE_SOURCE == "web" && ($RUN_STAGE == "" || $RUN_STAGE == "null")'
+          when: never
+
+        # Fix regex patterns - use $VAR format for regex.
+        - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE =~ /^(build|deploy)_prod_su-mac/'
+          variables:
+              ENVIRONMENT_NAME: "production"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+          when: always
+
+        # Fix regex patterns - use $VAR format for regex..*.
+        - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE =~ /^(build|deploy)_dev_su-mac/'
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+          when: always
+
+        # Use consistent variable syntax
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+          variables:
+              ENVIRONMENT_NAME: "production"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "staging"'
+          variables:
+              ENVIRONMENT_NAME: "staging"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:staging
+
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"'
+          variables:
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+          variables:
+              ENVIRONMENT_NAME: "production"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "staging"'
+          variables:
+              ENVIRONMENT_NAME: "staging"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:staging
+
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development"'
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+        - when: never
+
+stages:
+    - build_dev_su-mac-a
+    - build_dev_su-mac-b
+    - build_dev_su-mac-c
+    - build_prod_su-mac-a
+    - build_prod_su-mac-b
+    - build_prod_su-mac-c
+    - dev_cleanup_and_prepare
+    - deploy_dev_su-mac-a
+    - deploy_dev_su-mac-b
+    - deploy_dev_su-mac-c
+    - prod_cleanup_and_prepare
+    - deploy_prod_su-mac-a
+    - deploy_prod_su-mac-b
+    - deploy_prod_su-mac-c
+
+.stage_logic:
+    rules:
+        - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE == $CI_JOB_STAGE'
+          when: always
+        - if: '$CI_PIPELINE_SOURCE == "web"'
+          when: never
+
+.prod_build_su-mac-a:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_BUILD != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.prod_build_su-mac-b:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_BUILD != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.prod_build_su-mac-c:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_BUILD != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.prod_deploy_su-mac-a:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.prod_deploy_su-mac-b:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.prod_deploy_su-mac-c:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.dev_build_su-mac-a:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $SKIP_BUILD != "true"'
+
+.dev_build_su-mac-b:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $SKIP_BUILD != "true"'
+
+.dev_build_su-mac-c:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $SKIP_BUILD != "true"'
+
+.dev_deploy_su-mac-a:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $STOP_SERVICE != "true" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.dev_deploy_su-mac-b:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $STOP_SERVICE != "true" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+.dev_deploy_su-mac-c:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $STOP_SERVICE != "true" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+
+variables:
+    IMAGE_VER: latest
+    DOCKER_HOST: "unix:///run/user/$(id -u)/podman/podman.sock"
+    BASE_IMAGES_REGISTRY: igs.sabanciuniv.edu:5050/imagebase/images
+    SERVICE_GROUP1: su-mac-a:su-mac-a-nginx
+    SERVICE_GROUP2: su-mac-b:su-mac-b-nginx
+    SERVICE_GROUP3: su-mac-c:su-mac-c-nginx
+    MAIN_SERVICE1: su-mac-a
+    MAIN_SERVICE2: su-mac-b
+    MAIN_SERVICE3: su-mac-c
+    BUILD_VOLUME_PATH: /app/vendor
+    CODE_DIR: /home/${USER}/data_volume/data/html
+    SCALE: 1
+    SKIP_BUILD: false
+    SKIP_DEPLOY: false
+    BASE_PORT1: "1100"
+    BASE_PORT2: "1110"
+    BASE_PORT3: "1120"
+    LOG_STRING: "1a"
+    VOLUME_PATH: /data
+    SYSTEMD_REPO: "${CI_PROJECT_DIR}/.systemd"
+    CLEAN_SCRIPT: "${SYSTEMD_REPO}/clean.sh"
+    DEPLOY_SCRIPT: "${SYSTEMD_REPO}/deploy.sh"
+    STOP_SCRIPT: "${SYSTEMD_REPO}/stop.sh"
+    LOCAL_SCRIPT: "${SYSTEMD_REPO}/local.sh"
+    SCALE_SCRIPT: "${SYSTEMD_REPO}/scale.sh"
+
+    # SKIP_BUILD Logic
+    # To skip build manually, Run Pipeline > Add Variable: SKIP_BUILD = "true"
+
+# ---------------------------------------------------
+# JOB 1: BUILD & PUSH
+# Runs on: builder1 (Podman-in-Podman)
+# ---------------------------------------------------
+.build-container:
+    tags:
+        - sgs-test-builder-runner # Updated to match your PinP runner
+    image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
+
+    variables:
+    resource_group: ${ENVIRONMENT_NAME}
+
+    before_script:
+        - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+        #- echo "${REGISTRY_PASSWORD}" | podman login dhi.io -u "${REGISTRY_USER}" --password-stdin
+        - echo "${IMAGE_BASE_PASSWORD}" | podman login ${BASE_IMAGES_REGISTRY} -u ${IMAGE_BASE_USER} --password-stdin
+        # Create .env file securely with variables from GitLab CI/CD Settings
+
+        #Only add if needed
+        # - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > .env
+    environment: ${ENVIRONMENT_NAME}
+
+
+build_dev_su-mac-a:
+    stage: build_dev_su-mac-a
+    extends: .build-container
+    rules:
+        - !reference [.dev_build_su-mac-a, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE1}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Building image ${IMAGE_NAME} on Native Podman..."
+        - echo "Getting driver..."
+        - podman info | grep -E "graphDriverName|Native Overlay Diff"
+        - podman info
+        - podman images
+        - echo "Getting driver end..."
+        - podman build -v /next:/app/.next/cache:Z -v /npm:/root/.npm:Z -v /in_container_test/build:/data:Z -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+        - echo "Pushing to igs.sabanciuniv.edu Registry..."
+        - podman push ${IMAGE_NAME}
+    environment: ${ENVIRONMENT_NAME}
+
+
+build_dev_su-mac-b:
+    stage: build_dev_su-mac-b
+    extends: .build-container
+    rules:
+        - !reference [.dev_build_su-mac-b, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE2}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Building image ${IMAGE_NAME} on Native Podman..."
+        - podman build -v /next:/app/.next/cache:Z -v /npm:/root/.npm:Z -v /in_container_test/build:/data:Z -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+        - echo "Pushing to igs.sabanciuniv.edu Registry..."
+        - podman push ${IMAGE_NAME}
+    environment: ${ENVIRONMENT_NAME}
+
+build_dev_su-mac-c:
+    stage: build_dev_su-mac-c
+    extends: .build-container
+    rules:
+        - !reference [.dev_build_su-mac-c, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE3}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Building image ${IMAGE_NAME} on Native Podman..."
+        - podman build -v /next:/app/.next/cache:Z -v /npm:/root/.npm:Z -v /in_container_test/build:/data:Z -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+        - echo "Pushing to igs.sabanciuniv.edu Registry..."
+        - podman push ${IMAGE_NAME}
+    environment: ${ENVIRONMENT_NAME}
+
+
+build_prod_su-mac-a:
+    stage: build_prod_su-mac-a
+    extends: .build-container
+    rules:
+        - !reference [.prod_build_su-mac-a, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE1}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Building image ${IMAGE_NAME} on Native Podman..."
+        - podman build -v /next:/app/.next/cache:Z -v /npm:/root/.npm:Z -v /in_container_test/build:/data:Z -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+        - echo "Pushing to igs.sabanciuniv.edu Registry..."
+        - podman push ${IMAGE_NAME}
+    environment: ${ENVIRONMENT_NAME}
+
+
+build_prod_su-mac-b:
+    stage: build_prod_su-mac-b
+    extends: .build-container
+    rules:
+        - !reference [.prod_build_su-mac-b, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE2}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Building image ${IMAGE_NAME} on Native Podman..."
+        - podman build -v /next:/app/.next/cache:Z -v /npm:/root/.npm:Z -v /in_container_test/build:/data:Z -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+        - echo "Pushing to igs.sabanciuniv.edu Registry..."
+        - podman push ${IMAGE_NAME}
+    environment: ${ENVIRONMENT_NAME}
+
+build_prod_su-mac-c:
+    stage: build_prod_su-mac-c
+    extends: .build-container
+    rules:
+        - !reference [.prod_build_su-mac-c, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE3}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Building image ${IMAGE_NAME} on Native Podman..."
+        - podman build -v /next:/app/.next/cache:Z -v /npm:/root/.npm:Z -v /in_container_test/build:/data:Z -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+        - echo "Pushing to igs.sabanciuniv.edu Registry..."
+        - podman push ${IMAGE_NAME}
+    environment: ${ENVIRONMENT_NAME}
+
+# ---------------------------------------------------
+# JOB 2: DEPLOY TO RED HAT (Self-Hosted)
+# ---------------------------------------------------
+dev_cleanup_and_prepare:
+    stage: dev_cleanup_and_prepare
+    tags:
+      - sgs-test-test-runner
+    resource_group: ${ENVIRONMENT_NAME}
+    rules:
+        - !reference [.dev_deploy_su-mac-a, rules]
+    variables:
+        SERVICE_NAME: resetenv
+        AUTHORIZED_PROJECTS: "${SERVICE_GROUP1} ${SERVICE_GROUP2} ${SERVICE_GROUP3}"
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        # 1. SETUP ENV VARS.
+        - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+        - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+        - export TARGET_DIR="${HOME}/${APP_DIR}"
+        - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+        - export COMPOSE_BIN=$(which podman-compose)
+        - export USER
+        - export HOME
+        - export ENVIRONMENT_NAME
+        # 3. PREPARE DIRECTORIES
+        - mkdir -p "${TARGET_DIR}"
+        - cd "${TARGET_DIR}"
+        - podman image prune -a -f
+        - cp ${CLEAN_SCRIPT} "${TARGET_DIR}/clean.sh"
+        - bash "${TARGET_DIR}"/clean.sh
+    environment: ${ENVIRONMENT_NAME}
+
+.deploy-to-dev:
+    tags:
+        - sgs-test-test-runner
+
+    variables:
+        # Global Variables
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+    resource_group: ${ENVIRONMENT_NAME}
+
+    script:
+        - echo "Deploying to Self-Hosted Runner..."
+
+        # 1. SETUP ENV VARS
+        - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+        - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+        - export TARGET_DIR="${HOME}/${APP_DIR}"
+        - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+        - export COMPOSE_BIN=$(which podman-compose)
+        - export USER
+        - export HOME
+        - export CODE_DIR='${CODE_DIR}'
+        - export REPO_URL='${REPO_URL}'
+        - export ENVIRONMENT_NAME
+
+        # 2. LOGIN TO REGISTRY (Podman)
+        - podman logout "${CI_REGISTRY}" || true
+
+        # 3. PREPARE DIRECTORIES
+        - mkdir -p "${TARGET_DIR}"
+        - cd "${TARGET_DIR}"
+        - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME}"
+
+        - echo "Pulling latest image from igs.sabanciuniv.edu..."
+        - cd ${CI_PROJECT_DIR}
+        - $COMPOSE_BIN -f ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml pull
+
+        # Read from Exported ENV VARS, fallback to CLI arguments
+        - |
+            cat <<EOF > "${TARGET_DIR}/.exports"
+            export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+            export APP_CPUS="50%"
+            export APP_MEMS="128M"
+            export SERVICES="${SERVICE_GROUP}"
+            export APP_PULL_CREDS="${PULLER_USER}:${PULLER_PASSWORD} ${IMAGE_BASE_USER}:${IMAGE_BASE_PASSWORD}"
+            EOF
+
+        - export APP_SCALE="3"
+        - source "${TARGET_DIR}/.exports"
+
+        # 3. PREPARE DIRECTORIES
+        - mkdir -p "${TARGET_DIR}"
+
+        - |
+          SNAME=$(echo "$SERVICE_GROUP" | sed 's/SERVICE_GROUP: //' | tr ':' ' ')
+          for NAME in $SNAME; do
+            echo "Generating env for: $NAME"
+            envsubst < ${SYSTEMD_REPO}/.env.${NAME}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${NAME}.${ENVIRONMENT_NAME}
+          done
+
+
+
+    environment: ${ENVIRONMENT_NAME}
+
+
+
+deploy_dev_su-mac-a:
+    stage: deploy_dev_su-mac-a
+    extends: .deploy-to-dev
+    rules:
+        - !reference [.dev_deploy_su-mac-a, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE1}
+        SERVICE_GROUP: ${SERVICE_GROUP1}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - !reference [.deploy-to-dev, script]
+        - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+        - bash "${TARGET_DIR}/pull.sh"
+        - cp ${SYSTEMD_REPO}/scale.sh "${TARGET_DIR}/scale.sh"
+
+        - systemctl --user daemon-reload
+
+        - systemctl --user reset-failed
+        - export CONTAINER_NAME=${SERVICE_NAME}-$i
+        - export APP_PORT='${APP_PORT}'
+        - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+        - cp "$DEPLOY_SCRIPT" "${TARGET_DIR}/deploy.sh"
+        - cd "${TARGET_DIR}"
+        - export INSTANCE_ID='${INSTANCE_ID}'
+        - export APP_STOP_TIMEOUT_SEC="3600:240"
+        - export APP_PORTS="${BASE_PORT1}"
+        - bash "${TARGET_DIR}/deploy.sh"
+
+
+
+deploy_dev_su-mac-b:
+    stage: deploy_dev_su-mac-b
+    extends: .deploy-to-dev
+    rules:
+        - !reference [.dev_deploy_su-mac-b, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE2}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+        SERVICE_GROUP: ${SERVICE_GROUP2}
+
+    script:
+        - !reference [.deploy-to-dev, script]
+
+        - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+        - bash "${TARGET_DIR}/pull.sh"
+        - cp ${SYSTEMD_REPO}/scale.sh "${TARGET_DIR}/scale.sh"
+
+        - systemctl --user daemon-reload
+
+        - systemctl --user reset-failed
+        - export CONTAINER_NAME=${SERVICE_NAME}-$i
+        - export APP_PORT='${APP_PORT}'
+        - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+        - cd "${TARGET_DIR}"
+        - export INSTANCE_ID='${INSTANCE_ID}'
+        - export APP_PORTS="${BASE_PORT2}"
+        #- export APP_STOP_TIMEOUT_SEC="3600:240"
+        - export APP_STOP_TIMEOUT_SEC="3600:240"
+        - cp "$DEPLOY_SCRIPT" "${TARGET_DIR}/deploy.sh"
+        - bash "${TARGET_DIR}/deploy.sh"
+
+deploy_dev_su-mac-c:
+    stage: deploy_dev_su-mac-c
+    extends: .deploy-to-dev
+    rules:
+        - !reference [.dev_deploy_su-mac-c, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE3}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+        SERVICE_GROUP: ${SERVICE_GROUP3}
+
+    script:
+        - !reference [.deploy-to-dev, script]
+
+        - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+        - bash "${TARGET_DIR}/pull.sh"
+
+        - systemctl --user daemon-reload
+
+        - systemctl --user reset-failed
+        - export CONTAINER_NAME=${SERVICE_NAME}-$i
+        - export APP_PORT='${APP_PORT}'
+        - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+        - cd "${TARGET_DIR}"
+        - export INSTANCE_ID='${INSTANCE_ID}'
+        - export APP_PORTS="${BASE_PORT3}"
+        - export APP_STOP_TIMEOUT_SEC="3600:240"
+        - cp "$DEPLOY_SCRIPT" "${TARGET_DIR}/deploy.sh"
+        - bash "${TARGET_DIR}/deploy.sh"
+
+# ---------------------------------------------------
+# JOB 2: DEPLOY TO RED HAT (Self-Hosted)
+# ---------------------------------------------------
+
+prod_cleanup_and_prepare:
+    stage: prod_cleanup_and_prepare
+    tags:
+      - container-test-test-runner
+    rules:
+        - !reference [.prod_deploy_su-mac-a, rules]
+    variables:
+        SERVICE_NAME: resetenv
+        AUTHORIZED_PROJECTS: "${SERVICE_GROUP1} ${SERVICE_GROUP2} ${SERVICE_GROUP3}"
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        # 1. SETUP ENV VARS
+        - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+        - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+        - export TARGET_DIR="${HOME}/${APP_DIR}"
+        - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+        - export COMPOSE_BIN=$(which podman-compose)
+        - export USER
+        - export HOME
+        - export ENVIRONMENT_NAME
+        # 3. PREPARE DIRECTORIES
+        - mkdir -p "${TARGET_DIR}"
+        - cd "${TARGET_DIR}"
+        - cp ${CLEAN_SCRIPT} "${TARGET_DIR}/clean.sh"
+        - bash "${TARGET_DIR}"/clean.sh
+    environment: ${ENVIRONMENT_NAME}
+
+.deploy-to-prod:
+    tags:
+        - container-test-prod-runner
+
+    variables:
+        # Global Variables
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+    script:
+        - echo "Deploying to Self-Hosted Runner..."
+
+        # 1. SETUP ENV VARS
+        - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+        - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+        - export TARGET_DIR="${HOME}/${APP_DIR}"
+        - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+        - export COMPOSE_BIN=$(which podman-compose)
+        - export USER
+        - export HOME
+        - export CODE_DIR='${CODE_DIR}'
+        - export REPO_URL='${REPO_URL}'
+        - export ENVIRONMENT_NAME
+
+        # 2. LOGIN TO REGISTRY (Podman)
+        - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+
+        # 3. PREPARE DIRECTORIES
+        - mkdir -p "${TARGET_DIR}"
+        - cd "${TARGET_DIR}"
+        - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME}"
+
+        - echo "Pulling latest image from igs.sabanciuniv.edu..."
+        - cd ${CI_PROJECT_DIR}
+        - $COMPOSE_BIN -f ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml pull
+
+        # Read from Exported ENV VARS, fallback to CLI arguments
+        - |
+            cat <<EOF > "${TARGET_DIR}/.exports"
+            export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+            export APP_CPUS="50%"
+            export APP_MEMS="128M"
+            export SERVICES="${SERVICE_GROUP}"
+            EOF
+
+        - export APP_SCALE="3"
+        - source "${TARGET_DIR}/.exports"
+        # 2. LOGIN TO REGISTRY (Podman)
+        - unset DOCKER_AUTH_CONFIG
+        - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+
+        # 3. PREPARE DIRECTORIES
+        - mkdir -p "${TARGET_DIR}"
+
+        - |
+          SNAME=$(echo "$SERVICE_GROUP" | sed 's/SERVICE_GROUP: //' | tr ':' ' ')
+          for NAME in $SNAME; do
+            echo "Generating env for: $NAME"
+            envsubst < ${SYSTEMD_REPO}/.env.${NAME}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${NAME}.${ENVIRONMENT_NAME}
+          done
+
+
+    environment: ${ENVIRONMENT_NAME}
+
+
+
+deploy_prod_su-mac-a:
+    stage: deploy_prod_su-mac-a
+    extends: .deploy-to-prod
+    rules:
+        - !reference [.prod_deploy_su-mac-a, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE1}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+        SERVICE_GROUP: ${SERVICE_GROUP1}
+
+    script:
+        - !reference [.deploy-to-prod, script]
+
+        - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+        - bash "${TARGET_DIR}/pull.sh"
+
+        - systemctl --user daemon-reload
+
+        - systemctl --user reset-failed
+        - export CONTAINER_NAME=${SERVICE_NAME}-$i
+        - export APP_PORT='${APP_PORT}'
+        - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+        - cd "${TARGET_DIR}"
+        - export INSTANCE_ID='${INSTANCE_ID}'
+        - export APP_PORTS="${BASE_PORT1}"
+        - bash "${TARGET_DIR}/deploy.sh"
+
+
+deploy_prod_su-mac-b:
+    stage: deploy_prod_su-mac-b
+    extends: .deploy-to-prod
+    rules:
+        - !reference [.prod_deploy_su-mac-b, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE2}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+        SERVICE_GROUP: ${SERVICE_GROUP2}
+
+    script:
+        - !reference [.deploy-to-prod, script]
+
+        - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+        - bash "${TARGET_DIR}/pull.sh"
+
+        - systemctl --user daemon-reload
+
+        - systemctl --user reset-failed
+        - export CONTAINER_NAME=${SERVICE_NAME}-$i
+        - export APP_PORT='${APP_PORT}'
+        - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+        - cd "${TARGET_DIR}"
+        - export INSTANCE_ID='${INSTANCE_ID}'
+        - export APP_PORTS="${BASE_PORT2}"
+        - bash "${TARGET_DIR}/deploy.sh"
+
+deploy_prod_su-mac-c:
+    stage: deploy_prod_su-mac-c
+    extends: .deploy-to-prod
+    rules:
+        - !reference [.prod_deploy_su-mac-c, rules]
+    variables:
+        SERVICE_NAME: ${MAIN_SERVICE3}
+        IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+        APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+        SERVICE_GROUP: ${SERVICE_GROUP3}
+
+    script:
+        - !reference [.deploy-to-prod, script]
+
+        - envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+        - bash "${TARGET_DIR}/pull.sh"
+
+        - systemctl --user daemon-reload
+
+        - systemctl --user reset-failed
+        - export CONTAINER_NAME=${SERVICE_NAME}-$i
+        - export APP_PORT='${APP_PORT}'
+        - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+        - cd "${TARGET_DIR}"
+        - export INSTANCE_ID='${INSTANCE_ID}'
+        - export APP_PORTS="${BASE_PORT3}"
+        - bash "${TARGET_DIR}/deploy.sh"

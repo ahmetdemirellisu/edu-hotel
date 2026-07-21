@@ -1,0 +1,175 @@
+build_dev_ehp-backend:
+  stage: build_dev_ehp-backend
+  image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
+  extends: .build-container
+  rules:
+    - !reference [.dev_build_ehp-backend, rules]
+
+variables:
+  SERVICE_NAME: ${SERVICE1}
+  IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+  APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Building image ${IMAGE_NAME} on Native Podman..."
+    - |
+      podman build -v /next:/app/.next/cache:Z -v /cache:/root/.npm:Z -v /in_container_test/build:/data:Z \
+      -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+    - echo "Pushing to igs.sabanciuniv.edu Registry..."
+    - podman push ${IMAGE_NAME}
+
+  environment: ${ENVIRONMENT_NAME}
+
+
+build_dev_ehp:
+  stage: build_dev_ehp
+  image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
+  extends: .build-container
+  rules:
+    - !reference [.dev_build_ehp, rules]
+
+  variables:
+    SERVICE_NAME: ${SERVICE2}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Building image ${IMAGE_NAME} on Native Podman..."
+    - |
+      podman build -v /next:/app/.next/cache:Z -v /cache:/root/.npm:Z -v /in_container_test/build:/data:Z \
+      -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
+
+    - echo "Pushing to igs.sabanciuniv.edu Registry..."
+    - podman push ${IMAGE_NAME}
+
+  environment: ${ENVIRONMENT_NAME}
+
+# ---------------------------------------------------
+# JOB 2: DEPLOY TO RED HAT (Self-Hosted)
+# ---------------------------------------------------
+dev_cleanup_and_prepare:
+  stage: dev_cleanup_and_prepare
+  tags:
+    - ehp-backend-test-runner
+  resource_group: ${ENVIRONMENT_NAME}
+  rules:
+    - !reference [.dev_deploy_ehp-backend, rules]
+  variables:
+    SERVICE_NAME: resetenv
+    AUTHORIZED_PROJECTS: "${SERVICE_GROUP1} ${SERVICE_GROUP2} ${SERVICE_GROUP3}"
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    # 1. SETUP ENV VARS.
+    - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+    - export TARGET_DIR="${HOME}/${APP_DIR}"
+    - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+    - export COMPOSE_BIN=$(which podman-compose)
+    - export USER
+    - export HOME
+    - export ENVIRONMENT_NAME
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - cd "${TARGET_DIR}"
+    - podman image prune -a -f
+    - cp ${CLEAN_SCRIPT} "${TARGET_DIR}/clean.sh"
+    - bash "${TARGET_DIR}"/clean.sh
+  environment: ${ENVIRONMENT_NAME}
+
+.deploy-to-dev:
+  tags:
+    - ehp-backend-test-runner
+
+  variables:
+    # Global Variables
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+  resource_group: ${ENVIRONMENT_NAME}
+
+  script:
+    - echo "Deploying to Self-Hosted Runner..."
+
+    # 1. SETUP ENV VARS
+    - export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    - export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+    - export TARGET_DIR="${HOME}/${APP_DIR}"
+    - export SYSTEMD_DIR="${HOME}/.config/systemd/user"
+    - export COMPOSE_BIN=$(which podman-compose)
+    - export USER
+    - export HOME
+    #- export CODE_DIR='${CODE_DIR}'
+    #- export REPO_URL='${REPO_URL}'
+    - export ENVIRONMENT_NAME
+    - export CI_PROJECT_DIR
+
+    # 2. LOGIN TO REGISTRY (Podman)
+    - podman logout "${CI_REGISTRY}" || true
+
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+    - cd "${TARGET_DIR}"
+    - envsubst < ${SYSTEMD_REPO}/docker/php/php.ini > "${TARGET_DIR}"/php.ini
+    - envsubst < $SYSTEMD_REPO/docker/php/php-fpm.conf > "${TARGET_DIR}"/php-fpm.conf
+    - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME}"
+
+    # Read from Exported ENV VARS, fallback to CLI arguments
+    - |
+      cat <<EOF > "${TARGET_DIR}/.exports"
+      export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
+      export APP_CPUS="50%"
+      export APP_MEMS="512M"
+      export SERVICES="${SERVICE_GROUP}"
+      export APP_PULL_CREDS="${PULLER_USER}:${PULLER_PASSWORD}"
+      export APP_UID=$APP_UID
+      export APP_GID=$APP_GID
+      EOF
+
+    - export APP_SCALE="3"
+    - source "${TARGET_DIR}/.exports"
+
+    # 3. PREPARE DIRECTORIES
+    - mkdir -p "${TARGET_DIR}"
+
+    - |
+      SNAME=$(echo "$SERVICE_GROUP" | sed 's/SERVICE_GROUP: //' | tr ':' ' ')
+      for NAME in $SNAME; do
+        echo "Generating env for: $NAME"
+        envsubst < ${SYSTEMD_REPO}/.env.${NAME}.${ENVIRONMENT_NAME} > ${TARGET_DIR}/.env.${NAME}.${ENVIRONMENT_NAME}
+      done
+
+  environment: ${ENVIRONMENT_NAME}
+
+deploy_dev_ehp:
+  stage: deploy_dev_ehp
+  extends: .deploy-to-dev
+  rules:
+    - !reference [.dev_deploy_ehp, rules]
+  variables:
+    SERVICE_NAME: ${MAIN_SERVICE1}
+    SERVICE_GROUP: ${SERVICE_GROUP1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - !reference [.deploy-to-dev, script]
+    #- envsubst < ${SYSTEMD_REPO}/pull.sh > "${TARGET_DIR}/pull.sh"
+    #- bash "${TARGET_DIR}/pull.sh"
+    #- cp ${SYSTEMD_REPO}/scale.sh "${TARGET_DIR}/scale.sh"
+    - cp ${SYSTEMD_REPO}/sync_with_repo.sh "${TARGET_DIR}/sync_with_repo.sh"
+    - bash "${TARGET_DIR}/sync_with_repo.sh"
+    - cp ${SYSTEMD_REPO}/scale.sh "${TARGET_DIR}/scale.sh"
+
+
+    - systemctl --user daemon-reload
+
+    - systemctl --user reset-failed
+    - export CONTAINER_NAME=${SERVICE_NAME}-$i
+    - export APP_PORT='${APP_PORT}'
+    - envsubst < ${SYSTEMD_REPO}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml > ${TARGET_DIR}/.docker-compose.${SERVICE_NAME}.${ENVIRONMENT_NAME}.yml
+    - cp "$DEPLOY_SCRIPT" "${TARGET_DIR}/deploy.sh"
+    - cd "${TARGET_DIR}"
+    - export INSTANCE_ID='${INSTANCE_ID}'
+    - export APP_STOP_TIMEOUT_SEC="30"
+    - export APP_PORTS="${BASE_PORT1}:${BASE_PORT2}"
+    - bash "${TARGET_DIR}/deploy.sh"
