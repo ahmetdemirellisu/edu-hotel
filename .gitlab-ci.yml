@@ -1,0 +1,169 @@
+workflow:
+    rules:
+        # Fix null/empty check
+        - if: '$CI_PIPELINE_SOURCE == "web" && ($RUN_STAGE == "" || $RUN_STAGE == "null")'
+          when: never
+
+        # Fix regex patterns - use $VAR format for regex..
+        - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE =~ /^(build|deploy)_prod_ehp/'
+          variables:
+              ENVIRONMENT_NAME: "production"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+          when: always
+
+        # Fix regex patterns - use $VAR format for regex.
+        - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE =~ /^(build|deploy)_dev_ehp/'
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+          when: always
+
+        # Use consistent variable syntax
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+          variables:
+              ENVIRONMENT_NAME: "production"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "staging"'
+          variables:
+              ENVIRONMENT_NAME: "staging"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:staging
+
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"'
+          variables:
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+          variables:
+              ENVIRONMENT_NAME: "production"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:prod
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "staging"'
+          variables:
+              ENVIRONMENT_NAME: "staging"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:staging
+
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development"'
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "development" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "staging"'
+          variables:
+              ENVIRONMENT_NAME: "development"
+              IMAGE_VAR: ${CI_REGISTRY_IMAGE}:dev
+
+
+        - when: never
+
+
+
+include:
+  - local: "/.systemd/ci/.gitlab-ci-development.yml"
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development"'
+      - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE =~ /^(build|deploy)_dev_ehp/'
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "development" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "staging"'
+
+  - local: "/.systemd/ci/.gitlab-ci-production.yml"
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+
+
+stages:
+    - build_dev_ehp
+    - build_prod_ehp
+    - dev_cleanup_and_prepare
+    - deploy_dev_ehp
+    - prod_cleanup_and_prepare
+    - deploy_prod_ehp
+
+.stage_logic:
+    rules:
+        - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_STAGE == $CI_JOB_STAGE'
+          when: always
+        - if: '$CI_PIPELINE_SOURCE == "web"'
+          when: never
+
+.prod_build_ehp:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_BUILD != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+
+.prod_deploy_ehp:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main" && $SKIP_DEPLOY != "true"'
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+
+.dev_build_ehp:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $SKIP_BUILD != "true"'
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "development" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "staging"'
+
+
+.dev_deploy_ehp:
+    rules:
+        - !reference [.stage_logic, rules]
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "development" && $STOP_SERVICE != "true" && $SKIP_DEPLOY != "true"'
+        - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "development" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "staging"'
+
+          changes:
+              - "**/*"
+              - "!.gitlab-ci.yml"
+
+
+variables:
+    IMAGE_VER: latest
+    BASE_IMAGES_REGISTRY: igs.sabanciuniv.edu:5050/imagebase/images
+    SERVICE1: ehp
+    SERVICE2: ${SERVICE1}-backend
+    SERVICE_GROUP1: "$SERVICE1:$SERVICE2"
+    BUILD_VOLUME_PATH: /app/vendor
+    CODE_DIR: /home/${USER}/data_volume/data/html
+    SCALE: 1
+    APP_UID: 1000
+    APP_GID: 1000
+    SKIP_BUILD: false
+    SKIP_DEPLOY: false
+    BASE_PORT1: "1170"
+    BASE_PORT2: "1180"
+    LOG_STRING: "1a"
+    VOLUME_PATH: /opt/drupal
+    SYSTEMD_REPO: "${CI_PROJECT_DIR}/.systemd"
+    CLEAN_SCRIPT: "${SYSTEMD_REPO}/clean.sh"
+    DEPLOY_SCRIPT: "${SYSTEMD_REPO}/deploy.sh"
+    STOP_SCRIPT: "${SYSTEMD_REPO}/stop.sh"
+    LOCAL_SCRIPT: "${SYSTEMD_REPO}/local.sh"
+    SCALE_SCRIPT: "${SYSTEMD_REPO}/scale.sh"
+
+    # SKIP_BUILD Logic
+    # To skip build manually, Run Pipeline > Add Variable: SKIP_BUILD = "true"
+
+# ---------------------------------------------------
+# JOB 1: BUILD & PUSH
+# Runs on: builder1 (Podman-in-Podman)
+# ---------------------------------------------------
+.build-container:
+    tags:
+        - ehp-builder-runner # Updated to match your PinP runner
+
+    before_script:
+        - echo "${CI_REGISTRY_PASSWORD}" | podman login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} --password-stdin
+        #- echo "${REGISTRY_PASSWORD}" | podman login dhi.io -u "${REGISTRY_USER}" --password-stdin
+        - echo "${IMAGE_BASE_PASSWORD}" | podman login ${BASE_IMAGES_REGISTRY} -u ${IMAGE_BASE_USER} --password-stdin
+        # Create .env file securely with variables from GitLab CI/CD Settings
+
+        #Only add if needed
+        # - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > .env
+    environment: ${ENVIRONMENT_NAME}
