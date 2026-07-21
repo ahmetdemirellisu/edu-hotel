@@ -3,7 +3,7 @@ build_dev_ehp-backend:
   image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
   extends: .build-container
   rules:
-    - !reference [.dev_build_ehp-backend, rules]
+    - !reference [.dev_build_ehp, rules]
 
 variables:
   SERVICE_NAME: ${SERVICE1}
@@ -50,10 +50,10 @@ build_dev_ehp:
 dev_cleanup_and_prepare:
   stage: dev_cleanup_and_prepare
   tags:
-    - ehp-backend-test-runner
+    - ehp-test-runner
   resource_group: ${ENVIRONMENT_NAME}
   rules:
-    - !reference [.dev_deploy_ehp-backend, rules]
+    - !reference [.dev_deploy_ehp, rules]
   variables:
     SERVICE_NAME: resetenv
     AUTHORIZED_PROJECTS: "${SERVICE_GROUP1} ${SERVICE_GROUP2} ${SERVICE_GROUP3}"
@@ -79,7 +79,7 @@ dev_cleanup_and_prepare:
 
 .deploy-to-dev:
   tags:
-    - ehp-backend-test-runner
+    - ehp-test-runner
 
   variables:
     # Global Variables
