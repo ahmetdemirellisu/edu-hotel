@@ -73,6 +73,7 @@ include:
 
 
 stages:
+    - build_dev_ehp-backend
     - build_dev_ehp
     - build_prod_ehp
     - dev_cleanup_and_prepare
