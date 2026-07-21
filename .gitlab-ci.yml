@@ -132,11 +132,11 @@ variables:
     SERVICE_GROUP1: "$SERVICE1:$SERVICE2"
     BUILD_VOLUME_PATH: /app/vendor
     CODE_DIR: /home/${USER}/data_volume/data/html
-    SCALE: 1
-    APP_UID: 1000
-    APP_GID: 1000
-    SKIP_BUILD: false
-    SKIP_DEPLOY: false
+    SCALE: "1"
+    APP_UID: "1000"
+    APP_GID: "1000"
+    SKIP_BUILD: "false"
+    SKIP_DEPLOY: "false"
     BASE_PORT1: "1170"
     BASE_PORT2: "1180"
     LOG_STRING: "1a"
