@@ -1,6 +1,6 @@
 services:
   ${SERVICE1}:
-    image: ${IMAGE_NAME}
+    image: ${IMAGE_NAME1}
     container_name: ehp-backend
     command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
     ports:
@@ -15,7 +15,7 @@ services:
       - instance_net
       -
   ${SERVICE2}:
-    image: ${IMAGE_NAME}
+    image: ${IMAGE_NAME2}
     container_name: ehp-frontend
     depends_on:
       - backend

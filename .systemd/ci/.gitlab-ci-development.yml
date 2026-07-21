@@ -146,9 +146,10 @@ deploy_dev_ehp:
   rules:
     - !reference [.dev_deploy_ehp, rules]
   variables:
-    SERVICE_NAME: ${MAIN_SERVICE1}
+    SERVICE_NAME: ${SERVICE1}
     SERVICE_GROUP: ${SERVICE_GROUP1}
-    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    IMAGE_NAME1: ${IMAGE_VAR}-${SERVICE1}-${IMAGE_VER}
+    IMAGE_NAME2: ${IMAGE_VAR}-${SERVICE2}-${IMAGE_VER}
     APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
 
   script:
