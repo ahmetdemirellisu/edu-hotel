@@ -125,27 +125,7 @@ stages:
 
 variables:
     IMAGE_VER: latest
-    BASE_IMAGES_REGISTRY: igs.sabanciuniv.edu:5050/imagebase/images
-    SERVICE1: ehp
-    SERVICE2: "ehp-backend"
-    SERVICE_GROUP1: "ehp:ehp-backend"
-    BUILD_VOLUME_PATH: /app/vendor
-    CODE_DIR: /home/${USER}/data_volume/data/html
-    SCALE: 1a
-    APP_UID: 1000
-    APP_GID: 1000
-    SKIP_BUILD: false
-    SKIP_DEPLOY: false
-    BASE_PORT1: "1170"
-    BASE_PORT2: "1180"
-    LOG_STRING: "1a"
-    VOLUME_PATH: /opt/drupal
-    SYSTEMD_REPO: "${CI_PROJECT_DIR}/.systemd"
-    CLEAN_SCRIPT: "${SYSTEMD_REPO}/clean.sh"
-    DEPLOY_SCRIPT: "${SYSTEMD_REPO}/deploy.sh"
-    STOP_SCRIPT: "${SYSTEMD_REPO}/stop.sh"
-    LOCAL_SCRIPT: "${SYSTEMD_REPO}/local.sh"
-    SCALE_SCRIPT: "${SYSTEMD_REPO}/scale.sh"
+
 
     # SKIP_BUILD Logic
     # To skip build manually, Run Pipeline > Add Variable: SKIP_BUILD = "true"
