@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # 1. Install dependencies only when needed
-FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
+FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS deps
 RUN apk add --no-cache libc6-compat curl
 WORKDIR /app
 
