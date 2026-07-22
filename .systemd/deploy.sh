@@ -270,7 +270,7 @@ EOF
                 INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
 
                 # Define your port logic here
-                TARGET_PORT=$(( FIRST_PORT + PORT_OFFSET + (i - 1) ))
+                TARGET_PORT=$(( BACKEND_PORT + PORT_OFFSET + (i - 1) ))
 
                 # Create a fresh copy for this specific instance
                 cp "$TARGET_DIR/nginx.conf.template" "$INSTANCE_CONF"

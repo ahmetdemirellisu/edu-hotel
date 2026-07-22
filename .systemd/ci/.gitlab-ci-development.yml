@@ -171,5 +171,5 @@ deploy_dev_ehp:
     - export INSTANCE_ID='${INSTANCE_ID}'
     - export APP_STOP_TIMEOUT_SEC="30"
     - export APP_PORTS="${BASE_PORT1}"
-    - export FIRST_PORT="${BASE_PORT1}"
+    - export BACKEND_PORT="${BASE_PORT1}"
     - bash "${TARGET_DIR}/deploy.sh"
