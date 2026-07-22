@@ -279,7 +279,7 @@ log_info "⬇️ Pre-fetching images with per-container credentials..."
 for srv_idx in "${!BASENAMES[@]}"; do
     current_unit=$(get_unit_name "${BASENAMES[$srv_idx]}" "1")
     TARGET_IMAGE=$(grep -oP '^Image=\K.*' "$QUADLET_DIR/${current_unit}.container" | head -n 1 || true)
-    SVC_CRED="${CRED_ARRAY[$srv_idx]}"
+    SVC_CRED="${CRED_ARRAY[$srv_idx]:-${CRED_ARRAY[0]}}"
 
     if [[ -n "$TARGET_IMAGE" ]]; then
         if [[ -n "$SVC_CRED" && "$SVC_CRED" != "none" ]]; then
@@ -400,7 +400,7 @@ restart_instance() {
         for srv_idx in "${!BASENAMES[@]}"; do
             local current_unit=$(get_unit_name "${BASENAMES[$srv_idx]}" "$i")
             local TARGET_IMAGE=$(grep -oP '^Image=\K.*' "$QUADLET_DIR/${current_unit}.container" | head -n 1)
-            local SVC_CRED="${CRED_ARRAY[$srv_idx]}"
+            local SVC_CRED="${CRED_ARRAY[$srv_idx]:-${CRED_ARRAY[0]}}"
 
             if [[ -n "$TARGET_IMAGE" ]]; then
                 if [[ -n "$SVC_CRED" && "$SVC_CRED" != "none" ]]; then
