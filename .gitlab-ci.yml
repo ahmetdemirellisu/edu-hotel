@@ -137,7 +137,7 @@ variables:
     APP_GID1: 1000
     APP_UID2: 101
     APP_GID2: 101
-    SKIP_BUILD: true
+    SKIP_BUILD: false
     SKIP_DEPLOY: false
     BASE_PORT1: "1170"
     LOG_STRING: "1a"
