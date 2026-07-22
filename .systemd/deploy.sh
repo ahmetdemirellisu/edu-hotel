@@ -268,7 +268,7 @@ EOF
         # ==========================================
         if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
             local INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
-
+            echo "Entered here"
             # Define your port logic here. This grabs the mapped port of the main service (index 0).
             # If you are passing a new environment variable, you can use that instead.
             local TARGET_PORT=$(( ${PORT_ARRAY[0]:-$FIRST_PORT} + PORT_OFFSET + (i - 1) ))

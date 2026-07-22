@@ -135,8 +135,8 @@ variables:
     SCALE: 1
     APP_UID1: 1000
     APP_GID1: 1000
-    APP_UID2: 82
-    APP_GID2: 82
+    APP_UID2: 101
+    APP_GID2: 101
     SKIP_BUILD: true
     SKIP_DEPLOY: false
     BASE_PORT1: "1170"
