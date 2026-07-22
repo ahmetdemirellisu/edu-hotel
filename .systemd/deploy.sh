@@ -266,7 +266,7 @@ EOF
         # ==========================================
         # 🛠️ PER-INSTANCE NGINX CONFIG GENERATION
         # ==========================================
-        if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
+        #if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
             local INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
             echo "Entered here"
             # Define your port logic here. This grabs the mapped port of the main service (index 0).
@@ -284,7 +284,7 @@ EOF
             sed -i "s|Volume=.*:/etc/nginx/nginx.conf|Volume=$INSTANCE_CONF:/etc/nginx/nginx.conf|g" "$TEMPLATE_FILE"
 
             log_info "  📝 Generated unique NGINX config for instance $i targeting port $TARGET_PORT"
-        fi
+        #fi
 
         SAFE_NAME=$(echo "$BASENAME" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
         VAR_CPU="${SAFE_NAME}_CPU"
