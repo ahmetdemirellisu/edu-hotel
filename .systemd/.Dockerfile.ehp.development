@@ -25,12 +25,12 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
 # Next.js build cache mount
-RUN npm run build
+RUN npm install
 
 # ==========================================
 # STAGE 3: Production Runner (Tiny Image)
 # ==========================================
-FROM node:20-alpine AS runner
+FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
