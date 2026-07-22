@@ -17,5 +17,5 @@ RUN chown -R node:node /app
 
 USER node:node
 
-EXPOSE 1180
+EXPOSE 9004
 CMD ["npm", "start"]

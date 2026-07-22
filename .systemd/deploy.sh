@@ -277,7 +277,7 @@ EOF
 
                 # Replace placeholders with real values for this loop iteration
                 sed -i "s/{{INSTANCE_ID}}/$i/g" "$INSTANCE_CONF"
-                sed -i "s/{{TARGET_PORT}}/$TARGET_PORT/g" "$INSTANCE_CONF"
+                #sed -i "s/{{TARGET_PORT}}/$TARGET_PORT/g" "$INSTANCE_CONF"
 
                 # Aggressively replace the entire Volume line mapping to /etc/nginx/nginx.conf
                 sed -i -E "s|Volume=.*:/etc/nginx/nginx\.conf(:.*)?|Volume=$INSTANCE_CONF:/etc/nginx/conf.d/default.conf\1|g" "$TEMPLATE_FILE"
