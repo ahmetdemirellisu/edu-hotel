@@ -108,6 +108,7 @@ dev_cleanup_and_prepare:
     # 3. PREPARE DIRECTORIES
     - mkdir -p "${TARGET_DIR}"
     - cd "${TARGET_DIR}"
+    - cp $SYSTEMD_REPO/docker/nginx/nginx.conf "$TARGET_DIR/nginx-template.conf"
     - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME}"
 
     # Read from Exported ENV VARS, fallback to CLI arguments
@@ -170,4 +171,5 @@ deploy_dev_ehp:
     - export INSTANCE_ID='${INSTANCE_ID}'
     - export APP_STOP_TIMEOUT_SEC="30"
     - export APP_PORTS="${BASE_PORT1}:${BASE_PORT2}"
+    - export FIRST_PORT="${BASE_PORT1}"
     - bash "${TARGET_DIR}/deploy.sh"
