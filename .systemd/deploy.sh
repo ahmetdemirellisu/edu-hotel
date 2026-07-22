@@ -266,7 +266,7 @@ EOF
         # ==========================================
         # 🛠️ PER-INSTANCE NGINX CONFIG GENERATION
         # ==========================================
-        if [[ "$BASENAME" == "*frontend" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
+        if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
             local INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
 
             # Define your port logic here. This grabs the mapped port of the main service (index 0).
