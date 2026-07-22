@@ -133,8 +133,8 @@ variables:
     BUILD_VOLUME_PATH: /app/vendor
     CODE_DIR: /home/${USER}/data_volume/data/html
     SCALE: 1
-    APP_UID1: 1000
-    APP_GID1: 1000
+    APP_UID1: 1001
+    APP_GID1: 1001
     APP_UID2: 101
     APP_GID2: 101
     SKIP_BUILD: false

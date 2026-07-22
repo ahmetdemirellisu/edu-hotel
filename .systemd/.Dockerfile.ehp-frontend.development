@@ -1,25 +1,35 @@
+# syntax=docker/dockerfile:1
+
+# ==========================================
 # 1. Aşama: Derleme (Builder)
+# ==========================================
 FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS builder
 WORKDIR /app
 
+# 1. Install dependencies (Cached until package*.json changes)
+COPY frontend/package*.json ./
+RUN  npm ci --legacy-peer-deps
+
+# 2. Build Arguments & Env Variables
+# (Placed AFTER npm ci so changing ARGs won't invalidate dependency cache)
 ARG VITE_API_URL=/ehp/api
 ARG VITE_BASE_PATH=/ehp
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_BASE_PATH=$VITE_BASE_PATH
 
-COPY frontend/package*.json ./
-RUN npm ci --legacy-peer-deps
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_BASE_PATH=$VITE_BASE_PATH \
+    NODE_ENV=production
 
+# 3. Copy source code and build static assets
 COPY frontend .
 RUN npm run build
 
+# ==========================================
 # 2. Aşama: Yayına Alma (Production)
+# ==========================================
 FROM igs.sabanciuniv.edu:5050/imagebase/images/nginx-unprivileged-base
 
-#COPY /.systemd/docker/nginx/nginx.conf /etc/nginx/nginx.conf
+# Remove default NGINX configuration
+RUN rm -f /etc/nginx/conf.d/default.conf
 
-RUN rm /etc/nginx/conf.d/default.conf
-
+# Copy compiled static assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-EXPOSE 1170
