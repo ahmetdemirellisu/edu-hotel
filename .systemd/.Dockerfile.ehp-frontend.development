@@ -10,7 +10,7 @@ ENV VITE_BASE_PATH=$VITE_BASE_PATH
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
 
-COPY . .
+COPY backend .
 RUN npm run build
 
 # 2. Aşama: Yayına Alma (Production)
