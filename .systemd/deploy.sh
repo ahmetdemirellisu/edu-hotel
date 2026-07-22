@@ -263,10 +263,10 @@ EOF
         sed -i "s|Volume=\./|Volume=$TARGET_DIR/|g" "$TEMPLATE_FILE"
 
 
-# ==========================================
+        # ==========================================
         # 🛠️ PER-INSTANCE NGINX CONFIG GENERATION
         # ==========================================
-        if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
+        #if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
                 INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
 
                 # Define your port logic here
@@ -284,7 +284,7 @@ EOF
 
                 log_info "  📝 Generated unique NGINX config for $BASENAME instance $i targeting port $TARGET_PORT"
 
-        fi
+        #fi
 
         SAFE_NAME=$(echo "$BASENAME" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
         VAR_CPU="${SAFE_NAME}_CPU"
