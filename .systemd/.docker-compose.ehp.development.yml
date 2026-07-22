@@ -40,6 +40,6 @@ services:
     networks:
       - instance_net
 
-  networks:
-    instance_net:
-      driver: bridge
+networks:
+  instance_net:
+    driver: bridge
