@@ -280,7 +280,7 @@ EOF
                 sed -i "s/{{TARGET_PORT}}/$TARGET_PORT/g" "$INSTANCE_CONF"
 
                 # Aggressively replace the entire Volume line mapping to /etc/nginx/nginx.conf
-                sed -i -E "s|Volume=.*:/etc/nginx/nginx\.conf(:.*)?|Volume=$INSTANCE_CONF:/etc/conf.d/default.conf\1|g" "$TEMPLATE_FILE"
+                sed -i -E "s|Volume=.*:/etc/nginx/nginx\.conf(:.*)?|Volume=$INSTANCE_CONF:/etc/nginx/conf.d/default.conf\1|g" "$TEMPLATE_FILE"
 
                 log_info "  📝 Generated unique NGINX config for $BASENAME instance $i targeting port $TARGET_PORT"
 
