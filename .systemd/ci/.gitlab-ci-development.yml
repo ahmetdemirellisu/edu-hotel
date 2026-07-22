@@ -108,8 +108,6 @@ dev_cleanup_and_prepare:
     # 3. PREPARE DIRECTORIES
     - mkdir -p "${TARGET_DIR}"
     - cd "${TARGET_DIR}"
-    - envsubst < ${SYSTEMD_REPO}/docker/php/php.ini > "${TARGET_DIR}"/php.ini
-    - envsubst < $SYSTEMD_REPO/docker/php/php-fpm.conf > "${TARGET_DIR}"/php-fpm.conf
     - envsubst < ${SYSTEMD_REPO}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME} > "${TARGET_DIR}/.env.${SERVICE_NAME}.${ENVIRONMENT_NAME}"
 
     # Read from Exported ENV VARS, fallback to CLI arguments
