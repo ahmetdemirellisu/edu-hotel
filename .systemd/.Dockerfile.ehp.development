@@ -6,7 +6,7 @@ RUN apk add curl
 COPY backend/package*.json ./
 RUN npm install
 
-COPY prisma ./prisma
+COPY backend/prisma ./prisma
 RUN npx prisma generate
 
 COPY backend .
