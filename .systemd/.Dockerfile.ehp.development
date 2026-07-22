@@ -13,7 +13,7 @@ COPY backend .
 
 ENV PORT=1180
 
-RUN chown -R node:node /app && mkdir /paymentRecieptsAprooved /paymentRecieptsPending \
+RUN chown -R node:node /app && mkdir /paymentRecieptsAprooved /paymentRecieptsPending && \
     chown node:node /paymentRecieptsAprooved /paymentRecieptsPending
 
 USER node:node
