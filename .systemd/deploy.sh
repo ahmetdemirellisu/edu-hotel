@@ -280,8 +280,8 @@ EOF
             sed -i "s/{{INSTANCE_ID}}/$i/g" "$INSTANCE_CONF"
             sed -i "s/{{TARGET_PORT}}/$TARGET_PORT/g" "$INSTANCE_CONF"
 
-            # Repoint the Quadlet Volume mount from the generic config to the instance-specific one
-            sed -i "s|Volume=$TARGET_DIR/nginx.conf:|Volume=$INSTANCE_CONF:|g" "$TEMPLATE_FILE"
+# Repoint the Quadlet Volume mount from the generic config to the instance-specific one
+            sed -i "s|Volume=.*:/etc/nginx/nginx.conf|Volume=$INSTANCE_CONF:/etc/nginx/nginx.conf|g" "$TEMPLATE_FILE"
 
             log_info "  📝 Generated unique NGINX config for instance $i targeting port $TARGET_PORT"
         fi
