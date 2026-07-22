@@ -1,53 +1,22 @@
-# syntax=docker/dockerfile:1
 # 1. Install dependencies only when needed
-FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS deps
-RUN apk add --no-cache libc6-compat curl
+FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
 WORKDIR /app
+RUN apk add curl
 
 COPY backend/package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY backend/prisma ./prisma
 RUN npx prisma generate
 
-# ==========================================
-# STAGE 2: Next.js Builder
-# ==========================================
-FROM node:20-alpine AS builder
-WORKDIR /app
+COPY backend .
 
-# Copy node_modules & Prisma client from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/prisma ./prisma
-COPY backend/ .
-
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
-
-# Next.js build cache mount
-RUN npm install
-
-# ==========================================
-# STAGE 3: Production Runner (Tiny Image)
-# ==========================================
-FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
-
-# Copy standalone build output
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-ENV PORT 9004
+ENV PORT=1180
 
 RUN chown -R node:node /app && mkdir /paymentRecieptsAprooved /paymentRecieptsPending /identityDocs && \
     chown node:node /paymentRecieptsAprooved /paymentRecieptsPending /identityDocs
 
+USER node:node
+
+EXPOSE 9004
 CMD ["npm", "start"]
