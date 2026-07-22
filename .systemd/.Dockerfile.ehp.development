@@ -13,6 +13,8 @@ COPY backend .
 
 ENV PORT=1180
 
+RUN chown -R node:node /app
+
 USER node:node
 
 EXPOSE 1180

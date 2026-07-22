@@ -6,7 +6,7 @@ build_dev_ehp:
     - !reference [.dev_build_ehp, rules]
 
   variables:
-    SERVICE_NAME: ${SERVICE2}
+    SERVICE_NAME: ${SERVICE1}
     IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
     APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
 
@@ -29,7 +29,7 @@ build_dev_ehp-frontend:
     - !reference [.dev_build_ehp, rules]
 
   variables:
-    SERVICE_NAME: ${SERVICE1}
+    SERVICE_NAME: ${SERVICE2}
     IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
     APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
 
