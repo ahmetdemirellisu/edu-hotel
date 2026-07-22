@@ -7,10 +7,10 @@ ARG VITE_BASE_PATH=/ehp
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
 
-COPY package*.json ./
+COPY frontend/package*.json ./
 RUN npm ci --legacy-peer-deps
 
-COPY backend .
+COPY frontend .
 RUN npm run build
 
 # 2. Aşama: Yayına Alma (Production)

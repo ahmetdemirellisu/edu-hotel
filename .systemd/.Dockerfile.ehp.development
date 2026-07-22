@@ -3,13 +3,13 @@ FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
 WORKDIR /app
 RUN apk add curl
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install
 
 COPY prisma ./prisma
 RUN npx prisma generate
 
-COPY . .
+COPY backend .
 
 ENV PORT=1180
 
