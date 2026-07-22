@@ -8,8 +8,6 @@ services:
     environment:
       - TZ=Europe/Istanbul
     command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
-    ports:
-      - "8080:8080"
     healthcheck:
       test: ["CMD-SHELL", "pgrep npx || exit 1"]
       interval: 10s
