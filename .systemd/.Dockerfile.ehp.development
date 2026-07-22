@@ -13,5 +13,7 @@ COPY backend .
 
 ENV PORT=1180
 
+USER node:node
+
 EXPOSE 1180
 CMD ["npm", "start"]
