@@ -1,26 +1,3 @@
-build_dev_ehp-backend:
-  stage: build_dev_ehp-backend
-  image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
-  extends: .build-container
-  rules:
-    - !reference [.dev_build_ehp, rules]
-
-  variables:
-    SERVICE_NAME: ${SERVICE1}
-    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
-    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
-
-  script:
-    - echo "Building image ${IMAGE_NAME} on Native Podman..."
-    - |
-      podman build -v /next:/app/.next/cache:Z -v /cache:/root/.npm:Z -v /in_container_test/build:/data:Z \
-      -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
-    - echo "Pushing to igs.sabanciuniv.edu Registry..."
-    - podman push ${IMAGE_NAME}
-
-  environment: ${ENVIRONMENT_NAME}
-
-
 build_dev_ehp:
   stage: build_dev_ehp
   image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
@@ -39,6 +16,28 @@ build_dev_ehp:
       podman build -v /next:/app/.next/cache:Z -v /cache:/root/.npm:Z -v /in_container_test/build:/data:Z \
       -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
 
+    - echo "Pushing to igs.sabanciuniv.edu Registry..."
+    - podman push ${IMAGE_NAME}
+
+  environment: ${ENVIRONMENT_NAME}
+
+build_dev_ehp-frontend:
+  stage: build_dev_ehp-frontend
+  image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
+  extends: .build-container
+  rules:
+    - !reference [.dev_build_ehp, rules]
+
+  variables:
+    SERVICE_NAME: ${SERVICE1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
+  script:
+    - echo "Building image ${IMAGE_NAME} on Native Podman..."
+    - |
+      podman build -v /next:/app/.next/cache:Z -v /cache:/root/.npm:Z -v /in_container_test/build:/data:Z \
+      -t ${IMAGE_NAME} -f ${SYSTEMD_REPO}/.Dockerfile.${SERVICE_NAME}.${ENVIRONMENT_NAME} .
     - echo "Pushing to igs.sabanciuniv.edu Registry..."
     - podman push ${IMAGE_NAME}
 
