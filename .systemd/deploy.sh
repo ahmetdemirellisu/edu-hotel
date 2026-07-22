@@ -263,28 +263,28 @@ EOF
         sed -i "s|Volume=\./|Volume=$TARGET_DIR/|g" "$TEMPLATE_FILE"
 
 
-        # ==========================================
+# ==========================================
         # 🛠️ PER-INSTANCE NGINX CONFIG GENERATION
         # ==========================================
-        #if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
-            local INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
-            echo "Entered here"
-            # Define your port logic here. This grabs the mapped port of the main service (index 0).
-            # If you are passing a new environment variable, you can use that instead.
-            local TARGET_PORT=$(( ${PORT_ARRAY[0]:-$FIRST_PORT} + PORT_OFFSET + (i - 1) ))
+        if [[ "$BASENAME" == "*frontend*" && -f "$TARGET_DIR/nginx.conf.template" ]]; then
+                INSTANCE_CONF="$TARGET_DIR/nginx-${i}.conf"
 
-            # Create a fresh copy for this specific instance
-            cp "$TARGET_DIR/nginx.conf.template" "$INSTANCE_CONF"
+                # Define your port logic here
+                TARGET_PORT=$(( ${PORT_ARRAY[0]:-$FIRST_PORT} + PORT_OFFSET + (i - 1) ))
 
-            # Replace placeholders with real values for this loop iteration
-            sed -i "s/{{INSTANCE_ID}}/$i/g" "$INSTANCE_CONF"
-            sed -i "s/{{TARGET_PORT}}/$TARGET_PORT/g" "$INSTANCE_CONF"
+                # Create a fresh copy for this specific instance
+                cp "$TARGET_DIR/nginx.conf.template" "$INSTANCE_CONF"
 
-# Repoint the Quadlet Volume mount from the generic config to the instance-specific one
-            sed -i "s|Volume=.*:/etc/nginx/nginx.conf|Volume=$INSTANCE_CONF:/etc/nginx/nginx.conf|g" "$TEMPLATE_FILE"
+                # Replace placeholders with real values for this loop iteration
+                sed -i "s/{{INSTANCE_ID}}/$i/g" "$INSTANCE_CONF"
+                sed -i "s/{{TARGET_PORT}}/$TARGET_PORT/g" "$INSTANCE_CONF"
 
-            log_info "  📝 Generated unique NGINX config for instance $i targeting port $TARGET_PORT"
-        #fi
+                # Aggressively replace the entire Volume line mapping to /etc/nginx/nginx.conf
+                sed -i -E "s|Volume=.*:/etc/nginx/nginx\.conf(:.*)?|Volume=$INSTANCE_CONF:/etc/nginx/nginx.conf\1|g" "$TEMPLATE_FILE"
+
+                log_info "  📝 Generated unique NGINX config for $BASENAME instance $i targeting port $TARGET_PORT"
+
+        fi
 
         SAFE_NAME=$(echo "$BASENAME" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
         VAR_CPU="${SAFE_NAME}_CPU"
