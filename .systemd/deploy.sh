@@ -255,9 +255,10 @@ EOF
                  INTERNAL_PORT=$(grep -oP '^PublishPort=\K(?:[0-9.]+:)?[0-9]+:([0-9]+)' "$TEMPLATE_FILE" | sed -E 's/.*:([0-9]+)$/\1/' | head -n 1)
                  sed -i '/^PublishPort=/d' "$TEMPLATE_FILE"
                  if [[ -n "$INTERNAL_PORT" ]]; then sed -i "/\[Container\]/a PublishPort=${SVC_APP_PORT}:$INTERNAL_PORT" "$TEMPLATE_FILE"; fi
-            else
-                 sed -i '/^PublishPort=/d' "$TEMPLATE_FILE"
             fi
+        else
+            # Explicitly remove PublishPort if port is 0 so no host port is exposed
+            sed -i '/^PublishPort=/d' "$TEMPLATE_FILE"
         fi
 
         sed -i "s|Volume=\./|Volume=$TARGET_DIR/|g" "$TEMPLATE_FILE"
