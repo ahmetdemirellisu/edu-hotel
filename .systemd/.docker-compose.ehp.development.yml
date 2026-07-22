@@ -28,7 +28,7 @@ services:
     depends_on:
       - ${SERVICE1}
     ports:
-      - "8080:8080"
+      - "8080:8004"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     healthcheck:
