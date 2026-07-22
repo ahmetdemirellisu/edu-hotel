@@ -1,26 +1,42 @@
 services:
   ${SERVICE1}:
     image: ${IMAGE_NAME1}
-    container_name: ehp-backend
+    container_name: ${SERVICE1}
+    labels:
+      - "io.podman.healthcheck.on-failure=kill"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Istanbul
     command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD-SHELL", "pgrep supervisord || exit 1"]
+      test: ["CMD-SHELL", "pgrep npx || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 3
       start_period: 15s
     networks:
       - instance_net
-      -
+
   ${SERVICE2}:
     image: ${IMAGE_NAME2}
-    container_name: ehp-frontend
+    container_name: ${SERVICE2}
+    labels:
+      - "io.podman.healthcheck.on-failure=kill"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Istanbul
     depends_on:
       - backend
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "nginx || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
     networks:
       - instance_net
 
