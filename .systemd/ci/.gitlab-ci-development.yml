@@ -118,8 +118,8 @@ dev_cleanup_and_prepare:
       export APP_MEMS="512M"
       export SERVICES="${SERVICE_GROUP}"
       export APP_PULL_CREDS="${PULLER_USER}:${PULLER_PASSWORD}"
-      export APP_UID=$APP_UID
-      export APP_GID=$APP_GID
+      export APP_UID="$APP_UID1:$APP_UID2"
+      export APP_GID="$APP_GID1:$APP_GID2"
       EOF
 
     - export APP_SCALE="3"

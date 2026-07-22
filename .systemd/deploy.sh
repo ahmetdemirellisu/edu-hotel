@@ -40,8 +40,10 @@ PORT_OFFSET="${APP_OFFSET:-${4:-0}}"
 ENVIRONMENT_NAME="${ENVIRONMENT_NAME:-$5}"
 INPUT_CPUS="${APP_CPUS:-${6:-100%}}"
 INPUT_MEMS="${APP_MEMS:-${7:-512M}}"
-APP_UID="${APP_UID:-$8}"
-APP_GID="${APP_GID:-$9}"
+
+# Parse UIDs and GIDs into arrays separated by colons
+IFS=':' read -r -a UID_ARRAY <<< "${APP_UID:-$8}"
+IFS=':' read -r -a GID_ARRAY <<< "${APP_GID:-$9}"
 
 CHECK_QUEUES="${CHECK_QUEUES:-false}"
 MONITOR_QUEUES="${MONITOR_QUEUES:-redis:default,redis:ldap}"
@@ -235,8 +237,15 @@ EOF
 
         sed -i "/\[Container\]/a StopTimeout=${SVC_TIMEOUT}" "$TEMPLATE_FILE"
 
+        # Map the specific UID/GID for this container (falls back to the first array item if missing)
+        SVC_UID="${UID_ARRAY[$srv_idx]:-${UID_ARRAY[0]}}"
+        SVC_GID="${GID_ARRAY[$srv_idx]:-${GID_ARRAY[0]}}"
+
         PODMAN_ARGS="--health-on-failure=kill"
-        if [[ -n "$APP_UID" && -n "$APP_GID" ]]; then PODMAN_ARGS="--userns=keep-id:uid=${APP_UID},gid=${APP_GID} $PODMAN_ARGS"; fi
+        # Only apply userns remapping if values are set and not marked as 'none'
+        if [[ -n "$SVC_UID" && -n "$SVC_GID" && "$SVC_UID" != "none" && "$SVC_GID" != "none" ]]; then
+            PODMAN_ARGS="--userns=keep-id:uid=${SVC_UID},gid=${SVC_GID} $PODMAN_ARGS"
+        fi
         sed -i "/\[Container\]/a PodmanArgs=$PODMAN_ARGS" "$TEMPLATE_FILE"
         sed -i "/\[Container\]/a LogDriver=journald" "$TEMPLATE_FILE"
         sed -i "/\[Container\]/a LogOpt=tag=1a-{{.Name}}" "$TEMPLATE_FILE"
