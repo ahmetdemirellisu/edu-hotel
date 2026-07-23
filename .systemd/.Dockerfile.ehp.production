@@ -1,0 +1,22 @@
+# 1. Install dependencies only when needed
+FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
+WORKDIR /app
+RUN apk add curl
+
+COPY backend/package*.json ./
+RUN npm install
+
+COPY backend/prisma ./prisma
+RUN npx prisma generate
+
+COPY backend .
+
+ENV PORT=1180
+
+RUN chown -R node:node /app && mkdir /paymentRecieptsAprooved /paymentRecieptsPending /identityDocs && \
+    chown node:node /paymentRecieptsAprooved /paymentRecieptsPending /identityDocs
+
+USER node:node
+
+EXPOSE 9004
+CMD ["npm", "start"]
