@@ -32,11 +32,11 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     healthcheck:
-      test: ["CMD-SHELL", "prep nginx || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:8004/nginx-health"]
       interval: 10s
-      timeout: 3s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 10s
     networks:
       - instance_net
 
