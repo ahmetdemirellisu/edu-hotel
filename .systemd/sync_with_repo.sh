@@ -13,7 +13,7 @@ mkdir -p "$DEST_DIR"
 EXCLUDE_FILE=$(mktemp)
 cd "$SRC_DIR"
 cat .gitignore >> "$EXCLUDE_FILE"
-echo ".git/\n.editorconfig\n.gitattributes\n.gitignore\n.gitlab-ci.yml\n.systemd" >> "$EXCLUDE_FILE"
+echo -e ".git/\n.editorconfig\n.gitattributes\n.gitignore\n.gitlab-ci.yml\n.systemd\n.ddev" >> "$EXCLUDE_FILE"
 
 # 3. Determine exactly what files currently exist in the source (respecting ignores)
 # We do a dry-run against an empty directory to get an exact list of source files.
