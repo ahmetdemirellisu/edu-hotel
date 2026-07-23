@@ -116,7 +116,7 @@ dev_cleanup_and_prepare:
       cat <<EOF > "${TARGET_DIR}/.exports"
       export ENVIRONMENT_NAME="${ENVIRONMENT_NAME}"
       export APP_CPUS="50%"
-      export APP_MEMS="512M"
+      export APP_MEMS="1024M"
       export SERVICES="${SERVICE_GROUP}"
       export APP_PULL_CREDS="${PULLER_USER}:${PULLER_PASSWORD}"
       export APP_UID="$APP_UID1:$APP_UID2"
