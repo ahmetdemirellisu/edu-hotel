@@ -9,7 +9,7 @@ services:
       - TZ=Europe/Istanbul
     command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
     healthcheck:
-      test: ["CMD-SHELL", "pgrep npx || exit 1"]
+      test: ["CMD-SHELL", "pgrep node || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 3
