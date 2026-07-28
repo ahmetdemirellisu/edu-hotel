@@ -1,9 +1,9 @@
-build_prod_su-edevlet:
-  stage: build_prod_su-edevlet
-  image: ${BASE_IMAGES_REGISTRY}/builder-base:laprod # Necessary for Docker/PinP executor..
+build_prod_ehp:
+  stage: build_prod_ehp
+  image: ${BASE_IMAGES_REGISTRY}/builder-base:latest # Necessary for Docker/PinP executor..
   extends: .build-container
   rules:
-    - !reference [.prod_build_su-edevlet, rules]
+    - !reference [.prod_build_ehp, rules]
 
   script:
     - echo "Building image ${IMAGE_NAME} on Native Podman..."
@@ -22,10 +22,10 @@ build_prod_su-edevlet:
 prod_cleanup_and_prepare:
   stage: prod_cleanup_and_prepare
   tags:
-    - su-edevlet-prod-runner
+    - ehp-prod-runner
   resource_group: ${ENVIRONMENT_NAME}
   rules:
-    - !reference [.prod_deploy_su-edevlet, rules]
+    - !reference [.prod_deploy_ehp, rules]
   variables:
     SERVICE_NAME: resetenv
     AUTHORIZED_PROJECTS: "${SERVICE_GROUP1} ${SERVICE_GROUP2} ${SERVICE_GROUP3}"
@@ -51,7 +51,7 @@ prod_cleanup_and_prepare:
 
 .deploy-to-prod:
   tags:
-    - su-edevlet-prod-runner
+    - ehp-prod-runner
 
   variables:
     # Global Variables
@@ -75,7 +75,7 @@ prod_cleanup_and_prepare:
     - export ENVIRONMENT_NAME
     - export CI_PROJECT_DIR
 
-    
+
     # 2. LOGIN TO REGISTRY (Podman)
     - podman logout "${CI_REGISTRY}" || true
 
@@ -113,11 +113,11 @@ prod_cleanup_and_prepare:
 
   environment: ${ENVIRONMENT_NAME}
 
-deploy_prod_su-edevlet:
-  stage: deploy_prod_su-edevlet
+deploy_prod_ehp:
+  stage: deploy_prod_ehp
   extends: .deploy-to-prod
   rules:
-    - !reference [.prod_deploy_su-edevlet, rules]
+    - !reference [.prod_deploy_ehp, rules]
   variables:
     SERVICE_NAME: ${MAIN_SERVICE1}
     SERVICE_GROUP: ${SERVICE_GROUP1}
