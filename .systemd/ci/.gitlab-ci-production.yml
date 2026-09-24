@@ -5,6 +5,11 @@ build_prod_ehp:
   rules:
     - !reference [.prod_build_ehp, rules]
 
+  variables:
+    SERVICE_NAME: ${SERVICE1}
+    IMAGE_NAME: ${IMAGE_VAR}-${SERVICE_NAME}-${IMAGE_VER}
+    APP_DIR: "${ENVIRONMENT_NAME}/${SERVICE_NAME}"
+
   script:
     - echo "Building image ${IMAGE_NAME} on Native Podman..."
     - |

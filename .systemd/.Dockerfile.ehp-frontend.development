@@ -12,8 +12,8 @@ RUN  npm ci --legacy-peer-deps
 
 # 2. Build Arguments & Env Variables
 # (Placed AFTER npm ci so changing ARGs won't invalidate dependency cache)
-ARG VITE_API_URL=/ehp/api
-ARG VITE_BASE_PATH=/ehp
+ARG VITE_API_URL=/api
+ARG VITE_BASE_PATH=/
 
 ENV VITE_API_URL=$VITE_API_URL \
     VITE_BASE_PATH=$VITE_BASE_PATH \
