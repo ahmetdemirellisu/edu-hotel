@@ -2,6 +2,7 @@
 // Run: node seed-rooms.js
 // Creates all 49 rooms for EDU Hotel Kat 2
 
+require('dotenv').config();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -50,6 +51,26 @@ async function main() {
     console.log(`  ✅ Created Room ${room.name} (${room.type}) - id: ${room.id}`);
     created++;
   }
+
+  // Create Admin User
+  const adminEmail = process.env.ADMIN_SEED_EMAIL || "admin@example.com";
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD || "admin123";
+  
+  const bcrypt = require("bcrypt");
+  const hashed = await bcrypt.hash(adminPassword, 10);
+  
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      password: hashed,
+      name: "Super Admin",
+      role: "ADMIN",
+      userType: "STAFF",
+    }
+  });
+  console.log(`\n👨‍💼 Admin user ensured: ${adminEmail}`);
 
   console.log(`\n📊 Summary: ${created} created, ${skipped} skipped (already existed)`);
   console.log(`📦 Total rooms in database: ${await prisma.room.count()}`);

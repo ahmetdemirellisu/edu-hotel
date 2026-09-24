@@ -222,6 +222,16 @@
     "firstTimePrompt": "İlk defa mı kullanıyorsunuz?",
     "signupLink": "Kayıt olun",
     "firstTime": "İlk defa mı kullanıyorsunuz? Kayıt olun",
+    "welcomeBack": "Tekrar Hoş Geldiniz",
+    "subtitle": "EDU Eğitim Oteli hesabınıza giriş yapın",
+    "sidebarTitle": "EDU EĞİTİM OTELİ",
+    "sidebarDesc": "Rezervasyonlarınızı yönetmek, oda müsaitliğini görüntülemek ve konaklamalarınızı planlamak için panele erişin.",
+    "manageStays": "Konaklama Yönetimi",
+    "manageStaysSub": "Rezervasyonları Görüntüle",
+    "instantAccess": "Hızlı Erişim",
+    "instantAccessSub": "Giriş Portalı",
+    "support": "7/24 Destek",
+    "supportSub": "Resepsiyon İletişim",
     "errors": {
       "loginFailed": "Giriş başarısız.",
       "network": "Ağ hatası. Lütfen tekrar deneyin."

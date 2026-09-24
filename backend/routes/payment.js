@@ -47,9 +47,12 @@ const upload = multer({
   },
 });
 
+const requireAuth = require("../middleware/requireAuth");
+
 // Upload receipt endpoint
 router.post(
   "/upload-dekont/:reservationId",
+  requireAuth,
   upload.single("dekont"),
   async (req, res) => {
     const { reservationId } = req.params;
@@ -58,12 +61,28 @@ router.post(
         return res.status(400).json({ error: "No file uploaded" });
       }
 
+      // Read first 4 bytes for magic bytes validation
+      const buffer = fs.readFileSync(req.file.path);
+      if (buffer.length >= 4) {
+        const hex = buffer.toString('hex', 0, 4);
+        const isJPG = hex.startsWith('ffd8');
+        const isPNG = hex === '89504e47';
+        const isPDF = hex === '25504446';
+        if (!isJPG && !isPNG && !isPDF) {
+          fs.unlinkSync(req.file.path);
+          return res.status(400).json({ error: "Invalid file format (magic bytes mismatch)." });
+        }
+      }
+
       // Guard: reservation must be APPROVED and have a price set
       const existing = await prisma.reservation.findUnique({
         where: { id: parseInt(reservationId) },
       });
       if (!existing) {
         return res.status(404).json({ error: "Reservation not found." });
+      }
+      if (existing.userId !== req.user.userId) {
+        return res.status(403).json({ error: "Access denied." });
       }
       if (existing.status !== "APPROVED") {
         return res.status(400).json({ error: "Payment can only be submitted for approved reservations." });

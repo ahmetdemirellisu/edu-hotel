@@ -122,11 +122,13 @@ router.get("/availability", async (req, res) => {
   }
 });
 
+const requireAdmin = require("../middleware/requireAdmin");
+
 /**
  * PATCH /rooms/:id/status
  * Update room base status (admin action)
  */
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const { status } = req.body;

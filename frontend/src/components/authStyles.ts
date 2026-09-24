@@ -5,7 +5,7 @@
 //     the hero side, fully covered by the panel side.
 //   • A solid ivory panel takes ~44% on desktop (left for Login, right for
 //     Signup); the remaining ~56% is the campus hero with a navy tint, a
-//     soft fade into the panel, the Sabancı badge, and a large EDU HOTEL
+//     soft fade into the panel, the Sabancı badge, and a large EDU EDUCATION HOTEL
 //     wordmark vertically centered.
 //   • No floating-modal feel: the panel is full-height, edge-to-edge,
 //     with only a subtle gold-rim border on its inner edge.

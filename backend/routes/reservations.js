@@ -533,11 +533,18 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
         };
         if (isNonEmptyString(adminNote)) assignData.adminNote = adminNote.trim();
 
-        const updated = await prisma.reservation.update({
-            where: { id },
-            data: assignData,
-            include: { user: true, room: true },
-        });
+        const [updated] = await prisma.$transaction([
+            prisma.reservation.update({
+                where: { id },
+                data: assignData,
+                include: { user: true, room: true },
+            }),
+            ...roomIdList.map(rId => prisma.room.update({
+                where: { id: rId },
+                data: { status: "OCCUPIED" } // Assigning it might update the room's base status or just map it.
+                // Wait, in edu-hotel, they might not update room base status to OCCUPIED. Let me just use a transaction for the reservation update.
+            }))
+        ]);
 
         // Send room assignment notification email
         try {

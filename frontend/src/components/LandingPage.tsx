@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TextReveal } from "./ui/text-reveal";
 import { SabanciLogo } from "./SabanciLogo";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 import campusBg from "@/assets/campus.png";
 import {
   Star, Wifi, Coffee, BookOpen, Building2, MapPin,
@@ -99,8 +101,11 @@ const FEATURE_VISUALS = [
    ══════════════════════════════════════════════════════════ */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
-  const currentLang = i18n.language?.toUpperCase() === "TR" ? "TR" : "EN";
-  const switchLanguage = (val: string) => i18n.changeLanguage(val.toLowerCase());
+  const currentLang = (i18n.resolvedLanguage || i18n.language || "en").startsWith("tr") ? "TR" : "EN";
+
+  const switchLang = (lang: string) => {
+    i18n.changeLanguage(lang);
+  };
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -110,12 +115,19 @@ export function LandingPage() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const navLinks = [
-    { label: t("landing.nav.rooms"), href: "#odalar" },
-    { label: t("landing.nav.features"), href: "#ozellikler" },
-    { label: t("landing.nav.about"), href: "#hakkimizda" },
-    { label: t("landing.nav.contact"), href: "#iletisim" },
-  ];
+  const navLinks = currentLang === "TR"
+    ? [
+        { label: "Odalar", href: "#odalar" },
+        { label: "Özellikler", href: "#ozellikler" },
+        { label: "Hakkımızda", href: "#hakkimizda" },
+        { label: "İletişim", href: "#iletisim" },
+      ]
+    : [
+        { label: "Rooms", href: "#odalar" },
+        { label: "Features", href: "#ozellikler" },
+        { label: "About", href: "#hakkimizda" },
+        { label: "Contact", href: "#iletisim" },
+      ];
 
   const FEATURES = FEATURE_VISUALS.map(f => ({
     ...f,
@@ -182,13 +194,13 @@ export function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <SabanciLogo size="sm" />
+              <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
               <div className="hidden sm:block w-px h-8" style={{ background: "rgba(255,255,255,0.15)" }} />
               <span
                 className="hidden sm:block text-white font-light tracking-[6px] uppercase text-base"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                EDU HOTEL
+                {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU HOTEL"}
               </span>
             </Link>
 
@@ -213,26 +225,20 @@ export function LandingPage() {
             {/* CTA + Mobile toggle */}
             <div className="flex items-center gap-3">
               {/* Language toggle */}
-              <div
-                className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-lg"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                {["EN", "TR"].map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => switchLanguage(lang)}
-                    className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider transition-all duration-200"
-                    style={{
-                      background: currentLang === lang ? "linear-gradient(135deg, #f0d080, #c9a84c)" : "transparent",
-                      color: currentLang === lang ? "#001428" : "rgba(255,255,255,0.55)",
-                    }}
-                  >
-                    {lang}
-                  </button>
-                ))}
+              <div className="hidden sm:flex items-center gap-1 text-xs font-bold tracking-wide">
+                <button
+                  onClick={() => switchLang("tr")}
+                  className={`px-2 py-1 rounded-md transition-all duration-200 ${currentLang === "TR" ? "text-[#c9a84c]" : "text-white/50 hover:text-white/80"}`}
+                >
+                  TR
+                </button>
+                <span className="text-white/20">|</span>
+                <button
+                  onClick={() => switchLang("en")}
+                  className={`px-2 py-1 rounded-md transition-all duration-200 ${currentLang === "EN" ? "text-[#c9a84c]" : "text-white/50 hover:text-white/80"}`}
+                >
+                  EN
+                </button>
               </div>
 
               <Link
@@ -244,7 +250,7 @@ export function LandingPage() {
                   boxShadow: "0 4px 16px rgba(201,168,76,0.3)",
                 }}
               >
-                {t("landing.nav.login")}
+                {currentLang === "TR" ? "Giriş Yap" : "Sign In"}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <button
@@ -290,7 +296,7 @@ export function LandingPage() {
                     {["EN", "TR"].map((lang) => (
                       <button
                         key={lang}
-                        onClick={() => { switchLanguage(lang); setMobileMenuOpen(false); }}
+                        onClick={() => { switchLang(lang.toLowerCase()); setMobileMenuOpen(false); }}
                         className="flex-1 py-1.5 rounded-md text-xs font-bold tracking-wider transition-all"
                         style={{
                           background: currentLang === lang ? "linear-gradient(135deg, #f0d080, #c9a84c)" : "transparent",
@@ -307,7 +313,7 @@ export function LandingPage() {
                     className="block text-center mt-2 px-5 py-3 rounded-xl text-sm font-bold"
                     style={{ background: "linear-gradient(135deg, #f0d080, #c9a84c)", color: "#001428" }}
                   >
-                    {t("landing.nav.login")}
+                    {currentLang === "TR" ? "Giriş Yap" : "Sign In"}
                   </Link>
                 </div>
               </motion.div>
@@ -355,7 +361,7 @@ export function LandingPage() {
             className="text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed"
             style={{ color: "rgba(255,255,255,0.55)", fontWeight: 300 }}
           >
-            {t("landing.hero.subtitle")}
+            {currentLang === "TR" ? "Araştırmacılar, eğitmenler, konuklar ve kurumlar için kampüste konaklama deneyimi." : t("landing.hero.subtitle")}
           </motion.p>
 
           {/* CTA buttons */}
@@ -401,10 +407,7 @@ export function LandingPage() {
             transition={{ duration: 0.7, delay: 1.3 }}
             className="flex items-center gap-2 mt-10"
           >
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-4 w-4 fill-current" style={{ color: "#c9a84c" }} />
-            ))}
-            <span className="text-xs ml-1 font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
               {t("landing.hero.starStrip")}
             </span>
           </motion.div>
@@ -585,15 +588,17 @@ export function LandingPage() {
                 <span className="text-[10px] font-bold tracking-[4px] uppercase" style={{ color: "#c9a84c" }}>{t("landing.about.eyebrow")}</span>
               </div>
               <TextReveal
-                text={t("landing.about.title")}
+                text={currentLang === "TR" ? "Sabancı Kampüsünde Bir Konaklama Deneyimi." : t("landing.about.title")}
                 className="text-2xl sm:text-3xl font-light text-white mb-6"
               />
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-                {t("landing.about.p1")}
+                {currentLang === "TR" ? "EDU Eğitim Oteli, Sabancı Üniversitesi Yönetim Bilimleri Fakültesi binasında akademisyenlere, araştırmacılara, konuklara ve kurumlara öğrenme odaklı bir konaklama deneyimi sunuyor." : t("landing.about.p1")}
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-                {t("landing.about.p2")}
-              </p>
+              {currentLang !== "TR" && (
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  {t("landing.about.p2")}
+                </p>
+              )}
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 mt-8 text-sm font-bold transition-all duration-200 hover:gap-3"
@@ -687,12 +692,12 @@ export function LandingPage() {
             {/* Column 1 — Brand */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <SabanciLogo size="sm" />
+                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
                 <span
                   className="text-white font-light tracking-[5px] uppercase text-sm"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  EDU HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU HOTEL"}
                 </span>
               </div>
               <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 /**
- * EduConcierge — animated bellhop mascot for the EDU Hotel dashboard.
+ * EduConcierge — animated bellhop mascot for the EDU Education Hotel dashboard.
  *
  * Sabancı palette: deep navy + gold. Idle animations: gentle float, blinking,
  * a welcoming wave. Click the golden bell on his tray for a "ding" with ring
@@ -197,7 +197,7 @@ export function EduConcierge({
         className="edu-concierge__stage"
         viewBox="0 0 360 460"
         role="img"
-        aria-label="EDU Hotel concierge"
+        aria-label="EDU Education Hotel concierge"
       >
         <defs>
           <radialGradient id="edu-halo" cx="50%" cy="45%" r="55%">
@@ -401,7 +401,7 @@ export function EduConcierge({
         {/* ===== pillbox cap ===== */}
         <g>
           <path d="M 128 96 Q 128 58 180 58 Q 232 58 232 96 Z" fill={NAVY} stroke={NAVY_DARK} strokeWidth="2" />
-          {/* gold band with EDU HOTEL */}
+          {/* gold band with EDU EDUCATION HOTEL */}
           <rect
             x="126"
             y="88"
@@ -422,7 +422,7 @@ export function EduConcierge({
             letterSpacing="2.5"
             fill={NAVY_DARK}
           >
-            EDU HOTEL
+            EDU EDUCATION HOTEL
           </text>
           {/* cap button + piping */}
           <circle cx="180" cy="60" r="4.5" fill="url(#edu-gold)" />

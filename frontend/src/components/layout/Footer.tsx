@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { SabanciLogo } from "../SabanciLogo";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 
 /* ── Inject keyframes once ─────────────────────────────── */
 const _footerStyle = document.getElementById("footer-anim") ?? (() => {
@@ -61,7 +62,8 @@ const _footerStyle = document.getElementById("footer-anim") ?? (() => {
 })();
 
 export function Footer() {
-  const { t } = useTranslation();
+  const { t , i18n } = useTranslation();
+  const currentLang = (i18n.resolvedLanguage || i18n.language || "en").startsWith("tr") ? "TR" : "EN";
   const currentYear = new Date().getFullYear();
 
   return (
@@ -131,7 +133,7 @@ export function Footer() {
 
           {/* Brand + Address */}
           <div>
-            <SabanciLogo size="sm" className="mb-5" />
+            <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto mb-5" />
             <p className="text-sm text-white/50 leading-relaxed footer-contact-item">
               {t("footer.address.line1")}
               <br />
@@ -196,7 +198,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Animated EDU HOTEL brand at bottom center */}
+        {/* Animated EDU EDUCATION HOTEL brand at bottom center */}
         <div className="flex flex-col items-center pb-8">
           <div
             className="h-px w-full mb-7"
@@ -209,7 +211,7 @@ export function Footer() {
             className="footer-brand-text text-[11px] font-light tracking-[12px] uppercase mb-4 select-none"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            EDU HOTEL
+            EDU EDUCATION HOTEL
           </h2>
 
           <p className="text-[11px] text-white/30 font-medium tracking-wider text-center">

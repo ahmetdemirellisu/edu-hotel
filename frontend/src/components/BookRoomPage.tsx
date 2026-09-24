@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { SabanciLogo } from "./SabanciLogo";
 import { PhoneInput } from "./ui/PhoneInput";
 import { fetchPublicSettings } from "../api/settings";
 import { format, parseISO } from "date-fns";
@@ -12,6 +11,8 @@ import { NotificationBell } from "./NotificationBell";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import {
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
   Select,
   SelectContent,
   SelectItem,
@@ -695,15 +696,15 @@ export function BookRoomPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <SabanciLogo size="sm" />
+                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU HOTEL
+                  EDU EDUCATION HOTEL
                 </h1>
               </Link>
             </div>
-            <h1 className="sm:hidden text-white text-base font-light tracking-[5px] uppercase">EDU HOTEL</h1>
+            <h1 className="sm:hidden text-white text-base font-light tracking-[5px] uppercase">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h1>
             <div className="flex items-center gap-3 sm:gap-5">
               <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/55 hover:text-white transition-colors tracking-wide">
                 <LayoutGrid className="h-3.5 w-3.5" />
@@ -1214,7 +1215,7 @@ export function BookRoomPage() {
                             <div>
                               <p className="text-[9px] font-black text-[#c9a84c]/60 tracking-[3px] uppercase">Sabancı University</p>
                               <p className="text-[13px] font-light text-white tracking-[4px] uppercase mt-0.5"
-                                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>EDU HOTEL</p>
+                                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</p>
                             </div>
                             <div className="text-right">
                               <p className="text-[9px] text-white/25 uppercase tracking-[2px]">{t("bookRoom.boardingPass.reservation", "Reservation")}</p>

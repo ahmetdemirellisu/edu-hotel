@@ -222,6 +222,16 @@
     "firstTimePrompt": "First time user?",
     "signupLink": "Create account",
     "firstTime": "First time user? Create account",
+    "welcomeBack": "Welcome back",
+    "subtitle": "Sign in to your EDU Education Hotel account",
+    "sidebarTitle": "EDU EDUCATION HOTEL",
+    "sidebarDesc": "Access your dashboard to manage reservations, explore room availability, and customize your upcoming stays.",
+    "manageStays": "Manage Stays",
+    "manageStaysSub": "View & Edit Bookings",
+    "instantAccess": "Instant Access",
+    "instantAccessSub": "Fast Check-in Portal",
+    "support": "24/7 Support",
+    "supportSub": "Contact Reception",
     "errors": {
       "loginFailed": "Login failed",
       "network": "Network error. Please try again."
