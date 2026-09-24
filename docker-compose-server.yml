@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ehp-db
+    command: postgres -p ${POSTGRES_PORT}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data:Z
+    networks:
+      - ehpnetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h db -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    image: ghcr.io/ahmetdemirellisu/edu-hotel/backend:latest
+    container_name: ehp-backend
+    command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
+    environment:
+      NODE_ENV: production
+      PORT: 9004
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_ADMIN_SECRET: ${JWT_ADMIN_SECRET:?JWT_ADMIN_SECRET is required}
+      JWT_EXPIRES_IN: 1d
+      JWT_REFRESH_EXPIRES_IN: 7d
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      CLIENT_URL: https://student-projects.sabanciuniv.edu
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ehpnetwork
+
+  frontend:
+    image: ghcr.io/ahmetdemirellisu/edu-hotel/frontend:latest
+    container_name: ehp-frontend
+    environment:
+      REACT_APP_API_URL: https://student-projects.sabanciuniv.edu/api
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8004:8004"
+    networks:
+      - ehpnetwork
+
+networks:
+  ehpnetwork:
+    driver: bridge
