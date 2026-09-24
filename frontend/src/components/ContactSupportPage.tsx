@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
-import {
 import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
 import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import {
   Mail,
   Phone,
   Clock,

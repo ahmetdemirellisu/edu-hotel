@@ -13,7 +13,7 @@
 //     centered card on top of the dimmed campus photo.
 
 export const AUTH_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&subset=latin,latin-ext&display=swap');
 
 .auth {
   --navy: #0E2A4E;

@@ -10,9 +10,9 @@ import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
-import {
 import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
 import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import {
   Select,
   SelectContent,
   SelectItem,

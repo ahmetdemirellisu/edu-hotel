@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { getMyLatestReservation, getUserReservations, type Reservation } from "../api/reservations";
 import { useNavigate, Link } from "react-router-dom";
-import {
 import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
 import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import {
   CalendarDays,
   Clock,
   CheckCircle2,

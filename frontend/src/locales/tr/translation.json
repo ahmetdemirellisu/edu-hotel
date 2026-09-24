@@ -9,15 +9,15 @@
     },
     "hero": {
       "eyebrow": "Sabancı Üniversitesi",
-      "title": "EDU Hotel: Sabancı Üniversitesi'nin Kalbinde Lüks Bir Konaklama.",
-      "subtitle": "Akademik dünya ile konfor bir arada. Araştırmacılar, konuklar ve eğitimciler için 5 yıldızlı bir konaklama deneyimi.",
+      "title": "EDU Eğitim Oteli: Sabancı Üniversitesi Kampüsünde Bir Konaklama Deneyimi.",
+      "subtitle": "Araştırmacılar, eğitmenler, konuklar ve kurumlar için kampüste konaklama deneyimi.",
       "ctaPrimary": "Hemen Rezervasyon Yap",
       "ctaSecondary": "Daha Fazla Keşfet",
       "starStrip": "Akademik Konaklama Standardı",
       "scroll": "Kaydır"
     },
     "features": {
-      "eyebrow": "Neden EDU Hotel?",
+      "eyebrow": "Neden EDU Eğitim Oteli?",
       "title": "Her Detayda Mükemmellik.",
       "subtitle": "Akademik bir ortamda lüks konforun ayrıcalığını yaşayın.",
       "modernRooms": {
@@ -56,8 +56,8 @@
     },
     "about": {
       "eyebrow": "Hakkımızda",
-      "title": "Sabancı Kampüsünde Benzersiz Bir Deneyim.",
-      "p1": "EDU Hotel, Sabancı Üniversitesi'nin 1994'te kuruluşundan bu yana akademisyenlere, araştırmacılara ve kurumsal misafirlere ev sahipliği yapmaktadır.",
+      "title": "Sabancı Kampüsünde Bir Konaklama Deneyimi.",
+      "p1": "EDU Eğitim Oteli, Sabancı Üniversitesi Yönetim Bilimleri Fakültesi binasında akademisyenlere, araştırmacılara, konuklara ve kurumlara öğrenme odaklı bir konaklama deneyimi sunuyor.",
       "p2": "Modern mimarisi ve yeşil kampüs dokusunun içindeki konumuyla, iş ve akademiyi konforla birleştiren eşsiz bir konaklama deneyimi sunuyoruz.",
       "cta": "Rezervasyon Yap",
       "stats": {
@@ -73,7 +73,7 @@
       "cta": "Rezervasyon Yap"
     },
     "footer": {
-      "rights": "Sabancı Üniversitesi EDU Hotel. Tüm hakları saklıdır.",
+      "rights": "Sabancı Üniversitesi EDU Eğitim Oteli. Tüm hakları saklıdır.",
       "quickLinks": "Hızlı Bağlantılar",
       "bookStay": "Rezervasyon Yap",
       "signUp": "Kayıt Ol",
@@ -122,7 +122,7 @@
 
   "adminLogin": {
     "title": "Yönetici Portalı",
-    "subtitle": "EDU Hotel Yönetim Sistemi",
+    "subtitle": "EDU Eğitim Oteli Yönetim Sistemi",
     "secured": "Güvenli Bağlantı",
     "username": "Kullanıcı Adı",
     "usernamePlaceholder": "Kullanıcı adınızı girin",
@@ -133,7 +133,7 @@
     "signIn": "Yönetici girişi",
     "accessGranted": "Erişim Onaylandı",
     "redirecting": "Yönetici paneline yönlendiriliyorsunuz…",
-    "footer": "EDU Hotel © 2026 · Kısıtlı Erişim · Tüm aktiviteler kayıt altına alınır",
+    "footer": "EDU Eğitim Oteli © 2026 · Kısıtlı Erişim · Tüm aktiviteler kayıt altına alınır",
     "backToSite": "← Ana siteye dön",
     "errors": {
       "tooManyAttempts": "Çok fazla başarısız deneme. 30 saniye boyunca kilitlendi.",
@@ -144,7 +144,7 @@
   },
 
   "auth": {
-    "eyebrow": "Sabancı Üniversitesi · EDU Hotel",
+    "eyebrow": "Sabancı Üniversitesi · EDU Eğitim Oteli",
     "protected": "Sabancı Üniversitesi BT Altyapısı tarafından korunmaktadır",
     "welcomeBackTo": "Tekrar hoş geldiniz",
     "joinCommunity": "Topluluğumuza katılın",
@@ -153,7 +153,7 @@
     "signIn": "Giriş yap",
     "signingIn": "Giriş yapılıyor…",
     "loginSubtitle": "Rezervasyonlarınızı, konaklamalarınızı ve hesabınızı yönetmek için giriş yapın.",
-    "registerTitle": "EDU Hotel hesabınızı oluşturun",
+    "registerTitle": "EDU Eğitim Oteli hesabınızı oluşturun",
     "registerSubtitle": "Konaklamalarınızı ve rezervasyonlarınızı yönetmek için kayıt olun.",
     "forgotPassword": "Şifrenizi mi unuttunuz?",
     "passwordHelper": "En az 8 karakter",
@@ -169,7 +169,7 @@
     },
     "reset": {
       "title": "Yeni bir şifre belirleyin",
-      "subtitle": "EDU Hotel hesabınız için yeni bir şifre seçin.",
+      "subtitle": "EDU Eğitim Oteli hesabınız için yeni bir şifre seçin.",
       "newPasswordLabel": "Yeni şifre",
       "newPasswordPlaceholder": "En az 8 karakter",
       "confirmPasswordLabel": "Yeni şifreyi onaylayın",
@@ -190,7 +190,7 @@
     "fillFullName": "Lütfen tam adınızı girin.",
     "fillEmail": "Lütfen e-posta adresinizi girin.",
     "passwordMin": "Şifre en az 8 karakter olmalıdır.",
-    "kvkkShort": "EDU Hotel tarafından kişisel verilerimin 6698 sayılı KVKK Kanunu kapsamında işlenmesine onay veriyorum.",
+    "kvkkShort": "EDU Eğitim Oteli tarafından kişisel verilerimin 6698 sayılı KVKK Kanunu kapsamında işlenmesine onay veriyorum.",
     "kvkkReadDetails": "Detayları göster",
     "kvkkHideDetails": "Detayları gizle",
     "kvkkDetails": "Kişisel verilerim yalnızca konaklama ve rezervasyon hizmetleri için, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında işlenecektir. Verilerim üçüncü taraflarla paylaşılmayacak ve ilgili mevzuata aykırı şekilde kullanılmayacaktır.",
@@ -206,7 +206,7 @@
 
   "login": {
     "welcomeTitle": "Tekrar hoş geldiniz",
-    "welcomeSubtitle": "EDU Hotel hesabınıza giriş yapın",
+    "welcomeSubtitle": "EDU Eğitim Oteli hesabınıza giriş yapın",
     "loginWith": "Giriş yöntemi",
     "email": "E-posta",
     "phone": "Telefon Numarası",
@@ -240,7 +240,7 @@
 
   "signup": {
     "createTitle": "Hesap oluşturun",
-    "createSubtitle": "EDU Hotel ile başlamak için kayıt olun",
+    "createSubtitle": "EDU Eğitim Oteli ile başlamak için kayıt olun",
     "haveAccountPrompt": "Zaten hesabınız var mı?",
     "loginLink": "Giriş yapın",
     "fullNameLabel": "Ad Soyad",
@@ -261,7 +261,7 @@
     "creatingAccount": "Hesap oluşturuluyor...",
     "createAccount": "Hesap oluştur",
     "alreadyHaveAccount": "Zaten hesabınız var mı? Giriş yapın",
-    "kvkk": "6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında kişisel verilerimin yalnızca konaklama ve rezervasyon hizmetleri amacıyla EDU Hotel tarafından işlenmesine onay veriyorum. Verilerim üçüncü şahıslarla paylaşılmayacak ve mevzuata aykırı kullanılmayacaktır.",
+    "kvkk": "6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında kişisel verilerimin yalnızca konaklama ve rezervasyon hizmetleri amacıyla EDU Eğitim Oteli tarafından işlenmesine onay veriyorum. Verilerim üçüncü şahıslarla paylaşılmayacak ve mevzuata aykırı kullanılmayacaktır.",
     "errors": {
       "fillAll": "Lütfen tüm alanları doldurun.",
       "passwordMismatch": "Şifreler eşleşmiyor.",
@@ -411,11 +411,11 @@
       "pendingApprovals_other": "Bugün {{count}} onay bekleyen talebiniz var. Hızlı işlemler için bana tıklayın!",
       "upcomingStays_one": "Tekrar hoş geldiniz! {{count}} yaklaşan konaklamanız var. Bir şey ister misiniz?",
       "upcomingStays_other": "Tekrar hoş geldiniz! {{count}} yaklaşan konaklamanız var. Bir şey ister misiniz?",
-      "welcome": "Tekrar hoş geldiniz! Ben Atlas, EDU Hotel Konsiyerjiniz. Hızlı işlemler için bana tıklayın!"
+      "welcome": "Tekrar hoş geldiniz! Ben Atlas, EDU Eğitim Oteli Konsiyerjiniz. Hızlı işlemler için bana tıklayın!"
     },
-    "atlasTitle": "Atlas – EDU Hotel Konsiyerji",
+    "atlasTitle": "Atlas – EDU Eğitim Oteli Konsiyerji",
     "atlasStatus": "Çevrimiçi · Yardıma hazır",
-    "atlasTooltip": "Atlas ile sohbet et – EDU Hotel Konsiyerji",
+    "atlasTooltip": "Atlas ile sohbet et – EDU Eğitim Oteli Konsiyerji",
     "quickActions": {
       "heading": "Hızlı İşlemler",
       "wifi": { "label": "Wi-Fi Şifresini Al", "desc": "Kampüs ağı bilgileri" },
@@ -425,7 +425,7 @@
     },
     "chat": {
       "heading": "Atlas ile Sohbet",
-      "greeting": "Merhaba! Ben Atlas, EDU Hotel konsiyerjiniz. Wi-Fi, kahvaltı, kampüs ya da rezervasyonunuz hakkında bana sorabilirsiniz — veya yukarıdaki hızlı eylemleri kullanabilirsiniz.",
+      "greeting": "Merhaba! Ben Atlas, EDU Eğitim Oteli konsiyerjiniz. Wi-Fi, kahvaltı, kampüs ya da rezervasyonunuz hakkında bana sorabilirsiniz — veya yukarıdaki hızlı eylemleri kullanabilirsiniz.",
       "autoReply": "Bunu resepsiyon ekibine ileteceğim — kısa süre içinde size dönüş yapacaklar. Bu sırada yukarıdaki hızlı eylemleri de kullanabilirsiniz.",
       "placeholder": "Atlas'a herhangi bir şey sorun…"
     },
@@ -435,7 +435,7 @@
       "password": "Şifre",
       "copy": "Kopyala",
       "copied": "Kopyalandı",
-      "hint": "EDU Hotel binası ve kampüs ortak alanlarında kullanılabilir."
+      "hint": "EDU Eğitim Oteli binası ve kampüs ortak alanlarında kullanılabilir."
     },
     "mapModal": {
       "title": "Sabancı Üniversitesi · Tuzla Kampüsü Haritası",
@@ -460,7 +460,7 @@
       "successSent": "Gönderildi! Resepsiyon ekibimiz kısa süre içinde size dönüş yapacaktır."
     },
     "faq": {
-      "hello": "Merhaba! Ben Atlas, EDU Hotel konsiyerjiniz. Wi-Fi, kahvaltı, kampüs ya da rezervasyonunuz hakkında bana sorabilirsiniz — veya yukarıdaki hızlı eylemleri kullanabilirsiniz.",
+      "hello": "Merhaba! Ben Atlas, EDU Eğitim Oteli konsiyerjiniz. Wi-Fi, kahvaltı, kampüs ya da rezervasyonunuz hakkında bana sorabilirsiniz — veya yukarıdaki hızlı eylemleri kullanabilirsiniz.",
       "thanks": "Rica ederim! Başka bir konuda yardımcı olabilir miyim?",
       "wifi": "Wi-Fi ağı \"EDU-Hotel-Guest\", şifresi \"Welcome2026\". Yukarıdaki Wi-Fi kısayoluna dokunarak tek tıkla kopyalayabilirsiniz.",
       "map": "Kampüs Haritası kısayoluna dokunarak Tuzla kampüs yerleşim planını görebilirsiniz. Belirli binaları bulmak için yakınlaştırabilirsiniz.",
@@ -473,7 +473,7 @@
       "luggage": "Resepsiyon, giriş öncesinde veya çıkıştan sonra bagajınızı ücretsiz olarak muhafaza edebilir. Yanınızda rezervasyon kimliğinizi getirmeniz yeterlidir.",
       "housekeeping": "Odalar her gün 10:00 ile 14:00 arasında temizlenir. Ek havlu, battaniye veya kişisel bakım malzemesi için Sorun Bildir'e dokunup ihtiyacınızı belirtmeniz yeterlidir.",
       "laundry": "Aynı gün çamaşır yıkama hizmeti için çamaşırınızı 09:00'dan önce resepsiyona bırakabilirsiniz. Talep üzerine ütü ve ütü masası temin edilir.",
-      "smoking": "EDU Hotel tüm odalar ve ortak alanlarda sigara içilmeyen bir oteldir. Belirlenmiş açık hava sigara içme alanları avlu ve kampüs servis durağı yakınındadır.",
+      "smoking": "EDU Eğitim Oteli tüm odalar ve ortak alanlarda sigara içilmeyen bir oteldir. Belirlenmiş açık hava sigara içme alanları avlu ve kampüs servis durağı yakınındadır.",
       "quiet": "22:00 ile 08:00 arası sessizlik saatleri uygulanır. Komşunuz gürültü yapıyorsa Sorun Bildir'e dokunun; ilgileneceğiz.",
       "parking": "Misafir otoparkı Ana Giriş'tedir (harita üzerinde 9 numara). Geldiğinizde güvenliğe rezervasyon numaranızı göstermeyi unutmayın.",
       "shuttle": "Kampüs servisi (harita üzerinde SH) Tuzla metrosuna gider. Güncel saatler için resepsiyondaki ilan panosunu kontrol edin.",

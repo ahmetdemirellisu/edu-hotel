@@ -19,10 +19,7 @@ void (document.getElementById("landing-css") ?? (() => {
   const s = document.createElement("style");
   s.id = "landing-css";
   s.textContent = `
-    @keyframes landingPan {
-      0%   { transform: scale(1.08) translateX(0); }
-      100% { transform: scale(1.08) translateX(-4%); }
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&subset=latin,latin-ext&display=swap');
     @keyframes landingPulseGlow {
       0%, 100% { box-shadow: 0 0 22px rgba(201,168,76,0.45), 0 0 50px rgba(201,168,76,0.15); }
       50%       { box-shadow: 0 0 38px rgba(201,168,76,0.75), 0 0 80px rgba(201,168,76,0.3); }
@@ -159,7 +156,6 @@ export function LandingPage() {
             height: "100%",
             objectFit: "cover",
             objectPosition: "center",
-            animation: "landingPan 60s ease-in-out infinite alternate",
           }}
         />
         {/* layered gradient: top dark, middle softer, bottom dark */}
@@ -200,7 +196,7 @@ export function LandingPage() {
                 className="hidden sm:block text-white font-light tracking-[6px] uppercase text-base"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU HOTEL"}
+                {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
               </span>
             </Link>
 
@@ -697,7 +693,7 @@ export function LandingPage() {
                   className="text-white font-light tracking-[5px] uppercase text-sm"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU HOTEL"}
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </span>
               </div>
               <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>

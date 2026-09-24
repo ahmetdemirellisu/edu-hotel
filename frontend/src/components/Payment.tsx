@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
 import { fetchPublicSettings, SETTINGS_FALLBACK, type PublicSettings } from "../api/settings";
-import {
 import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
 import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import {
   Select,
   SelectContent,
   SelectItem,

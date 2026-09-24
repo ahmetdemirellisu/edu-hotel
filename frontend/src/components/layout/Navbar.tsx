@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
-import {
 import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
 import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import {
   Globe,
   Bell,
   User,
