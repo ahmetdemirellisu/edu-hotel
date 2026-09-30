@@ -48,7 +48,6 @@ export const AUTH_CSS = `
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  animation: auth-kenburns 60s ease-in-out infinite alternate;
 }
 
 /* ============ editorial split (panel + hero) ============ */
@@ -494,10 +493,6 @@ export const AUTH_CSS = `
 }
 
 /* ============ animations ============ */
-@keyframes auth-kenburns {
-  from { transform: scale(1) translate(0, 0); }
-  to   { transform: scale(1.07) translate(-1.5%, -1.2%); }
-}
 @keyframes auth-panel-in {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }

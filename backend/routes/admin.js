@@ -172,7 +172,7 @@ router.post("/approve-payment/:id", async (req, res) => {
                 paymentStatus: "APPROVED",
                 status: "APPROVED",
             },
-            include: { user: true, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
         });
 
         // ✉️ EMAIL — Payment Approved
@@ -287,7 +287,7 @@ router.post("/reject-payment/:id", async (req, res) => {
         const reservation = await prisma.reservation.update({
             where: { id: Number(id) },
             data: { paymentStatus: "REJECTED" },
-            include: { user: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } } },
         });
 
         // ✉️ EMAIL — Payment Rejected

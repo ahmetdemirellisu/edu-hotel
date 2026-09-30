@@ -325,7 +325,7 @@ router.get("/admin", requireAdmin, async (req, res) => {
             where,
             orderBy: { createdAt: "desc" },
             include: {
-                user: true,
+                user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } },
                 room: true,
                 identityDocuments: { orderBy: { guestIndex: "asc" } },
             },
@@ -368,7 +368,7 @@ router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
         const reservation = await prisma.reservation.update({
             where: { id },
             data,
-            include: { user: true, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
         });
 
         // ✉️ EMAIL — Reservation Approved (EN + TR)
@@ -537,7 +537,7 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
             prisma.reservation.update({
                 where: { id },
                 data: assignData,
-                include: { user: true, room: true },
+                include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
             }),
             ...roomIdList.map(rId => prisma.room.update({
                 where: { id: rId },
@@ -622,7 +622,7 @@ router.patch("/admin/:id/reject", requireAdmin, async (req, res) => {
         const reservation = await prisma.reservation.update({
             where: { id },
             data: { status: "REJECTED", note: note || null },
-            include: { user: true, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
         });
 
         // ✉️ EMAIL — Reservation Rejected (EN + TR)
@@ -712,7 +712,7 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
 
         const reservation = await prisma.reservation.findUnique({
             where: { id },
-            include: { user: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } } },
         });
 
         if (!reservation) return res.status(404).json({ error: "Reservation not found." });
@@ -741,7 +741,7 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
                     ? `${reservation.note}\n[Cancelled by user]`
                     : "[Cancelled by user]",
             },
-            include: { user: true, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
         });
 
         if (reservation.roomId) {
@@ -1096,7 +1096,7 @@ router.post("/admin/create", requireAdmin, async (req, res) => {
                 status: "APPROVED",
                 paymentStatus: "NONE",
             },
-            include: { user: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } } },
         });
 
         return res.status(201).json(reservation);

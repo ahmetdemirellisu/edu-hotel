@@ -83,11 +83,6 @@ void (document.getElementById("dashboard-anim") ?? (() => {
     @keyframes dashProgressBar {
       from { width: 0%; }
     }
-    @keyframes campusPan {
-      0%   { background-position-x: 0%; }
-      50%  { background-position-x: 100%; }
-      100% { background-position-x: 0%; }
-    }
     @keyframes dashCardTilt {
       0%   { transform: perspective(800px) rotateX(0deg) rotateY(0deg); }
     }
@@ -400,10 +395,7 @@ export function Dashboard() {
           backgroundImage: `url(${campusBg})`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "0% 50%",
-          transform: "scale(1.05)",
-          transformOrigin: "center center",
-          animation: "campusPan 90s ease-in-out infinite",
+          backgroundPosition: "center center",
         }}
       />
 

@@ -307,7 +307,7 @@ router.post("/reset-password", authLimiter, async (req, res) => {
         const tokenHash = sha256(token);
         const record = await prisma.passwordResetToken.findUnique({
             where: { tokenHash },
-            include: { user: true },
+            include: { user: { select: { id: true, email: true } } },
         });
 
         if (!record || record.usedAt || record.expiresAt < new Date()) {

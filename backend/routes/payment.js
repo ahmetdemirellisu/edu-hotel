@@ -120,7 +120,7 @@ router.post(
       const reservation = await prisma.reservation.update({
         where: { id: parseInt(reservationId) },
         data: { paymentStatus: "PENDING_VERIFICATION" },
-        include: { user: true },
+        include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true } } },
       });
 
       // ✉️ EMAIL — Payment Receipt Uploaded
