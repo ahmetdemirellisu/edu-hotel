@@ -332,7 +332,7 @@ export function MyReservations() {
       <header
         className="sticky top-0 z-50 border-b border-white/10"
         style={{
-          background: "rgba(0,25,51,0.96)",
+          background: "rgba(0,28,60,0.96)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           boxShadow: "0 1px 0 rgba(255,255,255,0.05), 0 6px 28px rgba(0,20,50,0.4)",

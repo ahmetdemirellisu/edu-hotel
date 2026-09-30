@@ -12,7 +12,7 @@ router.use(requireAdmin);
 router.get("/", async (req, res) => {
     try {
         const list = await prisma.blacklist.findMany({
-            include: { user: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, createdAt: true } } },
             orderBy: { addedAt: "desc" },
         });
 
@@ -49,7 +49,7 @@ router.post("/add", async (req, res) => {
                 reason,
                 expiresAt: expiresAt ? new Date(expiresAt) : null,
             },
-            include: { user: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, createdAt: true } } },
         });
 
         return res.status(201).json(entry);
