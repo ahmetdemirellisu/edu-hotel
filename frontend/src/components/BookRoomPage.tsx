@@ -62,11 +62,6 @@ if (!document.getElementById("book-wizard-anim")) {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes campusPanBook {
-      0%   { background-position-x: 0%; }
-      50%  { background-position-x: 100%; }
-      100% { background-position-x: 0%; }
-    }
     .tile-accom {
       transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
       cursor: pointer;
@@ -669,13 +664,10 @@ export function BookRoomPage() {
           backgroundImage: `url(${campusBg})`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "0% 50%",
-          transform: "scale(1.05)",
-          transformOrigin: "center center",
-          animation: "campusPanBook 90s ease-in-out infinite",
+          backgroundPosition: "center center",
         }}
       />
-      <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-[#001428]/97 via-[#002244]/92 to-[#001428]/97" />
+      <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-[#001428]/95 via-[#002244]/85 to-[#001428]/95" />
 
       {/* ── Header ─────────────────────────────────────────── */}
       <header
