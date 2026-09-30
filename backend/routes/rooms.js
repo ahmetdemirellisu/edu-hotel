@@ -30,26 +30,24 @@ router.get("/", async (req, res) => {
  *   - status: computed status for the given date (may become OCCUPIED if a reservation covers that date)
  *   - reservation: the reservation occupying this room on that date (if any)
  */
+/**
+ * GET /rooms/availability?date=YYYY-MM-DD
+ * PUBLIC endpoint — returns room status for a date WITHOUT guest/reservation PII.
+ * Only exposes: room id, name, type, price, capacity, amenities, status.
+ */
 router.get("/availability", async (req, res) => {
   try {
     const { date } = req.query;
-
-    // Default to today if no date provided
     const targetDate = date ? new Date(date + "T12:00:00Z") : new Date();
 
-    // We need the start and end of the target date for overlap check
     const dayStart = new Date(targetDate);
     dayStart.setUTCHours(0, 0, 0, 0);
     const dayEnd = new Date(targetDate);
     dayEnd.setUTCHours(23, 59, 59, 999);
 
-    // Get all rooms
-    const rooms = await prisma.room.findMany({
-      orderBy: { id: "asc" },
-    });
+    const rooms = await prisma.room.findMany({ orderBy: { id: "asc" } });
 
-    // Get all APPROVED reservations that overlap with this date
-    // A reservation overlaps if: checkIn <= targetDate AND checkOut > targetDate
+    // Find which rooms have approved reservations on this date (just roomIds)
     const reservations = await prisma.reservation.findMany({
       where: {
         status: "APPROVED",
@@ -57,39 +55,16 @@ router.get("/availability", async (req, res) => {
         checkIn: { lte: dayEnd },
         checkOut: { gt: dayStart },
       },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true, firstName: true, lastName: true },
-        },
-      },
+      select: { roomId: true },
     });
 
-    // Build a map of roomId -> reservation for this date
-    const roomReservationMap = new Map();
-    for (const r of reservations) {
-      if (r.roomId) {
-        roomReservationMap.set(r.roomId, {
-          id: r.id,
-          guestName: `${r.firstName || ""} ${r.lastName || ""}`.trim() || r.user?.name || "Guest",
-          checkIn: r.checkIn,
-          checkOut: r.checkOut,
-          guests: r.guests,
-          paymentStatus: r.paymentStatus,
-        });
-      }
-    }
+    const occupiedRoomIds = new Set(reservations.map((r) => r.roomId));
 
-    // Build response
     const result = rooms.map((room) => {
-      const reservation = roomReservationMap.get(room.id) || null;
-      let computedStatus = room.status; // base status
-
-      // If room has a reservation on this date, it's OCCUPIED
-      if (reservation && room.status !== "MAINTENANCE" && room.status !== "RESERVED") {
+      let computedStatus = room.status;
+      if (occupiedRoomIds.has(room.id) && room.status !== "MAINTENANCE" && room.status !== "RESERVED") {
         computedStatus = "OCCUPIED";
       }
-
-      // MAINTENANCE and RESERVED override everything
       if (room.status === "MAINTENANCE") computedStatus = "MAINTENANCE";
       if (room.status === "RESERVED") computedStatus = "RESERVED";
 
@@ -102,11 +77,10 @@ router.get("/availability", async (req, res) => {
         amenities: room.amenities,
         baseStatus: room.status,
         status: computedStatus,
-        reservation,
+        // NO reservation/guest details exposed
       };
     });
 
-    // Counts
     const counts = {
       available: result.filter((r) => r.status === "AVAILABLE").length,
       occupied: result.filter((r) => r.status === "OCCUPIED").length,
@@ -123,6 +97,89 @@ router.get("/availability", async (req, res) => {
 });
 
 const requireAdmin = require("../middleware/requireAdmin");
+
+/**
+ * GET /rooms/availability/admin?date=YYYY-MM-DD
+ * ADMIN-ONLY — returns full reservation details including guest info.
+ * Used by the admin calendar/rooms dashboard.
+ */
+router.get("/availability/admin", requireAdmin, async (req, res) => {
+  try {
+    const { date } = req.query;
+    const targetDate = date ? new Date(date + "T12:00:00Z") : new Date();
+
+    const dayStart = new Date(targetDate);
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const dayEnd = new Date(targetDate);
+    dayEnd.setUTCHours(23, 59, 59, 999);
+
+    const rooms = await prisma.room.findMany({ orderBy: { id: "asc" } });
+
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        status: "APPROVED",
+        roomId: { not: null },
+        checkIn: { lte: dayEnd },
+        checkOut: { gt: dayStart },
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, firstName: true, lastName: true },
+        },
+      },
+    });
+
+    const roomReservationMap = new Map();
+    for (const r of reservations) {
+      if (r.roomId) {
+        roomReservationMap.set(r.roomId, {
+          id: r.id,
+          guestName: `${r.firstName || ""} ${r.lastName || ""}`.trim() || r.user?.name || "Guest",
+          checkIn: r.checkIn,
+          checkOut: r.checkOut,
+          guests: r.guests,
+          paymentStatus: r.paymentStatus,
+        });
+      }
+    }
+
+    const result = rooms.map((room) => {
+      const reservation = roomReservationMap.get(room.id) || null;
+      let computedStatus = room.status;
+
+      if (reservation && room.status !== "MAINTENANCE" && room.status !== "RESERVED") {
+        computedStatus = "OCCUPIED";
+      }
+      if (room.status === "MAINTENANCE") computedStatus = "MAINTENANCE";
+      if (room.status === "RESERVED") computedStatus = "RESERVED";
+
+      return {
+        id: room.id,
+        name: room.name,
+        type: room.type,
+        price: room.price,
+        capacity: room.capacity,
+        amenities: room.amenities,
+        baseStatus: room.status,
+        status: computedStatus,
+        reservation, // Full details — admin only
+      };
+    });
+
+    const counts = {
+      available: result.filter((r) => r.status === "AVAILABLE").length,
+      occupied: result.filter((r) => r.status === "OCCUPIED").length,
+      maintenance: result.filter((r) => r.status === "MAINTENANCE").length,
+      reserved: result.filter((r) => r.status === "RESERVED").length,
+      total: result.length,
+    };
+
+    return res.json({ rooms: result, counts, date: dayStart.toISOString().slice(0, 10) });
+  } catch (err) {
+    console.error("Error fetching admin room availability:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+});
 
 /**
  * PATCH /rooms/:id/status

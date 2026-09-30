@@ -14,7 +14,8 @@ COPY . .
 # Since routes are at /app/routes/, ../../ resolves to /
 # We create them under /app instead and symlink
 RUN mkdir -p /app/paymentRecieptsPending /app/paymentRecieptsAprooved /app/identityDocs \
-    /paymentRecieptsPending /paymentRecieptsAprooved /identityDocs
+    /paymentRecieptsPending /paymentRecieptsAprooved /identityDocs \
+    /paymentRecieptsPending/.tmp /identityDocs/.tmp
 
 # Run as non-root user for security
 RUN chown -R node:node /app /paymentRecieptsPending /paymentRecieptsAprooved /identityDocs
