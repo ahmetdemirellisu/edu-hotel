@@ -12,10 +12,12 @@ const { validateEmail, validatePassword } = require("../utils/sanitize");
 const router = express.Router();
 
 // Resolve the frontend base URL used in transactional links.
-// In production this is set in docker-compose-server.yml (CLIENT_URL).
-// In local dev it defaults to the Docker frontend port + /ehp prefix.
+// CLIENT_URL = origin (e.g. https://student-projects.sabanciuniv.edu)
+// CLIENT_BASE_PATH = subpath prefix (e.g. /ehp) — empty for root deployments.
 function clientUrl() {
-    return (process.env.CLIENT_URL || "http://localhost:8004/ehp").replace(/\/$/, "");
+    const base = (process.env.CLIENT_URL || "http://localhost:8004").replace(/\/$/, "");
+    const path = (process.env.CLIENT_BASE_PATH || "").replace(/\/$/, "");
+    return base + path;
 }
 
 function sha256(str) {
