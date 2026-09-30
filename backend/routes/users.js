@@ -3,6 +3,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const requireAdmin = require("../middleware/requireAdmin");
 const requireAuth = require("../middleware/requireAuth");
+const { stripPassword } = require("../utils/sanitize");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -71,7 +72,8 @@ router.get("/search", requireAdmin, async (req, res) => {
       take: 200,
     });
 
-    res.json(users);
+    const sanitizedUsers = stripPassword(users);
+    res.json(sanitizedUsers);
   } catch (err) {
     console.error("User search error:", err);
     res.status(500).json({ error: "Internal server error." });
@@ -151,7 +153,8 @@ router.get("/admin", requireAdmin, async (req, res) => {
       mergedUsers = mergedUsers.filter((u) => u.blacklist === null);
     }
 
-    res.json(mergedUsers);
+    const sanitizedUsers = stripPassword(mergedUsers);
+    res.json(sanitizedUsers);
   } catch (err) {
     console.error("Admin guest list error:", err);
     res.status(500).json({ error: "Internal server error." });
@@ -190,7 +193,8 @@ router.get("/:id", requireAuth, async (req, res) => {
       where: { userId },
     });
 
-    res.json({ ...user, blacklist: blacklist || null });
+    const userWithBlacklist = { ...user, blacklist: blacklist || null };
+    res.json(stripPassword(userWithBlacklist));
   } catch (err) {
     console.error("Get user error:", err);
     res.status(500).json({ error: "Internal server error." });
@@ -219,7 +223,7 @@ router.patch("/admin/:id/max-stay", requireAdmin, async (req, res) => {
       select: { id: true, maxStayOverride: true },
     });
 
-    res.json(user);
+    res.json(stripPassword(user));
   } catch (err) {
     console.error("Set max stay override error:", err);
     res.status(500).json({ error: "Internal server error." });

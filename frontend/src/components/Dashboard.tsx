@@ -3,11 +3,12 @@ import campusBg from "@/assets/campus.png";
 import { DashboardHero } from "./DashboardHero";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
-import { SabanciLogo } from "./SabanciLogo";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { getMyLatestReservation, getUserReservations, type Reservation } from "../api/reservations";
 import { useNavigate, Link } from "react-router-dom";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 import {
   CalendarDays,
   Clock,
@@ -439,19 +440,19 @@ export function Dashboard() {
             {/* Left — logo */}
             <Link to="/main" className="flex items-center gap-4 group">
               <motion.div whileHover={{ scale: 1.04 }} className="transition-all duration-300">
-                <SabanciLogo size="sm" />
+                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
               </motion.div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
                 <Building2 className="h-4 w-4 text-[#c9a84c]/70" strokeWidth={1.5} />
                 <h1 className="text-white text-base font-light tracking-[8px] uppercase" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU HOTEL
+                  EDU EDUCATION HOTEL
                 </h1>
               </div>
             </Link>
 
             {/* Center — mobile */}
-            <h1 className="sm:hidden text-white text-sm font-light tracking-[5px] uppercase">EDU HOTEL</h1>
+            <h1 className="sm:hidden text-white text-sm font-light tracking-[5px] uppercase">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h1>
 
             {/* Right — nav */}
             <div className="flex items-center gap-3 sm:gap-4">

@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 import { AUTH_CSS, REGISTER_CSS } from "./authStyles";
-import { SabanciLogo } from "./SabanciLogo";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 
 const API_URL = ((import.meta as any).env?.VITE_API_URL as string) || "/ehp/api";
 
@@ -119,16 +120,16 @@ export function Signup() {
       <div className="auth__bg" style={{ backgroundImage: `url(${backgroundImage})` }} />
 
       <div className="auth__split auth__split--reverse">
-        {/* ===== HERO (LEFT) — image visible + EDU HOTEL wordmark ===== */}
+        {/* ===== HERO (LEFT) — image visible + EDU EDUCATION HOTEL wordmark ===== */}
         <section className="auth__hero" aria-hidden="true">
           <div className="auth__hero-tint" />
           <div className="auth__hero-fade" />
 
-          <SabanciLogo size="md" className="auth__hero-badge auth__hero-badge--logo" />
+          <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto auth__hero-badge auth__hero-badge--logo" />
 
           <div className="auth__hero-center">
             <p className="auth__hero-eyebrow">{t("auth.joinCommunity", "Join our community")}</p>
-            <h2 className="auth__hero-wordmark">EDU&nbsp;HOTEL</h2>
+            <h2 className="auth__hero-wordmark">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h2>
             <div className="auth__hero-rule" />
             <p className="auth__hero-tagline">{t("auth.tagline")}</p>
           </div>
@@ -138,7 +139,7 @@ export function Signup() {
         <aside className="auth__panel">
           <div className="auth__panel-inner" key={shake} data-shake={shake > 0}>
             <header className="auth__panel-top">
-              <Link to="/" className="auth__monogram" aria-label="EDU Hotel">E</Link>
+              <Link to="/" className="auth__monogram" aria-label={currentLang === "TR" ? "EDU Eğitim Oteli" : "EDU Education Hotel"}>E</Link>
               <div className="auth__lang">
                 {(["EN", "TR"] as const).map((l) => (
                   <button
@@ -155,7 +156,7 @@ export function Signup() {
 
             <div className="auth__form-area">
               <p className="auth__eyebrow">{t("auth.eyebrow")}</p>
-              <h1 className="auth__title">{t("auth.registerTitle", "Create your EDU Hotel account")}</h1>
+              <h1 className="auth__title">{t("auth.registerTitle", "Create your EDU Education Hotel account")}</h1>
               <p className="auth__sub">{t("auth.registerSubtitle")}</p>
               <div className="auth__rule" />
 

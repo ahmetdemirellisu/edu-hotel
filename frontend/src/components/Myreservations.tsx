@@ -1,12 +1,13 @@
 import React from "react";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
-import { SabanciLogo } from "./SabanciLogo";
 import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { getUserReservations, cancelReservation, type Reservation } from "../api/reservations";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 import {
   CalendarDays,
   Clock,
@@ -348,15 +349,15 @@ export function MyReservations() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <SabanciLogo size="sm" />
+                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU HOTEL
+                  EDU EDUCATION HOTEL
                 </h1>
               </Link>
             </div>
-            <h1 className="sm:hidden text-white text-base font-light tracking-[5px] uppercase">EDU HOTEL</h1>
+            <h1 className="sm:hidden text-white text-base font-light tracking-[5px] uppercase">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h1>
             <div className="flex items-center gap-3 sm:gap-5">
               <Link to="/main" className="hidden md:flex items-center gap-1.5 text-xs text-white/55 hover:text-white transition-colors tracking-wide">
                 <LayoutGrid className="h-3.5 w-3.5" />
@@ -568,7 +569,7 @@ export function MyReservations() {
                 </h3>
                 <p className="text-sm text-gray-500 mb-7 max-w-xs mx-auto leading-relaxed">
                   {reservations.length === 0
-                    ? t("reservations.empty.subtitle",   { defaultValue: "Book your first room to get started with your EDU Hotel experience." })
+                    ? t("reservations.empty.subtitle",   { defaultValue: "Book your first room to get started with your EDU Education Hotel experience." })
                     : t("reservations.empty.noMatchSub", { defaultValue: "Try adjusting your filters or search query." })}
                 </p>
                 {reservations.length === 0 && (

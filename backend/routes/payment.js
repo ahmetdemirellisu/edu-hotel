@@ -17,20 +17,26 @@ if (!fs.existsSync(pendingDir)) {
   fs.mkdirSync(pendingDir, { recursive: true });
 }
 
-// Multer storage config
+const crypto = require("crypto");
+
+// Temp directory for uploads — files are moved to pendingDir only after auth checks pass
+const tempDir = path.join(__dirname, "../../paymentRecieptsPending/.tmp");
+if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+// Multer storage config — writes to temp dir with random filename
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, pendingDir);
+    cb(null, tempDir);
   },
   filename: (req, file, cb) => {
-    const { reservationId } = req.params;
     const extMap = {
       "application/pdf": ".pdf",
       "image/jpeg": ".jpg",
       "image/png": ".png",
     };
-    const ext = extMap[file.mimetype];
-    cb(null, `${reservationId}_payment${ext}`);
+    const ext = extMap[file.mimetype] || ".bin";
+    // Random filename to avoid collisions and prevent overwriting
+    cb(null, `tmp_${crypto.randomBytes(16).toString("hex")}${ext}`);
   },
 });
 
@@ -47,30 +53,69 @@ const upload = multer({
   },
 });
 
+const requireAuth = require("../middleware/requireAuth");
+
 // Upload receipt endpoint
 router.post(
   "/upload-dekont/:reservationId",
+  requireAuth,
   upload.single("dekont"),
   async (req, res) => {
+    // Helper: remove temp file safely
+    const cleanupTemp = () => {
+      try { if (req.file?.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path); } catch (_) {}
+    };
+
     const { reservationId } = req.params;
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      // Guard: reservation must be APPROVED and have a price set
+      // ── Ownership & status checks (BEFORE touching final storage) ────
       const existing = await prisma.reservation.findUnique({
         where: { id: parseInt(reservationId) },
       });
       if (!existing) {
+        cleanupTemp();
         return res.status(404).json({ error: "Reservation not found." });
       }
+      if (existing.userId !== req.user.userId) {
+        cleanupTemp();
+        return res.status(403).json({ error: "Access denied." });
+      }
       if (existing.status !== "APPROVED") {
+        cleanupTemp();
         return res.status(400).json({ error: "Payment can only be submitted for approved reservations." });
       }
       if (existing.price == null) {
+        cleanupTemp();
         return res.status(400).json({ error: "Admin has not set a price for this reservation yet. Please wait." });
       }
+
+      // ── Magic bytes validation ───────────────────────────────────────
+      const buffer = fs.readFileSync(req.file.path);
+      if (buffer.length >= 4) {
+        const hex = buffer.toString('hex', 0, 4);
+        const isJPG = hex.startsWith('ffd8');
+        const isPNG = hex === '89504e47';
+        const isPDF = hex === '25504446';
+        if (!isJPG && !isPNG && !isPDF) {
+          cleanupTemp();
+          return res.status(400).json({ error: "Invalid file format (magic bytes mismatch)." });
+        }
+      }
+
+      // ── All checks passed — move temp file to final location ─────────
+      const extMap = { "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png" };
+      const ext = extMap[req.file.mimetype] || ".bin";
+      const finalName = `${reservationId}_payment${ext}`;
+      const finalPath = path.join(pendingDir, finalName);
+      fs.renameSync(req.file.path, finalPath);
+
+      // Update the stored filename reference
+      req.file.filename = finalName;
+      req.file.path = finalPath;
 
       const reservation = await prisma.reservation.update({
         where: { id: parseInt(reservationId) },

@@ -1,0 +1,45 @@
+services:
+  ${SERVICE1}:
+    image: ${IMAGE_NAME1}
+    container_name: ${SERVICE1}
+    labels:
+      - "io.podman.healthcheck.on-failure=kill"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Istanbul
+    command: sh -c "npx prisma migrate deploy && PORT=9004 npm run start"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep node || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    networks:
+      - instance_net
+
+  ${SERVICE2}:
+    image: ${IMAGE_NAME2}
+    container_name: ${SERVICE2}
+    labels:
+      - "io.podman.healthcheck.on-failure=kill"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Istanbul
+    depends_on:
+      - ${SERVICE1}
+    ports:
+      - "8080:8004"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "prep nginx || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    networks:
+      - instance_net
+
+networks:
+  instance_net:
+    driver: bridge

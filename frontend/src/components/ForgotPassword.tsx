@@ -79,7 +79,7 @@ export function ForgotPassword() {
         <aside className="auth__panel">
           <div className="auth__panel-inner" key={shake} data-shake={shake > 0}>
             <header className="auth__panel-top">
-              <Link to="/" className="auth__monogram" aria-label="EDU Hotel">E</Link>
+              <Link to="/" className="auth__monogram" aria-label={currentLang === "TR" ? "EDU Eğitim Oteli" : "EDU Education Hotel"}>E</Link>
               <div className="auth__lang">
                 {(["EN", "TR"] as const).map((l) => (
                   <button
@@ -165,7 +165,7 @@ export function ForgotPassword() {
           <SabanciLogo size="md" className="auth__hero-badge auth__hero-badge--logo" />
           <div className="auth__hero-center">
             <p className="auth__hero-eyebrow">{t("auth.welcomeBackTo", "Welcome back to")}</p>
-            <h2 className="auth__hero-wordmark">EDU&nbsp;HOTEL</h2>
+            <h2 className="auth__hero-wordmark">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h2>
             <div className="auth__hero-rule" />
             <p className="auth__hero-tagline">{t("auth.tagline")}</p>
           </div>

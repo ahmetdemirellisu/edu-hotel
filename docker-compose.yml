@@ -9,7 +9,7 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data:Z
     ports:
-      - "5440:5432"
+      - "127.0.0.1:5440:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -25,7 +25,8 @@ services:
       NODE_ENV: production
       PORT: 9004
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_ADMIN_SECRET: ${JWT_ADMIN_SECRET:?JWT_ADMIN_SECRET is required}
       EMAIL_USER: ${EMAIL_USER:-}
       EMAIL_PASS: ${EMAIL_PASS:-}
       SMTP_HOST: smtp.gmail.com
@@ -33,18 +34,11 @@ services:
       SMTP_USER: ${EMAIL_USER:-}
       SMTP_PASS: ${EMAIL_PASS:-}
       SMTP_FROM: "EDU HOTEL <${EMAIL_USER:-}>"
-      ADMIN_USER: ${ADMIN_USER:-}
-      ADMIN_PASS: ${ADMIN_PASS:-}
-      # Used in transactional emails (e.g. password reset link). Override via env if needed.
-      CLIENT_URL: ${CLIENT_URL:-http://localhost:8004/ehp}
-    volumes:
-      - ./paymentRecieptsPending:/paymentRecieptsPending
-      - ./paymentRecieptsAprooved:/paymentRecieptsAprooved
+      ADMIN_SEED_EMAIL: ${ADMIN_SEED_EMAIL:-}
+      ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "9004:9004"
     networks:
       - ehp-network
 
@@ -52,8 +46,8 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: /ehp/api
-        VITE_BASE_PATH: /ehp
+        VITE_API_URL: /api
+        VITE_BASE_PATH: /
     container_name: eduhotel-frontend
     depends_on:
       - backend

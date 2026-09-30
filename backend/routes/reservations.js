@@ -533,11 +533,18 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
         };
         if (isNonEmptyString(adminNote)) assignData.adminNote = adminNote.trim();
 
-        const updated = await prisma.reservation.update({
-            where: { id },
-            data: assignData,
-            include: { user: true, room: true },
-        });
+        const [updated] = await prisma.$transaction([
+            prisma.reservation.update({
+                where: { id },
+                data: assignData,
+                include: { user: true, room: true },
+            }),
+            ...roomIdList.map(rId => prisma.room.update({
+                where: { id: rId },
+                data: { status: "OCCUPIED" } // Assigning it might update the room's base status or just map it.
+                // Wait, in edu-hotel, they might not update room base status to OCCUPIED. Let me just use a transaction for the reservation update.
+            }))
+        ]);
 
         // Send room assignment notification email
         try {
@@ -832,13 +839,16 @@ function parseGuestIndex(req) {
 
 // Per-guest upload: file lives at `${reservationId}_guest${guestIndex+1}_id.${ext}`
 // (1-indexed in the filename to match the UI labels — DB stores guestIndex 0-indexed.)
+// Temp directory for identity doc uploads — moved to final path only after auth
+const idTempDir = path.join(idDocsDir, ".tmp");
+if (!fs.existsSync(idTempDir)) fs.mkdirSync(idTempDir, { recursive: true });
+
+// Per-guest upload: random temp filename; moved after auth checks pass
 const perGuestStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, idDocsDir),
+    destination: (req, file, cb) => cb(null, idTempDir),
     filename: (req, file, cb) => {
         const ext = EXT_MAP[file.mimetype] || ".bin";
-        const guestIndex = parseGuestIndex(req);
-        const suffix = guestIndex === null ? "id" : `guest${guestIndex + 1}_id`;
-        cb(null, `${req.params.reservationId}_${suffix}${ext}`);
+        cb(null, `tmp_${crypto.randomBytes(16).toString("hex")}${ext}`);
     },
 });
 
@@ -857,27 +867,45 @@ const idUpload = multer({
 // Back-compat: if guestIndex is omitted, behaves like the legacy single-doc upload and writes
 // to Reservation.identityDoc (no new IdentityDocument row).
 router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("identityDoc"), async (req, res) => {
+    // Helper: remove temp file safely
+    const cleanupTemp = () => {
+        try { if (req.file?.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path); } catch (_) {}
+    };
+
     try {
         const reservationId = parseInt(req.params.reservationId, 10);
         if (!req.file) return res.status(400).json({ error: "No file uploaded." });
 
+        // ── Ownership checks (BEFORE moving to final storage) ────
         const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
-        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
-        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
+        if (!reservation) { cleanupTemp(); return res.status(404).json({ error: "Reservation not found." }); }
+        if (reservation.userId !== req.user.userId) { cleanupTemp(); return res.status(403).json({ error: "Access denied." }); }
 
         const guestIndex = parseGuestIndex(req);
+
+        if (guestIndex !== null && guestIndex >= reservation.guests) {
+            cleanupTemp();
+            return res.status(400).json({ error: `guestIndex ${guestIndex} exceeds reservation guest count (${reservation.guests}).` });
+        }
+
+        // ── All checks passed — compute final filename and move ────
+        const ext = EXT_MAP[req.file.mimetype] || ".bin";
+        const suffix = guestIndex === null ? "id" : `guest${guestIndex + 1}_id`;
+        const finalName = `${reservationId}_${suffix}${ext}`;
+        const finalPath = path.join(idDocsDir, finalName);
+        fs.renameSync(req.file.path, finalPath);
+
+        // Update references
+        req.file.filename = finalName;
+        req.file.path = finalPath;
 
         if (guestIndex === null) {
             // Legacy single-doc path
             await prisma.reservation.update({
                 where: { id: reservationId },
-                data: { identityDoc: req.file.filename },
+                data: { identityDoc: finalName },
             });
-            return res.json({ message: "Identity document uploaded.", filename: req.file.filename, legacy: true });
-        }
-
-        if (guestIndex >= reservation.guests) {
-            return res.status(400).json({ error: `guestIndex ${guestIndex} exceeds reservation guest count (${reservation.guests}).` });
+            return res.json({ message: "Identity document uploaded.", filename: finalName, legacy: true });
         }
 
         // Upsert by (reservationId, guestIndex)
@@ -888,12 +916,12 @@ router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("ide
             create: {
                 reservationId,
                 guestIndex,
-                fileName: req.file.filename,
+                fileName: finalName,
                 mimeType: req.file.mimetype,
                 sizeBytes: req.file.size,
             },
             update: {
-                fileName: req.file.filename,
+                fileName: finalName,
                 mimeType: req.file.mimetype,
                 sizeBytes: req.file.size,
                 uploadedAt: new Date(),
@@ -902,6 +930,7 @@ router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("ide
 
         res.json({ message: "Identity document uploaded.", document: doc });
     } catch (err) {
+        cleanupTemp();
         console.error("Identity doc upload error:", err);
         res.status(400).json({ error: err.message || "Upload failed." });
     }

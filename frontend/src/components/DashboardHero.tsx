@@ -210,7 +210,7 @@ export function DashboardHero({
     {
       triggers: ["smoke", "smoking", "sigara"],
       key: "dashboardHero.faq.smoking",
-      fallback: "The EDU Hotel is non-smoking inside all rooms and common areas. Designated outdoor smoking areas are by the courtyard and near the campus shuttle stop.",
+      fallback: "The EDU Education Hotel is non-smoking inside all rooms and common areas. Designated outdoor smoking areas are by the courtyard and near the campus shuttle stop.",
     },
     {
       triggers: ["quiet", "noise", "silence", "sessizlik", "gürültü", "gurultu"],
@@ -299,7 +299,7 @@ export function DashboardHero({
     {
       triggers: ["hello", "hi ", "hey", "merhaba", "selam", "good morning", "good afternoon", "good evening", "günaydın", "gunaydin"],
       key: "dashboardHero.faq.hello",
-      fallback: "Hello! I'm Atlas, your EDU Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
+      fallback: "Hello! I'm Atlas, your EDU Education Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
     },
   ];
 
@@ -725,7 +725,7 @@ export function DashboardHero({
                         </div>
                       ))}
                       <p className="text-[10.5px] text-white/40 leading-relaxed">
-                        {t("dashboardHero.wifi.hint", { defaultValue: "Available throughout the EDU Hotel building and the campus common areas." })}
+                        {t("dashboardHero.wifi.hint", { defaultValue: "Available throughout the EDU Education Hotel building and the campus common areas." })}
                       </p>
                     </div>
                   )}

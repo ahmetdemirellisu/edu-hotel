@@ -30,7 +30,7 @@ type SettingsShape = {
 };
 
 const FALLBACK: SettingsShape = {
-  hotelName: "EDU Hotel",
+  hotelName: "EDU Education Hotel",
   contactEmail: "hotel@sabanciuniv.edu",
   contactPhone: "+90 (216) 483 9000",
   maxAdvanceDays: 30,

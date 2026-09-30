@@ -22,7 +22,7 @@ export type PublicSettings = {
 };
 
 export const SETTINGS_FALLBACK: PublicSettings = {
-  hotelName: "EDU Hotel",
+  hotelName: "EDU Eğitim Oteli",
   contactEmail: "hotel@sabanciuniv.edu",
   contactPhone: "+90 (216) 483 9000",
   bankName: "Akbank T.A.Ş.",

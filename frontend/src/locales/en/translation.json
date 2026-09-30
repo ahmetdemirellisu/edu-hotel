@@ -9,7 +9,7 @@
     },
     "hero": {
       "eyebrow": "Sabancı University",
-      "title": "EDU Hotel: A Luxurious Stay in the Heart of Sabancı University.",
+      "title": "EDU Education Hotel: A Stay Experience on Sabancı University Campus.",
       "subtitle": "Academic life meets comfort. A five-star accommodation experience for researchers, guests, and educators.",
       "ctaPrimary": "Book Now",
       "ctaSecondary": "Discover More",
@@ -17,7 +17,7 @@
       "scroll": "Scroll"
     },
     "features": {
-      "eyebrow": "Why EDU Hotel?",
+      "eyebrow": "Why EDU Education Hotel?",
       "title": "Excellence in Every Detail.",
       "subtitle": "Experience the privilege of luxury comfort in an academic setting.",
       "modernRooms": {
@@ -57,7 +57,7 @@
     "about": {
       "eyebrow": "About Us",
       "title": "A Unique Experience on the Sabancı Campus.",
-      "p1": "EDU Hotel has been hosting academics, researchers, and corporate guests since the founding of Sabancı University in 1994.",
+      "p1": "EDU Education Hotel has been hosting academics, researchers, and corporate guests since the founding of Sabancı University in 1994.",
       "p2": "With its modern architecture and location within a lush green campus, we offer a unique accommodation experience that combines work and academia with comfort.",
       "cta": "Make a Reservation",
       "stats": {
@@ -73,7 +73,7 @@
       "cta": "Make a Reservation"
     },
     "footer": {
-      "rights": "Sabancı University EDU Hotel. All rights reserved.",
+      "rights": "Sabancı University EDU Education Hotel. All rights reserved.",
       "quickLinks": "Quick Links",
       "bookStay": "Book a Stay",
       "signUp": "Sign Up",
@@ -122,7 +122,7 @@
 
   "adminLogin": {
     "title": "Admin Portal",
-    "subtitle": "EDU Hotel Management System",
+    "subtitle": "EDU Education Hotel Management System",
     "secured": "Secured Connection",
     "username": "Username",
     "usernamePlaceholder": "Enter your username",
@@ -133,7 +133,7 @@
     "signIn": "Sign in to Admin",
     "accessGranted": "Access Granted",
     "redirecting": "Redirecting to admin panel…",
-    "footer": "EDU Hotel © 2026 · Restricted Access · All activity is logged",
+    "footer": "EDU Education Hotel © 2026 · Restricted Access · All activity is logged",
     "backToSite": "← Back to main site",
     "errors": {
       "tooManyAttempts": "Too many failed attempts. Locked for 30 seconds.",
@@ -144,7 +144,7 @@
   },
 
   "auth": {
-    "eyebrow": "Sabancı Üniversitesi · EDU Hotel",
+    "eyebrow": "Sabancı Üniversitesi · EDU Education Hotel",
     "protected": "Protected by Sabancı University IT Infrastructure",
     "welcomeBackTo": "Welcome back to",
     "joinCommunity": "Join our community",
@@ -153,7 +153,7 @@
     "signIn": "Sign in",
     "signingIn": "Signing in…",
     "loginSubtitle": "Sign in to manage your reservations, stays and account.",
-    "registerTitle": "Create your EDU Hotel account",
+    "registerTitle": "Create your EDU Education Hotel account",
     "registerSubtitle": "Sign up to manage your stays and reservations.",
     "forgotPassword": "Forgot password?",
     "passwordHelper": "Min. 8 characters",
@@ -169,7 +169,7 @@
     },
     "reset": {
       "title": "Set a new password",
-      "subtitle": "Choose a new password for your EDU Hotel account.",
+      "subtitle": "Choose a new password for your EDU Education Hotel account.",
       "newPasswordLabel": "New password",
       "newPasswordPlaceholder": "Min. 8 characters",
       "confirmPasswordLabel": "Confirm new password",
@@ -190,7 +190,7 @@
     "fillFullName": "Please enter your full name.",
     "fillEmail": "Please enter your email address.",
     "passwordMin": "Password must be at least 8 characters.",
-    "kvkkShort": "I consent to the processing of my personal data by EDU Hotel in accordance with KVKK Law No. 6698.",
+    "kvkkShort": "I consent to the processing of my personal data by EDU Education Hotel in accordance with KVKK Law No. 6698.",
     "kvkkReadDetails": "Read details",
     "kvkkHideDetails": "Hide details",
     "kvkkDetails": "My personal data will be processed solely for accommodation and reservation services, in accordance with the Personal Data Protection Law No. 6698 (KVKK). My data will not be shared with third parties and will not be used in violation of applicable legislation.",
@@ -206,7 +206,7 @@
 
   "login": {
     "welcomeTitle": "Welcome back",
-    "welcomeSubtitle": "Sign in to your EDU Hotel account",
+    "welcomeSubtitle": "Sign in to your EDU Education Hotel account",
     "loginWith": "Login with",
     "email": "Email",
     "phone": "Phone Number",
@@ -222,6 +222,16 @@
     "firstTimePrompt": "First time user?",
     "signupLink": "Create account",
     "firstTime": "First time user? Create account",
+    "welcomeBack": "Welcome back",
+    "subtitle": "Sign in to your EDU Education Hotel account",
+    "sidebarTitle": "EDU EDUCATION HOTEL",
+    "sidebarDesc": "Access your dashboard to manage reservations, explore room availability, and customize your upcoming stays.",
+    "manageStays": "Manage Stays",
+    "manageStaysSub": "View & Edit Bookings",
+    "instantAccess": "Instant Access",
+    "instantAccessSub": "Fast Check-in Portal",
+    "support": "24/7 Support",
+    "supportSub": "Contact Reception",
     "errors": {
       "loginFailed": "Login failed",
       "network": "Network error. Please try again."
@@ -230,7 +240,7 @@
 
   "signup": {
     "createTitle": "Create an account",
-    "createSubtitle": "Sign up to get started with EDU Hotel",
+    "createSubtitle": "Sign up to get started with EDU Education Hotel",
     "haveAccountPrompt": "Already have an account?",
     "loginLink": "Log in",
     "fullNameLabel": "Full Name",
@@ -251,7 +261,7 @@
     "creatingAccount": "Creating account...",
     "createAccount": "Create account",
     "alreadyHaveAccount": "Already have an account? Login",
-    "kvkk": "I consent to the processing of my personal data by EDU Hotel solely for accommodation and reservation services, in accordance with the Personal Data Protection Law No. 6698 (KVKK). My data will not be shared with third parties and will not be used in violation of applicable legislation.",
+    "kvkk": "I consent to the processing of my personal data by EDU Education Hotel solely for accommodation and reservation services, in accordance with the Personal Data Protection Law No. 6698 (KVKK). My data will not be shared with third parties and will not be used in violation of applicable legislation.",
     "errors": {
       "fillAll": "Please fill in all fields.",
       "passwordMismatch": "Passwords do not match.",
@@ -401,11 +411,11 @@
       "pendingApprovals_other": "You have {{count}} pending approvals today. Click me for quick actions!",
       "upcomingStays_one": "Welcome back! You have {{count}} upcoming stay. Need anything?",
       "upcomingStays_other": "Welcome back! You have {{count}} upcoming stays. Need anything?",
-      "welcome": "Welcome back! I'm Atlas, your EDU Hotel Concierge. Click me for quick actions!"
+      "welcome": "Welcome back! I'm Atlas, your EDU Education Hotel Concierge. Click me for quick actions!"
     },
-    "atlasTitle": "Atlas – EDU Hotel Concierge",
+    "atlasTitle": "Atlas – EDU Education Hotel Concierge",
     "atlasStatus": "Online · Ready to help",
-    "atlasTooltip": "Chat with Atlas – EDU Hotel Concierge",
+    "atlasTooltip": "Chat with Atlas – EDU Education Hotel Concierge",
     "quickActions": {
       "heading": "Quick Actions",
       "wifi": { "label": "Get Wi-Fi Password", "desc": "Campus network credentials" },
@@ -415,7 +425,7 @@
     },
     "chat": {
       "heading": "Chat with Atlas",
-      "greeting": "Hello! I'm Atlas, your EDU Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
+      "greeting": "Hello! I'm Atlas, your EDU Education Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
       "autoReply": "I'll forward that to the reception team — they'll follow up shortly. In the meantime you can use the quick actions above.",
       "placeholder": "Ask Atlas anything…"
     },
@@ -425,7 +435,7 @@
       "password": "Password",
       "copy": "Copy",
       "copied": "Copied",
-      "hint": "Available throughout the EDU Hotel building and the campus common areas."
+      "hint": "Available throughout the EDU Education Hotel building and the campus common areas."
     },
     "mapModal": {
       "title": "Sabancı University · Tuzla Campus Map",
@@ -450,7 +460,7 @@
       "successSent": "Sent! Reception will follow up shortly."
     },
     "faq": {
-      "hello": "Hello! I'm Atlas, your EDU Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
+      "hello": "Hello! I'm Atlas, your EDU Education Hotel concierge. Ask me about Wi-Fi, breakfast, the campus, your reservation — or use the quick actions above.",
       "thanks": "You're very welcome! Anything else I can help with?",
       "wifi": "The Wi-Fi network is \"EDU-Hotel-Guest\" and the password is \"Welcome2026\". You can also tap the Wi-Fi quick action above for one-tap copy.",
       "map": "Tap the Campus Map quick action to see the Tuzla campus layout. You can zoom into the map to find specific buildings.",
@@ -463,7 +473,7 @@
       "luggage": "Reception can hold your luggage before check-in or after check-out at no charge. Just bring your reservation ID.",
       "housekeeping": "Rooms are cleaned daily between 10:00 and 14:00. For extra towels, blankets, or amenities, tap Report an Issue and describe what you need.",
       "laundry": "Same-day laundry can be arranged at reception if you drop it off before 09:00. An iron and ironing board are available on request.",
-      "smoking": "The EDU Hotel is non-smoking inside all rooms and common areas. Designated outdoor smoking areas are by the courtyard and near the campus shuttle stop.",
+      "smoking": "The EDU Education Hotel is non-smoking inside all rooms and common areas. Designated outdoor smoking areas are by the courtyard and near the campus shuttle stop.",
       "quiet": "Quiet hours are observed between 22:00 and 08:00. If a neighbour is being noisy, tap Report an Issue and we'll handle it discreetly.",
       "parking": "Guest parking is at the Main Gate (marker 9 on the campus map). Please show your reservation ID to security on arrival.",
       "shuttle": "The campus shuttle (marker SH on the map) runs to Tuzla metro. Check the reception noticeboard for the current timetable.",
@@ -540,12 +550,12 @@
   },
 
   "bookingRequest": {
-    "title": "Reservation Request for EDU Hotel",
-    "subtitle": "Submit a pre-reservation request for EDU Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
+    "title": "Reservation Request for EDU Education Hotel",
+    "subtitle": "Submit a pre-reservation request for EDU Education Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
     "step1Title": "Step 1 – Submit your reservation request",
     "step1Description": "Please fill in your stay dates and basic information. This is a request form, not an instant booking.",
     "step2Title": "Step 2 – Explore room types",
-    "step2Description": "These are example room types available at EDU Hotel. Final room assignment will be made by the hotel administration after your request is approved.",
+    "step2Description": "These are example room types available at EDU Education Hotel. Final room assignment will be made by the hotel administration after your request is approved.",
     "pageTitle": "Book a Room",
     "pageSubtitle": "Submit your pre-reservation request. The EDU team will review and confirm.",
     "loggedInAs": "You are logged in as:",

@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
-import { SabanciLogo } from "./SabanciLogo";
 import { CardNumberInput, type CardBrand } from "./ui/CardNumberInput";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
 import { fetchPublicSettings, SETTINGS_FALLBACK, type PublicSettings } from "../api/settings";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 import {
   Select,
   SelectContent,
@@ -271,16 +272,16 @@ export function Payment() {
           <div className="flex justify-between items-center">
             <Link to="/main" className="flex items-center gap-4 group">
               <motion.div whileHover={{ scale: 1.04 }} className="transition-all duration-300">
-                <SabanciLogo size="sm" />
+                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
               </motion.div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
                 <h1 className="text-white text-base font-light tracking-[8px] uppercase" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU HOTEL
+                  EDU EDUCATION HOTEL
                 </h1>
               </div>
             </Link>
-            <h1 className="sm:hidden text-white text-sm font-light tracking-[5px] uppercase">EDU HOTEL</h1>
+            <h1 className="sm:hidden text-white text-sm font-light tracking-[5px] uppercase">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h1>
             <div className="flex items-center gap-3 sm:gap-4">
               <Select value={currentLang} onValueChange={switchLanguage}>
                 <SelectTrigger className="w-[58px] h-8 bg-white/6 border-white/15 text-white text-xs font-semibold hover:bg-white/12 focus:ring-0 rounded-lg">
@@ -474,7 +475,7 @@ export function Payment() {
                   ))}
                   {/* Label */}
                   <div className="absolute bottom-5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full" style={{ background: "rgba(0,51,102,0.7)", backdropFilter: "blur(4px)" }}>
-                    <span className="text-white/90 text-[10px] font-bold tracking-widest">EDU HOTEL</span>
+                    <span className="text-white/90 text-[10px] font-bold tracking-widest">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</span>
                   </div>
                 </div>
               </div>

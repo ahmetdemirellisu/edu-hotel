@@ -25,14 +25,13 @@ services:
       NODE_ENV: production
       PORT: 9004
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
-      JWT_SECRET: ${JWT_SECRET:-change-me-very-secret}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_ADMIN_SECRET: ${JWT_ADMIN_SECRET:?JWT_ADMIN_SECRET is required}
       JWT_EXPIRES_IN: 1d
       JWT_REFRESH_EXPIRES_IN: 7d
       EMAIL_USER: ${EMAIL_USER}
       EMAIL_PASS: ${EMAIL_PASS}
-      ADMIN_USER: ${ADMIN_USER}
-      ADMIN_PASS: ${ADMIN_PASS}
-      CLIENT_URL: https://student-projects.sabanciuniv.edu/ehp
+      CLIENT_URL: https://student-projects.sabanciuniv.edu
     depends_on:
       db:
         condition: service_healthy
@@ -43,11 +42,11 @@ services:
     image: ghcr.io/ahmetdemirellisu/edu-hotel/frontend:latest
     container_name: ehp-frontend
     environment:
-      REACT_APP_API_URL: https://student-projects.sabanciuniv.edu/ehp/api
+      REACT_APP_API_URL: https://student-projects.sabanciuniv.edu/api
     depends_on:
       - backend
     ports:
-      - "8004:8004"
+      - "127.0.0.1:8004:8004"
     networks:
       - ehpnetwork
 

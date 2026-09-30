@@ -113,13 +113,15 @@ export function RoomsPage() {
   const load = useCallback(async (d: string) => {
     try {
       setLoading(true); setError(null);
-      const res = await fetch(`/ehp/api/rooms/availability?date=${d}`);
+      const res = await fetch(`/api/rooms/availability/admin?date=${d}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}` },
+      });
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setRooms(data.rooms); setCounts(data.counts);
     } catch {
       try {
-        const res = await fetch("/ehp/api/rooms");
+        const res = await fetch("/api/rooms");
         if (res.ok) {
           const arr = await res.json();
           setRooms(arr.map((r: any) => ({ ...r, baseStatus: r.status, reservation: null })));

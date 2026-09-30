@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { SabanciLogo } from "../SabanciLogo";
 import { useState, useEffect, useRef } from "react";
+import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
+import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
 import {
   Globe,
   Bell,
@@ -132,7 +133,7 @@ export function Navbar() {
 
           {/* Left: Sabancı Logo Branding */}
           <div className="flex items-center gap-4">
-            <SabanciLogo size="sm" />
+            <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
           </div>
 
           {/* Center: Main Title (Absolute Centered) */}
@@ -146,7 +147,7 @@ export function Navbar() {
               className="text-[17px] font-light whitespace-nowrap tracking-[6px] uppercase nav-logo-hover cursor-default select-none transition-all duration-300"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              EDU HOTEL
+              EDU EDUCATION HOTEL
             </h1>
             <div
               className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] flex-shrink-0"

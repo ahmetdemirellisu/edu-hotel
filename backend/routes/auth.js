@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 const prisma = require("../prismaClient");
 const { sendMailAsync } = require("../services/mail");
 const { emailTemplate, badge, heading } = require("../services/mailTemplate");
+const { validateEmail, validatePassword } = require("../utils/sanitize");
 
 const router = express.Router();
 
@@ -52,9 +53,18 @@ router.post("/register", authLimiter, async (req, res) => {
                 .status(400)
                 .json({ error: "Email and password are required." });
         }
+        
+        const emailResult = validateEmail(email);
+        if (!emailResult.valid) {
+            return res.status(400).json({ error: "Invalid email format." });
+        }
+        const passResult = validatePassword(password);
+        if (!passResult.valid) {
+            return res.status(400).json({ error: passResult.message });
+        }
 
         // check if user already exists
-        const existing = await prisma.user.findUnique({ where: { email } });
+        const existing = await prisma.user.findUnique({ where: { email: emailResult.email } });
         if (existing) {
             return res
                 .status(409)

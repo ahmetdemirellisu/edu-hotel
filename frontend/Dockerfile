@@ -1,9 +1,9 @@
 # 1. Aşama: Derleme (Builder)
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-ARG VITE_API_URL=/ehp/api
-ARG VITE_BASE_PATH=/ehp
+ARG VITE_API_URL=/api
+ARG VITE_BASE_PATH=/
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
 

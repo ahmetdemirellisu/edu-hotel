@@ -157,7 +157,7 @@ export function AdminDashboard() {
               <span className="text-white text-xs font-bold">E</span>
             </div>
             <div>
-              <h2 className="text-white text-sm font-semibold tracking-wide">EDU HOTEL</h2>
+              <h2 className="text-white text-sm font-semibold tracking-wide">EDU EDUCATION HOTEL</h2>
               <p className="text-[10px] text-white/40 font-medium tracking-wider uppercase">{t("common.adminPanel", "Admin Panel")}</p>
             </div>
           </div>
