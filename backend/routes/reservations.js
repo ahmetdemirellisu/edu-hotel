@@ -498,53 +498,65 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
             return res.status(400).json({ error: `Cannot assign more rooms (${roomIdList.length}) than guests (${reservation.guests}).` });
         }
 
-        // Check each room is available for the reservation's date range.
-        // Look at both the singular `roomId` column AND inside other reservations' `roomIds` JSON arrays.
-        const overlapping = await prisma.reservation.findMany({
-            where: {
-                status: "APPROVED",
-                id: { not: id },
-                checkIn: { lt: reservation.checkOut },
-                checkOut: { gt: reservation.checkIn },
-            },
-            select: { id: true, roomId: true, roomIds: true, room: { select: { name: true } } },
-        });
-        const requested = new Set(roomIdList);
-        for (const other of overlapping) {
-            const otherRoomIds = new Set();
-            if (Number.isInteger(other.roomId)) otherRoomIds.add(other.roomId);
-            if (Array.isArray(other.roomIds)) {
-                for (const r of other.roomIds) {
-                    const n = parseInt(r, 10);
-                    if (Number.isInteger(n)) otherRoomIds.add(n);
-                }
-            }
-            for (const rid of requested) {
-                if (otherRoomIds.has(rid)) {
-                    const name = (other.roomId === rid && other.room?.name) ? other.room.name : `#${rid}`;
-                    return res.status(400).json({ error: `Room ${name} is already booked for these dates.` });
-                }
-            }
-        }
-
+        // G04 fix: overlap check + assignment inside a single Serializable transaction
+        // to prevent two concurrent requests from assigning the same room.
         const assignData = {
             roomId: roomIdList[0],
             roomIds: roomIdList,
         };
         if (isNonEmptyString(adminNote)) assignData.adminNote = adminNote.trim();
 
-        const [updated] = await prisma.$transaction([
-            prisma.reservation.update({
-                where: { id },
-                data: assignData,
-                include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
-            }),
-            ...roomIdList.map(rId => prisma.room.update({
-                where: { id: rId },
-                data: { status: "OCCUPIED" } // Assigning it might update the room's base status or just map it.
-                // Wait, in edu-hotel, they might not update room base status to OCCUPIED. Let me just use a transaction for the reservation update.
-            }))
-        ]);
+        let updated;
+        try {
+            updated = await prisma.$transaction(async (tx) => {
+                // 1. Check overlapping reservations INSIDE the transaction
+                const overlapping = await tx.reservation.findMany({
+                    where: {
+                        status: "APPROVED",
+                        id: { not: id },
+                        checkIn: { lt: reservation.checkOut },
+                        checkOut: { gt: reservation.checkIn },
+                    },
+                    select: { id: true, roomId: true, roomIds: true, room: { select: { name: true } } },
+                });
+
+                const requested = new Set(roomIdList);
+                for (const other of overlapping) {
+                    const otherRoomIds = new Set();
+                    if (Number.isInteger(other.roomId)) otherRoomIds.add(other.roomId);
+                    if (Array.isArray(other.roomIds)) {
+                        for (const r of other.roomIds) {
+                            const n = parseInt(r, 10);
+                            if (Number.isInteger(n)) otherRoomIds.add(n);
+                        }
+                    }
+                    for (const rid of requested) {
+                        if (otherRoomIds.has(rid)) {
+                            const name = (other.roomId === rid && other.room?.name) ? other.room.name : `#${rid}`;
+                            throw new Error(`CONFLICT:Room ${name} is already booked for these dates.`);
+                        }
+                    }
+                }
+
+                // 2. Assign rooms to the reservation (no base status change on the room —
+                //    availability is computed dynamically from reservation dates)
+                const result = await tx.reservation.update({
+                    where: { id },
+                    data: assignData,
+                    include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
+                });
+
+                return result;
+            }, {
+                isolationLevel: "Serializable",
+                timeout: 10000,
+            });
+        } catch (txErr) {
+            if (txErr.message?.startsWith("CONFLICT:")) {
+                return res.status(400).json({ error: txErr.message.replace("CONFLICT:", "") });
+            }
+            throw txErr; // re-throw unexpected errors to outer catch
+        }
 
         // Send room assignment notification email
         try {

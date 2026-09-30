@@ -2,7 +2,8 @@ const prisma = require("../prismaClient");
 
 async function checkBlacklist(req, res, next) {
     try {
-        const userId = req.body.userId || req.user?.userId;
+        // G05 fix: ONLY use the JWT-verified userId — never trust body.userId
+        const userId = req.user?.userId;
 
         if (!userId) return next();
 
@@ -18,8 +19,9 @@ async function checkBlacklist(req, res, next) {
 
         next();
     } catch (err) {
+        // G05 fix: fail-closed — reject the request on infrastructure errors
         console.error("Blacklist check error:", err);
-        next();
+        return res.status(503).json({ error: "Service temporarily unavailable. Please try again." });
     }
 }
 
