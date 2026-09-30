@@ -64,6 +64,7 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
           JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_ADMIN_SECRET=${{ secrets.JWT_ADMIN_SECRET }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
           SMTP_USER=${{ secrets.EMAIL_USER }}
