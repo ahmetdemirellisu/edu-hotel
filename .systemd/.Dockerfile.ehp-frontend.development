@@ -3,7 +3,7 @@
 # ==========================================
 # 1. Aşama: Derleme (Builder)
 # ==========================================
-FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS builder
+FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-22 AS builder
 WORKDIR /app
 
 # 1. Install dependencies (Cached until package*.json changes)

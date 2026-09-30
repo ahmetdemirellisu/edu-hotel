@@ -1,6 +1,7 @@
 /**
  * Branded bilingual HTML email layout for EDU Hotel.
  */
+const { escapeHtml } = require("../utils/sanitize");
 
 /**
  * Wraps EN + TR body sections in the branded outer template.
@@ -88,7 +89,7 @@ function badge(text, color) {
   };
   const s = styles[color] || styles.blue;
   return `<span style="display:inline-block;padding:5px 16px;border-radius:999px;margin-bottom:16px;
-    background:${s.bg};color:${s.fg};font-size:12.5px;font-weight:700;letter-spacing:0.5px;">${text}</span>`;
+    background:${s.bg};color:${s.fg};font-size:12.5px;font-weight:700;letter-spacing:0.5px;">${escapeHtml(text)}</span>`;
 }
 
 /**
@@ -99,8 +100,8 @@ function row(label, value) {
   if (value === null || value === undefined || value === '') return '';
   return `<tr>
     <td style="padding:5px 12px 5px 0;font-size:13px;color:#64748b;
-               width:150px;vertical-align:top;white-space:nowrap;">${label}</td>
-    <td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${value}</td>
+               width:150px;vertical-align:top;white-space:nowrap;">${escapeHtml(String(label))}</td>
+    <td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${escapeHtml(String(value))}</td>
   </tr>`;
 }
 
@@ -122,7 +123,7 @@ function detailTable(rows) {
  */
 function heading(text) {
   return `<p style="margin:20px 0 6px;font-size:12px;font-weight:700;
-                    color:#003366;letter-spacing:0.8px;text-transform:uppercase;">${text}</p>`;
+                    color:#003366;letter-spacing:0.8px;text-transform:uppercase;">${escapeHtml(text)}</p>`;
 }
 
 // Human-readable labels for DB enum values

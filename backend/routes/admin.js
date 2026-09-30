@@ -131,8 +131,9 @@ router.get("/pending-assignments", async (req, res) => {
 router.post("/approve-payment/:id", async (req, res) => {
     const { id } = req.params;
 
-    const pendingDir = path.resolve(__dirname, "../../paymentRecieptsPending");
-    const approvedDir = path.resolve(__dirname, "../../paymentRecieptsAprooved");
+    const UPLOAD_BASE = process.env.UPLOAD_DIR || path.resolve(__dirname, "..");
+    const pendingDir = path.join(UPLOAD_BASE, "paymentRecieptsPending");
+    const approvedDir = path.join(UPLOAD_BASE, "paymentRecieptsAprooved");
 
     const candidates = [
         `${id}_payment.pdf`,

@@ -837,7 +837,9 @@ ${detailTable([
 });
 
 // ── Identity Document Upload ────────────────────────────────────────────
-const idDocsDir = path.join(__dirname, "../../identityDocs");
+// D02: Configurable upload base dir
+const UPLOAD_BASE_ID = process.env.UPLOAD_DIR || path.join(__dirname, "..");
+const idDocsDir = path.join(UPLOAD_BASE_ID, "identityDocs");
 if (!fs.existsSync(idDocsDir)) fs.mkdirSync(idDocsDir, { recursive: true });
 
 const EXT_MAP = { "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png" };

@@ -9,8 +9,9 @@ const { emailTemplate, badge, row, detailTable, heading } = require("../services
 
 const prisma = new PrismaClient();
 
-// Path to pending receipts folder
-const pendingDir = path.join(__dirname, "../../paymentRecieptsPending");
+// D02: Configurable upload base dir — defaults to /app/uploads inside container
+const UPLOAD_BASE = process.env.UPLOAD_DIR || path.join(__dirname, "..");
+const pendingDir = path.join(UPLOAD_BASE, "paymentRecieptsPending");
 
 // Ensure folder exists
 if (!fs.existsSync(pendingDir)) {
@@ -20,7 +21,7 @@ if (!fs.existsSync(pendingDir)) {
 const crypto = require("crypto");
 
 // Temp directory for uploads — files are moved to pendingDir only after auth checks pass
-const tempDir = path.join(__dirname, "../../paymentRecieptsPending/.tmp");
+const tempDir = path.join(pendingDir, ".tmp");
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
 // Multer storage config — writes to temp dir with random filename
@@ -95,15 +96,17 @@ router.post(
 
       // ── Magic bytes validation ───────────────────────────────────────
       const buffer = fs.readFileSync(req.file.path);
-      if (buffer.length >= 4) {
-        const hex = buffer.toString('hex', 0, 4);
-        const isJPG = hex.startsWith('ffd8');
-        const isPNG = hex === '89504e47';
-        const isPDF = hex === '25504446';
-        if (!isJPG && !isPNG && !isPDF) {
-          cleanupTemp();
-          return res.status(400).json({ error: "Invalid file format (magic bytes mismatch)." });
-        }
+      if (buffer.length < 4) {
+        cleanupTemp();
+        return res.status(400).json({ error: "File too small to be a valid document." });
+      }
+      const hex = buffer.toString('hex', 0, 4);
+      const isJPG = hex.startsWith('ffd8');
+      const isPNG = hex === '89504e47';
+      const isPDF = hex === '25504446';
+      if (!isJPG && !isPNG && !isPDF) {
+        cleanupTemp();
+        return res.status(400).json({ error: "Invalid file format (magic bytes mismatch)." });
       }
 
       // ── All checks passed — move temp file to final location ─────────

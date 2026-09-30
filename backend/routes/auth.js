@@ -300,8 +300,12 @@ router.post("/reset-password", authLimiter, async (req, res) => {
         if (typeof token !== "string" || token.length !== 64) {
             return res.status(400).json({ error: "Invalid or missing reset token." });
         }
-        if (typeof newPassword !== "string" || newPassword.length < 8) {
-            return res.status(400).json({ error: "Password must be at least 8 characters." });
+        if (typeof newPassword !== "string") {
+            return res.status(400).json({ error: "Password is required." });
+        }
+        const passResult = validatePassword(newPassword);
+        if (!passResult.valid) {
+            return res.status(400).json({ error: passResult.message });
         }
 
         const tokenHash = sha256(token);

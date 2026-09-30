@@ -1,5 +1,5 @@
 # 1. Install dependencies only when needed
-FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-20 AS runner
+FROM igs.sabanciuniv.edu:5050/imagebase/images/nodejs-base-22 AS runner
 WORKDIR /app
 RUN apk add curl
 
@@ -13,8 +13,8 @@ COPY backend .
 
 ENV PORT=1180
 
-RUN chown -R node:node /app && mkdir /paymentRecieptsAprooved /paymentRecieptsPending /identityDocs && \
-    chown node:node /paymentRecieptsAprooved /paymentRecieptsPending /identityDocs
+RUN mkdir -p /app/paymentRecieptsPending/.tmp /app/paymentRecieptsAprooved /app/identityDocs/.tmp && \
+    chown -R node:node /app
 
 USER node:node
 

@@ -53,24 +53,34 @@ async function main() {
   }
 
   // Create Admin User
-  const adminEmail = process.env.ADMIN_SEED_EMAIL || "admin@example.com";
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD || "admin123";
-  
-  const bcrypt = require("bcrypt");
-  const hashed = await bcrypt.hash(adminPassword, 10);
-  
-  await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {},
-    create: {
-      email: adminEmail,
-      password: hashed,
-      name: "Super Admin",
-      role: "ADMIN",
-      userType: "STAFF",
+  const adminEmail = process.env.ADMIN_SEED_EMAIL;
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("❌ ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD must be set in production.");
+      process.exit(1);
     }
-  });
-  console.log(`\n👨‍💼 Admin user ensured: ${adminEmail}`);
+    console.warn("⚠️  ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD not set — skipping admin seed in non-production.");
+  }
+  
+  if (adminEmail && adminPassword) {
+    const bcrypt = require("bcrypt");
+    const hashed = await bcrypt.hash(adminPassword, 10);
+    
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {},
+      create: {
+        email: adminEmail,
+        password: hashed,
+        name: "Super Admin",
+        role: "ADMIN",
+        userType: "STAFF",
+      }
+    });
+    console.log(`\n👨‍💼 Admin user ensured: ${adminEmail}`);
+  }
 
   console.log(`\n📊 Summary: ${created} created, ${skipped} skipped (already existed)`);
   console.log(`📦 Total rooms in database: ${await prisma.room.count()}`);

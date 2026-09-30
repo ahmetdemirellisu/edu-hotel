@@ -10,15 +10,14 @@ RUN npx prisma generate
 
 COPY . .
 
-# Create upload directories that routes expect at ../../ relative to routes/
-# Since routes are at /app/routes/, ../../ resolves to /
-# We create them under /app instead and symlink
-RUN mkdir -p /app/paymentRecieptsPending /app/paymentRecieptsAprooved /app/identityDocs \
-    /paymentRecieptsPending /paymentRecieptsAprooved /identityDocs \
-    /paymentRecieptsPending/.tmp /identityDocs/.tmp
+# D02: All upload directories under /app (non-root writable)
+# Routes use UPLOAD_DIR env var (defaults to /app when not set)
+RUN mkdir -p /app/paymentRecieptsPending/.tmp \
+             /app/paymentRecieptsAprooved \
+             /app/identityDocs/.tmp
 
 # Run as non-root user for security
-RUN chown -R node:node /app /paymentRecieptsPending /paymentRecieptsAprooved /identityDocs
+RUN chown -R node:node /app
 USER node
 
 ENV PORT=9004
