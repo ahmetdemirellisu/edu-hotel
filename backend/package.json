@@ -6,7 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "@prisma/client": "^6.20.0",
+    "@prisma/client": "^6.19.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
@@ -19,6 +19,6 @@
     "morgan": "^1.12.1",
     "multer": "^2.4.0",
     "nodemailer": "^9.1.2",
-    "prisma": "^6.20.0"
+    "prisma": "^6.19.0"
   }
 }
