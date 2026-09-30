@@ -1,0 +1,118 @@
+name: Deploy Project
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  REGISTRY: ghcr.io
+  TARGET_RUNNER: eduhotel-runner
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.DEPLOY_TOKEN }}
+
+      - name: Build and Push Images
+        run: |
+          # Repo ismini küçük harfe çevir (GHCR zorunluluğu)
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
+          docker build -t ghcr.io/$REPO_LOWER/backend:latest ./backend
+          docker build -t ghcr.io/$REPO_LOWER/frontend:latest ./frontend
+          
+          docker push ghcr.io/$REPO_LOWER/backend:latest
+          docker push ghcr.io/$REPO_LOWER/frontend:latest
+
+  deploy:
+    needs: build-and-push
+    # Belirlediğimiz runner etiketini kullanıyoruz
+    runs-on: [self-hosted, production]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy with Podman
+        run: |       
+          
+          DEPLOY_DIR="$HOME/app"
+          mkdir -p "$DEPLOY_DIR/postgres_data"
+          # Imaj isimleri için repo adını tekrar küçük harfe çeviriyoruz
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
+          # .env dosyasını oluştur (GITHUB_REPOSITORY artık küçük harf)
+          cat <<EOF > "$DEPLOY_DIR/.env"
+          PROJECT_NAME=${{ github.event.repository.name }}
+          GITHUB_REPOSITORY=$REPO_LOWER
+          FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
+          BACKEND_PORT=${{ secrets.BACKEND_PORT }}
+          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EMAIL_USER=${{ secrets.EMAIL_USER }}
+          EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          SMTP_USER=${{ secrets.EMAIL_USER }}
+          SMTP_PASS=${{ secrets.EMAIL_PASS }}
+          EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+          EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+          SMTP_PORT=${{ secrets.EMAIL_PORT }}
+          SMTP_HOST=${{ secrets.EMAIL_HOST }}
+          ADMIN_USER=${{ secrets.ADMIN_USER }}
+          ADMIN_PASS=${{ secrets.ADMIN_PASS }}
+          EOF
+          
+          ## !!! DONT CHANGE BELOW !!! ###----------------------------
+          
+          export XDG_RUNTIME_DIR=/run/user/$(id -u)
+          export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+          export SYSTEMD_DIR="$HOME/.config/systemd/user"
+          
+          cd "$DEPLOY_DIR"
+          # Podman login
+          echo "${{ secrets.DEPLOY_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          podman pull ghcr.io/$REPO_LOWER/backend:latest
+          podman pull ghcr.io/$REPO_LOWER/frontend:latest
+
+          systemctl --user disable --now "${USER}-app.service" || true
+          cp $GITHUB_WORKSPACE/docker-compose-server.yml "$DEPLOY_DIR/"
+
+          # GENERATE & START SYSTEMD SERVICE ---
+          cat <<EOF > "$SYSTEMD_DIR/${USER}-app.service"
+          [Unit]
+          Description=${USER} app service
+          After=network.target
+
+          [Service]
+          WorkingDirectory=$DEPLOY_DIR
+          Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus"
+          Environment="XDG_RUNTIME_DIR=/run/user/$(id -u)"
+          ExecStart=/bin/bash -c 'podman pull ghcr.io/$REPO_LOWER/backend:latest && podman pull ghcr.io/$REPO_LOWER/frontend:latest && podman-compose -f docker-compose-server.yml up --remove-orphans --force-recreate'
+          ExecStop=/usr/bin/podman-compose -f docker-compose-server.yml down
+          
+          [Install]
+          WantedBy=default.target
+          EOF
+
+          systemctl --user daemon-reload
+          systemctl --user reset-failed
+
+          
+          systemctl --user enable --now "${USER}-app.service"
+          
+          ##-----------------------------------------------------------
