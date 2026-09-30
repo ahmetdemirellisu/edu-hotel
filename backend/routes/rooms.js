@@ -47,18 +47,26 @@ router.get("/availability", async (req, res) => {
 
     const rooms = await prisma.room.findMany({ orderBy: { id: "asc" } });
 
-    // Find which rooms have approved reservations on this date (just roomIds)
+    // Find which rooms have approved reservations on this date
     const reservations = await prisma.reservation.findMany({
       where: {
         status: "APPROVED",
-        roomId: { not: null },
         checkIn: { lte: dayEnd },
         checkOut: { gt: dayStart },
       },
-      select: { roomId: true },
+      select: { roomId: true, roomIds: true },
     });
 
-    const occupiedRoomIds = new Set(reservations.map((r) => r.roomId));
+    const occupiedRoomIds = new Set();
+    for (const r of reservations) {
+      if (Number.isInteger(r.roomId)) occupiedRoomIds.add(r.roomId);
+      if (Array.isArray(r.roomIds)) {
+        for (const rid of r.roomIds) {
+          const n = parseInt(rid, 10);
+          if (Number.isInteger(n)) occupiedRoomIds.add(n);
+        }
+      }
+    }
 
     const result = rooms.map((room) => {
       let computedStatus = room.status;
@@ -118,7 +126,6 @@ router.get("/availability/admin", requireAdmin, async (req, res) => {
     const reservations = await prisma.reservation.findMany({
       where: {
         status: "APPROVED",
-        roomId: { not: null },
         checkIn: { lte: dayEnd },
         checkOut: { gt: dayStart },
       },
@@ -131,15 +138,22 @@ router.get("/availability/admin", requireAdmin, async (req, res) => {
 
     const roomReservationMap = new Map();
     for (const r of reservations) {
-      if (r.roomId) {
-        roomReservationMap.set(r.roomId, {
-          id: r.id,
-          guestName: `${r.firstName || ""} ${r.lastName || ""}`.trim() || r.user?.name || "Guest",
-          checkIn: r.checkIn,
-          checkOut: r.checkOut,
-          guests: r.guests,
-          paymentStatus: r.paymentStatus,
-        });
+      const resData = {
+        id: r.id,
+        guestName: `${r.firstName || ""} ${r.lastName || ""}`.trim() || r.user?.name || "Guest",
+        checkIn: r.checkIn,
+        checkOut: r.checkOut,
+        guests: r.guests,
+        paymentStatus: r.paymentStatus,
+      };
+      if (Number.isInteger(r.roomId)) {
+        roomReservationMap.set(r.roomId, resData);
+      }
+      if (Array.isArray(r.roomIds)) {
+        for (const rid of r.roomIds) {
+          const n = parseInt(rid, 10);
+          if (Number.isInteger(n)) roomReservationMap.set(n, resData);
+        }
       }
     }
 
