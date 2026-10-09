@@ -5,9 +5,9 @@ import {
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TextReveal } from "./ui/text-reveal";
-import { SabanciLogo } from "./SabanciLogo";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import campusBg from "@/assets/campus.png";
 import {
   Star, Wifi, Coffee, BookOpen, Building2, MapPin,
@@ -132,16 +132,12 @@ export function LandingPage() {
     desc: t(`landing.features.${f.key}.desc`),
   }));
 
-  const MARQUEE_ITEMS = [
-    "Sabancı University",
-    t("landing.marquee.established"),
-    t("landing.marquee.fiveStar"),
-    t("landing.marquee.modernStay"),
+  // Repeated so one loop half is wider than the viewport
+  const MARQUEE_ITEMS = Array.from({ length: 4 }, () => [
+    t("landing.marquee.educationStay"),
+    t("landing.marquee.campusExperience"),
     t("landing.marquee.tuzla"),
-    t("landing.marquee.premiumComfort"),
-    t("landing.marquee.academicExcellence"),
-    t("landing.marquee.internationalStandards"),
-  ];
+  ]).flat();
 
   return (
     <div className="min-h-screen" style={{ background: "#000a1f", color: "#fff", overflowX: "hidden" }}>
@@ -190,7 +186,7 @@ export function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+              <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
               <div className="hidden sm:block w-px h-8" style={{ background: "rgba(255,255,255,0.15)" }} />
               <span
                 className="hidden sm:block text-white font-light tracking-[6px] uppercase text-base"
@@ -357,7 +353,7 @@ export function LandingPage() {
             className="text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed"
             style={{ color: "rgba(255,255,255,0.55)", fontWeight: 300 }}
           >
-            {currentLang === "TR" ? "Araştırmacılar, eğitmenler, konuklar ve kurumlar için kampüste konaklama deneyimi." : t("landing.hero.subtitle")}
+            {t("landing.hero.subtitle")}
           </motion.p>
 
           {/* CTA buttons */}
@@ -394,18 +390,6 @@ export function LandingPage() {
             >
               {t("landing.hero.ctaSecondary")}
             </a>
-          </motion.div>
-
-          {/* Star rating strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 1.3 }}
-            className="flex items-center gap-2 mt-10"
-          >
-            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
-              {t("landing.hero.starStrip")}
-            </span>
           </motion.div>
 
           {/* Scroll indicator */}
@@ -447,27 +431,6 @@ export function LandingPage() {
                   </span>
                   <div className="h-px w-10" style={{ background: "rgba(201,168,76,0.5)" }} />
                 </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <TextReveal
-                    text={t("landing.features.title")}
-                    className="justify-center text-3xl sm:text-4xl font-light text-white"
-                  />
-                </motion.div>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.35 }}
-                  viewport={{ once: true }}
-                  className="text-sm mt-4 max-w-md mx-auto leading-relaxed"
-                  style={{ color: "rgba(255,255,255,0.4)" }}
-                >
-                  {t("landing.features.subtitle")}
-                </motion.p>
               </div>
 
               {/* Feature cards grid */}
@@ -584,17 +547,12 @@ export function LandingPage() {
                 <span className="text-[10px] font-bold tracking-[4px] uppercase" style={{ color: "#c9a84c" }}>{t("landing.about.eyebrow")}</span>
               </div>
               <TextReveal
-                text={currentLang === "TR" ? "Sabancı Kampüsünde Bir Konaklama Deneyimi." : t("landing.about.title")}
+                text={t("landing.about.title")}
                 className="text-2xl sm:text-3xl font-light text-white mb-6"
               />
               <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-                {currentLang === "TR" ? "EDU Eğitim Oteli, Sabancı Üniversitesi Yönetim Bilimleri Fakültesi binasında akademisyenlere, araştırmacılara, konuklara ve kurumlara öğrenme odaklı bir konaklama deneyimi sunuyor." : t("landing.about.p1")}
+                {t("landing.about.p1")}
               </p>
-              {currentLang !== "TR" && (
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  {t("landing.about.p2")}
-                </p>
-              )}
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 mt-8 text-sm font-bold transition-all duration-200 hover:gap-3"
@@ -614,10 +572,8 @@ export function LandingPage() {
               className="grid grid-cols-2 gap-4"
             >
               {[
-                { val: "30+", label: t("landing.about.stats.experience") },
-                { val: "5★",  label: t("landing.about.stats.rating") },
-                { val: "49",  label: t("landing.about.stats.rooms") },
-                { val: "%98", label: t("landing.about.stats.satisfaction") },
+                { val: "20+", label: t("landing.about.stats.experience") },
+                { val: "50",  label: t("landing.about.stats.rooms") },
               ].map((s, i) => (
                 <motion.div
                   key={s.label}
@@ -688,13 +644,7 @@ export function LandingPage() {
             {/* Column 1 — Brand */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
-                <span
-                  className="text-white font-light tracking-[5px] uppercase text-sm"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                >
-                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
-                </span>
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
               </div>
               <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
                 {t("landing.hero.subtitle")}

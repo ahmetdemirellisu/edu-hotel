@@ -4,14 +4,58 @@
 const { escapeHtml } = require("../utils/sanitize");
 
 /**
- * Wraps EN + TR body sections in the branded outer template.
+ * Normalizes a stored/requested language to 'tr' or 'en' (default 'tr').
+ */
+function normalizeLang(lang) {
+  return typeof lang === 'string' && lang.toLowerCase().startsWith('en') ? 'en' : 'tr';
+}
+
+/**
+ * Returns the EN or TR variant for the given language.
+ */
+function pick(lang, en, tr) {
+  return normalizeLang(lang) === 'en' ? en : tr;
+}
+
+/**
+ * Wraps body sections in the branded outer template.
+ * With `lang`, only that language's body is rendered; without it, both
+ * (EN first, then TR) — used for staff-facing mails.
  * @param {string} bodyEN - HTML for English section
  * @param {string} bodyTR - HTML for Turkish section
+ * @param {string} [lang] - 'tr' | 'en'
  * @returns {string} Full HTML email
  */
-function emailTemplate(bodyEN, bodyTR) {
+function emailTemplate(bodyEN, bodyTR, lang) {
+  const single = lang ? pick(lang, bodyEN, bodyTR) : null;
+  const bodies = single
+    ? `<tr>
+          <td style="padding:32px 36px 32px;font-size:14px;color:#1e293b;line-height:1.75;">
+            ${single}
+          </td>
+        </tr>`
+    : `<!-- English Body -->
+        <tr>
+          <td style="padding:32px 36px 24px;font-size:14px;color:#1e293b;line-height:1.75;">
+            ${bodyEN}
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 36px;">
+            <hr style="border:none;border-top:1px solid #e2e8f0;margin:0;"/>
+          </td>
+        </tr>
+
+        <!-- Turkish Body -->
+        <tr>
+          <td style="padding:24px 36px 32px;font-size:14px;color:#1e293b;line-height:1.75;">
+            ${bodyTR}
+          </td>
+        </tr>`;
   return `<!DOCTYPE html>
-<html lang="tr">
+<html lang="${lang ? normalizeLang(lang) : 'tr'}">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
@@ -35,26 +79,7 @@ function emailTemplate(bodyEN, bodyTR) {
           </td>
         </tr>
 
-        <!-- English Body -->
-        <tr>
-          <td style="padding:32px 36px 24px;font-size:14px;color:#1e293b;line-height:1.75;">
-            ${bodyEN}
-          </td>
-        </tr>
-
-        <!-- Divider -->
-        <tr>
-          <td style="padding:0 36px;">
-            <hr style="border:none;border-top:1px solid #e2e8f0;margin:0;"/>
-          </td>
-        </tr>
-
-        <!-- Turkish Body -->
-        <tr>
-          <td style="padding:24px 36px 32px;font-size:14px;color:#1e293b;line-height:1.75;">
-            ${bodyTR}
-          </td>
-        </tr>
+        ${bodies}
 
         <!-- Footer -->
         <tr>
@@ -137,4 +162,4 @@ const INVOICE_LABELS = {
   CORPORATE:  { en: 'Corporate',  tr: 'Kurumsal' },
 };
 
-module.exports = { emailTemplate, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS };
+module.exports = { emailTemplate, normalizeLang, pick, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS };

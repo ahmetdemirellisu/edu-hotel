@@ -20,6 +20,7 @@ model User {
   lastName     String?
   phone           String?
   maxStayOverride Int?
+  language        String        @default("tr")
   blacklist       Blacklist?
   reservations    Reservation[]
   passwordResetTokens PasswordResetToken[]
@@ -67,6 +68,7 @@ model Reservation {
   status            ReservationStatus @default(PENDING)
   guestType         UserType          @default(OTHER)
   checkInTime       String?
+  checkOutTime      String?
   contactEmail      String?
   eventType         String?
   firstName         String?

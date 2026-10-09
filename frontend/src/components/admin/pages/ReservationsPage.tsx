@@ -478,7 +478,10 @@ export function ReservationsPage() {
                         <p className="text-xs font-semibold text-gray-700">{checkInDisplay}</p>
                         {checkInTime && <p className="text-[10px] text-gray-400">{checkInTime}</p>}
                       </td>
-                      <td className="py-3.5 px-4 text-xs font-semibold text-gray-700">{formatDateOnly(res.checkOut)}</td>
+                      <td className="py-3.5 px-4">
+                        <p className="text-xs font-semibold text-gray-700">{formatDateOnly(res.checkOut)}</p>
+                        {(res as any).checkOutTime && <p className="text-[10px] text-gray-400">{(res as any).checkOutTime}</p>}
+                      </td>
                       <td className="py-3.5 px-4"><StatusBadge status={res.status} /></td>
                       <td className="py-3.5 px-4"><PaymentBadge status={ps} /></td>
                       <td className="py-3.5 px-4">
@@ -680,6 +683,7 @@ export function ReservationsPage() {
                   <div className="space-y-2.5">
                     <div className="flex items-center gap-2 text-sm text-gray-700"><Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{formatDateOnly(selected.checkIn)} → {formatDateOnly(selected.checkOut)}</div>
                     {(selected as any).checkInTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.checkInLabel")}: {(selected as any).checkInTime}</div>}
+                    {(selected as any).checkOutTime && <div className="flex items-center gap-2 text-sm text-gray-700"><Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />{t("reservations.detail.checkOutLabel")}: {(selected as any).checkOutTime}</div>}
                     {(() => {
                       const names = resolveRoomNames(selected);
                       if (names.length === 0) return null;

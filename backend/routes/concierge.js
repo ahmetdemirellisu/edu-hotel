@@ -8,6 +8,7 @@
 const express = require("express");
 const router = express.Router();
 const requireAuth = require("../middleware/requireAuth");
+const { msg } = require("../utils/lang");
 const prisma = require("../prismaClient");
 const { sendMailAsync } = require("../services/mail");
 const { emailTemplate, badge, heading, detailTable, row } = require("../services/mailTemplate");
@@ -19,10 +20,10 @@ router.post("/contact", requireAuth, async (req, res) => {
     const { type, subject, message, requestedTime } = req.body || {};
 
     if (!ALLOWED_TYPES.has(type)) {
-      return res.status(400).json({ error: "Invalid request type." });
+      return res.status(400).json({ error: msg(req, "Invalid request type.", "Geçersiz talep türü.") });
     }
     if (typeof message !== "string" || !message.trim()) {
-      return res.status(400).json({ error: "Message is required." });
+      return res.status(400).json({ error: msg(req, "Message is required.", "Mesaj gereklidir.") });
     }
     const safeSubject = typeof subject === "string" && subject.trim() ? subject.trim() : null;
     const safeRequestedTime = typeof requestedTime === "string" && requestedTime.trim() ? requestedTime.trim() : null;
@@ -31,7 +32,7 @@ router.post("/contact", requireAuth, async (req, res) => {
       where: { id: req.user.userId },
       select: { id: true, email: true, name: true, firstName: true, lastName: true, phone: true },
     });
-    if (!user) return res.status(404).json({ error: "User not found." });
+    if (!user) return res.status(404).json({ error: msg(req, "User not found.", "Kullanıcı bulunamadı.") });
 
     const guestName =
       [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
@@ -110,10 +111,10 @@ ${detailTable([
       console.warn("EMAIL_USER not set — concierge request not emailed:", subjectLine);
     }
 
-    return res.json({ message: "Request received. Reception will follow up shortly." });
+    return res.json({ message: msg(req, "Request received. Reception will follow up shortly.", "Talebiniz alındı. Resepsiyon en kısa sürede sizinle iletişime geçecektir.") });
   } catch (err) {
     console.error("Concierge contact error:", err);
-    return res.status(500).json({ error: "Internal server error." });
+    return res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
   }
 });
 

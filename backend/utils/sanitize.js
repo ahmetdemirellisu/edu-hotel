@@ -48,14 +48,19 @@ function validateEmail(email) {
   return { valid: true, email: trimmed };
 }
 
-function validatePassword(password) {
-  if (typeof password !== 'string') return { valid: false, message: 'Password is required.' };
-  if (password.length < 8) return { valid: false, message: 'Password must be at least 8 characters.' };
-  if (password.length > 128) return { valid: false, message: 'Password too long.' };
-  if (!/[A-Z]/.test(password)) return { valid: false, message: 'Password must contain an uppercase letter.' };
-  if (!/[a-z]/.test(password)) return { valid: false, message: 'Password must contain a lowercase letter.' };
-  if (!/[0-9]/.test(password)) return { valid: false, message: 'Password must contain a digit.' };
-  if (!/[^A-Za-z0-9]/.test(password)) return { valid: false, message: 'Password must contain a special character.' };
+/**
+ * Validates password policy. `lang` ('tr' | 'en', default 'en') selects the
+ * language of the returned message — callers pass reqLang(req).
+ */
+function validatePassword(password, lang = 'en') {
+  const t = (en, tr) => (lang === 'tr' ? tr : en);
+  if (typeof password !== 'string') return { valid: false, message: t('Password is required.', 'Şifre gereklidir.') };
+  if (password.length < 8) return { valid: false, message: t('Password must be at least 8 characters.', 'Şifre en az 8 karakter olmalıdır.') };
+  if (password.length > 128) return { valid: false, message: t('Password too long.', 'Şifre çok uzun.') };
+  if (!/[A-Z]/.test(password)) return { valid: false, message: t('Password must contain an uppercase letter.', 'Şifre en az bir büyük harf içermelidir.') };
+  if (!/[a-z]/.test(password)) return { valid: false, message: t('Password must contain a lowercase letter.', 'Şifre en az bir küçük harf içermelidir.') };
+  if (!/[0-9]/.test(password)) return { valid: false, message: t('Password must contain a digit.', 'Şifre en az bir rakam içermelidir.') };
+  if (!/[^A-Za-z0-9]/.test(password)) return { valid: false, message: t('Password must contain a special character.', 'Şifre en az bir özel karakter içermelidir.') };
   return { valid: true, message: '' };
 }
 

@@ -10,8 +10,9 @@ import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import {
   Select,
   SelectContent,
@@ -385,10 +386,14 @@ export function BookRoomPage() {
   // ── Step 1 state ───────────────────────────────────────
   const [checkInDate, setCheckInDate] = useState("");
   const [checkInTime, setCheckInTime] = useState("14:00");
-  // Update the default check-in time from admin settings once loaded.
+  const [checkOutTime, setCheckOutTime] = useState("12:00");
+  // Update the default check-in/out times from admin settings once loaded.
   useEffect(() => {
     fetchPublicSettings()
-      .then((s) => setCheckInTime((cur) => (cur === "14:00" ? s.checkInTime : cur)))
+      .then((s) => {
+        setCheckInTime((cur) => (cur === "14:00" ? s.checkInTime : cur));
+        setCheckOutTime((cur) => (cur === "12:00" ? s.checkOutTime : cur));
+      })
       .catch(() => {});
   }, []);
   const [checkOutDate, setCheckOutDate] = useState("");
@@ -449,7 +454,7 @@ export function BookRoomPage() {
         .join(", ");
       const ok = window.confirm(
         t(
-          "bookRoom.identityDoc.discardConfirm",
+          "bookRoom.identityDocDiscardConfirm",
           "Reducing to {{n}} guest(s) will discard the uploaded document(s) for Guest {{indices}}. Continue?",
           { n: newCount, indices }
         )
@@ -577,6 +582,7 @@ export function BookRoomPage() {
         checkIn: checkInDate,
         checkOut: checkOutDate,
         checkInTime: checkInTime.trim(),
+        checkOutTime: checkOutTime.trim() || undefined,
         guests: numGuests,
         accommodationType,
         invoiceType,
@@ -621,7 +627,7 @@ export function BookRoomPage() {
       setSuccessMessage(t("bookRoom.successMessage", "Your reservation has been submitted! The reception will review your request and assign you a room."));
       // Reset
       setStep(1); setDirection(1);
-      setCheckInDate(""); setCheckInTime("14:00"); setCheckOutDate("");
+      setCheckInDate(""); setCheckInTime("14:00"); setCheckOutDate(""); setCheckOutTime("12:00");
       setAccommodationTypeUI(""); setNumberOfGuests("1"); setGuestList([]);
       setFirstName(storedUser.firstName); setLastName(storedUser.lastName);
       setPhone(storedUser.phone); setEmail(storedUser.email);
@@ -631,7 +637,7 @@ export function BookRoomPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
-      const msg = e?.response?.data?.message || e?.response?.data?.error || e?.message || "Unknown error";
+      const msg = e?.response?.data?.message || e?.response?.data?.error || e?.message || t("common.unknownError");
       setErrorMessage(`${t("bookRoom.errorMessage", "Reservation failed")}: ${msg}`);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -688,13 +694,13 @@ export function BookRoomPage() {
           <div className="flex justify-between items-center">
             <Link to="/main" className="flex items-center gap-4 group">
               <div className="transition-all duration-300">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
               </div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
                 <Building2 className="h-4 w-4 text-[#c9a84c]/70" strokeWidth={1.5} />
                 <h1 className="text-white text-base font-light tracking-[8px] uppercase" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </div>
             </Link>
@@ -892,12 +898,20 @@ export function BookRoomPage() {
                         </div>
                       </div>
 
-                      {/* Check-in time */}
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
-                          {t("bookRoom.checkInTime", "Expected Check-In Time")}
-                        </Label>
-                        <TimePickerField value={checkInTime} onChange={setCheckInTime} />
+                      {/* Check-in / check-out times */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.checkInTime", "Expected Check-In Time")}
+                          </Label>
+                          <TimePickerField value={checkInTime} onChange={setCheckInTime} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-bold text-white/45 uppercase tracking-[2px]">
+                            {t("bookRoom.checkOutTime", "Expected Check-Out Time")}
+                          </Label>
+                          <TimePickerField value={checkOutTime} onChange={setCheckOutTime} />
+                        </div>
                       </div>
 
                       {/* Nights summary */}
@@ -1230,6 +1244,7 @@ export function BookRoomPage() {
                             <div className="text-right">
                               <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.checkOut", "Check-Out")}</p>
                               <p className="text-sm font-bold text-white">{toDisplayDate(checkOutDate)}</p>
+                              <p className="text-[10px] text-white/35 mt-0.5">{checkOutTime}</p>
                             </div>
                           </div>
                         </div>
@@ -1252,7 +1267,7 @@ export function BookRoomPage() {
                             </div>
                             <div>
                               <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.boardingPass.type", "Type")}</p>
-                              <p className="text-xs font-bold text-[#c9a84c] uppercase">{accommodationTypeUI}</p>
+                              <p className="text-xs font-bold text-[#c9a84c] uppercase">{t(`enums.accommodation.${accommodationTypeUI.toUpperCase()}`, accommodationTypeUI)}</p>
                             </div>
                             <div>
                               <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.numberOfGuests", "Guests")}</p>
@@ -1262,7 +1277,7 @@ export function BookRoomPage() {
                           {eventType && (
                             <div className="pt-3 border-t border-white/[0.07]">
                               <p className="text-[9px] text-[#c9a84c]/60 uppercase tracking-[2px] mb-1">{t("bookRoom.eventType", "Purpose")}</p>
-                              <p className="text-xs text-white/55 capitalize">{eventType}</p>
+                              <p className="text-xs text-white/55 capitalize">{t(`bookRoom.eventTypes.${eventType}`, eventType)}</p>
                             </div>
                           )}
                         </div>
@@ -1374,8 +1389,8 @@ export function BookRoomPage() {
                             : (guestList[i - 1]?.lastName || "").trim();
                           const personName = `${personFirst} ${personLast}`.trim();
                           const slotLabel = currentLang === "TR"
-                            ? `${i + 1}. ${t("bookRoom.identityDoc.guestLabel", { defaultValue: "Misafir" })}`
-                            : `${t("bookRoom.identityDoc.guestLabel", { defaultValue: "Guest" })} ${i + 1}`;
+                            ? `${i + 1}. ${t("bookRoom.identityDocGuestLabel")}`
+                            : `${t("bookRoom.identityDocGuestLabel")} ${i + 1}`;
                           const fullLabel = personName
                             ? `${slotLabel} — ${personName}`
                             : slotLabel;

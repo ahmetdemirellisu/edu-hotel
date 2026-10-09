@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import {
   Globe,
   Bell,
@@ -133,7 +134,7 @@ export function Navbar() {
 
           {/* Left: Sabancı Logo Branding */}
           <div className="flex items-center gap-4">
-            <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+            <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
           </div>
 
           {/* Center: Main Title (Absolute Centered) */}
@@ -147,7 +148,7 @@ export function Navbar() {
               className="text-[17px] font-light whitespace-nowrap tracking-[6px] uppercase nav-logo-hover cursor-default select-none transition-all duration-300"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              EDU EDUCATION HOTEL
+              {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
             </h1>
             <div
               className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] flex-shrink-0"

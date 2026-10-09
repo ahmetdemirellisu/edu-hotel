@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 const { sendMailAsync } = require("../services/mail");
 const settingsService = require("../services/settings");
-const { emailTemplate, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS } = require("../services/mailTemplate");
+const { emailTemplate, pick, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS } = require("../services/mailTemplate");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -16,6 +16,7 @@ const prisma = new PrismaClient();
 const checkBlacklist = require("../middleware/checkBlacklist");
 const requireAdmin = require("../middleware/requireAdmin");
 const requireAuth = require("../middleware/requireAuth");
+const { msg, statusLabel } = require("../utils/lang");
 
 /**
  * Helpers
@@ -61,7 +62,7 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         const userId = req.user.userId;
 
         const {
-            checkIn, checkOut, checkInTime,
+            checkIn, checkOut, checkInTime, checkOutTime,
             guests, accommodationType, invoiceType, eventCode, note,
             firstName, lastName, phone, contactEmail,
             nationalId, taxNumber, eventType, priceType,
@@ -69,46 +70,46 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         } = req.body;
 
         if (!userId || !checkIn || !checkOut || !guests || !accommodationType || !invoiceType) {
-            return res.status(400).json({ error: "Missing required fields." });
+            return res.status(400).json({ error: msg(req, "Missing required fields.", "Zorunlu alanlar eksik.") });
         }
         if (!isNonEmptyString(firstName) || !isNonEmptyString(lastName) || !isNonEmptyString(phone) || !isNonEmptyString(contactEmail)) {
-            return res.status(400).json({ error: "Missing guest contact information." });
+            return res.status(400).json({ error: msg(req, "Missing guest contact information.", "Misafir iletişim bilgileri eksik.") });
         }
         if (!isNonEmptyString(checkInTime)) {
-            return res.status(400).json({ error: "Check-in time is required." });
+            return res.status(400).json({ error: msg(req, "Check-in time is required.", "Giriş saati gereklidir.") });
         }
         if (accommodationType === "CORPORATE" && !isNonEmptyString(eventCode)) {
-            return res.status(400).json({ error: "Program code is required." });
+            return res.status(400).json({ error: msg(req, "Program code is required.", "Program kodu gereklidir.") });
         }
         if (invoiceType === "INDIVIDUAL" && !isNonEmptyString(nationalId)) {
-            return res.status(400).json({ error: "National ID is required for individual billing." });
+            return res.status(400).json({ error: msg(req, "National ID is required for individual billing.", "Bireysel fatura için T.C. kimlik numarası gereklidir.") });
         }
         if (invoiceType === "CORPORATE" && !isNonEmptyString(taxNumber)) {
-            return res.status(400).json({ error: "Tax Number is required for corporate billing." });
+            return res.status(400).json({ error: msg(req, "Tax Number is required for corporate billing.", "Kurumsal fatura için vergi numarası gereklidir.") });
         }
         if (invoiceType === "CORPORATE" && !isNonEmptyString(billingTitle)) {
-            return res.status(400).json({ error: "Billing title (fatura unvanı) is required for corporate billing." });
+            return res.status(400).json({ error: msg(req, "Billing title (fatura unvanı) is required for corporate billing.", "Kurumsal fatura için fatura unvanı gereklidir.") });
         }
         if (invoiceType === "CORPORATE" && !isNonEmptyString(billingAddress)) {
-            return res.status(400).json({ error: "Billing address (fatura adresi) is required for corporate billing." });
+            return res.status(400).json({ error: msg(req, "Billing address (fatura adresi) is required for corporate billing.", "Kurumsal fatura için fatura adresi gereklidir.") });
         }
         if (!isNonEmptyString(eventType)) {
-            return res.status(400).json({ error: "Event type is required." });
+            return res.status(400).json({ error: msg(req, "Event type is required.", "Etkinlik türü gereklidir.") });
         }
 
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
-            return res.status(400).json({ error: `User not found for id ${userId}. Please log in again.` });
+            return res.status(400).json({ error: msg(req, `User not found for id ${userId}. Please log in again.`, `Kullanıcı bulunamadı (ID: ${userId}). Lütfen tekrar giriş yapın.`) });
         }
 
         const checkInDate = parseDate(checkIn);
         const checkOutDate = parseDate(checkOut);
 
-        if (!checkInDate || !checkOutDate) return res.status(400).json({ error: "Invalid date format." });
-        if (checkOutDate <= checkInDate) return res.status(400).json({ error: "Check-out must be after check-in." });
+        if (!checkInDate || !checkOutDate) return res.status(400).json({ error: msg(req, "Invalid date format.", "Geçersiz tarih biçimi.") });
+        if (checkOutDate <= checkInDate) return res.status(400).json({ error: msg(req, "Check-out must be after check-in.", "Çıkış tarihi giriş tarihinden sonra olmalıdır.") });
 
         const guestsInt = parseInt(guests, 10);
-        if (!guestsInt || guestsInt <= 0) return res.status(400).json({ error: "Guests must be at least 1." });
+        if (!guestsInt || guestsInt <= 0) return res.status(400).json({ error: msg(req, "Guests must be at least 1.", "Misafir sayısı en az 1 olmalıdır.") });
 
         const stayLength = diffInDays(checkInDate, checkOutDate);
 
@@ -116,7 +117,7 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         const settings = await settingsService.getSettings();
         const maxStayNights = settings.maxStayNights || 5;
         if (accommodationType === "PERSONAL" && stayLength > maxStayNights) {
-            return res.status(400).json({ error: `Personal bookings cannot exceed ${maxStayNights} consecutive nights.` });
+            return res.status(400).json({ error: msg(req, `Personal bookings cannot exceed ${maxStayNights} consecutive nights.`, `Kişisel rezervasyonlar en fazla ${maxStayNights} gece art arda olabilir.`) });
         }
 
         // Per-user override (set from the Guests admin page) wins; otherwise use
@@ -125,12 +126,12 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         const maxDate = new Date();
         maxDate.setDate(maxDate.getDate() + maxAdvanceDays);
         if (checkInDate > maxDate) {
-            return res.status(400).json({ error: `Reservations can only be made up to ${maxAdvanceDays} days in advance.` });
+            return res.status(400).json({ error: msg(req, `Reservations can only be made up to ${maxAdvanceDays} days in advance.`, `Rezervasyonlar en fazla ${maxAdvanceDays} gün önceden yapılabilir.`) });
         }
 
-        if (checkInDate.getDay() === 0) return res.status(400).json({ error: "Sunday check-in is not allowed." });
+        if (checkInDate.getDay() === 0) return res.status(400).json({ error: msg(req, "Sunday check-in is not allowed.", "Pazar günü giriş yapılamaz.") });
         if (checkInDate.getDay() === 6 && checkOutDate.getDay() === 0) {
-            return res.status(400).json({ error: "Saturday check-in & Sunday check-out combination is not allowed." });
+            return res.status(400).json({ error: msg(req, "Saturday check-in & Sunday check-out combination is not allowed.", "Cumartesi giriş ve Pazar çıkış kombinasyonuna izin verilmemektedir.") });
         }
 
         const normalizedGuestList = normalizeGuestList(guestList);
@@ -144,6 +145,7 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
             data: {
                 userId, checkIn: checkInDate, checkOut: checkOutDate,
                 checkInTime: checkInTime.trim(), guests: guestsInt,
+                checkOutTime: isNonEmptyString(checkOutTime) ? checkOutTime.trim() : null,
                 accommodationType, invoiceType,
                 eventCode: isNonEmptyString(eventCode) ? eventCode.trim() : null,
                 firstName: firstName.trim(), lastName: lastName.trim(),
@@ -166,14 +168,14 @@ router.post("/", requireAuth, checkBlacklist, async (req, res) => {
         try {
             if (user.email) {
                 const checkInStr  = checkInDate.toISOString().slice(0, 10);
-                const checkOutStr = checkOutDate.toISOString().slice(0, 10);
+                const checkOutStr = checkOutDate.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
                 const fullName    = `${firstName.trim()} ${lastName.trim()}`;
                 const accommEN    = ACCOMM_LABELS[accommodationType]?.en || accommodationType;
                 const accommTR    = ACCOMM_LABELS[accommodationType]?.tr || accommodationType;
                 const invoiceEN   = INVOICE_LABELS[invoiceType]?.en || invoiceType;
                 const invoiceTR   = INVOICE_LABELS[invoiceType]?.tr || invoiceType;
 
-                const subject = `EDU Hotel – Reservation request received #${reservation.id} / Rezervasyon talebi alındı #${reservation.id}`;
+                const subject = pick(user.language, `EDU Hotel – Reservation request received #${reservation.id}`, `EDU Hotel – Rezervasyon talebi alındı #${reservation.id}`);
 
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${fullName}</strong>,</p>
@@ -213,7 +215,7 @@ ${detailTable([
 ${heading('Sırada ne var?')}
 <p style="margin:0;font-size:13px;color:#475569;">Ekibimiz talebinizi inceleyecek ve onaylandığında ya da reddedildiğinde e-posta ile bilgilendirileceksiniz.</p>`;
 
-                const text = [
+                const text = pick(user.language, [
                     `Dear ${fullName},`,
                     ``,
                     `Thank you for choosing EDU Hotel. We have received your reservation request — it is now pending review.`,
@@ -229,9 +231,7 @@ ${heading('Sırada ne var?')}
                     isNonEmptyString(note)      ? `Note:           ${note}`      : null,
                     ``,
                     `Our team will notify you once your request has been approved or rejected.`,
-                    ``,
-                    `---`,
-                    ``,
+                    ], [
                     `Sayın ${fullName},`,
                     ``,
                     `EDU Hotel'i tercih ettiğiniz için teşekkür ederiz. Rezervasyon talebiniz alınmış olup inceleme aşamasındadır.`,
@@ -247,9 +247,9 @@ ${heading('Sırada ne var?')}
                     isNonEmptyString(note)      ? `Not:            ${note}`      : null,
                     ``,
                     `Ekibimiz talebinizi inceleyecek ve sonuç e-posta ile bildirilecektir.`,
-                ].filter(l => l !== null).join('\n');
+                ]).filter(l => l !== null).join('\n');
 
-                const html = emailTemplate(bodyEN, bodyTR);
+                const html = emailTemplate(bodyEN, bodyTR, user.language);
                 sendMailAsync({ to: user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -260,9 +260,9 @@ ${heading('Sırada ne var?')}
     } catch (err) {
         console.error("Error creating reservation:", err);
         if (err.code === "P2003") {
-            return res.status(400).json({ error: "Reservation cannot be created because the user does not exist." });
+            return res.status(400).json({ error: msg(req, "Reservation cannot be created because the user does not exist.", "Kullanıcı bulunamadığı için rezervasyon oluşturulamadı.") });
         }
-        return res.status(500).json({ error: "Internal server error." });
+        return res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
     }
 });
 
@@ -272,8 +272,8 @@ ${heading('Sırada ne var?')}
 router.get("/my/latest", requireAuth, async (req, res) => {
     try {
         const userId = parseInt(req.query.userId, 10);
-        if (!userId || isNaN(userId)) return res.status(400).json({ error: "userId query parameter is required." });
-        if (req.user.userId !== userId) return res.status(403).json({ error: "Access denied." });
+        if (!userId || isNaN(userId)) return res.status(400).json({ error: msg(req, "userId query parameter is required.", "userId sorgu parametresi gereklidir.") });
+        if (req.user.userId !== userId) return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") });
 
         const reservation = await prisma.reservation.findFirst({
             where: { userId },
@@ -281,11 +281,11 @@ router.get("/my/latest", requireAuth, async (req, res) => {
             include: { room: true },
         });
 
-        if (!reservation) return res.status(404).json({ error: "No reservations found." });
+        if (!reservation) return res.status(404).json({ error: msg(req, "No reservations found.", "Rezervasyon bulunamadı.") });
         return res.json(reservation);
     } catch (err) {
         console.error("Error fetching latest reservation:", err);
-        return res.status(500).json({ error: "Internal server error." });
+        return res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
     }
 });
 
@@ -295,8 +295,8 @@ router.get("/my/latest", requireAuth, async (req, res) => {
 router.get("/user/:userId", requireAuth, async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
-        if (isNaN(userId)) return res.status(400).json({ error: "Invalid userId." });
-        if (req.user.userId !== userId) return res.status(403).json({ error: "Access denied." });
+        if (isNaN(userId)) return res.status(400).json({ error: msg(req, "Invalid userId.", "Geçersiz kullanıcı kimliği.") });
+        if (req.user.userId !== userId) return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") });
 
         const reservations = await prisma.reservation.findMany({
             where: { userId },
@@ -307,7 +307,7 @@ router.get("/user/:userId", requireAuth, async (req, res) => {
         return res.json(reservations);
     } catch (err) {
         console.error("Error fetching user reservations:", err);
-        return res.status(500).json({ error: "Internal server error." });
+        return res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
     }
 });
 
@@ -325,7 +325,7 @@ router.get("/admin", requireAdmin, async (req, res) => {
             where,
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } },
+                user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } },
                 room: true,
                 identityDocuments: { orderBy: { guestIndex: "asc" } },
             },
@@ -368,7 +368,7 @@ router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
         const reservation = await prisma.reservation.update({
             where: { id },
             data,
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } }, room: true },
         });
 
         // ✉️ EMAIL — Reservation Approved (EN + TR)
@@ -376,9 +376,9 @@ router.patch("/admin/:id/approve", requireAdmin, async (req, res) => {
             if (reservation.user?.email) {
                 const guestName   = reservation.firstName || reservation.user.name || "Guest";
                 const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
-                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
+                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
 
-                const subject = `EDU Hotel – Reservation approved #${reservation.id} / Rezervasyon onaylandı #${reservation.id}`;
+                const subject = pick(reservation.user.language, `EDU Hotel – Reservation approved #${reservation.id}`, `EDU Hotel – Rezervasyon onaylandı #${reservation.id}`);
 
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
@@ -418,7 +418,7 @@ ${heading('Sıradaki Adım')}
 ${heading('Oda Kartı Teslim Bilgileri')}
 <p style="margin:0;font-size:13px;color:#475569;">16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.</p>`;
 
-                const text = [
+                const text = pick(reservation.user.language, [
                     `Dear ${guestName},`,
                     ``,
                     `Great news! Your reservation has been approved.`,
@@ -434,9 +434,7 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                     `Next step: Log in to your EDU Hotel account and upload your payment receipt to complete the reservation.`,
                     ``,
                     `Key pickup: For check-ins before 16:30, collect your room key from the reception desk against signature. After 16:30, the key card will be left in a sealed envelope at the main security gate.`,
-                    ``,
-                    `---`,
-                    ``,
+                    ], [
                     `Sayın ${guestName},`,
                     ``,
                     `Harika haber! Rezervasyonunuz onaylanmıştır.`,
@@ -452,9 +450,9 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                     `Sıradaki adım: EDU Hotel hesabınıza giriş yaparak ödeme dekontunuzu yükleyin.`,
                     ``,
                     `Oda kartı teslimi: 16:30'a kadar olan girişlerinizde oda kartınızı imza karşılığı resepsiyondan alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`,
-                ].filter(l => l !== null).join('\n');
+                ]).filter(l => l !== null).join('\n');
 
-                const html = emailTemplate(bodyEN, bodyTR);
+                const html = emailTemplate(bodyEN, bodyTR, reservation.user.language);
                 sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -543,7 +541,7 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
                 const result = await tx.reservation.update({
                     where: { id },
                     data: assignData,
-                    include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
+                    include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } }, room: true },
                 });
 
                 return result;
@@ -571,9 +569,9 @@ router.patch("/admin/:id/assign-room", requireAdmin, async (req, res) => {
                 const roomLabelEN = roomIdList.length > 1 ? "Rooms" : "Room";
                 const roomLabelTR = roomIdList.length > 1 ? "Odalar" : "Oda";
                 const checkInStr = updated.checkIn.toISOString().slice(0, 10);
-                const checkOutStr = updated.checkOut.toISOString().slice(0, 10);
+                const checkOutStr = updated.checkOut.toISOString().slice(0, 10) + (updated.checkOutTime ? ` ${updated.checkOutTime}` : '');
 
-                const subject = `EDU Hotel – ${roomLabelEN} assigned #${updated.id} / ${roomLabelTR} atandı #${updated.id}`;
+                const subject = pick(updated.user.language, `EDU Hotel – ${roomLabelEN} assigned #${updated.id}`, `EDU Hotel – ${roomLabelTR} atandı #${updated.id}`);
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
 <p style="margin:0 0 20px;color:#475569;">${roomIdList.length > 1 ? 'Rooms have' : 'A room has'} been assigned to your reservation.</p>
@@ -608,8 +606,8 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                 const adminLineEN = isNonEmptyString(updated.adminNote) ? `\nAdmin note: ${updated.adminNote}` : "";
                 const noteLineTR  = isNonEmptyString(updated.note)      ? `\nNotunuz:        ${updated.note}`      : "";
                 const adminLineTR = isNonEmptyString(updated.adminNote) ? `\nYönetici notu:  ${updated.adminNote}` : "";
-                const text = `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.${noteLineEN}${adminLineEN}\n\nKey pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.\n---\nSayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.${noteLineTR}${adminLineTR}\n\nOda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`;
-                const html = emailTemplate(bodyEN, bodyTR);
+                const text = pick(updated.user.language, `Dear ${guestName}, ${roomLabelEN} ${roomNames} ${roomIdList.length > 1 ? 'have' : 'has'} been assigned to reservation #${updated.id}. Check-in: ${checkInStr}, Check-out: ${checkOutStr}.${noteLineEN}${adminLineEN}\n\nKey pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.`, `Sayın ${guestName}, ${roomNames} ${roomLabelTR.toLowerCase()} #${updated.id} numaralı rezervasyonunuza atanmıştır. Giriş: ${checkInStr}, Çıkış: ${checkOutStr}.${noteLineTR}${adminLineTR}\n\nOda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`);
+                const html = emailTemplate(bodyEN, bodyTR, updated.user.language);
                 sendMailAsync({ to: updated.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -634,7 +632,7 @@ router.patch("/admin/:id/reject", requireAdmin, async (req, res) => {
         const reservation = await prisma.reservation.update({
             where: { id },
             data: { status: "REJECTED", note: note || null },
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } }, room: true },
         });
 
         // ✉️ EMAIL — Reservation Rejected (EN + TR)
@@ -642,11 +640,11 @@ router.patch("/admin/:id/reject", requireAdmin, async (req, res) => {
             if (reservation.user?.email) {
                 const guestName   = reservation.firstName || reservation.user.name || "Guest";
                 const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
-                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
+                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
                 const reasonEN    = note || null;
                 const reasonTR    = note || null;
 
-                const subject = `EDU Hotel – Reservation not approved #${reservation.id} / Rezervasyon reddedildi #${reservation.id}`;
+                const subject = pick(reservation.user.language, `EDU Hotel – Reservation not approved #${reservation.id}`, `EDU Hotel – Rezervasyon reddedildi #${reservation.id}`);
 
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
@@ -674,7 +672,7 @@ ${detailTable([
 ])}
 <p style="margin:0;font-size:13px;color:#475569;">Yeni bir rezervasyon talebi oluşturabilir veya sorularınız için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bizimle iletişime geçebilirsiniz.</p>`;
 
-                const text = [
+                const text = pick(reservation.user.language, [
                     `Dear ${guestName},`,
                     ``,
                     `We regret to inform you that your reservation request #${reservation.id} could not be approved at this time.`,
@@ -684,9 +682,7 @@ ${detailTable([
                     reasonEN ? `Reason:    ${reasonEN}` : null,
                     ``,
                     `You may submit a new request or contact us at hotel@sabanciuniv.edu.`,
-                    ``,
-                    `---`,
-                    ``,
+                    ], [
                     `Sayın ${guestName},`,
                     ``,
                     `Üzülerek bildiririz ki #${reservation.id} numaralı rezervasyon talebiniz bu aşamada onaylanamamıştır.`,
@@ -696,9 +692,9 @@ ${detailTable([
                     reasonTR ? `Neden:  ${reasonTR}` : null,
                     ``,
                     `Yeni bir rezervasyon talebi oluşturabilir veya hotel@sabanciuniv.edu adresinden bize ulaşabilirsiniz.`,
-                ].filter(l => l !== null).join('\n');
+                ]).filter(l => l !== null).join('\n');
 
-                const html = emailTemplate(bodyEN, bodyTR);
+                const html = emailTemplate(bodyEN, bodyTR, reservation.user.language);
                 sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -724,23 +720,23 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
 
         const reservation = await prisma.reservation.findUnique({
             where: { id },
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } } },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } } },
         });
 
-        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
-        if (reservation.userId !== userId) return res.status(403).json({ error: "You can only cancel your own reservations." });
+        if (!reservation) return res.status(404).json({ error: msg(req, "Reservation not found.", "Rezervasyon bulunamadı.") });
+        if (reservation.userId !== userId) return res.status(403).json({ error: msg(req, "You can only cancel your own reservations.", "Yalnızca kendi rezervasyonlarınızı iptal edebilirsiniz.") });
         if (!["PENDING", "APPROVED"].includes(reservation.status)) {
-            return res.status(400).json({ error: `Cannot cancel a reservation with status "${reservation.status}".` });
+            return res.status(400).json({ error: msg(req, `Cannot cancel a reservation with status "${reservation.status}".`, `"${statusLabel(req, reservation.status)}" durumundaki bir rezervasyon iptal edilemez.`) });
         }
         if (reservation.paymentStatus === "APPROVED") {
-            return res.status(400).json({ error: "Cannot cancel a reservation with confirmed payment. Please request a refund instead." });
+            return res.status(400).json({ error: msg(req, "Cannot cancel a reservation with confirmed payment. Please request a refund instead.", "Ödemesi onaylanmış bir rezervasyon iptal edilemez. Lütfen bunun yerine iade talebinde bulunun.") });
         }
 
         const now = new Date();
         const checkInDate = new Date(reservation.checkIn);
         const hoursUntilCheckIn = (checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60);
         if (hoursUntilCheckIn < 24) {
-            return res.status(400).json({ error: "Cancellations must be made at least 24 hours before check-in." });
+            return res.status(400).json({ error: msg(req, "Cancellations must be made at least 24 hours before check-in.", "İptaller, giriş tarihinden en az 24 saat önce yapılmalıdır.") });
         }
 
         const updated = await prisma.reservation.update({
@@ -753,7 +749,7 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
                     ? `${reservation.note}\n[Cancelled by user]`
                     : "[Cancelled by user]",
             },
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } }, room: true },
         });
 
         if (reservation.roomId) {
@@ -768,9 +764,9 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
             if (updated.user?.email) {
                 const guestName   = updated.firstName || updated.user.name || "Guest";
                 const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
-                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
+                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
 
-                const subject = `EDU Hotel – Reservation cancelled #${id} / Rezervasyon iptal edildi #${id}`;
+                const subject = pick(updated.user.language, `EDU Hotel – Reservation cancelled #${id}`, `EDU Hotel – Rezervasyon iptal edildi #${id}`);
 
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
@@ -798,7 +794,7 @@ ${detailTable([
 ])}
 <p style="margin:0;font-size:13px;color:#475569;">Bu bir hata ise yeni bir rezervasyon talebi oluşturabilirsiniz. Yardım için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-                const text = [
+                const text = pick(updated.user.language, [
                     `Dear ${guestName},`,
                     ``,
                     `Your reservation #${id} has been successfully cancelled.`,
@@ -808,9 +804,7 @@ ${detailTable([
                     reason ? `Reason:    ${reason}` : null,
                     ``,
                     `If this was unintentional, please submit a new reservation request or contact hotel@sabanciuniv.edu.`,
-                    ``,
-                    `---`,
-                    ``,
+                    ], [
                     `Sayın ${guestName},`,
                     ``,
                     `#${id} numaralı rezervasyonunuz başarıyla iptal edilmiştir.`,
@@ -820,9 +814,9 @@ ${detailTable([
                     reason ? `Neden:  ${reason}` : null,
                     ``,
                     `Bu bir hata ise yeni bir rezervasyon talebi oluşturabilir veya hotel@sabanciuniv.edu adresinden bize ulaşabilirsiniz.`,
-                ].filter(l => l !== null).join('\n');
+                ]).filter(l => l !== null).join('\n');
 
-                const html = emailTemplate(bodyEN, bodyTR);
+                const html = emailTemplate(bodyEN, bodyTR, updated.user.language);
                 sendMailAsync({ to: updated.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -832,7 +826,7 @@ ${detailTable([
         return res.json(updated);
     } catch (err) {
         console.error("Error cancelling reservation:", err);
-        return res.status(500).json({ error: "Internal server error." });
+        return res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
     }
 });
 
@@ -870,7 +864,7 @@ const idUpload = multer({
     storage: perGuestStorage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        if (!ID_ALLOWED_MIME.includes(file.mimetype)) return cb(new Error("Only PDF, JPG, PNG files are allowed."));
+        if (!ID_ALLOWED_MIME.includes(file.mimetype)) return cb(new Error(msg(req, "Only PDF, JPG, PNG files are allowed.", "Yalnızca PDF, JPG ve PNG dosyaları yüklenebilir.")));
         cb(null, true);
     },
 });
@@ -888,18 +882,18 @@ router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("ide
 
     try {
         const reservationId = parseInt(req.params.reservationId, 10);
-        if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+        if (!req.file) return res.status(400).json({ error: msg(req, "No file uploaded.", "Dosya yüklenmedi.") });
 
         // ── Ownership checks (BEFORE moving to final storage) ────
         const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
-        if (!reservation) { cleanupTemp(); return res.status(404).json({ error: "Reservation not found." }); }
-        if (reservation.userId !== req.user.userId) { cleanupTemp(); return res.status(403).json({ error: "Access denied." }); }
+        if (!reservation) { cleanupTemp(); return res.status(404).json({ error: msg(req, "Reservation not found.", "Rezervasyon bulunamadı.") }); }
+        if (reservation.userId !== req.user.userId) { cleanupTemp(); return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") }); }
 
         const guestIndex = parseGuestIndex(req);
 
         if (guestIndex !== null && guestIndex >= reservation.guests) {
             cleanupTemp();
-            return res.status(400).json({ error: `guestIndex ${guestIndex} exceeds reservation guest count (${reservation.guests}).` });
+            return res.status(400).json({ error: msg(req, `guestIndex ${guestIndex} exceeds reservation guest count (${reservation.guests}).`, `Misafir sırası (${guestIndex}) rezervasyondaki misafir sayısını (${reservation.guests}) aşıyor.`) });
         }
 
         // ── All checks passed — compute final filename and move ────
@@ -919,7 +913,7 @@ router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("ide
                 where: { id: reservationId },
                 data: { identityDoc: finalName },
             });
-            return res.json({ message: "Identity document uploaded.", filename: finalName, legacy: true });
+            return res.json({ message: msg(req, "Identity document uploaded.", "Kimlik belgesi yüklendi."), filename: finalName, legacy: true });
         }
 
         // Upsert by (reservationId, guestIndex)
@@ -942,11 +936,11 @@ router.post("/upload-identity/:reservationId", requireAuth, idUpload.single("ide
             },
         });
 
-        res.json({ message: "Identity document uploaded.", document: doc });
+        res.json({ message: msg(req, "Identity document uploaded.", "Kimlik belgesi yüklendi."), document: doc });
     } catch (err) {
         cleanupTemp();
         console.error("Identity doc upload error:", err);
-        res.status(400).json({ error: err.message || "Upload failed." });
+        res.status(400).json({ error: err.message || msg(req, "Upload failed.", "Yükleme başarısız oldu.") });
     }
 });
 
@@ -957,17 +951,17 @@ router.delete("/upload-identity/:reservationId/:guestIndex", requireAuth, async 
         const reservationId = parseInt(req.params.reservationId, 10);
         const guestIndex = parseInt(req.params.guestIndex, 10);
         if (!Number.isInteger(reservationId) || !Number.isInteger(guestIndex) || guestIndex < 0) {
-            return res.status(400).json({ error: "Invalid reservationId or guestIndex." });
+            return res.status(400).json({ error: msg(req, "Invalid reservationId or guestIndex.", "Geçersiz rezervasyon veya misafir sırası.") });
         }
 
         const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
-        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
-        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
+        if (!reservation) return res.status(404).json({ error: msg(req, "Reservation not found.", "Rezervasyon bulunamadı.") });
+        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") });
 
         const existing = await prisma.identityDocument.findUnique({
             where: { reservationId_guestIndex: { reservationId, guestIndex } },
         });
-        if (!existing) return res.status(404).json({ error: "Document not found." });
+        if (!existing) return res.status(404).json({ error: msg(req, "Document not found.", "Belge bulunamadı.") });
 
         // Remove the file on disk (best-effort; orphaned files are harmless)
         try {
@@ -981,10 +975,10 @@ router.delete("/upload-identity/:reservationId/:guestIndex", requireAuth, async 
             where: { reservationId_guestIndex: { reservationId, guestIndex } },
         });
 
-        res.json({ message: "Document deleted." });
+        res.json({ message: msg(req, "Document deleted.", "Belge silindi.") });
     } catch (err) {
         console.error("Identity doc delete error:", err);
-        res.status(500).json({ error: "Internal server error." });
+        res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
     }
 });
 
@@ -993,11 +987,11 @@ router.delete("/upload-identity/:reservationId/:guestIndex", requireAuth, async 
 router.get("/:reservationId/identity-documents", requireAuth, async (req, res) => {
     try {
         const reservationId = parseInt(req.params.reservationId, 10);
-        if (!Number.isInteger(reservationId)) return res.status(400).json({ error: "Invalid reservationId." });
+        if (!Number.isInteger(reservationId)) return res.status(400).json({ error: msg(req, "Invalid reservationId.", "Geçersiz rezervasyon kimliği.") });
 
         const reservation = await prisma.reservation.findUnique({ where: { id: reservationId } });
-        if (!reservation) return res.status(404).json({ error: "Reservation not found." });
-        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: "Access denied." });
+        if (!reservation) return res.status(404).json({ error: msg(req, "Reservation not found.", "Rezervasyon bulunamadı.") });
+        if (reservation.userId !== req.user.userId) return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") });
 
         const docs = await prisma.identityDocument.findMany({
             where: { reservationId },
@@ -1006,7 +1000,7 @@ router.get("/:reservationId/identity-documents", requireAuth, async (req, res) =
         res.json({ documents: docs, legacyIdentityDoc: reservation.identityDoc || null });
     } catch (err) {
         console.error("Identity doc list error:", err);
-        res.status(500).json({ error: "Internal server error." });
+        res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
     }
 });
 
@@ -1025,7 +1019,7 @@ router.post("/admin/create", requireAdmin, async (req, res) => {
         const {
             forSelf = false,
             firstName, lastName, phone, contactEmail, email,
-            checkIn, checkOut, checkInTime,
+            checkIn, checkOut, checkInTime, checkOutTime,
             guests,
             eventCode, eventType, note,
             nationalId, taxNumber, billingTitle, billingAddress,
@@ -1084,6 +1078,7 @@ router.post("/admin/create", requireAdmin, async (req, res) => {
                 checkIn: checkInDate,
                 checkOut: checkOutDate,
                 checkInTime: isNonEmptyString(checkInTime) ? checkInTime.trim() : null,
+                checkOutTime: isNonEmptyString(checkOutTime) ? checkOutTime.trim() : null,
                 guests: guestsInt,
                 // Schema requires these two — accommodation type is hidden from the admin
                 // form per spec; default to PERSONAL. Invoice type defaults to INDIVIDUAL.
@@ -1110,7 +1105,7 @@ router.post("/admin/create", requireAdmin, async (req, res) => {
                 status: "APPROVED",
                 paymentStatus: "NONE",
             },
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } } },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } } },
         });
 
         return res.status(201).json(reservation);

@@ -36,6 +36,7 @@ export interface ReservationPayload {
   checkIn: string; // "YYYY-MM-DD"
   checkOut: string; // "YYYY-MM-DD"
   checkInTime: string; // "HH:MM" (required)
+  checkOutTime?: string; // "HH:MM"
 
   guests: number;
   accommodationType: AccommodationType;
@@ -199,6 +200,7 @@ export interface AdminCreateReservationPayload {
   checkIn: string;
   checkOut: string;
   checkInTime?: string;
+  checkOutTime?: string;
   // Stay
   guests: number;
   eventCode?: string;

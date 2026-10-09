@@ -7,8 +7,9 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { getMyLatestReservation, getUserReservations, type Reservation } from "../api/reservations";
 import { useNavigate, Link } from "react-router-dom";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import {
   CalendarDays,
   Clock,
@@ -307,20 +308,6 @@ export function Dashboard() {
     if (ids.length > 0) markManySeen(userId, ids);
   }
 
-  /* ── Announcements ───────────────────────────────────────────── */
-  const announcements = [
-    {
-      title: t("dashboard.announcements.a1Title", { defaultValue: "Holiday Season Special Rates" }),
-      message: t("dashboard.announcements.a1Msg", { defaultValue: "Enjoy special rates for bookings during the holiday season." }),
-      date: "Dec 15, 2025",
-    },
-    {
-      title: t("dashboard.announcements.a2Title", { defaultValue: "New Dining Service Available" }),
-      message: t("dashboard.announcements.a2Msg", { defaultValue: "In-room dining is available from 7 AM to 10 PM daily." }),
-      date: "Dec 10, 2025",
-    },
-  ];
-
   /* ── Status badge ────────────────────────────────────────────── */
   const statusBadge = (status: string) => {
     const base = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide";
@@ -431,14 +418,14 @@ export function Dashboard() {
           <div className="flex justify-between items-center">
             {/* Left — logo */}
             <Link to="/main" className="flex items-center gap-4 group">
-              <motion.div whileHover={{ scale: 1.04 }} className="transition-all duration-300">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+              <motion.div className="transition-all duration-300">
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
               </motion.div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
                 <Building2 className="h-4 w-4 text-[#c9a84c]/70" strokeWidth={1.5} />
                 <h1 className="text-white text-base font-light tracking-[8px] uppercase" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </div>
             </Link>
@@ -1048,43 +1035,6 @@ export function Dashboard() {
                     </Link>
                   </div>
                 )}
-              </div>
-            </motion.div>
-
-            {/* ── Announcements ──────────────────────────────── */}
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={6}
-              className="bg-white rounded-2xl overflow-hidden"
-              style={{
-                boxShadow: "0 2px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
-                border: "1px solid rgba(0,51,102,0.06)",
-              }}
-            >
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
-                <div className="w-1 h-5 rounded-full bg-[#c9a84c]" />
-                <h2 className="text-[14px] font-semibold text-[#003366] tracking-tight">
-                  {t("main.announcements.title", { defaultValue: "Announcements" })}
-                </h2>
-              </div>
-              <div className="p-4 space-y-2.5">
-                {announcements.map((a, idx) => (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ x: 4, backgroundColor: "rgba(248,250,252,1)" }}
-                    transition={{ duration: 0.15 }}
-                    className="group p-4 rounded-xl border border-gray-100 cursor-pointer transition-colors duration-200"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-[13px] text-gray-800 font-semibold group-hover:text-[#003366] transition-colors">{a.title}</p>
-                      <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-[#003366] flex-shrink-0 mt-0.5 transition-all group-hover:translate-x-0.5" />
-                    </div>
-                    <p className="text-[12px] text-gray-500 mt-1.5 leading-relaxed">{a.message}</p>
-                    <p className="text-[11px] text-gray-400 mt-2 font-medium">{a.date}</p>
-                  </motion.div>
-                ))}
               </div>
             </motion.div>
 

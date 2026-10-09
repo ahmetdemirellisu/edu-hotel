@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 import { AUTH_CSS } from "./authStyles";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
+import { currentLanguage } from "@/i18n";
 
 const API_URL = ((import.meta as any).env?.VITE_API_URL as string) || "/ehp/api";
 
@@ -56,7 +58,7 @@ export function Login() {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed, password }),
+        body: JSON.stringify({ email: trimmed, password, language: currentLanguage() }),
       });
       const data = await res.json();
 
@@ -191,7 +193,7 @@ export function Login() {
           <div className="auth__hero-tint" />
           <div className="auth__hero-fade" />
 
-          <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto auth__hero-badge auth__hero-badge--logo" />
+          <span className="inline-flex items-center gap-9 auth__hero-badge auth__hero-badge--logo"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
 
           <div className="auth__hero-center">
             <p className="auth__hero-eyebrow">{t("auth.welcomeBackTo", "Welcome back to")}</p>

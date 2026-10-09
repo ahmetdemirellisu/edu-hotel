@@ -1,7 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { sendMailAsync } = require("../services/mail");
-const { emailTemplate, badge, row, detailTable, heading } = require("../services/mailTemplate");
+const { emailTemplate, pick, badge, row, detailTable, heading } = require("../services/mailTemplate");
 const settingsService = require("../services/settings");
 const path = require("path");
 const fs = require("fs");
@@ -173,7 +173,7 @@ router.post("/approve-payment/:id", async (req, res) => {
                 paymentStatus: "APPROVED",
                 status: "APPROVED",
             },
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } }, room: true },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } }, room: true },
         });
 
         // ✉️ EMAIL — Payment Approved
@@ -181,11 +181,11 @@ router.post("/approve-payment/:id", async (req, res) => {
             if (reservation.user?.email) {
                 const guestName   = reservation.firstName || reservation.user.name || "Guest";
                 const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
-                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
+                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
                 const roomEN      = reservation.room ? reservation.room.name : null;
                 const roomTR      = reservation.room ? reservation.room.name : null;
 
-                const subject = `EDU Hotel – Booking confirmed ✓ #${reservation.id} / Rezervasyonunuz kesinleşti ✓ #${reservation.id}`;
+                const subject = pick(reservation.user.language, `EDU Hotel – Booking confirmed ✓ #${reservation.id}`, `EDU Hotel – Rezervasyonunuz kesinleşti ✓ #${reservation.id}`);
 
                 const hasGuestNote = typeof reservation.note === "string" && reservation.note.trim().length > 0;
                 const hasAdminNote = typeof reservation.adminNote === "string" && reservation.adminNote.trim().length > 0;
@@ -226,7 +226,7 @@ ${heading('Oda Kartı Teslim Bilgileri')}
 <p style="margin:0 0 16px;font-size:13px;color:#475569;">16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.</p>
 <p style="margin:0;font-size:13px;color:#475569;">Lütfen giriş sırasında geçerli bir kimlik belgesi ibraz ediniz. Konaklamanız öncesinde herhangi bir sorunuz için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-                const text = [
+                const text = pick(reservation.user.language, [
                     `Dear ${guestName},`,
                     ``,
                     `Your payment has been verified. Your stay at EDU Hotel is now fully confirmed!`,
@@ -242,9 +242,7 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                     `Key pickup: For check-ins before 16:30, you may collect your room key card from the reception area against signature. For check-ins after 16:30, the room key card will be left in a sealed envelope at the main security gate.`,
                     ``,
                     `Please present a valid ID upon arrival. We look forward to welcoming you!`,
-                    ``,
-                    `---`,
-                    ``,
+                    ], [
                     `Sayın ${guestName},`,
                     ``,
                     `Ödemeniz doğrulandı. EDU Hotel'deki konaklamanız kesinleşmiştir!`,
@@ -260,9 +258,9 @@ ${heading('Oda Kartı Teslim Bilgileri')}
                     `Oda kartı teslimi: 16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.`,
                     ``,
                     `Lütfen giriş sırasında geçerli bir kimlik belgesi ibraz ediniz. Sizi ağırlamaktan mutluluk duyacağız!`,
-                ].filter(l => l !== null).join('\n');
+                ]).filter(l => l !== null).join('\n');
 
-                const html = emailTemplate(bodyEN, bodyTR);
+                const html = emailTemplate(bodyEN, bodyTR, reservation.user.language);
                 sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {
@@ -288,7 +286,7 @@ router.post("/reject-payment/:id", async (req, res) => {
         const reservation = await prisma.reservation.update({
             where: { id: Number(id) },
             data: { paymentStatus: "REJECTED" },
-            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true } } },
+            include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, userType: true, language: true } } },
         });
 
         // ✉️ EMAIL — Payment Rejected
@@ -296,9 +294,9 @@ router.post("/reject-payment/:id", async (req, res) => {
             if (reservation.user?.email) {
                 const guestName   = reservation.firstName || reservation.user.name || "Guest";
                 const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
-                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
+                const checkOutStr = reservation.checkOut.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
 
-                const subject = `EDU Hotel – Payment receipt not accepted #${reservation.id} / Ödeme dekontu kabul edilmedi #${reservation.id}`;
+                const subject = pick(reservation.user.language, `EDU Hotel – Payment receipt not accepted #${reservation.id}`, `EDU Hotel – Ödeme dekontu kabul edilmedi #${reservation.id}`);
 
                 const bodyEN = `
 <p style="margin:0 0 4px;">Dear <strong>${guestName}</strong>,</p>
@@ -328,7 +326,7 @@ ${detailTable([
 ${heading('Yapmanız Gerekenler')}
 <p style="margin:0;font-size:13px;color:#475569;">EDU Hotel hesabınıza giriş yaparak yeni, net bir ödeme dekontu yükleyin (PDF, JPG veya PNG, maks. 5 MB). Yardım için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-                const text = [
+                const text = pick(reservation.user.language, [
                     `Dear ${guestName},`,
                     ``,
                     `Unfortunately, your payment receipt for reservation #${reservation.id} could not be verified.`,
@@ -339,9 +337,7 @@ ${heading('Yapmanız Gerekenler')}
                     ``,
                     `Please log in to your EDU Hotel account and upload a new, clear receipt (PDF, JPG or PNG, max 5 MB).`,
                     `For assistance: hotel@sabanciuniv.edu`,
-                    ``,
-                    `---`,
-                    ``,
+                    ], [
                     `Sayın ${guestName},`,
                     ``,
                     `Maalesef #${reservation.id} numaralı rezervasyonunuz için ödeme dekontunuz doğrulanamadı.`,
@@ -352,9 +348,9 @@ ${heading('Yapmanız Gerekenler')}
                     ``,
                     `EDU Hotel hesabınıza giriş yaparak yeni, net bir dekont yükleyin (PDF, JPG veya PNG, maks. 5 MB).`,
                     `Yardım için: hotel@sabanciuniv.edu`,
-                ].join('\n');
+                ]).join('\n');
 
-                const html = emailTemplate(bodyEN, bodyTR);
+                const html = emailTemplate(bodyEN, bodyTR, reservation.user.language);
                 sendMailAsync({ to: reservation.user.email, subject, text, html });
             }
         } catch (mailErr) {

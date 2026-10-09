@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { msg } = require("../utils/lang");
 
 /**
  * Verifies the user's JWT and attaches req.user = { userId, email }.
@@ -7,7 +8,7 @@ const jwt = require("jsonwebtoken");
 function requireAuth(req, res, next) {
     const authHeader = req.headers["authorization"];
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Authentication required." });
+        return res.status(401).json({ error: msg(req, "Authentication required.", "Oturum açmanız gerekiyor.") });
     }
 
     const token = authHeader.slice(7);
@@ -16,7 +17,7 @@ function requireAuth(req, res, next) {
         req.user = decoded; // { userId, email, iat, exp }
         next();
     } catch {
-        return res.status(401).json({ error: "Invalid or expired token." });
+        return res.status(401).json({ error: msg(req, "Invalid or expired token.", "Oturumunuz geçersiz veya süresi dolmuş. Lütfen tekrar giriş yapın.") });
     }
 }
 

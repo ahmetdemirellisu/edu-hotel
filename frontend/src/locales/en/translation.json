@@ -10,19 +10,16 @@
     "hero": {
       "eyebrow": "Sabancı University",
       "title": "EDU Education Hotel: A Stay Experience on Sabancı University Campus.",
-      "subtitle": "Academic life meets comfort. A five-star accommodation experience for researchers, guests, and educators.",
+      "subtitle": "An on-campus accommodation experience for researchers, educators, guests and institutions.",
       "ctaPrimary": "Book Now",
       "ctaSecondary": "Discover More",
-      "starStrip": "Academic Hospitality Standard",
       "scroll": "Scroll"
     },
     "features": {
       "eyebrow": "Why EDU Education Hotel?",
-      "title": "Excellence in Every Detail.",
-      "subtitle": "Experience the privilege of luxury comfort in an academic setting.",
       "modernRooms": {
-        "title": "Modern Rooms",
-        "desc": "Feel at home in our spacious, air-conditioned rooms equipped with high-speed Wi-Fi."
+        "title": "Study-Focused Accommodation",
+        "desc": "Feel at home in our air-conditioned rooms equipped with high-speed Wi-Fi."
       },
       "academicComfort": {
         "title": "Academic Comfort",
@@ -37,34 +34,27 @@
         "desc": "High-speed internet connected to the university's fiber infrastructure — perfect for conferences, research, and video calls."
       },
       "commonAreas": {
-        "title": "Elegant Common Areas",
+        "title": "Common Areas",
         "desc": "Coffee corners, study rooms, and social spaces for an energized stay at any time of day."
       },
       "location": {
-        "title": "Central Location",
-        "desc": "On the Anatolian side of Istanbul, intertwined with nature yet close to the city. Set in the unique geography of the Tuzla campus."
+        "title": "An Experience on the Tuzla Campus",
+        "desc": "On the Anatolian side of Istanbul, intertwined with nature. Set in the unique geography of the Tuzla campus."
       }
     },
     "marquee": {
-      "established": "Est. 1994",
-      "fiveStar": "Five-Star Academic Rating",
-      "modernStay": "Modern Accommodation",
-      "tuzla": "Tuzla · Istanbul",
-      "premiumComfort": "Premium Comfort",
-      "academicExcellence": "Academic Excellence",
-      "internationalStandards": "International Standards"
+      "educationStay": "Education-Focused Accommodation",
+      "campusExperience": "University Campus Experience",
+      "tuzla": "Tuzla · Istanbul"
     },
     "about": {
       "eyebrow": "About Us",
-      "title": "A Unique Experience on the Sabancı Campus.",
-      "p1": "EDU Education Hotel has been hosting academics, researchers, and corporate guests since the founding of Sabancı University in 1994.",
-      "p2": "With its modern architecture and location within a lush green campus, we offer a unique accommodation experience that combines work and academia with comfort.",
+      "title": "An Accommodation Experience on the Sabancı Campus.",
+      "p1": "Located in the Sabancı University School of Management building, EDU Education Hotel offers academics, researchers, guests and institutions a learning-focused accommodation experience.",
       "cta": "Make a Reservation",
       "stats": {
         "experience": "Years of Experience",
-        "rating": "Academic Rating",
-        "rooms": "Guest Rooms",
-        "satisfaction": "Satisfaction"
+        "rooms": "Guest Rooms"
       }
     },
     "contact": {
@@ -83,17 +73,14 @@
       "universityLine": "University"
     }
   },
-
   "header": {
     "mySU": "My SU",
     "language": "TR",
     "mainPage": "Main Page"
   },
-
   "breadcrumb": {
     "home": "Home"
   },
-
   "nav": {
     "dashboard": "Dashboard",
     "notifications": "Notifications",
@@ -102,7 +89,6 @@
     "myReservations": "My Reservations",
     "contact": "Contact Support"
   },
-
   "common": {
     "select": "Select",
     "success": "Success",
@@ -110,16 +96,16 @@
     "dismiss": "Dismiss",
     "note": "Note",
     "backToTop": "Back to top",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "unknownError": "Unknown error"
   },
-
   "notificationBell": {
     "title": "Notifications",
     "new": "new",
     "empty": "No notifications",
-    "viewAll": "View All Notifications"
+    "viewAll": "View All Notifications",
+    "markAllRead": "Mark all as read"
   },
-
   "adminLogin": {
     "title": "Admin Portal",
     "subtitle": "EDU Education Hotel Management System",
@@ -142,13 +128,12 @@
       "networkError": "Could not reach the server. Please try again."
     }
   },
-
   "auth": {
     "eyebrow": "Sabancı Üniversitesi · EDU Education Hotel",
     "protected": "Protected by Sabancı University IT Infrastructure",
     "welcomeBackTo": "Welcome back to",
     "joinCommunity": "Join our community",
-    "tagline": "Academic excellence and unparalleled comfort, in the heart of the Sabancı University campus.",
+    "tagline": "Stay in the heart of the Sabancı University campus.",
     "copyright": "© 2026 Sabancı University · All Rights Reserved",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
@@ -203,7 +188,6 @@
     "namePlaceholder": "Enter your full name",
     "emailPlaceholder": "name@sabanciuniv.edu"
   },
-
   "login": {
     "welcomeTitle": "Welcome back",
     "welcomeSubtitle": "Sign in to your EDU Education Hotel account",
@@ -237,7 +221,6 @@
       "network": "Network error. Please try again."
     }
   },
-
   "signup": {
     "createTitle": "Create an account",
     "createSubtitle": "Sign up to get started with EDU Education Hotel",
@@ -273,7 +256,6 @@
       "accountCreated": "Account created successfully. You can now log in."
     }
   },
-
   "dashboard": {
     "nav": {
       "bookRoom": "Book a Room",
@@ -344,7 +326,8 @@
       "paymentConfirmed": "Payment Confirmed",
       "paymentSent": "Payment Sent",
       "priceNotSet": "To be determined",
-      "paymentDisabledTip": "Payment is available only after approval."
+      "paymentDisabledTip": "Payment is available only after approval.",
+      "awaitingPrice": "Awaiting Price"
     },
     "reservation": {
       "success": "Your reservation request has been submitted for approval."
@@ -363,7 +346,8 @@
       "cancelled": "Cancelled",
       "pending": "Pending",
       "confirmed": "Confirmed",
-      "paymentRejected": "Payment Rejected"
+      "paymentRejected": "Payment Rejected",
+      "rejected": "Rejected"
     },
     "quick": {
       "viewReservations": "My Reservation Requests",
@@ -392,19 +376,24 @@
       "time2": "1 day ago",
       "time3": "3 days ago"
     },
-    "announcements": {
-      "a1Title": "Holiday Season Special Rates",
-      "a1Msg": "Enjoy special rates for bookings during the holiday season.",
-      "a2Title": "New Dining Service Available",
-      "a2Msg": "In-room dining is available from 7 AM to 10 PM daily."
-    },
     "help": {
       "title": "Need Help?",
       "msg": "If you have issues with approvals, payment receipts, or cancellations, contact the support team.",
       "cta": "Contact Support"
+    },
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "progress": {
+      "submitted": "Submitted",
+      "underReview": "Under Review",
+      "approved": "Approved",
+      "paymentSent": "Payment Sent",
+      "confirmed": "Confirmed"
     }
   },
-
   "dashboardHero": {
     "speech": {
       "pendingApprovals_one": "You have {{count}} pending approval today. Click me for quick actions!",
@@ -418,10 +407,22 @@
     "atlasTooltip": "Chat with Atlas – EDU Education Hotel Concierge",
     "quickActions": {
       "heading": "Quick Actions",
-      "wifi": { "label": "Get Wi-Fi Password", "desc": "Campus network credentials" },
-      "map":  { "label": "View Campus Map",    "desc": "Buildings & facilities" },
-      "issue":{ "label": "Report an Issue",    "desc": "Maintenance & support" },
-      "late": { "label": "Request Late Check-out", "desc": "Extend your stay time" }
+      "wifi": {
+        "label": "Get Wi-Fi Password",
+        "desc": "Campus network credentials"
+      },
+      "map": {
+        "label": "View Campus Map",
+        "desc": "Buildings & facilities"
+      },
+      "issue": {
+        "label": "Report an Issue",
+        "desc": "Maintenance & support"
+      },
+      "late": {
+        "label": "Request Late Check-out",
+        "desc": "Extend your stay time"
+      }
     },
     "chat": {
       "heading": "Chat with Atlas",
@@ -492,7 +493,6 @@
       "reception": "Reception is staffed 24/7. After 16:30 your room key card is held in a sealed envelope at the main security gate."
     }
   },
-
   "main": {
     "welcomeBack": "Welcome back!",
     "quickActions": "Quick Actions",
@@ -507,18 +507,8 @@
       "reservations": "Reservations",
       "profile": "My Profile",
       "logout": "Logout"
-    },
-    "announcements": {
-      "title": "Announcements",
-      "holidayTitle": "Holiday Season Special Rates",
-      "holidayMsg": "Enjoy special discounted rates for bookings during the holiday season.",
-      "diningTitle": "New Dining Service Available",
-      "diningMsg": "We now offer in-room dining service from 7 AM to 10 PM daily.",
-      "maintenanceTitle": "Maintenance Notice",
-      "maintenanceMsg": "Pool will be under maintenance on Dec 20-21. Thank you for your understanding."
     }
   },
-
   "footer": {
     "address": {
       "line1": "Orta Mahalle, Üniversite Caddesi No: 27",
@@ -548,7 +538,6 @@
     "rights": "Sabancı University. All rights reserved.",
     "rightsEduHotel": "Edu Hotel Management System - Sabancı University. All rights reserved."
   },
-
   "bookingRequest": {
     "title": "Reservation Request for EDU Education Hotel",
     "subtitle": "Submit a pre-reservation request for EDU Education Hotel. Your request will be reviewed and approved by the administration. Final room assignment will be done by the hotel staff.",
@@ -684,7 +673,6 @@
       "confirmationTime": "You will receive confirmation after review."
     }
   },
-
   "account": {
     "title": "My Account",
     "passwordStrength": {
@@ -737,7 +725,12 @@
       "notifAll": "All Notifications",
       "notifImportant": "Important Only",
       "notifNone": "None",
-      "saveBtn": "Save Preferences"
+      "saveBtn": "Save Preferences",
+      "emailNotifsDesc": "Receive updates via email",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "smsNotifs": "SMS Notifications",
+      "smsNotifsDesc": "Receive updates via SMS"
     },
     "session": {
       "title": "Session Management",
@@ -748,9 +741,12 @@
       "backToDashboard": "Back to Dashboard",
       "myReservations": "My Reservations",
       "bookRoom": "Book a Room"
-    }
+    },
+    "card": {
+      "memberSince": "Member Since"
+    },
+    "notProvided": "Not Provided"
   },
-
   "payment": {
     "title": "Payment & Confirmation",
     "subtitle": "Complete your payment via bank transfer and upload your receipt for verification.",
@@ -799,11 +795,22 @@
       "tooLarge": "File size exceeds 5MB.",
       "uploadFailed": "Failed to upload receipt. Please try again.",
       "noReservation": "No active reservation found.",
-      "serverError": "Could not connect to server. Please try again later."
+      "serverError": "Could not connect to server. Please try again later.",
+      "priceNotSet": "The admin hasn't set a price for this reservation yet. Please wait.",
+      "priceNotSetTitle": "Price not set yet"
     },
-    "success": "Payment receipt submitted successfully!"
+    "success": "Payment receipt submitted successfully!",
+    "card": {
+      "title": "Pay with card",
+      "subtitle": "We detect Visa, Mastercard, Amex and Discover automatically.",
+      "number": "Card number",
+      "holder": "Card holder name",
+      "holderPlaceholder": "JOHN SMITH",
+      "expiry": "Expiry (MM/YY)",
+      "notice": "Card form is for preview only. Complete your payment by transferring to the bank account above and uploading the receipt below."
+    },
+    "reservationLabel": "Reservation"
   },
-
   "notifications": {
     "pageTitle": "Notifications",
     "subtitle": "Stay updated with your latest reservation status and campus alerts.",
@@ -836,9 +843,10 @@
       "minutesAgo": "{{count}}m ago",
       "hoursAgo": "{{count}}h ago",
       "daysAgo": "{{count}}d ago"
-    }
+    },
+    "markAllRead": "Mark all as read",
+    "dateLocale": "en"
   },
-
   "reservations": {
     "title": "My Reservations",
     "subtitle": "View and manage all your reservation requests.",
@@ -892,9 +900,25 @@
     },
     "showing": "Showing",
     "of": "of",
-    "reservations": "reservations"
+    "reservations": "reservations",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "refundRequested": "Refund Requested",
+      "refunded": "Refunded"
+    },
+    "paymentStatus": {
+      "pending": "Payment Pending Verification",
+      "confirmed": "Payment Confirmed",
+      "rejected": "Payment Rejected"
+    },
+    "poll": {
+      "approved": "Your reservation has been approved!",
+      "approvedDesc": "Reservation #{{id}} — you can now proceed to payment."
+    }
   },
-
   "bookRoom": {
     "keyPickupTitle": "Key Pickup Instructions",
     "keyPickup": "For check-ins before 16:30, you may collect your room key card from the reception desk in person against signature. For check-ins after 16:30, your key card will be left in a sealed envelope at the main security gate.",
@@ -963,7 +987,8 @@
       "billingAddressRequired": "Billing address is required.",
       "identityDocRequired": "Please upload a copy of your ID or passport.",
       "consent": "Please accept the terms and conditions.",
-      "notLoggedIn": "You must be logged in."
+      "notLoggedIn": "You must be logged in.",
+      "identityDocRequiredFor": "Please upload an ID or passport for Guest {{n}}."
     },
     "step1": {
       "label": "Stay Dates",
@@ -1027,9 +1052,12 @@
     },
     "timePicker": {
       "label": "Select or Type Time"
-    }
+    },
+    "identityDocDiscardConfirm": "Reducing to {{n}} guest(s) will discard the uploaded document(s) for Guest {{indices}}. Continue?",
+    "identityDocGuestLabel": "Guest",
+    "identityDocHelpPerGuest": "Upload a copy of each guest's Turkish ID (Kimlik) or Passport. Accepted formats: PDF, JPG, PNG (max 5 MB).",
+    "checkOutTime": "Expected Check-Out Time"
   },
-
   "contact": {
     "pageTitle": "Contact Support",
     "subtitle": "Our team is available to help you with reservations, payments, and any hotel-related questions.",
@@ -1047,6 +1075,35 @@
       "paymentDesc": "Problems with bank transfer, receipt upload, or payment confirmation.",
       "cancellation": "Cancellation & Refunds",
       "cancellationDesc": "Requests to cancel your reservation or inquire about refund status."
+    }
+  },
+  "myReservations": {
+    "live": "Live",
+    "checkIn": "Check-in",
+    "room": "Room",
+    "event": "Event",
+    "programCode": "Program Code",
+    "freeAccommodation": "Free Accommodation",
+    "cancelledByYou": "Cancelled by you.",
+    "cancelFailed": "Failed to cancel reservation.",
+    "checkOut": "Check-out"
+  },
+  "enums": {
+    "accommodation": {
+      "PERSONAL": "Personal",
+      "CORPORATE": "Corporate",
+      "EDUCATION": "Education"
+    },
+    "invoice": {
+      "INDIVIDUAL": "Individual",
+      "CORPORATE": "Corporate"
+    },
+    "userType": {
+      "STUDENT": "Student",
+      "STAFF": "Staff",
+      "SPECIAL_GUEST": "Special Guest",
+      "PARENT": "Parent",
+      "OTHER": "Other"
     }
   }
 }

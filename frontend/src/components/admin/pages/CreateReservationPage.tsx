@@ -40,6 +40,7 @@ export function CreateReservationPage() {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [checkInTime, setCheckInTime] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
 
   // Guest contact
   const [firstName, setFirstName] = useState("");
@@ -139,6 +140,7 @@ export function CreateReservationPage() {
         checkIn,
         checkOut,
         checkInTime: checkInTime.trim() || undefined,
+        checkOutTime: checkOutTime.trim() || undefined,
         guests,
         eventType: eventType.trim() || undefined,
         eventCode: eventCode.trim() || undefined,
@@ -298,6 +300,9 @@ export function CreateReservationPage() {
           </div>
           <Field label={t("createReservation.fields.checkInTime", { defaultValue: "Check-in time" })}>
             <input type="time" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)} className={inputCls} />
+          </Field>
+          <Field label={t("createReservation.fields.checkOutTime", { defaultValue: "Check-out time" })}>
+            <input type="time" value={checkOutTime} onChange={(e) => setCheckOutTime(e.target.value)} className={inputCls} />
           </Field>
         </SectionCard>
 

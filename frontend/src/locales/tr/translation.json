@@ -13,16 +13,13 @@
       "subtitle": "Araştırmacılar, eğitmenler, konuklar ve kurumlar için kampüste konaklama deneyimi.",
       "ctaPrimary": "Hemen Rezervasyon Yap",
       "ctaSecondary": "Daha Fazla Keşfet",
-      "starStrip": "Akademik Konaklama Standardı",
       "scroll": "Kaydır"
     },
     "features": {
       "eyebrow": "Neden EDU Eğitim Oteli?",
-      "title": "Her Detayda Mükemmellik.",
-      "subtitle": "Akademik bir ortamda lüks konforun ayrıcalığını yaşayın.",
       "modernRooms": {
-        "title": "Modern Odalar",
-        "desc": "Geniş, klimalı ve yüksek hızlı Wi-Fi ile donatılmış konforlu odalarımızda kendinizi evinizde hissedeceksiniz."
+        "title": "Çalışma Odaklı Konaklama",
+        "desc": "Klimalı ve yüksek hızlı Wi-Fi ile donatılmış odalarımızda kendinizi evinizde hissedeceksiniz."
       },
       "academicComfort": {
         "title": "Akademik Konfor",
@@ -37,34 +34,27 @@
         "desc": "Üniversite fiber altyapısına bağlı yüksek hızlı internet bağlantısı — konferans, araştırma ve video görüşmeleri için ideal."
       },
       "commonAreas": {
-        "title": "Şık Ortak Alanlar",
+        "title": "Ortak Alanlar",
         "desc": "Kahve köşeleri, çalışma odaları ve sosyal alanlar ile günün her saati enerji dolu bir konaklama deneyimi."
       },
       "location": {
-        "title": "Merkezi Konum",
-        "desc": "İstanbul'un Anadolu yakasında, doğayla iç içe ama şehre yakın. Tuzla kampüsünün eşsiz coğrafyasında."
+        "title": "Tuzla Kampüsünde Bir Deneyim",
+        "desc": "İstanbul'un Anadolu yakasında, doğayla iç içe. Tuzla kampüsünün eşsiz coğrafyasında."
       }
     },
     "marquee": {
-      "established": "Est. 1994",
-      "fiveStar": "5 Yıldızlı Akademik Değerlendirme",
-      "modernStay": "Modern Konaklama",
-      "tuzla": "Tuzla · İstanbul",
-      "premiumComfort": "Premium Konfor",
-      "academicExcellence": "Akademik Mükemmellik",
-      "internationalStandards": "Uluslararası Standartlar"
+      "educationStay": "Eğitim Odaklı Konaklama",
+      "campusExperience": "Üniversite Kampüsü Deneyimi",
+      "tuzla": "Tuzla · İstanbul"
     },
     "about": {
       "eyebrow": "Hakkımızda",
       "title": "Sabancı Kampüsünde Bir Konaklama Deneyimi.",
       "p1": "EDU Eğitim Oteli, Sabancı Üniversitesi Yönetim Bilimleri Fakültesi binasında akademisyenlere, araştırmacılara, konuklara ve kurumlara öğrenme odaklı bir konaklama deneyimi sunuyor.",
-      "p2": "Modern mimarisi ve yeşil kampüs dokusunun içindeki konumuyla, iş ve akademiyi konforla birleştiren eşsiz bir konaklama deneyimi sunuyoruz.",
       "cta": "Rezervasyon Yap",
       "stats": {
         "experience": "Yıllık Deneyim",
-        "rating": "Akademik Puan",
-        "rooms": "Misafir Odası",
-        "satisfaction": "Memnuniyet"
+        "rooms": "Misafir Odası"
       }
     },
     "contact": {
@@ -83,17 +73,14 @@
       "universityLine": "Üniversitesi"
     }
   },
-
   "header": {
     "mySU": "My SU",
     "language": "TR",
     "mainPage": "Ana Sayfa"
   },
-
   "breadcrumb": {
     "home": "Ana Sayfa"
   },
-
   "nav": {
     "dashboard": "Ana Sayfa",
     "notifications": "Bildirimler",
@@ -102,7 +89,6 @@
     "myReservations": "Rezervasyonlarım",
     "contact": "İletişim Desteği"
   },
-
   "common": {
     "select": "Seç",
     "success": "Başarılı",
@@ -110,16 +96,16 @@
     "dismiss": "Kapat",
     "note": "Not",
     "backToTop": "Yukarı çık",
-    "loading": "Yükleniyor..."
+    "loading": "Yükleniyor...",
+    "unknownError": "Bilinmeyen hata"
   },
-
   "notificationBell": {
     "title": "Bildirimler",
     "new": "yeni",
     "empty": "Bildirim yok",
-    "viewAll": "Tüm Bildirimleri Gör"
+    "viewAll": "Tüm Bildirimleri Gör",
+    "markAllRead": "Tümünü okundu işaretle"
   },
-
   "adminLogin": {
     "title": "Yönetici Portalı",
     "subtitle": "EDU Eğitim Oteli Yönetim Sistemi",
@@ -142,13 +128,12 @@
       "networkError": "Sunucuya ulaşılamadı. Lütfen tekrar deneyin."
     }
   },
-
   "auth": {
     "eyebrow": "Sabancı Üniversitesi · EDU Eğitim Oteli",
     "protected": "Sabancı Üniversitesi BT Altyapısı tarafından korunmaktadır",
     "welcomeBackTo": "Tekrar hoş geldiniz",
     "joinCommunity": "Topluluğumuza katılın",
-    "tagline": "Sabancı Üniversitesi kampüsünün kalbinde akademik mükemmellik ve eşsiz konfor.",
+    "tagline": "Sabancı Üniversitesi kampüsünün kalbinde konaklayın.",
     "copyright": "© 2026 Sabancı Üniversitesi · Tüm Hakları Saklıdır",
     "signIn": "Giriş yap",
     "signingIn": "Giriş yapılıyor…",
@@ -203,7 +188,6 @@
     "namePlaceholder": "Tam adınızı girin",
     "emailPlaceholder": "ad@sabanciuniv.edu"
   },
-
   "login": {
     "welcomeTitle": "Tekrar hoş geldiniz",
     "welcomeSubtitle": "EDU Eğitim Oteli hesabınıza giriş yapın",
@@ -237,7 +221,6 @@
       "network": "Ağ hatası. Lütfen tekrar deneyin."
     }
   },
-
   "signup": {
     "createTitle": "Hesap oluşturun",
     "createSubtitle": "EDU Eğitim Oteli ile başlamak için kayıt olun",
@@ -273,7 +256,6 @@
       "accountCreated": "Hesap başarıyla oluşturuldu. Şimdi giriş yapabilirsiniz."
     }
   },
-
   "dashboard": {
     "nav": {
       "bookRoom": "Oda Rezervasyonu",
@@ -344,7 +326,8 @@
       "paymentConfirmed": "Ödeme Onaylandı",
       "paymentSent": "Ödeme Gönderildi",
       "priceNotSet": "Belirlenecek",
-      "paymentDisabledTip": "Ödeme sayfası, akış bağlandığında aktif hale gelecektir."
+      "paymentDisabledTip": "Ödeme sayfası, akış bağlandığında aktif hale gelecektir.",
+      "awaitingPrice": "Fiyat Bekleniyor"
     },
     "reservation": {
       "success": "Rezervasyon talebiniz onay için gönderildi."
@@ -363,7 +346,8 @@
       "cancelled": "İptal Edildi",
       "pending": "Ön Kayıt / Beklemede",
       "confirmed": "Onaylandı",
-      "paymentRejected": "Ödeme Reddedildi"
+      "paymentRejected": "Ödeme Reddedildi",
+      "rejected": "Reddedildi"
     },
     "quick": {
       "viewReservations": "Rezervasyon Taleplerim",
@@ -392,19 +376,24 @@
       "time2": "1 gün önce",
       "time3": "3 gün önce"
     },
-    "announcements": {
-      "a1Title": "Tatil Sezonu Özel Fiyatları",
-      "a1Msg": "Tatil sezonundaki rezervasyonlarınız için özel indirimlerin tadını çıkarın.",
-      "a2Title": "Yeni Yemek Servisi Başladı",
-      "a2Msg": "Odaya yemek servisi her gün 07:00 - 22:00 saatleri arasında mevcuttur."
-    },
     "help": {
       "title": "Yardıma mı ihtiyacınız var?",
       "msg": "Onaylar, ödeme makbuzları veya iptallerle ilgili sorun yaşıyorsanız destek ekibiyle iletişime geçin.",
       "cta": "Destekle İletişime Geç"
+    },
+    "greeting": {
+      "morning": "Günaydın",
+      "afternoon": "İyi günler",
+      "evening": "İyi akşamlar"
+    },
+    "progress": {
+      "submitted": "Gönderildi",
+      "underReview": "İnceleniyor",
+      "approved": "Onaylandı",
+      "paymentSent": "Ödeme Gönderildi",
+      "confirmed": "Kesinleşti"
     }
   },
-
   "dashboardHero": {
     "speech": {
       "pendingApprovals_one": "Bugün {{count}} onay bekleyen talebiniz var. Hızlı işlemler için bana tıklayın!",
@@ -418,10 +407,22 @@
     "atlasTooltip": "Atlas ile sohbet et – EDU Eğitim Oteli Konsiyerji",
     "quickActions": {
       "heading": "Hızlı İşlemler",
-      "wifi": { "label": "Wi-Fi Şifresini Al", "desc": "Kampüs ağı bilgileri" },
-      "map":  { "label": "Kampüs Haritası",    "desc": "Binalar ve tesisler" },
-      "issue":{ "label": "Sorun Bildir",        "desc": "Bakım ve destek" },
-      "late": { "label": "Geç Çıkış Talebi",    "desc": "Konaklama süresini uzat" }
+      "wifi": {
+        "label": "Wi-Fi Şifresini Al",
+        "desc": "Kampüs ağı bilgileri"
+      },
+      "map": {
+        "label": "Kampüs Haritası",
+        "desc": "Binalar ve tesisler"
+      },
+      "issue": {
+        "label": "Sorun Bildir",
+        "desc": "Bakım ve destek"
+      },
+      "late": {
+        "label": "Geç Çıkış Talebi",
+        "desc": "Konaklama süresini uzat"
+      }
     },
     "chat": {
       "heading": "Atlas ile Sohbet",
@@ -492,7 +493,6 @@
       "reception": "Resepsiyon 7/24 açıktır. 16:30 sonrasında oda kartınız ana güvenlik kapısında kapalı bir zarf içinde bekletilir."
     }
   },
-
   "main": {
     "welcomeBack": "Tekrar hoş geldiniz!",
     "quickActions": "Hızlı İşlemler",
@@ -507,18 +507,8 @@
       "reservations": "Rezervasyonlar",
       "profile": "Profilim",
       "logout": "Çıkış"
-    },
-    "announcements": {
-      "title": "Duyurular",
-      "holidayTitle": "Yılbaşı Dönemi Özel Fiyatlar",
-      "holidayMsg": "Yılbaşı dönemindeki rezervasyonlar için indirimli fiyatlardan yararlanın.",
-      "diningTitle": "Yeni Yemek Servisi",
-      "diningMsg": "Her gün 07:00–22:00 arası oda servisi hizmetimiz mevcuttur.",
-      "maintenanceTitle": "Bakım Duyurusu",
-      "maintenanceMsg": "Havuz 20–21 Aralık tarihlerinde bakımda olacaktır. Anlayışınız için teşekkür ederiz."
     }
   },
-
   "footer": {
     "address": {
       "line1": "Orta Mahalle, Üniversite Caddesi No: 27",
@@ -548,7 +538,6 @@
     "rights": "Sabancı Üniversitesi. Tüm hakları saklıdır.",
     "rightsEduHotel": "Edu Hotel Yönetim Sistemi - Sabancı Üniversitesi. Tüm hakları saklıdır."
   },
-
   "bookingRequest": {
     "title": "EDU Otel için Rezervasyon Talebi",
     "subtitle": "EDU Otel için ön rezervasyon talebi oluşturun. Talebiniz idare tarafından incelenip onaylanacaktır. Nihai oda ataması otel personeli tarafından yapılacaktır.",
@@ -684,7 +673,6 @@
       "confirmationTime": "İncelemeden sonra onay bilgisi alacaksınız."
     }
   },
-
   "account": {
     "title": "Hesabım",
     "passwordStrength": {
@@ -737,7 +725,12 @@
       "notifAll": "Tüm Bildirimler",
       "notifImportant": "Sadece Önemli",
       "notifNone": "Hiçbiri",
-      "saveBtn": "Tercihleri Kaydet"
+      "saveBtn": "Tercihleri Kaydet",
+      "emailNotifsDesc": "Güncellemeleri e-posta ile alın",
+      "enabled": "Açık",
+      "disabled": "Kapalı",
+      "smsNotifs": "SMS Bildirimleri",
+      "smsNotifsDesc": "Güncellemeleri SMS ile alın"
     },
     "session": {
       "title": "Oturum Yönetimi",
@@ -748,9 +741,12 @@
       "backToDashboard": "Ana Sayfaya Dön",
       "myReservations": "Rezervasyonlarım",
       "bookRoom": "Oda Rezervasyonu"
-    }
+    },
+    "card": {
+      "memberSince": "Üyelik Tarihi"
+    },
+    "notProvided": "Belirtilmedi"
   },
-
   "payment": {
     "title": "Ödeme ve Onay",
     "subtitle": "Ödemenizi banka havalesi ile tamamlayın ve doğrulama için makbuzunuzu yükleyin.",
@@ -799,11 +795,22 @@
       "tooLarge": "Dosya boyutu 5MB'ı aşıyor.",
       "uploadFailed": "Dekont yüklenemedi. Lütfen tekrar deneyin.",
       "noReservation": "Aktif rezervasyon bulunamadı.",
-      "serverError": "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyiniz."
+      "serverError": "Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyiniz.",
+      "priceNotSet": "Bu rezervasyon için henüz fiyat belirlenmedi. Lütfen bekleyin.",
+      "priceNotSetTitle": "Fiyat henüz belirlenmedi"
     },
-    "success": "Ödeme dekontu başarıyla gönderildi!"
+    "success": "Ödeme dekontu başarıyla gönderildi!",
+    "card": {
+      "title": "Kartla öde",
+      "subtitle": "Visa, Mastercard, Amex ve Discover kartları otomatik olarak tanınır.",
+      "number": "Kart numarası",
+      "holder": "Kart sahibinin adı",
+      "holderPlaceholder": "AD SOYAD",
+      "expiry": "Son kullanma (AA/YY)",
+      "notice": "Kart formu yalnızca önizleme amaçlıdır. Ödemenizi yukarıdaki banka hesabına havale yaparak ve dekontu aşağıya yükleyerek tamamlayın."
+    },
+    "reservationLabel": "Rezervasyon"
   },
-
   "notifications": {
     "pageTitle": "Bildirimler",
     "subtitle": "En son rezervasyon durumunuz ve kampüs duyuruları hakkında güncel kalın.",
@@ -836,9 +843,10 @@
       "minutesAgo": "{{count}} dk önce",
       "hoursAgo": "{{count}} sa önce",
       "daysAgo": "{{count}} gün önce"
-    }
+    },
+    "markAllRead": "Tümünü okundu işaretle",
+    "dateLocale": "tr"
   },
-
   "reservations": {
     "title": "Rezervasyonlarım",
     "subtitle": "Tüm rezervasyon taleplerinizi görüntüleyin ve yönetin.",
@@ -892,9 +900,25 @@
     },
     "showing": "Gösterilen",
     "of": "/",
-    "reservations": "rezervasyon"
+    "reservations": "rezervasyon",
+    "status": {
+      "pending": "Beklemede",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi",
+      "cancelled": "İptal Edildi",
+      "refundRequested": "İade Talep Edildi",
+      "refunded": "İade Edildi"
+    },
+    "paymentStatus": {
+      "pending": "Ödeme Doğrulanıyor",
+      "confirmed": "Ödeme Onaylandı",
+      "rejected": "Ödeme Reddedildi"
+    },
+    "poll": {
+      "approved": "Rezervasyonunuz onaylandı!",
+      "approvedDesc": "#{{id}} numaralı rezervasyon — artık ödeme adımına geçebilirsiniz."
+    }
   },
-
   "bookRoom": {
     "keyPickupTitle": "Oda Kartı Teslim Bilgileri",
     "keyPickup": "16:30'a kadar olan girişlerinizde oda giriş kartınızı imza karşılığı resepsiyon alanından alabilirsiniz. 16:30 sonrası girişlerinizde oda kartı kapalı bir zarfla ana güvenlik kapısına bırakılacaktır.",
@@ -963,7 +987,8 @@
       "billingAddressRequired": "Fatura adresi zorunludur.",
       "identityDocRequired": "Lütfen kimlik veya pasaport kopyanızı yükleyin.",
       "consent": "Lütfen şartlar ve koşulları kabul edin.",
-      "notLoggedIn": "Giriş yapmanız gerekmektedir."
+      "notLoggedIn": "Giriş yapmanız gerekmektedir.",
+      "identityDocRequiredFor": "Lütfen {{n}}. misafir için kimlik veya pasaport yükleyin."
     },
     "step1": {
       "label": "Konaklama Tarihleri",
@@ -1027,9 +1052,12 @@
     },
     "timePicker": {
       "label": "Saat Seç veya Yaz"
-    }
+    },
+    "identityDocDiscardConfirm": "Misafir sayısını {{n}} kişiye düşürmek, {{indices}}. misafir için yüklenen belgeleri silecek. Devam edilsin mi?",
+    "identityDocGuestLabel": "Misafir",
+    "identityDocHelpPerGuest": "Her misafir için T.C. kimlik kartı veya pasaport kopyası yükleyin. Kabul edilen formatlar: PDF, JPG, PNG (en fazla 5 MB).",
+    "checkOutTime": "Beklenen Çıkış Saati"
   },
-
   "contact": {
     "pageTitle": "Destek İletişim",
     "subtitle": "Ekibimiz rezervasyon, ödeme ve otelle ilgili her türlü sorunuzda yardımcı olmaya hazır.",
@@ -1047,6 +1075,35 @@
       "paymentDesc": "Banka transferi, dekont yükleme veya ödeme onayı ile ilgili sorunlar.",
       "cancellation": "İptal & İade",
       "cancellationDesc": "Rezervasyon iptali veya iade durumu hakkında talepler."
+    }
+  },
+  "myReservations": {
+    "live": "Canlı",
+    "checkIn": "Giriş",
+    "room": "Oda",
+    "event": "Etkinlik",
+    "programCode": "Program Kodu",
+    "freeAccommodation": "Ücretsiz Konaklama",
+    "cancelledByYou": "Sizin tarafınızdan iptal edildi.",
+    "cancelFailed": "Rezervasyon iptal edilemedi.",
+    "checkOut": "Çıkış"
+  },
+  "enums": {
+    "accommodation": {
+      "PERSONAL": "Kişisel",
+      "CORPORATE": "Kurumsal",
+      "EDUCATION": "Eğitim"
+    },
+    "invoice": {
+      "INDIVIDUAL": "Bireysel",
+      "CORPORATE": "Kurumsal"
+    },
+    "userType": {
+      "STUDENT": "Öğrenci",
+      "STAFF": "Personel",
+      "SPECIAL_GUEST": "Özel Misafir",
+      "PARENT": "Veli",
+      "OTHER": "Diğer"
     }
   }
 }

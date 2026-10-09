@@ -26,8 +26,9 @@ import {
   SelectValue,
 } from "./ui/select";
 import { NotificationBell } from "./NotificationBell";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 
 /* ─── Inject animation styles ───────────────────────── */
 if (!document.getElementById("notif-anim")) {
@@ -93,7 +94,7 @@ function timeAgo(timestamp: string, t: (key: string, opts?: object) => string): 
   if (hours < 24) return t("notifications.timeAgo.hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
   if (days < 7) return t("notifications.timeAgo.daysAgo", { count: days });
-  return then.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  return then.toLocaleDateString(t("notifications.dateLocale") === "tr" ? "tr-TR" : "en-GB", { day: "2-digit", month: "short" });
 }
 
 export function NotificationsPage() {
@@ -200,11 +201,11 @@ export function NotificationsPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </Link>
             </div>

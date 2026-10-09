@@ -2,12 +2,14 @@ import React from "react";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import { getUserReservations, cancelReservation, type Reservation } from "../api/reservations";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import {
   CalendarDays,
   Clock,
@@ -113,7 +115,7 @@ const stagger = (i: number): React.CSSProperties => ({
 });
 
 const formatDate = (iso: string) => {
-  try { return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }); }
+  try { return new Date(iso).toLocaleDateString(i18n.language?.startsWith("tr") ? "tr-TR" : "en-GB", { day: "2-digit", month: "short", year: "numeric" }); }
   catch { return iso; }
 };
 
@@ -269,7 +271,7 @@ export function MyReservations() {
           if (prev === "PENDING" && r.status === "APPROVED") {
             newlyApproved.push(r.id);
             toast.success(t("reservations.poll.approved", { defaultValue: "Your reservation has been approved!" }), {
-              description: t("reservations.poll.approvedDesc", { id: r.id, defaultValue: `Reservation #${r.id} — you can now proceed to payment.` }),
+              description: t("reservations.poll.approvedDesc", { id: r.id }),
               duration: 7000,
             });
           }
@@ -349,11 +351,11 @@ export function MyReservations() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </Link>
             </div>
@@ -436,7 +438,7 @@ export function MyReservations() {
               </p>
               <div className="flex items-center gap-1.5 mt-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ animation: "myresPulseDot 1.8s ease-in-out infinite", boxShadow: "0 0 4px #34d39980" }} />
-                <span className="text-[10px] font-bold tracking-[2px] uppercase text-emerald-400/80">Live</span>
+                <span className="text-[10px] font-bold tracking-[2px] uppercase text-emerald-400/80">{t("myReservations.live")}</span>
               </div>
             </div>
 
@@ -641,7 +643,7 @@ export function MyReservations() {
                         <PaymentBadge paymentStatus={ps} />
                         {r.accommodationType && (
                           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
-                            {r.accommodationType}
+                            {t(`enums.accommodation.${r.accommodationType}`, r.accommodationType)}
                           </span>
                         )}
                       </div>
@@ -730,18 +732,24 @@ export function MyReservations() {
                             {r.checkInTime && (
                               <div className="flex items-center gap-2 text-sm text-gray-700">
                                 <Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                                Check-in: {r.checkInTime}
+                                {t("myReservations.checkIn")}: {r.checkInTime}
+                              </div>
+                            )}
+                            {(r as any).checkOutTime && (
+                              <div className="flex items-center gap-2 text-sm text-gray-700">
+                                <Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                {t("myReservations.checkOut")}: {(r as any).checkOutTime}
                               </div>
                             )}
                             {r.room && (
                               <div className="flex items-center gap-2 text-sm text-gray-700">
                                 <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                                Room: {r.room.name} ({r.room.type})
+                                {t("myReservations.room")}: {r.room.name} ({r.room.type})
                               </div>
                             )}
                             <div className="flex items-center gap-2 text-sm text-gray-700">
                               <Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                              {r.accommodationType} / {r.invoiceType}
+                              {t(`enums.accommodation.${r.accommodationType}`, r.accommodationType)} / {t(`enums.invoice.${r.invoiceType}`, r.invoiceType)}
                             </div>
                           </div>
                         </div>
@@ -756,19 +764,19 @@ export function MyReservations() {
                             {r.eventType && (
                               <div className="flex items-center gap-2 text-sm text-gray-700">
                                 <FileText className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                                Event: {r.eventType}
+                                {t("myReservations.event")}: {t(`bookRoom.eventTypes.${r.eventType}`, r.eventType)}
                               </div>
                             )}
                             {r.eventCode && (
                               <div className="flex items-center gap-2 text-sm text-gray-700">
                                 <Hash className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                                Program Code: {r.eventCode}
+                                {t("myReservations.programCode")}: {r.eventCode}
                               </div>
                             )}
                             {r.freeAccommodation && (
                               <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
                                 <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
-                                Free Accommodation
+                                {t("myReservations.freeAccommodation")}
                               </div>
                             )}
                             {r.note && (
@@ -807,7 +815,7 @@ export function MyReservations() {
                             <p className="text-xs font-bold text-gray-600 mb-0.5 uppercase tracking-wide">
                               {t("reservations.detail.cancellationNote", { defaultValue: "Cancellation Note" })}
                             </p>
-                            <p className="text-sm text-gray-500">{r.note.replace("[Cancelled by user]", "").trim() || "Cancelled by you."}</p>
+                            <p className="text-sm text-gray-500">{r.note.replace("[Cancelled by user]", "").trim() || t("myReservations.cancelledByYou")}</p>
                           </div>
                         </div>
                       )}
@@ -857,7 +865,7 @@ export function MyReservations() {
                                 );
                                 setExpandedId(null);
                               } catch (err: any) {
-                                alert(err.message || "Failed to cancel reservation.");
+                                alert(err.message || t("myReservations.cancelFailed"));
                               }
                             }}
                           >

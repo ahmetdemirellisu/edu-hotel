@@ -5,7 +5,8 @@ const path = require("path");
 const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
 const { sendMailAsync } = require("../services/mail");
-const { emailTemplate, badge, row, detailTable, heading } = require("../services/mailTemplate");
+const { emailTemplate, pick, badge, row, detailTable, heading } = require("../services/mailTemplate");
+const { msg } = require("../utils/lang");
 
 const prisma = new PrismaClient();
 
@@ -48,7 +49,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     if (!allowedTypes.includes(file.mimetype)) {
-      return cb(new Error("Only PDF, JPG/JPEG, PNG files are allowed"));
+      return cb(new Error(msg(req, "Only PDF, JPG/JPEG, PNG files are allowed", "Yalnızca PDF, JPG/JPEG ve PNG dosyaları yüklenebilir.")));
     }
     cb(null, true);
   },
@@ -70,7 +71,7 @@ router.post(
     const { reservationId } = req.params;
     try {
       if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
+        return res.status(400).json({ error: msg(req, "No file uploaded", "Dosya yüklenmedi.") });
       }
 
       // ── Ownership & status checks (BEFORE touching final storage) ────
@@ -79,26 +80,26 @@ router.post(
       });
       if (!existing) {
         cleanupTemp();
-        return res.status(404).json({ error: "Reservation not found." });
+        return res.status(404).json({ error: msg(req, "Reservation not found.", "Rezervasyon bulunamadı.") });
       }
       if (existing.userId !== req.user.userId) {
         cleanupTemp();
-        return res.status(403).json({ error: "Access denied." });
+        return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") });
       }
       if (existing.status !== "APPROVED") {
         cleanupTemp();
-        return res.status(400).json({ error: "Payment can only be submitted for approved reservations." });
+        return res.status(400).json({ error: msg(req, "Payment can only be submitted for approved reservations.", "Ödeme yalnızca onaylanmış rezervasyonlar için gönderilebilir.") });
       }
       if (existing.price == null) {
         cleanupTemp();
-        return res.status(400).json({ error: "Admin has not set a price for this reservation yet. Please wait." });
+        return res.status(400).json({ error: msg(req, "Admin has not set a price for this reservation yet. Please wait.", "Bu rezervasyon için henüz fiyat belirlenmedi. Lütfen bekleyin.") });
       }
 
       // ── Magic bytes validation ───────────────────────────────────────
       const buffer = fs.readFileSync(req.file.path);
       if (buffer.length < 4) {
         cleanupTemp();
-        return res.status(400).json({ error: "File too small to be a valid document." });
+        return res.status(400).json({ error: msg(req, "File too small to be a valid document.", "Dosya, geçerli bir belge olamayacak kadar küçük.") });
       }
       const hex = buffer.toString('hex', 0, 4);
       const isJPG = hex.startsWith('ffd8');
@@ -106,7 +107,7 @@ router.post(
       const isPDF = hex === '25504446';
       if (!isJPG && !isPNG && !isPDF) {
         cleanupTemp();
-        return res.status(400).json({ error: "Invalid file format (magic bytes mismatch)." });
+        return res.status(400).json({ error: msg(req, "Invalid file format (magic bytes mismatch).", "Geçersiz dosya biçimi (dosya içeriği türüyle uyuşmuyor).") });
       }
 
       // ── All checks passed — move temp file to final location ─────────
@@ -123,17 +124,17 @@ router.post(
       const reservation = await prisma.reservation.update({
         where: { id: parseInt(reservationId) },
         data: { paymentStatus: "PENDING_VERIFICATION" },
-        include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true } } },
+        include: { user: { select: { id: true, name: true, email: true, firstName: true, lastName: true, language: true } } },
       });
 
       // ✉️ EMAIL — Payment Receipt Uploaded
       try {
         if (reservation.user?.email) {
           const checkInStr  = reservation.checkIn.toISOString().slice(0, 10);
-          const checkOutStr = reservation.checkOut.toISOString().slice(0, 10);
+          const checkOutStr = reservation.checkOut.toISOString().slice(0, 10) + (reservation.checkOutTime ? ` ${reservation.checkOutTime}` : '');
           const guestName   = reservation.firstName || reservation.user.name || "Guest";
 
-          const subject = `EDU Hotel – Payment receipt received #${reservation.id} / Ödeme dekontu alındı #${reservation.id}`;
+          const subject = pick(reservation.user.language, `EDU Hotel – Payment receipt received #${reservation.id}`, `EDU Hotel – Ödeme dekontu alındı #${reservation.id}`);
 
           const hasGuestNote = typeof reservation.note === "string" && reservation.note.trim().length > 0;
           const hasAdminNote = typeof reservation.adminNote === "string" && reservation.adminNote.trim().length > 0;
@@ -166,7 +167,7 @@ ${detailTable([
 ])}
 <p style="margin:0;font-size:13px;color:#475569;">Doğrulama genellikle 1 iş günü içinde tamamlanır. Sorularınız için <a href="mailto:hotel@sabanciuniv.edu" style="color:#003366;">hotel@sabanciuniv.edu</a> adresinden bize ulaşabilirsiniz.</p>`;
 
-          const text = [
+          const text = pick(reservation.user.language, [
             `Dear ${guestName},`,
             ``,
             `We have received your payment receipt for reservation #${reservation.id}. It is now awaiting verification.`,
@@ -177,9 +178,7 @@ ${detailTable([
             hasAdminNote ? `Admin note: ${reservation.adminNote}` : null,
             ``,
             `Verification is typically completed within 1 business day. You will be notified by email once confirmed.`,
-            ``,
-            `---`,
-            ``,
+            ], [
             `Sayın ${guestName},`,
             ``,
             `#${reservation.id} numaralı rezervasyonunuz için ödeme dekontunuz alınmıştır. Şu an doğrulama beklenmektedir.`,
@@ -190,9 +189,9 @@ ${detailTable([
             hasAdminNote ? `Yönetici notu:  ${reservation.adminNote}` : null,
             ``,
             `Doğrulama genellikle 1 iş günü içinde tamamlanır. Sonuç e-posta ile bildirilecektir.`,
-          ].filter(l => l !== null).join('\n');
+          ]).filter(l => l !== null).join('\n');
 
-          const html = emailTemplate(bodyEN, bodyTR);
+          const html = emailTemplate(bodyEN, bodyTR, reservation.user.language);
           sendMailAsync({ to: reservation.user.email, subject, text, html });
         }
       } catch (mailErr) {
@@ -200,12 +199,12 @@ ${detailTable([
       }
 
       res.json({
-        message: "File uploaded successfully and awaiting admin verification.",
+        message: msg(req, "File uploaded successfully and awaiting admin verification.", "Dosya başarıyla yüklendi, yönetici onayı bekleniyor."),
         filename: req.file.filename,
       });
     } catch (err) {
       console.error("Receipt upload error:", err);
-      res.status(400).json({ error: err.message || "Upload failed" });
+      res.status(400).json({ error: err.message || msg(req, "Upload failed", "Yükleme başarısız oldu.") });
     }
   }
 );
@@ -214,12 +213,12 @@ ${detailTable([
 router.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(413).json({ error: "File too large. Maximum allowed size is 5 MB." });
+      return res.status(413).json({ error: msg(req, "File too large. Maximum allowed size is 5 MB.", "Dosya çok büyük. İzin verilen en büyük boyut 5 MB'dir.") });
     }
     return res.status(400).json({ error: err.message });
   }
   if (err) {
-    return res.status(400).json({ error: err.message || "Upload failed." });
+    return res.status(400).json({ error: err.message || msg(req, "Upload failed.", "Yükleme başarısız oldu.") });
   }
   next();
 });

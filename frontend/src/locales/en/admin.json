@@ -1,787 +1,751 @@
 {
-    "menu": {
-      "dashboard": "Dashboard",
-      "reservations": "Reservations",
-      "createReservation": "New Reservation",
-      "calendar": "Calendar",
-      "rooms": "Rooms",
-      "guests": "Guests",
-      "payments": "Payments",
-      "blacklist": "Blacklist",
-      "reports": "Reports",
-      "adminUsers": "Admin Users",
-      "settings": "Settings",
-      "sectionMain": "Main",
-      "sectionManage": "Management",
-      "sectionSystem": "System"
-    },
-
-    "common": {
-      "adminPanel": "Admin Panel",
-      "searchPlaceholder": "Search...",
-      "edit": "Edit",
-      "cancel": "Cancel",
-      "save": "Save",
-      "collapse": "Collapse",
-      "admin": "Admin",
-      "close": "Close",
-      "approve": "Approve",
-      "reject": "Reject",
-      "today": "Today",
-      "loading": "Loading..."
-    },
-
-    "pages": {
-      "dashboard": {
-        "title": "Dashboard",
-        "pendingReservations": "Pending Requests",
-        "approvedReservations": "Approved",
-        "guestsStaying": "Guests Staying",
-        "availableRooms": "Available Rooms",
-        "fromYesterday": "from yesterday",
-        "quickActions": "Quick Actions",
-        "actions": {
-          "createReservation": "New Reservation",
-          "viewCalendar": "View Calendar",
-          "viewCalendarDesc": "View room availability over time",
-          "addRoom": "Add room",
-          "manageRooms": "Manage Rooms",
-          "manageRoomsDesc": "Floor plan and room status",
-          "pendingPayments": "Pending Payments",
-          "pendingPaymentsDesc": "Verify and process receipts",
-          "guests": "Guests",
-          "guestsDesc": "Manage guests and access levels",
-          "generateReport": "Generate Report",
-          "reportCenter": "Report center"
-        },
-        "latestReservations": "Recent Reservations",
-        "latestBookingActivity": "Latest booking activity",
-        "viewAll": "View all",
-        "open": "Open",
-        "thisWeek": "this week",
-        "noReservationsYet": "No reservations yet.",
-        "noReservationsYetSub": "No reservations have been made yet.",
-        "roomOccupancy": "Room Occupancy",
-        "occupancyRate": "Occupancy Rate",
-        "occupied": "Occupied",
-        "available": "Available",
-        "maintenance": "Under maintenance",
-        "expectedCheckinsToday": "Expected Check-ins Today",
-        "loadingReservations": "Loading latest reservations...",
-        "noReservations": "No reservations have been created yet.",
-        "pendingAlert": {
-          "title_one": "{{count}} pending request",
-          "title_other": "{{count}} pending requests",
-          "message": "Requires your review and approval.",
-          "reviewNow": "Review now"
-        }
+  "menu": {
+    "dashboard": "Dashboard",
+    "reservations": "Reservations",
+    "createReservation": "New Reservation",
+    "calendar": "Calendar",
+    "rooms": "Rooms",
+    "guests": "Guests",
+    "payments": "Payments",
+    "blacklist": "Blacklist",
+    "reports": "Reports",
+    "adminUsers": "Admin Users",
+    "settings": "Settings",
+    "sectionMain": "Main",
+    "sectionManage": "Management",
+    "sectionSystem": "System"
+  },
+  "common": {
+    "adminPanel": "Admin Panel",
+    "searchPlaceholder": "Search...",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "collapse": "Collapse",
+    "admin": "Admin",
+    "close": "Close",
+    "approve": "Approve",
+    "reject": "Reject",
+    "today": "Today",
+    "loading": "Loading..."
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Dashboard",
+      "pendingReservations": "Pending Requests",
+      "approvedReservations": "Approved",
+      "guestsStaying": "Guests Staying",
+      "availableRooms": "Available Rooms",
+      "fromYesterday": "from yesterday",
+      "quickActions": "Quick Actions",
+      "actions": {
+        "createReservation": "New Reservation",
+        "viewCalendar": "View Calendar",
+        "viewCalendarDesc": "View room availability over time",
+        "addRoom": "Add room",
+        "manageRooms": "Manage Rooms",
+        "manageRoomsDesc": "Floor plan and room status",
+        "pendingPayments": "Pending Payments",
+        "pendingPaymentsDesc": "Verify and process receipts",
+        "guests": "Guests",
+        "guestsDesc": "Manage guests and access levels",
+        "generateReport": "Generate Report",
+        "reportCenter": "Report center"
       },
-
-      "reservations": {
-        "title": "Reservation Management"
-      },
-
-      "createReservation": {
-        "title": "Create Reservation",
-        "description": "Add a reservation on behalf of a special guest or for yourself."
-      },
-
-      "reports": {
-        "title": "Reports"
-      },
-
-      "calendar": {
-        "title": "Calendar View",
-        "empty": "No rooms found.",
-        "roomOccupancyCalendar": "Room occupancy calendar",
-        "room": "Room",
-        "prev": "← Prev",
-        "today": "Today",
-        "next": "Next →",
-        "bookings": "{{count}} bookings",
-        "roomsOccupied": "{{occupied}}/{{total}} rooms occupied",
-        "legend": {
-          "pending": "Pending",
-          "approved": "Approved",
-          "confirmed": "Confirmed",
-          "checkedIn": "Checked-in",
-          "canceled": "Canceled"
-        }
-      },
-
-      "rooms": {
-        "title": "Room Management"
-      },
-
-      "guests": {
-        "title": "Guest Management"
-      },
-
-      "payments": {
-        "title": "Payment Management"
-      },
-
-      "blacklist": {
-        "title": "Blacklist Management"
-      },
-
-      "adminUsers": {
-        "title": "Admin User Management"
-      },
-
-      "settings": {
-        "title": "System Settings"
-      },
-      "profile": {
-        "title": "My Profile"
+      "latestReservations": "Recent Reservations",
+      "latestBookingActivity": "Latest booking activity",
+      "viewAll": "View all",
+      "open": "Open",
+      "thisWeek": "this week",
+      "noReservationsYet": "No reservations yet.",
+      "noReservationsYetSub": "No reservations have been made yet.",
+      "roomOccupancy": "Room Occupancy",
+      "occupancyRate": "Occupancy Rate",
+      "occupied": "Occupied",
+      "available": "Available",
+      "maintenance": "Under maintenance",
+      "expectedCheckinsToday": "Expected Check-ins Today",
+      "loadingReservations": "Loading latest reservations...",
+      "noReservations": "No reservations have been created yet.",
+      "pendingAlert": {
+        "title_one": "{{count}} pending request",
+        "title_other": "{{count}} pending requests",
+        "message": "Requires your review and approval.",
+        "reviewNow": "Review now"
       }
     },
-
-    "pageDescriptions": {
-      "dashboard": "Overview of hotel operations and key metrics",
-      "reservations": "Manage reservation requests, approvals, and assignments",
-      "createReservation": "Add a reservation for yourself or for a special guest.",
-      "calendar": "Monthly room occupancy and booking timeline",
-      "rooms": "Room inventory, status, and floor plan management",
-      "guests": "Guest profiles, history, and blacklist management",
-      "payments": "Payment verification queue and receipt management",
-      "blacklist": "Blocked users and access restrictions",
-      "reports": "Generate and download operational reports",
-      "adminUsers": "System administrators and role management",
-      "settings": "Hotel configuration and system preferences",
-      "profile": "Manage your account and security settings"
+    "reservations": {
+      "title": "Reservation Management"
     },
-
-    "tables": {
-      "id": "ID",
-      "guestName": "Guest",
+    "createReservation": {
+      "title": "Create Reservation",
+      "description": "Add a reservation on behalf of a special guest or for yourself."
+    },
+    "reports": {
+      "title": "Reports"
+    },
+    "calendar": {
+      "title": "Calendar View",
+      "empty": "No rooms found.",
+      "roomOccupancyCalendar": "Room occupancy calendar",
+      "room": "Room",
+      "prev": "← Prev",
+      "today": "Today",
+      "next": "Next →",
+      "bookings": "{{count}} bookings",
+      "roomsOccupied": "{{occupied}}/{{total}} rooms occupied",
+      "legend": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "confirmed": "Confirmed",
+        "checkedIn": "Checked-in",
+        "canceled": "Canceled"
+      }
+    },
+    "rooms": {
+      "title": "Room Management"
+    },
+    "guests": {
+      "title": "Guest Management"
+    },
+    "payments": {
+      "title": "Payment Management"
+    },
+    "blacklist": {
+      "title": "Blacklist Management"
+    },
+    "adminUsers": {
+      "title": "Admin User Management"
+    },
+    "settings": {
+      "title": "System Settings"
+    },
+    "profile": {
+      "title": "My Profile"
+    }
+  },
+  "pageDescriptions": {
+    "dashboard": "Overview of hotel operations and key metrics",
+    "reservations": "Manage reservation requests, approvals, and assignments",
+    "createReservation": "Add a reservation for yourself or for a special guest.",
+    "calendar": "Monthly room occupancy and booking timeline",
+    "rooms": "Room inventory, status, and floor plan management",
+    "guests": "Guest profiles, history, and blacklist management",
+    "payments": "Payment verification queue and receipt management",
+    "blacklist": "Blocked users and access restrictions",
+    "reports": "Generate and download operational reports",
+    "adminUsers": "System administrators and role management",
+    "settings": "Hotel configuration and system preferences",
+    "profile": "Manage your account and security settings"
+  },
+  "tables": {
+    "id": "ID",
+    "guestName": "Guest",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "status": "Status",
+    "payment": "Payment",
+    "action": "Action",
+    "actions": "Actions",
+    "name": "Name",
+    "email": "Email",
+    "guestType": "Guest type",
+    "reservationId": "Reservation ID",
+    "date": "Date",
+    "room": "Room",
+    "paymentNotTracked": "N/A",
+    "unknownGuest": "Unknown guest",
+    "guest_one": "guest",
+    "guest_other": "guests",
+    "paymentPaid": "Paid",
+    "paymentPending": "Pending",
+    "paymentRejected": "Rejected",
+    "paymentNA": "N/A"
+  },
+  "commonTable": {
+    "viewAll": "View all",
+    "view": "View"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "newReservation": "New reservation created",
+    "paymentReceived": "Payment received",
+    "checkout": "Guest checked out",
+    "newBadge": "{{count}} new",
+    "time": {
+      "5min": "5 minutes ago",
+      "1h": "1 hour ago",
+      "2h": "2 hours ago"
+    }
+  },
+  "adminUsers": {
+    "addNewAdmin": "Add new admin",
+    "role": "Role",
+    "lastLogin": "Last login",
+    "status": "Status",
+    "disable": "Disable",
+    "resetPassword": "Reset password",
+    "subtitle": "System administrators and staff accounts",
+    "noUsers": "No admin users found.",
+    "noUsersDesc": "Admin user management will be available when the user search API supports role filtering.",
+    "roleSuperAdmin": "Super Admin",
+    "roleHotelStaff": "Hotel Staff",
+    "roleUser": "User",
+    "colType": "Type",
+    "colJoined": "Joined",
+    "adminCount_one": "{{count}} admin",
+    "adminCount_other": "{{count}} admins",
+    "staffBadge": "staff",
+    "memberSince": "Member since {{date}}",
+    "inviteHeading": "Need to add a new team member?",
+    "inviteSubtitle": "Invite admins and staff via the invitation system (coming soon)",
+    "sendInvite": "Send Invite",
+    "systemBadge": "System",
+    "envBased": "Configured in backend .env"
+  },
+  "guests": {
+    "searchPlaceholder": "Search guests by name, type or reservation ID...",
+    "searchPlaceholderSimple": "Search guests...",
+    "filters": {
+      "type": "Guest type",
+      "blacklist": "Status",
+      "allTypes": "All types",
+      "allStatuses": "All statuses"
+    },
+    "types": {
+      "student": "Student",
+      "staff": "Staff",
+      "specialGuest": "Special guest",
+      "parent": "Parent",
+      "other": "Other"
+    },
+    "status": {
+      "active": "Active",
+      "blacklisted": "Blacklisted"
+    },
+    "columns": {
+      "reservations": "Reservations",
+      "lastStay": "Last stay",
+      "status": "Status"
+    },
+    "summary": {
+      "total": "Total guests: {{count}}",
+      "blacklisted": "Blacklisted: {{count}}"
+    },
+    "subtitle": "{{count}} guests · {{blacklisted}} blacklisted",
+    "loading": "Loading guests...",
+    "empty": "No guests found for the selected filters.",
+    "noGuests": "No guests found.",
+    "details": {
+      "title": "Guest details",
+      "reservations": "Reservation history",
+      "noReservations": "This guest has no reservations."
+    },
+    "actions": {
+      "addToBlacklist": "Add to blacklist",
+      "removeFromBlacklist": "Remove from blacklist"
+    },
+    "blacklistReasonPrompt": "Please enter a reason for blacklisting:",
+    "confirmUnblacklist": "Remove this user from the blacklist?",
+    "blacklistReasonSection": "Blacklist Reason",
+    "reservationHistoryTitle": "Reservation History ({{count}})",
+    "noReservationsSimple": "No reservations.",
+    "close": "Close",
+    "filterAllTypes": "All Types",
+    "filterStudent": "Student",
+    "filterStaff": "Staff",
+    "filterSpecialGuest": "Special Guest",
+    "filterOther": "Other",
+    "filterAllStatuses": "All Statuses",
+    "filterActive": "Active",
+    "filterBlacklisted": "Blacklisted",
+    "filterParent": "Parent / Guardian",
+    "failed": "Failed.",
+    "unknownGuest": "Unknown guest",
+    "emptyHint": "Try adjusting your search or filters.",
+    "reservationCount_one": "{{count}} reservation",
+    "reservationCount_other": "{{count}} reservations",
+    "stats": {
+      "active": "active",
+      "blocked": "blocked"
+    },
+    "maxStayOverride": "Max Advance Booking (days)",
+    "maxStayOverrideDesc": "Override the default 30-day advance booking limit for this user. Leave empty to use the default.",
+    "saveOverride": "Save",
+    "saving": "Saving...",
+    "resetDefault": "Reset to 30",
+    "reasonLabel": "Reason"
+  },
+  "blacklist": {
+    "rulesTitle": "Blacklist usage rules",
+    "rulesDescription": "Use the blacklist only for serious violations such as unpaid bills, fraud, or property damage. Always follow legal and data protection requirements.",
+    "title": "Blacklisted guests ({{count}})",
+    "addToBlacklist": "Add to blacklist",
+    "nationalId": "National ID",
+    "reason": "Reason",
+    "addedDate": "Added date",
+    "expiryDate": "Expiry date",
+    "remove": "Remove from blacklist",
+    "searchUser": "Search user by ID, e-mail or name",
+    "searching": "Searching...",
+    "unknownUser": "Unknown user",
+    "blockType": "Block type",
+    "permanent": "Permanent block",
+    "temporary": "Temporary (until date)",
+    "permanentShort": "Permanent",
+    "permanentHint": "For permanent blocks, the expiry date is not required.",
+    "blockedUsers": "{{count}} blocked users",
+    "unknown": "Unknown",
+    "unnamed": "Unnamed",
+    "reasonLabel": "Reason",
+    "searchPlaceholder": "ID, email, or name...",
+    "expiryDateLabel": "Expiry Date",
+    "blockUser": "Block User",
+    "colUser": "User",
+    "colEmail": "Email",
+    "colReason": "Reason",
+    "colAdded": "Added",
+    "colExpires": "Expires",
+    "colActions": "Actions",
+    "validation": {
+      "required": "User and reason are required.",
+      "expiryRequired": "Please select an expiry date for a temporary block."
+    },
+    "reasonPlaceholder": "Enter reason",
+    "userId": "User ID",
+    "confirmRemove": "Remove this user from blacklist?",
+    "loading": "Loading blacklist...",
+    "empty": "There are no blacklisted users.",
+    "emptyHint": "The blacklist is currently empty.",
+    "blocked": "Blocked",
+    "modalSubtitle": "Block a user from making reservations",
+    "noExpiry": "No expiry date",
+    "untilDate": "Until a date"
+  },
+  "payments": {
+    "totalRevenue": "Total revenue",
+    "pendingPayments": "Pending payments",
+    "thisMonth": "Revenue this month",
+    "amount": "Amount",
+    "paymentStatus": "Payment status",
+    "viewReceipt": "View receipt",
+    "downloadReceipt": "Download receipt",
+    "approvePayment": "Approve payment",
+    "subtitle": "Review and verify uploaded payment receipts",
+    "pendingVerification": "Pending Verification",
+    "approvedToday": "Approved Today",
+    "rejectedToday": "Rejected Today",
+    "noReceipts": "No pending receipts",
+    "noReceiptsDesc": "All payment receipts have been processed.",
+    "colReservation": "Reservation",
+    "colUser": "User",
+    "colGuestName": "Guest Name",
+    "colEmail": "Email",
+    "colReceipt": "Receipt",
+    "preview": "Preview",
+    "download": "Download",
+    "confirmApproval": "Confirm payment approval?",
+    "rejectReasonPrompt": "Enter rejection reason (optional):",
+    "receiptNotFound": "Receipt file not found.",
+    "rejectFailed": "Failed to reject payment.",
+    "refresh": "Refresh",
+    "upToDate": "Up to date",
+    "userId": "User ID",
+    "unknownGuest": "Unknown guest",
+    "capacity": "Capacity",
+    "assignFailed": "Failed to assign rooms.",
+    "approveFailed": "Failed to approve.",
+    "noAvailableRooms": "No available rooms.",
+    "allAssignedDesc": "No reservations awaiting room assignment.",
+    "allAssigned": "All rooms assigned!",
+    "assignRoom": "Assign Room",
+    "assignRoomsAction": "Assign {{count}} Room(s)",
+    "guests": "guests",
+    "needsRoom": "Needs Room",
+    "pendingAssignment": "Pending Room Assignment",
+    "pendingAssignmentDesc": "Reservations with verified payment awaiting room assignment",
+    "receiptPreview": "Receipt Preview",
+    "selectRooms": "Select Rooms",
+    "selectedCount": "{{selected}} of {{required}} selected"
+  },
+  "reports": {
+    "generateReports": "Generate and download reports",
+    "subtitle": "Generate and download operational reports",
+    "daily": "Daily report",
+    "dailyDesc": "Summary of today's reservations, check-ins, check-outs and payments.",
+    "monthly": "Monthly report",
+    "monthlyDesc": "Overview of reservations, occupancy and revenue for the selected month.",
+    "roomOccupancy": "Room occupancy report",
+    "roomOccupancyDesc": "Detailed occupancy information by room and date.",
+    "revenue": "Revenue report",
+    "revenueDesc": "Income breakdown by payment status, room type and date.",
+    "generateButton": "Generate report",
+    "optionsTitle": "Generation Options",
+    "dateRange": "Date Range",
+    "format": "Output Format",
+    "downloadReport": "Generate Report",
+    "tags": {
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "occupancy": "Occupancy",
+      "revenue": "Revenue"
+    },
+    "from": "From",
+    "to": "To",
+    "formatHint": {
+      "pdf": "PDF document, ready to print",
+      "xlsx": "Excel spreadsheet",
+      "docx": "Word document",
+      "csv": "Excel-friendly, UTF-8"
+    },
+    "formatNote": "Reports are downloaded as CSV files compatible with Excel and Google Sheets.",
+    "generating": "Generating...",
+    "selectedHint": "{{tag}} report selected",
+    "selectPrompt": "Select a report type above",
+    "selectFirst": "Please select a report type above.",
+    "downloaded": "Report downloaded: {{name}}",
+    "generateFailed": "Failed to generate report."
+  },
+  "reservations": {
+    "search": "Search reservations",
+    "searchPlaceholder": "Search by guest, reservation ID or room...",
+    "searchByAll": "Search by name, email, phone, or ID...",
+    "status": "Status",
+    "guestType": "Guest type",
+    "dateRange": "Date",
+    "applyFilters": "Apply filters",
+    "allReservations": "All reservations ({{count}})",
+    "createReservation": "Create reservation",
+    "approve": "Approve reservation",
+    "reject": "Reject reservation",
+    "assignRoom": "Assign room",
+    "totalCount": "{{count}} total reservations",
+    "filterAll": "All",
+    "tableColResType": "Res. Type",
+    "tableColEventType": "Event Type",
+    "showingCount": "Showing {{shown}} of {{total}} reservations",
+    "filters": {
+      "allStatus": "All statuses",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "canceled": "Canceled",
+      "allTypes": "All guest types",
+      "student": "Student",
+      "personnel": "Personnel",
+      "visitor": "Visitor"
+    },
+    "statusLabels": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "canceled": "Canceled",
+      "refundRequested": "Refund requested",
+      "refunded": "Refunded",
+      "checkedIn": "Checked-in",
+      "completed": "Completed"
+    },
+    "guestTypes": {
+      "personal": "Personal",
+      "corporate": "Corporate",
+      "education": "Education"
+    },
+    "eventTypes": {
+      "conference": "Conference",
+      "seminar": "Seminar",
+      "workshop": "Workshop",
+      "training": "Training",
+      "meeting": "Meeting",
+      "other": "Other"
+    },
+    "invoiceTypes": {
+      "individual": "Individual",
+      "corporate": "Corporate"
+    },
+    "rejectReasonPrompt": "Please enter a reason for rejection (optional):",
+    "guestTypeDisabledHint": "Guest type is derived from accommodation type (personal / corporate / education).",
+    "summary": {
+      "total": "Total reservations: {{count}}",
+      "pending": "Pending: {{count}}"
+    },
+    "loading": "Loading reservations...",
+    "empty": "No reservations found for the selected filters.",
+    "createReservationDisabledHint": "Admin-created reservations will be implemented later.",
+    "toasts": {
+      "approved": "Reservation {{id}} approved successfully.",
+      "rejected": "Reservation {{id}} has been rejected.",
+      "roomAssigned": "Room(s) assigned to {{id}}"
+    },
+    "approveModal": {
+      "title": "Approve Reservation {{id}}",
+      "desc": "Set the price for this reservation. The user will be notified by email.",
+      "priceLabel": "Price (TL)",
+      "pricePlaceholder": "Enter amount in TL",
+      "priceHint": "The price will be included in the approval email sent to the guest.",
+      "priceRequired": "Please enter a valid price greater than 0.",
+      "approving": "Approving...",
+      "approveBtn": "Approve Reservation",
+      "adminNoteLabel": "Admin note (optional)",
+      "adminNotePlaceholder": "Visible to the guest in the approval and confirmation emails."
+    },
+    "assignModal": {
+      "forReservation": "For reservation",
+      "guests": "guest(s)",
+      "roomsSelected": "room(s) selected",
+      "capacity": "Capacity",
+      "capacityOk": "OK",
+      "capacityShort": "Under capacity",
+      "confirmBtn": "Assign Selected",
+      "assigning": "Assigning...",
+      "adminNoteLabel": "Admin note (optional)",
+      "adminNotePlaceholder": "Optional note for the guest, sent with the assignment email."
+    },
+    "capacity": "Capacity",
+    "noAvailableRooms": "No available rooms found.",
+    "detail": {
+      "guestInfo": "Guest Information",
+      "stayDetails": "Stay Details",
+      "billingEvent": "Billing & Event",
+      "checkInLabel": "Check-in",
+      "freeAccommodation": "Free Accommodation",
+      "eventLabel": "Event",
+      "codeLabel": "Program Code",
+      "tcLabel": "TC",
+      "taxLabel": "Tax",
+      "additionalGuests": "Additional Guests",
+      "note": "Note",
+      "adminNote": "Admin note",
+      "guestNote": "Guest's note",
+      "identityDocuments": "Identity Documents",
+      "legacyIdentityDoc": "Legacy ID document (single)",
+      "created": "Created",
+      "guest_one": "{{count}} guest",
+      "guest_other": "{{count}} guests",
+      "checkOutLabel": "Check-out"
+    }
+  },
+  "rooms": {
+    "addNewRoom": "Add new room",
+    "roomLabel": "Room {{number}}",
+    "typeLabel": "Type: {{type}}",
+    "capacity": "Capacity",
+    "guestSingular": "guest",
+    "guestPlural": "guests",
+    "price": "Price",
+    "perNight": "per night",
+    "amenities": "Amenities",
+    "statusAvailable": "Available",
+    "statusOccupied": "Occupied",
+    "statusMaintenance": "Maintenance",
+    "statusReserved": "Reserved",
+    "today": "Today",
+    "viewFloor": "Floor Plan",
+    "viewGrid": "Cards",
+    "noRooms": "No rooms found.",
+    "roomsCount": "{{count}} rooms",
+    "drawer": {
+      "floor": "Floor 2",
+      "type": "Type",
+      "doubleRoom": "Double Room",
+      "singleRoom": "Single Room",
+      "perNight": "/night",
+      "occupiedTitle": "Occupied",
+      "maintenanceTitle": "Under Maintenance",
+      "maintenanceDesc": "Room is unavailable for booking.",
+      "reservedTitle": "Reserved for Special Guests",
+      "reservedDesc": "This room is permanently reserved and cannot be booked through the system.",
+      "changeStatus": "Change Base Status",
+      "optAvailable": "Available",
+      "optMaintenance": "Maintenance",
+      "optReserved": "Reserved (Special Guests)",
+      "saving": "Saving...",
+      "updateStatus": "Update Status",
+      "guest_one": "guest",
+      "guest_other": "guests"
+    },
+    "grid": {
+      "double": "Double",
+      "single": "Single",
+      "perNight": "/night",
+      "guest_one": "guest",
+      "guest_other": "guests"
+    },
+    "doubleLabel": "DOUBLE",
+    "guestLabel": "Guest",
+    "roomHeading": "Room {{name}}",
+    "loadingArch": "LOADING ARCHITECTURE..."
+  },
+  "settings": {
+    "generalSettings": "Hotel Identity",
+    "hotelName": "Hotel name",
+    "contactEmail": "Contact e-mail",
+    "contactPhone": "Contact phone",
+    "bookingSettings": "Booking Rules",
+    "autoApprove": "Auto-approve reservations",
+    "autoApproveDesc": "New reservations are created as APPROVED instead of PENDING.",
+    "minBookingAdvance": "Max advance booking (days)",
+    "maxBookingDuration": "Max consecutive nights (personal)",
+    "saveSettings": "Save settings",
+    "saving": "Saving…",
+    "loading": "Loading settings…",
+    "saved": "Settings saved!",
+    "saveFailed": "Failed to save settings.",
+    "unsaved": "Unsaved changes",
+    "upToDate": "All changes saved",
+    "subtitle": "Hotel configuration and system preferences",
+    "emailNotifications": "Email Notifications",
+    "emailNotificationsDesc": "When off, transactional emails are suppressed. Security emails (password reset) still send.",
+    "guestInfo": "Guest-facing Info",
+    "checkInTime": "Check-in time",
+    "checkOutTime": "Check-out time",
+    "breakfastHours": "Breakfast hours",
+    "receptionHours": "Reception hours",
+    "wifi": "Guest Wi-Fi",
+    "wifiSsid": "Network (SSID)",
+    "wifiPassword": "Password",
+    "banking": "Bank Transfer Details",
+    "bankName": "Bank name",
+    "accountHolder": "Account holder",
+    "iban": "IBAN",
+    "hints": {
+      "platformName": "The name displayed across the platform",
+      "contactEmail": "Shown in all guest-facing emails and support pages.",
+      "minHours": "Minimum hours before check-in",
+      "maxNights": "Cap for personal accommodation type.",
+      "maxAdvance": "Furthest into the future a guest may book.",
+      "checkInTime": "Shown in confirmation emails and the concierge.",
+      "wifi": "Shown in the EduConcierge quick-action panel.",
+      "iban": "Shown to guests on the Payment page after their reservation is approved."
+    }
+  },
+  "calendar": {
+    "loading": "Loading calendar…",
+    "roomsCount_one": "{{count}} room",
+    "roomsCount_other": "{{count}} rooms",
+    "bookingsCount_one": "{{count}} active booking",
+    "bookingsCount_other": "{{count}} active bookings"
+  },
+  "adminProfile": {
+    "brand": "EDU Education Hotel Admin"
+  },
+  "createReservation": {
+    "optional": "OPTIONAL",
+    "submit": "Create Reservation",
+    "submitting": "Creating…",
+    "statusHint": "Created as APPROVED. Visible in Reservations and Guests immediately.",
+    "errors": {
+      "datesRequired": "Check-in and check-out dates are required.",
+      "checkoutAfter": "Check-out must be after check-in.",
+      "emailRequired": "A valid guest email is required so the reservation can be linked to a user.",
+      "guestsRequired": "Guest count must be at least 1.",
+      "generic": "Failed to create reservation."
+    },
+    "mode": {
+      "self": "For yourself",
+      "guest": "For special guest"
+    },
+    "sections": {
+      "dates": "Dates",
+      "yourInfo": "Your information",
+      "guestInfo": "Guest information",
+      "stayDetails": "Stay details",
+      "stayHint": "Accommodation type is not collected here — leave any field blank if it doesn't apply.",
+      "billing": "Billing"
+    },
+    "fields": {
       "checkIn": "Check-in",
       "checkOut": "Check-out",
-      "status": "Status",
-      "payment": "Payment",
-      "action": "Action",
-      "actions": "Actions",
-      "name": "Name",
+      "checkInTime": "Check-in time",
+      "firstName": "First name",
+      "lastName": "Last name",
       "email": "Email",
+      "phone": "Phone",
+      "guests": "Number of guests",
       "guestType": "Guest type",
-      "reservationId": "Reservation ID",
-      "date": "Date",
-      "room": "Room",
-      "paymentNotTracked": "N/A",
-      "unknownGuest": "Unknown guest",
-      "guest_one": "guest",
-      "guest_other": "guests",
-      "paymentPaid": "Paid",
-      "paymentPending": "Pending",
-      "paymentRejected": "Rejected",
-      "paymentNA": "N/A"
+      "guestTypeDefault": "Default: Special guest",
+      "eventType": "Event type",
+      "eventCode": "Program code",
+      "priceType": "Price type",
+      "note": "Guest note",
+      "adminNote": "Admin note",
+      "freeAccommodation": "Free accommodation",
+      "invoiceType": "Invoice type",
+      "nationalId": "National ID / Passport",
+      "taxNumber": "Tax number",
+      "billingTitle": "Billing title",
+      "billingAddress": "Billing address",
+      "price": "Price (TL)",
+      "checkOutTime": "Check-out time"
     },
-
-    "commonTable": {
-      "viewAll": "View all",
-      "view": "View"
+    "placeholders": {
+      "note": "Any preferences from the guest…",
+      "adminNote": "Visible to the guest in confirmation emails."
     },
-
-    "notifications": {
-      "title": "Notifications",
-      "newReservation": "New reservation created",
-      "paymentReceived": "Payment received",
-      "checkout": "Guest checked out",
-      "newBadge": "{{count}} new",
-      "time": {
-        "5min": "5 minutes ago",
-        "1h": "1 hour ago",
-        "2h": "2 hours ago"
-      }
+    "hints": {
+      "email": "Used to find or create the underlying user record."
     },
-
-
-    "adminUsers": {
-      "addNewAdmin": "Add new admin",
-      "role": "Role",
-      "lastLogin": "Last login",
-      "status": "Status",
-      "disable": "Disable",
-      "resetPassword": "Reset password",
-      "subtitle": "System administrators and staff accounts",
-      "noUsers": "No admin users found.",
-      "noUsersDesc": "Admin user management will be available when the user search API supports role filtering.",
-      "roleSuperAdmin": "Super Admin",
-      "roleHotelStaff": "Hotel Staff",
-      "roleUser": "User",
-      "colType": "Type",
-      "colJoined": "Joined",
-      "adminCount_one": "{{count}} admin",
-      "adminCount_other": "{{count}} admins",
-      "staffBadge": "staff",
-      "memberSince": "Member since {{date}}",
-      "inviteHeading": "Need to add a new team member?",
-      "inviteSubtitle": "Invite admins and staff via the invitation system (coming soon)",
-      "sendInvite": "Send Invite",
-      "systemBadge": "System",
-      "envBased": "Configured in backend .env"
-    },
-
-    "guests": {
-        "searchPlaceholder": "Search guests by name, type or reservation ID...",
-        "searchPlaceholderSimple": "Search guests...",
-        "filters": {
-            "type": "Guest type",
-            "blacklist": "Status",
-            "allTypes": "All types",
-            "allStatuses": "All statuses"
-        },
-        "types": {
-            "student": "Student",
-            "staff": "Staff",
-            "specialGuest": "Special guest",
-            "parent": "Parent",
-            "other": "Other"
-        },
-        "status": {
-            "active": "Active",
-            "blacklisted": "Blacklisted"
-        },
-        "columns": {
-            "reservations": "Reservations",
-            "lastStay": "Last stay",
-            "status": "Status"
-        },
-        "summary": {
-            "total": "Total guests: {{count}}",
-            "blacklisted": "Blacklisted: {{count}}"
-        },
-        "subtitle": "{{count}} guests · {{blacklisted}} blacklisted",
-        "loading": "Loading guests...",
-        "empty": "No guests found for the selected filters.",
-        "noGuests": "No guests found.",
-        "details": {
-            "title": "Guest details",
-            "reservations": "Reservation history",
-            "noReservations": "This guest has no reservations."
-        },
-        "actions": {
-            "addToBlacklist": "Add to blacklist",
-            "removeFromBlacklist": "Remove from blacklist"
-        },
-        "blacklistReasonPrompt": "Please enter a reason for blacklisting:",
-        "confirmUnblacklist": "Remove this user from the blacklist?",
-        "blacklistReasonSection": "Blacklist Reason",
-        "reservationHistoryTitle": "Reservation History ({{count}})",
-        "noReservationsSimple": "No reservations.",
-        "close": "Close",
-        "filterAllTypes": "All Types",
-        "filterStudent": "Student",
-        "filterStaff": "Staff",
-        "filterSpecialGuest": "Special Guest",
-        "filterOther": "Other",
-        "filterAllStatuses": "All Statuses",
-        "filterActive": "Active",
-        "filterBlacklisted": "Blacklisted",
-        "filterParent": "Parent / Guardian",
-        "failed": "Failed.",
-        "unknownGuest": "Unknown guest",
-        "emptyHint": "Try adjusting your search or filters.",
-        "reservationCount_one": "{{count}} reservation",
-        "reservationCount_other": "{{count}} reservations",
-        "stats": {
-            "active": "active",
-            "blocked": "blocked"
-        },
-        "maxStayOverride": "Max Advance Booking (days)",
-        "maxStayOverrideDesc": "Override the default 30-day advance booking limit for this user. Leave empty to use the default.",
-        "saveOverride": "Save",
-        "saving": "Saving...",
-        "resetDefault": "Reset to 30",
-        "reasonLabel": "Reason"
-    },
-
-
-    "blacklist": {
-      "rulesTitle": "Blacklist usage rules",
-      "rulesDescription": "Use the blacklist only for serious violations such as unpaid bills, fraud, or property damage. Always follow legal and data protection requirements.",
-      "title": "Blacklisted guests ({{count}})",
-      "addToBlacklist": "Add to blacklist",
-      "nationalId": "National ID",
-      "reason": "Reason",
-      "addedDate": "Added date",
-      "expiryDate": "Expiry date",
-      "remove": "Remove from blacklist",
-      "searchUser": "Search user by ID, e-mail or name",
-      "searching": "Searching...",
-      "unknownUser": "Unknown user",
-      "blockType": "Block type",
-      "permanent": "Permanent block",
-      "temporary": "Temporary (until date)",
-      "permanentShort": "Permanent",
-      "permanentHint": "For permanent blocks, the expiry date is not required.",
-      "blockedUsers": "{{count}} blocked users",
-      "unknown": "Unknown",
-      "unnamed": "Unnamed",
-      "reasonLabel": "Reason",
-      "searchPlaceholder": "ID, email, or name...",
-      "expiryDateLabel": "Expiry Date",
-      "blockUser": "Block User",
-      "colUser": "User",
-      "colEmail": "Email",
-      "colReason": "Reason",
-      "colAdded": "Added",
-      "colExpires": "Expires",
-      "colActions": "Actions",
-
-      "validation": {
-        "required": "User and reason are required.",
-        "expiryRequired": "Please select an expiry date for a temporary block."
-      },
-      "reasonPlaceholder": "Enter reason",
-      "userId": "User ID",
-
-      "confirmRemove": "Remove this user from blacklist?",
-      "loading": "Loading blacklist...",
-      "empty": "There are no blacklisted users.",
-      "emptyHint": "The blacklist is currently empty.",
-      "blocked": "Blocked",
-      "modalSubtitle": "Block a user from making reservations",
-      "noExpiry": "No expiry date",
-      "untilDate": "Until a date"
-    },
-
-    "payments": {
-        "totalRevenue": "Total revenue",
-        "pendingPayments": "Pending payments",
-        "thisMonth": "Revenue this month",
-        "amount": "Amount",
-        "paymentStatus": "Payment status",
-        "viewReceipt": "View receipt",
-        "downloadReceipt": "Download receipt",
-        "approvePayment": "Approve payment",
-        "subtitle": "Review and verify uploaded payment receipts",
-        "pendingVerification": "Pending Verification",
-        "approvedToday": "Approved Today",
-        "rejectedToday": "Rejected Today",
-        "noReceipts": "No pending receipts",
-        "noReceiptsDesc": "All payment receipts have been processed.",
-        "colReservation": "Reservation",
-        "colUser": "User",
-        "colGuestName": "Guest Name",
-        "colEmail": "Email",
-        "colReceipt": "Receipt",
-        "preview": "Preview",
-        "download": "Download",
-        "confirmApproval": "Confirm payment approval?",
-        "rejectReasonPrompt": "Enter rejection reason (optional):",
-        "receiptNotFound": "Receipt file not found.",
-        "rejectFailed": "Failed to reject payment.",
-        "refresh": "Refresh",
-        "upToDate": "Up to date",
-        "userId": "User ID",
-        "unknownGuest": "Unknown guest",
-        "capacity": "Capacity",
-        "assignFailed": "Failed to assign rooms.",
-        "approveFailed": "Failed to approve.",
-        "noAvailableRooms": "No available rooms.",
-        "allAssignedDesc": "No reservations awaiting room assignment.",
-        "allAssigned": "All rooms assigned!",
-        "assignRoom": "Assign Room",
-        "assignRoomsAction": "Assign {{count}} Room(s)",
-        "guests": "guests",
-        "needsRoom": "Needs Room",
-        "pendingAssignment": "Pending Room Assignment",
-        "pendingAssignmentDesc": "Reservations with verified payment awaiting room assignment",
-        "receiptPreview": "Receipt Preview",
-        "selectRooms": "Select Rooms",
-        "selectedCount": "{{selected}} of {{required}} selected"
-    },
-
-    "reports": {
-        "generateReports": "Generate and download reports",
-        "subtitle": "Generate and download operational reports",
-        "daily": "Daily report",
-        "dailyDesc": "Summary of today's reservations, check-ins, check-outs and payments.",
-        "monthly": "Monthly report",
-        "monthlyDesc": "Overview of reservations, occupancy and revenue for the selected month.",
-        "roomOccupancy": "Room occupancy report",
-        "roomOccupancyDesc": "Detailed occupancy information by room and date.",
-        "revenue": "Revenue report",
-        "revenueDesc": "Income breakdown by payment status, room type and date.",
-        "generateButton": "Generate report",
-        "optionsTitle": "Generation Options",
-        "dateRange": "Date Range",
-        "format": "Output Format",
-        "downloadReport": "Generate Report",
-        "tags": {
-            "daily": "Daily",
-            "monthly": "Monthly",
-            "occupancy": "Occupancy",
-            "revenue": "Revenue"
-        },
-        "from": "From",
-        "to": "To",
-        "formatHint": {
-            "pdf": "PDF document, ready to print",
-            "xlsx": "Excel spreadsheet",
-            "docx": "Word document",
-            "csv": "Excel-friendly, UTF-8"
-        },
-        "formatNote": "Reports are downloaded as CSV files compatible with Excel and Google Sheets.",
-        "generating": "Generating...",
-        "selectedHint": "{{tag}} report selected",
-        "selectPrompt": "Select a report type above",
-        "selectFirst": "Please select a report type above.",
-        "downloaded": "Report downloaded: {{name}}",
-        "generateFailed": "Failed to generate report."
-    },
-
-    "reservations": {
-        "search": "Search reservations",
-        "searchPlaceholder": "Search by guest, reservation ID or room...",
-        "searchByAll": "Search by name, email, phone, or ID...",
-        "status": "Status",
-        "guestType": "Guest type",
-        "dateRange": "Date",
-        "applyFilters": "Apply filters",
-        "allReservations": "All reservations ({{count}})",
-        "createReservation": "Create reservation",
-        "approve": "Approve reservation",
-        "reject": "Reject reservation",
-        "assignRoom": "Assign room",
-        "totalCount": "{{count}} total reservations",
-        "filterAll": "All",
-        "tableColResType": "Res. Type",
-        "tableColEventType": "Event Type",
-        "showingCount": "Showing {{shown}} of {{total}} reservations",
-        "filters": {
-            "allStatus": "All statuses",
-            "pending": "Pending",
-            "approved": "Approved",
-            "rejected": "Rejected",
-            "canceled": "Canceled",
-            "allTypes": "All guest types",
-            "student": "Student",
-            "personnel": "Personnel",
-            "visitor": "Visitor"
-        },
-        "statusLabels": {
-            "pending": "Pending",
-            "approved": "Approved",
-            "rejected": "Rejected",
-            "canceled": "Canceled",
-            "refundRequested": "Refund requested",
-            "refunded": "Refunded",
-            "checkedIn": "Checked-in",
-            "completed": "Completed"
-          },
-          "guestTypes": {
-            "personal": "Personal",
-            "corporate": "Corporate",
-            "education": "Education"
-          },
-          "eventTypes": {
-            "conference": "Conference",
-            "seminar":    "Seminar",
-            "workshop":   "Workshop",
-            "training":   "Training",
-            "meeting":    "Meeting",
-            "other":      "Other"
-          },
-          "invoiceTypes": {
-            "individual": "Individual",
-            "corporate":  "Corporate"
-          },
-          "rejectReasonPrompt": "Please enter a reason for rejection (optional):",
-          "guestTypeDisabledHint": "Guest type is derived from accommodation type (personal / corporate / education).",
-          "summary": {
-            "total": "Total reservations: {{count}}",
-            "pending": "Pending: {{count}}"
-          },
-          "loading": "Loading reservations...",
-          "empty": "No reservations found for the selected filters.",
-          "createReservationDisabledHint": "Admin-created reservations will be implemented later.",
-          "toasts": {
-            "approved": "Reservation {{id}} approved successfully.",
-            "rejected": "Reservation {{id}} has been rejected.",
-            "roomAssigned": "Room(s) assigned to {{id}}"
-          },
-          "approveModal": {
-            "title": "Approve Reservation {{id}}",
-            "desc": "Set the price for this reservation. The user will be notified by email.",
-            "priceLabel": "Price (TL)",
-            "pricePlaceholder": "Enter amount in TL",
-            "priceHint": "The price will be included in the approval email sent to the guest.",
-            "priceRequired": "Please enter a valid price greater than 0.",
-            "approving": "Approving...",
-            "approveBtn": "Approve Reservation",
-            "adminNoteLabel": "Admin note (optional)",
-            "adminNotePlaceholder": "Visible to the guest in the approval and confirmation emails."
-          },
-          "assignModal": {
-            "forReservation": "For reservation",
-            "guests": "guest(s)",
-            "roomsSelected": "room(s) selected",
-            "capacity": "Capacity",
-            "capacityOk": "OK",
-            "capacityShort": "Under capacity",
-            "confirmBtn": "Assign Selected",
-            "assigning": "Assigning...",
-            "adminNoteLabel": "Admin note (optional)",
-            "adminNotePlaceholder": "Optional note for the guest, sent with the assignment email."
-          },
-          "capacity": "Capacity",
-          "noAvailableRooms": "No available rooms found.",
-          "detail": {
-            "guestInfo": "Guest Information",
-            "stayDetails": "Stay Details",
-            "billingEvent": "Billing & Event",
-            "checkInLabel": "Check-in",
-            "freeAccommodation": "Free Accommodation",
-            "eventLabel": "Event",
-            "codeLabel": "Program Code",
-            "tcLabel": "TC",
-            "taxLabel": "Tax",
-            "additionalGuests": "Additional Guests",
-            "note": "Note",
-            "adminNote": "Admin note",
-            "guestNote": "Guest's note",
-            "identityDocuments": "Identity Documents",
-            "legacyIdentityDoc": "Legacy ID document (single)",
-            "created": "Created",
-            "guest_one": "{{count}} guest",
-            "guest_other": "{{count}} guests"
-          }
-    },
-
-    "rooms": {
-        "addNewRoom": "Add new room",
-        "roomLabel": "Room {{number}}",
-        "typeLabel": "Type: {{type}}",
-        "capacity": "Capacity",
-        "guestSingular": "guest",
-        "guestPlural": "guests",
-        "price": "Price",
-        "perNight": "per night",
-        "amenities": "Amenities",
-        "statusAvailable": "Available",
-        "statusOccupied": "Occupied",
-        "statusMaintenance": "Maintenance",
-        "statusReserved": "Reserved",
-        "today": "Today",
-        "viewFloor": "Floor Plan",
-        "viewGrid": "Cards",
-        "noRooms": "No rooms found.",
-        "roomsCount": "{{count}} rooms",
-        "drawer": {
-          "floor": "Floor 2",
-          "type": "Type",
-          "doubleRoom": "Double Room",
-          "singleRoom": "Single Room",
-          "perNight": "/night",
-          "occupiedTitle": "Occupied",
-          "maintenanceTitle": "Under Maintenance",
-          "maintenanceDesc": "Room is unavailable for booking.",
-          "reservedTitle": "Reserved for Special Guests",
-          "reservedDesc": "This room is permanently reserved and cannot be booked through the system.",
-          "changeStatus": "Change Base Status",
-          "optAvailable": "Available",
-          "optMaintenance": "Maintenance",
-          "optReserved": "Reserved (Special Guests)",
-          "saving": "Saving...",
-          "updateStatus": "Update Status",
-          "guest_one": "guest",
-          "guest_other": "guests"
-        },
-        "grid": {
-          "double": "Double",
-          "single": "Single",
-          "perNight": "/night",
-          "guest_one": "guest",
-          "guest_other": "guests"
-        },
-        "doubleLabel": "DOUBLE",
-        "guestLabel": "Guest",
-        "roomHeading": "Room {{name}}",
-        "loadingArch": "LOADING ARCHITECTURE..."
-    },
-
-    "settings": {
-        "generalSettings": "Hotel Identity",
-        "hotelName": "Hotel name",
-        "contactEmail": "Contact e-mail",
-        "contactPhone": "Contact phone",
-        "bookingSettings": "Booking Rules",
-        "autoApprove": "Auto-approve reservations",
-        "autoApproveDesc": "New reservations are created as APPROVED instead of PENDING.",
-        "minBookingAdvance": "Max advance booking (days)",
-        "maxBookingDuration": "Max consecutive nights (personal)",
-        "saveSettings": "Save settings",
-        "saving": "Saving…",
-        "loading": "Loading settings…",
-        "saved": "Settings saved!",
-        "saveFailed": "Failed to save settings.",
-        "unsaved": "Unsaved changes",
-        "upToDate": "All changes saved",
-        "subtitle": "Hotel configuration and system preferences",
-        "emailNotifications": "Email Notifications",
-        "emailNotificationsDesc": "When off, transactional emails are suppressed. Security emails (password reset) still send.",
-        "guestInfo": "Guest-facing Info",
-        "checkInTime": "Check-in time",
-        "checkOutTime": "Check-out time",
-        "breakfastHours": "Breakfast hours",
-        "receptionHours": "Reception hours",
-        "wifi": "Guest Wi-Fi",
-        "wifiSsid": "Network (SSID)",
-        "wifiPassword": "Password",
-        "banking": "Bank Transfer Details",
-        "bankName": "Bank name",
-        "accountHolder": "Account holder",
-        "iban": "IBAN",
-        "hints": {
-            "platformName": "The name displayed across the platform",
-            "contactEmail": "Shown in all guest-facing emails and support pages.",
-            "minHours": "Minimum hours before check-in",
-            "maxNights": "Cap for personal accommodation type.",
-            "maxAdvance": "Furthest into the future a guest may book.",
-            "checkInTime": "Shown in confirmation emails and the concierge.",
-            "wifi": "Shown in the EduConcierge quick-action panel.",
-            "iban": "Shown to guests on the Payment page after their reservation is approved."
-        }
-    },
-
-    "calendar": {
-        "loading": "Loading calendar…",
-        "roomsCount_one": "{{count}} room",
-        "roomsCount_other": "{{count}} rooms",
-        "bookingsCount_one": "{{count}} active booking",
-        "bookingsCount_other": "{{count}} active bookings"
-    },
-
-    "adminProfile": {
-        "brand": "EDU Education Hotel Admin"
-    },
-
-    "createReservation": {
-        "optional": "OPTIONAL",
-        "submit": "Create Reservation",
-        "submitting": "Creating…",
-        "statusHint": "Created as APPROVED. Visible in Reservations and Guests immediately.",
-        "errors": {
-            "datesRequired": "Check-in and check-out dates are required.",
-            "checkoutAfter": "Check-out must be after check-in.",
-            "emailRequired": "A valid guest email is required so the reservation can be linked to a user.",
-            "guestsRequired": "Guest count must be at least 1.",
-            "generic": "Failed to create reservation."
-        },
-        "mode": {
-            "self": "For yourself",
-            "guest": "For special guest"
-        },
-        "sections": {
-            "dates": "Dates",
-            "yourInfo": "Your information",
-            "guestInfo": "Guest information",
-            "stayDetails": "Stay details",
-            "stayHint": "Accommodation type is not collected here — leave any field blank if it doesn't apply.",
-            "billing": "Billing"
-        },
-        "fields": {
-            "checkIn": "Check-in",
-            "checkOut": "Check-out",
-            "checkInTime": "Check-in time",
-            "firstName": "First name",
-            "lastName": "Last name",
-            "email": "Email",
-            "phone": "Phone",
-            "guests": "Number of guests",
-            "guestType": "Guest type",
-            "guestTypeDefault": "Default: Special guest",
-            "eventType": "Event type",
-            "eventCode": "Program code",
-            "priceType": "Price type",
-            "note": "Guest note",
-            "adminNote": "Admin note",
-            "freeAccommodation": "Free accommodation",
-            "invoiceType": "Invoice type",
-            "nationalId": "National ID / Passport",
-            "taxNumber": "Tax number",
-            "billingTitle": "Billing title",
-            "billingAddress": "Billing address",
-            "price": "Price (TL)"
-        },
-        "placeholders": {
-            "note": "Any preferences from the guest…",
-            "adminNote": "Visible to the guest in confirmation emails."
-        },
-        "hints": {
-            "email": "Used to find or create the underlying user record."
-        },
-        "toasts": {
-            "created": "Reservation {{id}} created."
-        }
-    },
-
-    "profile": {
-        "name": "Admin",
-        "role": "Hotel manager",
-        "profileSettings": "Profile settings",
-        "changePassword": "Change password",
-        "logout": "Log out",
-        "activeSession": "Active Session",
-        "sessionStarted": "Session started {{date}} at {{time}}",
-        "signOut": "Sign Out",
-        "accountInfo": {
-            "title": "Account Information",
-            "subtitle": "Your admin account details",
-            "username": "Username",
-            "role": "Role",
-            "email": "Email",
-            "memberSince": "Member Since",
-            "memberSinceValue": "March 2026",
-            "status": "Status",
-            "statusValue": "✓ Active",
-            "roleValue": "Super Administrator"
-        },
-        "sessionInfo": {
-            "title": "Current Session",
-            "subtitle": "Live session details",
-            "loginTime": "Login Time",
-            "loginDate": "Login Date",
-            "browser": "Browser",
-            "platform": "Platform",
-            "sessionType": "Session Type",
-            "sessionTypeValue": "sessionStorage (tab)"
-        },
-        "changePassword": {
-            "title": "Change Password",
-            "subtitle": "Update your admin credentials",
-            "currentPassword": "Current Password",
-            "currentPlaceholder": "Enter current password",
-            "newPassword": "New Password",
-            "newPlaceholder": "Enter new password",
-            "confirmPassword": "Confirm Password",
-            "confirmPlaceholder": "Confirm new password",
-            "updateBtn": "Update Password",
-            "strength": {
-                "weak": "Weak",
-                "fair": "Fair",
-                "good": "Good",
-                "strong": "Strong",
-                "veryStrong": "Very Strong"
-            },
-            "errors": {
-                "wrongCurrent": "Current password is incorrect.",
-                "tooShort": "New password must be at least 8 characters.",
-                "noMatch": "Passwords do not match.",
-                "sameAsCurrent": "New password must be different from current."
-            },
-            "success": "Password updated successfully. (Restart app to apply.)"
-        },
-        "securityNote": {
-            "label": "Security note:",
-            "text": "This session is stored in sessionStorage and will be cleared automatically when you close this browser tab. All admin activity is logged."
-        }
+    "toasts": {
+      "created": "Reservation {{id}} created."
     }
-
-
+  },
+  "profile": {
+    "name": "Admin",
+    "role": "Hotel manager",
+    "profileSettings": "Profile settings",
+    "changePassword": {
+      "title": "Change Password",
+      "subtitle": "Update your admin credentials",
+      "currentPassword": "Current Password",
+      "currentPlaceholder": "Enter current password",
+      "newPassword": "New Password",
+      "newPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPlaceholder": "Confirm new password",
+      "updateBtn": "Update Password",
+      "strength": {
+        "weak": "Weak",
+        "fair": "Fair",
+        "good": "Good",
+        "strong": "Strong",
+        "veryStrong": "Very Strong"
+      },
+      "errors": {
+        "wrongCurrent": "Current password is incorrect.",
+        "tooShort": "New password must be at least 8 characters.",
+        "noMatch": "Passwords do not match.",
+        "sameAsCurrent": "New password must be different from current."
+      },
+      "success": "Password updated successfully. (Restart app to apply.)"
+    },
+    "logout": "Log out",
+    "activeSession": "Active Session",
+    "sessionStarted": "Session started {{date}} at {{time}}",
+    "signOut": "Sign Out",
+    "accountInfo": {
+      "title": "Account Information",
+      "subtitle": "Your admin account details",
+      "username": "Username",
+      "role": "Role",
+      "email": "Email",
+      "memberSince": "Member Since",
+      "memberSinceValue": "March 2026",
+      "status": "Status",
+      "statusValue": "✓ Active",
+      "roleValue": "Super Administrator"
+    },
+    "sessionInfo": {
+      "title": "Current Session",
+      "subtitle": "Live session details",
+      "loginTime": "Login Time",
+      "loginDate": "Login Date",
+      "browser": "Browser",
+      "platform": "Platform",
+      "sessionType": "Session Type",
+      "sessionTypeValue": "sessionStorage (tab)"
+    },
+    "securityNote": {
+      "label": "Security note:",
+      "text": "This session is stored in sessionStorage and will be cleared automatically when you close this browser tab. All admin activity is logged."
+    }
   }
-
-
-
+}

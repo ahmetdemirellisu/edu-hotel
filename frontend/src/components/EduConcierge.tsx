@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * EduConcierge — animated bellhop mascot for the EDU Education Hotel dashboard.
@@ -37,6 +38,8 @@ export function EduConcierge({
   onBubbleClick,
   showBubble = false,
 }: EduConciergeProps) {
+  const { i18n } = useTranslation();
+  const isTR = (i18n.resolvedLanguage || i18n.language || "").startsWith("tr");
   const [ding, setDing] = useState(0);
   const [bubbleVisible, setBubbleVisible] = useState(false);
 
@@ -401,7 +404,7 @@ export function EduConcierge({
         {/* ===== pillbox cap ===== */}
         <g>
           <path d="M 128 96 Q 128 58 180 58 Q 232 58 232 96 Z" fill={NAVY} stroke={NAVY_DARK} strokeWidth="2" />
-          {/* gold band with EDU EDUCATION HOTEL */}
+          {/* gold band with the hotel name (TR/EN) */}
           <rect
             x="126"
             y="88"
@@ -418,11 +421,13 @@ export function EduConcierge({
             textAnchor="middle"
             fontFamily="Georgia, serif"
             fontWeight="bold"
-            fontSize="11.5"
-            letterSpacing="2.5"
+            fontSize="9"
+            letterSpacing="0.6"
+            textLength="98"
+            lengthAdjust="spacingAndGlyphs"
             fill={NAVY_DARK}
           >
-            EDU EDUCATION HOTEL
+            {isTR ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
           </text>
           {/* cap button + piping */}
           <circle cx="180" cy="60" r="4.5" fill="url(#edu-gold)" />

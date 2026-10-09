@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Footer } from "./layout/Footer";
 import { NotificationBell } from "./NotificationBell";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import {
   Mail,
   Phone,
@@ -79,11 +80,11 @@ export function ContactSupportPage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </Link>
             </div>

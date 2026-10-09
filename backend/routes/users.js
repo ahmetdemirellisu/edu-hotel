@@ -4,6 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const requireAdmin = require("../middleware/requireAdmin");
 const requireAuth = require("../middleware/requireAuth");
 const { stripPassword } = require("../utils/sanitize");
+const { msg } = require("../utils/lang");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -171,10 +172,10 @@ router.get("/:id", requireAuth, async (req, res) => {
   try {
     const userId = Number(req.params.id);
     if (isNaN(userId)) {
-      return res.status(400).json({ error: "Invalid user ID." });
+      return res.status(400).json({ error: msg(req, "Invalid user ID.", "Geçersiz kullanıcı kimliği.") });
     }
     if (req.user.userId !== userId) {
-      return res.status(403).json({ error: "Access denied." });
+      return res.status(403).json({ error: msg(req, "Access denied.", "Erişim reddedildi.") });
     }
 
     const user = await prisma.user.findUnique({
@@ -185,7 +186,7 @@ router.get("/:id", requireAuth, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found." });
+      return res.status(404).json({ error: msg(req, "User not found.", "Kullanıcı bulunamadı.") });
     }
 
     // Fetch blacklist entry (if any)
@@ -197,7 +198,27 @@ router.get("/:id", requireAuth, async (req, res) => {
     res.json(stripPassword(userWithBlacklist));
   } catch (err) {
     console.error("Get user error:", err);
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
+  }
+});
+
+/**
+ * --------------------------------------------------------------------------
+ * PATCH /users/me/language
+ * Stores the user's UI language so emails are sent in that language.
+ * --------------------------------------------------------------------------
+ */
+router.patch("/me/language", requireAuth, async (req, res) => {
+  const { language } = req.body || {};
+  if (language !== "tr" && language !== "en") {
+    return res.status(400).json({ error: msg(req, "Invalid language.", "Geçersiz dil.") });
+  }
+  try {
+    await prisma.user.update({ where: { id: req.user.userId }, data: { language } });
+    res.json({ language });
+  } catch (err) {
+    console.error("Update language error:", err);
+    res.status(500).json({ error: msg(req, "Internal server error.", "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.") });
   }
 });
 

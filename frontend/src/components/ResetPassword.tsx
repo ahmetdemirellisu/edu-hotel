@@ -3,7 +3,9 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import backgroundImage from "figma:asset/9bf36aafa693f4a63cbdf015b397abd2911f2e4f.png";
 import { AUTH_CSS } from "./authStyles";
-import { SabanciLogo } from "./SabanciLogo";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 
 const API_URL = ((import.meta as any).env?.VITE_API_URL as string) || "/ehp/api";
 
@@ -201,7 +203,7 @@ export function ResetPassword() {
         <section className="auth__hero" aria-hidden="true">
           <div className="auth__hero-tint" />
           <div className="auth__hero-fade" />
-          <SabanciLogo size="md" className="auth__hero-badge auth__hero-badge--logo" />
+          <span className="inline-flex items-center gap-11 auth__hero-badge auth__hero-badge--logo"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-11 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-11 w-auto" /></span>
           <div className="auth__hero-center">
             <p className="auth__hero-eyebrow">{t("auth.welcomeBackTo", "Welcome back to")}</p>
             <h2 className="auth__hero-wordmark">{currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}</h2>

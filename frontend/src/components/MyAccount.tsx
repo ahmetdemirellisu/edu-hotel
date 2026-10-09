@@ -31,8 +31,9 @@ import {
   Smartphone
 } from "lucide-react";
 import { GlareCard } from "./ui/glare-card";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 
 /* ═══════════════════════════════════════════════════════════
    Inject animations once
@@ -161,7 +162,7 @@ export function MyAccount() {
           fullName: parsedUser.name || storedName || "",
           email: parsedUser.email || localStorage.getItem("userEmail") || "",
           phone: parsedUser.phone || "",
-          tcNo: parsedUser.tcNo || "Not Provided",
+          tcNo: parsedUser.tcNo || "",
           userType: parsedUser.userType || "STUDENT",
         });
       } catch (error) {
@@ -243,10 +244,10 @@ export function MyAccount() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Link to="/main" className="flex items-center gap-4">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
                 <div className="w-px h-8 bg-white/15 hidden sm:block" />
                 <h1 className="text-white text-lg font-light tracking-[7px] uppercase hidden sm:block" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </Link>
             </div>
@@ -484,6 +485,7 @@ export function MyAccount() {
                       <Input
                         id="tcNo"
                         value={userData.tcNo}
+                        placeholder={t("account.notProvided")}
                         className="h-12 rounded-xl bg-gray-50/40 border border-gray-100 text-gray-400 text-sm italic cursor-not-allowed"
                         disabled
                       />
@@ -741,7 +743,7 @@ export function MyAccount() {
                           className="text-[13px] font-light tracking-[5px] uppercase text-white mt-0.5"
                           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                         >
-                          EDU EDUCATION HOTEL
+                          {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                         </div>
                       </div>
                       {/* EMV Chip */}
@@ -785,7 +787,7 @@ export function MyAccount() {
                             color: "#c9a84c",
                           }}
                         >
-                          {userData.userType || "STUDENT"}
+                          {t(`enums.userType.${userData.userType || "STUDENT"}`, userData.userType)}
                         </span>
                       </div>
                     </div>

@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 
 /* ── Inject keyframes once ─────────────────────────────── */
 const _footerStyle = document.getElementById("footer-anim") ?? (() => {
@@ -133,7 +134,7 @@ export function Footer() {
 
           {/* Brand + Address */}
           <div>
-            <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto mb-5" />
+            <span className="inline-flex items-center gap-9 mb-5"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
             <p className="text-sm text-white/50 leading-relaxed footer-contact-item">
               {t("footer.address.line1")}
               <br />
@@ -211,7 +212,7 @@ export function Footer() {
             className="footer-brand-text text-[11px] font-light tracking-[12px] uppercase mb-4 select-none"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            EDU EDUCATION HOTEL
+            {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
           </h2>
 
           <p className="text-[11px] text-white/30 font-medium tracking-wider text-center">

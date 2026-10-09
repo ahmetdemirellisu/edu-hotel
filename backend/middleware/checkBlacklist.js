@@ -1,4 +1,5 @@
 const prisma = require("../prismaClient");
+const { msg } = require("../utils/lang");
 
 async function checkBlacklist(req, res, next) {
     try {
@@ -13,7 +14,7 @@ async function checkBlacklist(req, res, next) {
 
         if (entry) {
             return res.status(403).json({
-                error: "Your account is blacklisted. Please contact EDU Hotel administration."
+                error: msg(req, "Your account is blacklisted. Please contact EDU Hotel administration.", "Hesabınız kara listeye alınmıştır. Lütfen EDU Hotel yönetimiyle iletişime geçin.")
             });
         }
 
@@ -21,7 +22,7 @@ async function checkBlacklist(req, res, next) {
     } catch (err) {
         // G05 fix: fail-closed — reject the request on infrastructure errors
         console.error("Blacklist check error:", err);
-        return res.status(503).json({ error: "Service temporarily unavailable. Please try again." });
+        return res.status(503).json({ error: msg(req, "Service temporarily unavailable. Please try again.", "Hizmet geçici olarak kullanılamıyor. Lütfen tekrar deneyin.") });
     }
 }
 

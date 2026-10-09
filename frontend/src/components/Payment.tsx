@@ -7,8 +7,9 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyLatestReservation, type Reservation } from "../api/reservations";
 import { fetchPublicSettings, SETTINGS_FALLBACK, type PublicSettings } from "../api/settings";
-import sabanciLogoTr from "@/assets/sabanci-logo-tr.png";
-import sabanciLogoEn from "@/assets/sabanci-logo-en.png";
+import eduLogoTr from "@/assets/edu-logo-tr.png";
+import eduLogoEn from "@/assets/edu-logo-en.png";
+import suLogo from "@/assets/su-logo.svg";
 import {
   Select,
   SelectContent,
@@ -271,13 +272,13 @@ export function Payment() {
         <div className="max-w-7xl mx-auto px-6 py-3.5">
           <div className="flex justify-between items-center">
             <Link to="/main" className="flex items-center gap-4 group">
-              <motion.div whileHover={{ scale: 1.04 }} className="transition-all duration-300">
-                <img src={currentLang === "TR" ? sabanciLogoTr : sabanciLogoEn} alt="Sabancı University" className="h-8 w-auto" />
+              <motion.div className="transition-all duration-300">
+                <span className="inline-flex items-center gap-9"><img src={suLogo} alt="Sabancı Üniversitesi" className="h-9 w-auto" /><img src={currentLang === "TR" ? eduLogoTr : eduLogoEn} alt="EDU" className="h-9 w-auto" /></span>
               </motion.div>
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
               <div className="hidden sm:flex items-center gap-2.5">
                 <h1 className="text-white text-base font-light tracking-[8px] uppercase" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  EDU EDUCATION HOTEL
+                  {currentLang === "TR" ? "EDU EĞİTİM OTELİ" : "EDU EDUCATION HOTEL"}
                 </h1>
               </div>
             </Link>
@@ -367,14 +368,14 @@ export function Payment() {
               className="hidden sm:flex flex-col items-end gap-1 px-5 py-3 rounded-2xl"
               style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(10px)" }}
             >
-              <span className="text-white/50 text-[10px] font-bold uppercase tracking-widest">Reservation</span>
+              <span className="text-white/50 text-[10px] font-bold uppercase tracking-widest">{t("payment.reservationLabel")}</span>
               <span className="text-white text-xl font-bold tabular-nums">#{reservation.id}</span>
               <span
                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold mt-1"
                 style={{ background: "rgba(201,168,76,0.25)", color: "#e8c96d" }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#e8c96d] animate-pulse" />
-                {t(`dashboard.status.${reservation.status.toLowerCase()}`, { defaultValue: reservation.status })}
+                {t(`dashboard.status.${reservation.status.toLowerCase().replace(/_(\w)/g, (_, c) => c.toUpperCase())}`, { defaultValue: reservation.status })}
               </span>
             </div>
           </div>

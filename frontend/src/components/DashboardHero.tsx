@@ -549,8 +549,9 @@ export function DashboardHero({
                   exit={{ opacity: 0 }}
                   transition={{ delay: 1.1, duration: 0.5 }}
                   onClick={() => setDrawerOpen(true)}
-                  className="absolute top-5 left-[12%] z-20 max-w-[200px] cursor-pointer select-none"
-                  style={{ animation: "atlasBubbleFloat 4s ease-in-out infinite" }}
+                  className="absolute top-5 z-20 max-w-[190px] cursor-pointer select-none"
+                  // Sits to the right of the bellhop's head so it never covers the cap band
+                  style={{ left: "calc(50% + 72px)", animation: "atlasBubbleFloat 4s ease-in-out infinite" }}
                 >
                   <div
                     className="relative px-3.5 py-2.5 rounded-2xl text-[11px] leading-snug font-medium text-white"
@@ -562,9 +563,9 @@ export function DashboardHero({
                     }}
                   >
                     {speechText}
-                    {/* Tail pointing down-right toward robot */}
+                    {/* Tail pointing down-left toward the bellhop */}
                     <span
-                      className="absolute -bottom-2 right-8 w-0 h-0"
+                      className="absolute -bottom-2 left-6 w-0 h-0"
                       style={{
                         borderLeft: "6px solid transparent",
                         borderRight: "6px solid transparent",
@@ -572,7 +573,7 @@ export function DashboardHero({
                       }}
                     />
                     <span
-                      className="absolute -bottom-[7px] right-[33px] w-0 h-0"
+                      className="absolute -bottom-[7px] left-[25px] w-0 h-0"
                       style={{
                         borderLeft: "5px solid transparent",
                         borderRight: "5px solid transparent",
