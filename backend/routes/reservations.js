@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 const { sendMailAsync } = require("../services/mail");
 const settingsService = require("../services/settings");
-const { emailTemplate, pick, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS } = require("../services/mailTemplate");
+const { emailTemplate, pick, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS, eventTypeLabel } = require("../services/mailTemplate");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -189,7 +189,7 @@ ${detailTable([
     row('Guests',         guestsInt),
     row('Accommodation',  accommEN),
     row('Invoice type',   invoiceEN),
-    row('Event type',     eventType || null),
+    row('Purpose of stay', eventTypeLabel(eventType, 'en')),
     row('Program code',   isNonEmptyString(eventCode) ? eventCode : null),
     row('Note',           isNonEmptyString(note) ? note : null),
 ])}
@@ -208,7 +208,7 @@ ${detailTable([
     row('Misafir sayısı',  guestsInt),
     row('Konaklama türü',  accommTR),
     row('Fatura türü',     invoiceTR),
-    row('Etkinlik türü',   eventType || null),
+    row('Konaklama amacı', eventTypeLabel(eventType, 'tr')),
     row('Program kodu',    isNonEmptyString(eventCode) ? eventCode : null),
     row('Not',             isNonEmptyString(note) ? note : null),
 ])}
@@ -226,7 +226,7 @@ ${heading('Sırada ne var?')}
                     `Guests:         ${guestsInt}`,
                     `Accommodation:  ${accommEN}`,
                     `Invoice type:   ${invoiceEN}`,
-                    eventType          ? `Event type:     ${eventType}`  : null,
+                    eventType          ? `Purpose of stay: ${eventTypeLabel(eventType, 'en')}`  : null,
                     isNonEmptyString(eventCode) ? `Program code:   ${eventCode}` : null,
                     isNonEmptyString(note)      ? `Note:           ${note}`      : null,
                     ``,
@@ -242,7 +242,7 @@ ${heading('Sırada ne var?')}
                     `Misafir sayısı: ${guestsInt}`,
                     `Konaklama türü: ${accommTR}`,
                     `Fatura türü:    ${invoiceTR}`,
-                    eventType          ? `Etkinlik türü:  ${eventType}`  : null,
+                    eventType          ? `Konaklama amacı: ${eventTypeLabel(eventType, 'tr')}`  : null,
                     isNonEmptyString(eventCode) ? `Program kodu:   ${eventCode}` : null,
                     isNonEmptyString(note)      ? `Not:            ${note}`      : null,
                     ``,

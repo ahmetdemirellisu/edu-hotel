@@ -162,4 +162,22 @@ const INVOICE_LABELS = {
   CORPORATE:  { en: 'Corporate',  tr: 'Kurumsal' },
 };
 
-module.exports = { emailTemplate, normalizeLang, pick, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS };
+// Purpose-of-stay codes from the booking form (admin form allows free text)
+const EVENT_TYPE_LABELS = {
+  conference: { en: 'Conference', tr: 'Konferans' },
+  seminar:    { en: 'Seminar',    tr: 'Seminer'   },
+  workshop:   { en: 'Workshop',   tr: 'Atölye'    },
+  training:   { en: 'Training',   tr: 'Eğitim'    },
+  meeting:    { en: 'Meeting',    tr: 'Toplantı'  },
+  personal:   { en: 'Personal',   tr: 'Kişisel'   },
+  other:      { en: 'Other',      tr: 'Diğer'     },
+};
+
+/** Localized purpose-of-stay label; unknown/free-text values pass through. */
+function eventTypeLabel(value, lang) {
+  if (!value) return null;
+  const entry = EVENT_TYPE_LABELS[String(value).trim().toLowerCase()];
+  return entry ? pick(lang, entry.en, entry.tr) : value;
+}
+
+module.exports = { emailTemplate, normalizeLang, pick, badge, row, detailTable, heading, ACCOMM_LABELS, INVOICE_LABELS, EVENT_TYPE_LABELS, eventTypeLabel };
