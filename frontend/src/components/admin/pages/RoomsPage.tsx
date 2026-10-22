@@ -5,6 +5,9 @@ import {
   ChevronRight, ChevronLeft, Calendar,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { adminFetch } from "../../../api/adminFetch";
+
+const API_BASE = ((import.meta as any).env?.VITE_API_URL || "/ehp/api").replace(/\/$/, "");
 
 /* ════════════════════════════════════════════════════════════
    Types
@@ -113,15 +116,13 @@ export function RoomsPage() {
   const load = useCallback(async (d: string) => {
     try {
       setLoading(true); setError(null);
-      const res = await fetch(`/api/rooms/availability/admin?date=${d}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}` },
-      });
+      const res = await adminFetch(`${API_BASE}/rooms/availability/admin?date=${d}`);
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setRooms(data.rooms); setCounts(data.counts);
     } catch {
       try {
-        const res = await fetch("/api/rooms");
+        const res = await fetch(`${API_BASE}/rooms`);
         if (res.ok) {
           const arr = await res.json();
           setRooms(arr.map((r: any) => ({ ...r, baseStatus: r.status, reservation: null })));
@@ -464,7 +465,7 @@ function Drawer({ room, date, onClose }: { room: RoomData; date: string; onClose
   const save = async () => {
     try {
       setSaving(true);
-      const r = await fetch(`/ehp/api/rooms/${room.id}/status`, {
+      const r = await adminFetch(`${API_BASE}/rooms/${room.id}/status`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });

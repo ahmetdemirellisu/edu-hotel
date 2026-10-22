@@ -14,6 +14,11 @@ services:
       timeout: 3s
       retries: 3
       start_period: 15s
+    volumes:
+      # Uploaded receipts and ID documents must survive container recreation on deploy
+      - ehp_receipts_pending:/app/paymentRecieptsPending
+      - ehp_receipts_approved:/app/paymentRecieptsAprooved
+      - ehp_identity_docs:/app/identityDocs
     networks:
       - instance_net
 
@@ -39,6 +44,11 @@ services:
       start_period: 15s
     networks:
       - instance_net
+
+volumes:
+  ehp_receipts_pending:
+  ehp_receipts_approved:
+  ehp_identity_docs:
 
 networks:
   instance_net:

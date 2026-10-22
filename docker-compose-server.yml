@@ -37,6 +37,11 @@ services:
       ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD:-${ADMIN_PASS}}
       CLIENT_URL: https://student-projects.sabanciuniv.edu
       CLIENT_BASE_PATH: /ehp
+    volumes:
+      # Uploaded receipts and ID documents must survive container recreation on deploy
+      - ehp_receipts_pending:/app/paymentRecieptsPending
+      - ehp_receipts_approved:/app/paymentRecieptsAprooved
+      - ehp_identity_docs:/app/identityDocs
     depends_on:
       db:
         condition: service_healthy
@@ -54,6 +59,11 @@ services:
       - "127.0.0.1:8004:8004"
     networks:
       - ehpnetwork
+
+volumes:
+  ehp_receipts_pending:
+  ehp_receipts_approved:
+  ehp_identity_docs:
 
 networks:
   ehpnetwork:

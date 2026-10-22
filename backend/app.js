@@ -42,7 +42,9 @@ app.use("/concierge", require("./routes/concierge"));
 app.use("/settings", require("./routes/settings"));
 
 // --- 3. STATIC FILE SERVING ---
-const rootDir = path.join(__dirname, '..');
+// Same base the upload routes write to (routes/payment.js, routes/reservations.js):
+// UPLOAD_DIR if set, otherwise the backend folder itself (/app in the container).
+const uploadBase = process.env.UPLOAD_DIR || __dirname;
 const requireAdmin = require('./middleware/requireAdmin');
 const fs = require('fs');
 
@@ -50,7 +52,7 @@ const fs = require('fs');
 function serveReceipt(dir) {
     return [requireAdmin, (req, res) => {
         const filename = path.basename(req.path); // strips any ../ attempts
-        const filepath = path.join(rootDir, dir, filename);
+        const filepath = path.join(uploadBase, dir, filename);
         if (!fs.existsSync(filepath)) return res.status(404).json({ error: "File not found." });
         res.sendFile(filepath);
     }];
